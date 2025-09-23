@@ -116,8 +116,8 @@ BEGIN
 			)cc
 			ON hi.ClaimHeaderGroupImportId = cc.ClaimHeaderGroupImportId	
 		----------------------------------------------------------
-	WHERE (hi.BillingDate >= @BillingDateFrom)
-	AND (hi.BillingDate < @BillingDateTo)
+	WHERE (hi.CreatedDate >= @BillingDateFrom)
+	AND (hi.CreatedDate < @BillingDateTo)
 	AND hi.IsActive = 1
 	AND (hi.ClaimHeaderGroupImportStatusId = @ClaimHeaderGroupImportStatusId OR @ClaimHeaderGroupImportStatusId IS NULL)--
 	AND (hi.ClaimHeaderGroupCode LIKE '%'+@SearchDetail+'%' OR @SearchDetail IS NULL)
