@@ -1,11 +1,11 @@
-SELECT 
+ÔªøSELECT 
 v.App_id
-,v.·ºπª√–°—π					ProductCategory
-,v.®—ßÀ«—¥						Province
+,v.‡πÅ‡∏ú‡∏ô‡∏õ‡∏£‡∏∞‡∏Å‡∏±‡∏ô					ProductCategory
+,v.‡∏à‡∏±‡∏á‡∏´‡∏ß‡∏±‡∏î						Province
 ,v.Code
 ,v.DateNotice
-,v.™◊ËÕ≈Ÿ°§È“					Customer
-,v.‡√‘Ë¡§ÿÈ¡§√Õß					StartCoverDate
+,v.‡∏ä‡∏∑‡πà‡∏≠‡∏•‡∏π‡∏Å‡∏Ñ‡πâ‡∏≤					Customer
+,v.‡πÄ‡∏£‡∏¥‡πà‡∏°‡∏Ñ‡∏∏‡πâ‡∏°‡∏Ñ‡∏£‡∏≠‡∏á					StartCoverDate
 ,v.ClaimType
 ,v.ClaimAdmitType
 ,v.ClaimType_id
