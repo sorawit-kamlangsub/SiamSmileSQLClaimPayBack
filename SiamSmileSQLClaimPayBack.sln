@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # SQL Server Management Studio Version 21
-VisualStudioVersion = 17.14.36408.4 d17.14
+VisualStudioVersion = 17.14.36408.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{4F2E2C19-372F-40D8-9FA7-9D2138C6997A}") = "SiamSmileSQLClaimPayBack", "SiamSmileSQLClaimPayBack.ssmssqlproj", "{81F9C8E8-7583-A700-5CE6-F9B6F3403E8E}"
 EndProject
@@ -11,7 +11,7 @@ Global
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{81F9C8E8-7583-A700-5CE6-F9B6F3403E8E}.Default|Default.ActiveCfg = Default
-		{FDB07DA9-F4F7-440D-977E-D4199E2938E9}.Default|Default.ActiveCfg = Default
+		{75C654D5-8C3D-452A-ABF8-83F973D8BD19}.Default|Default.ActiveCfg = Default
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
