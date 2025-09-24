@@ -18,8 +18,6 @@ BEGIN
 
 	SET NOCOUNT ON;
 
---DECLARE @DateFrom			DATE = '2025-09-24';
---DECLARE @DateTo			DATE = '2025-09-24';
 DECLARE @ClaimHeaderSSS		INT = 2;
 DECLARE @ClaimHeaderSSSPA	INT = 3;
 DECLARE @ClaimCompensate	INT = 4;
@@ -48,14 +46,23 @@ SET @DateTo = DATEADD(DAY,1,@DateTo)
 
 SELECT 
 	d.ClaimGroupCode
-	,h.ClaimGroupTypeId
+	,d.ProductGroupId
 	,d.CreatedDate
 INTO #Tmp
 FROM dbo.ClaimPayBackDetail d
 	INNER JOIN dbo.ClaimPayBack h
 		ON d.ClaimPayBackId = d.ClaimPayBackId
 WHERE d.CreatedDate >= @DateFrom
-AND d.CreatedDate < @DateTo;
+AND d.CreatedDate < @DateTo
+AND 
+NOT EXISTS 
+(
+	SELECT 
+	1
+	FROM dbo.ClaimHeaderGroupImport i
+	WHERE i.IsActive = 1
+	AND i.ClaimHeaderGroupCode = d.ClaimGroupCode 
+);
 
 
 
@@ -99,6 +106,7 @@ SELECT d.ClaimHeaderGroupCodeInDB
 	,d.ClaimHeaderCodeInDB
 	,d.ProductGroup
 	,d.PolicyNo
+	,d.ProductGroupId
 INTO #TmpDetail
 FROM
 	(	--SSS------
@@ -110,6 +118,7 @@ FROM
 				,h.Code									AS ClaimHeaderCodeInDB
 				,IIF(h.Product_id = 'P30',h.Product_id,'1000') AS ProductGroup
 				,cus.InsuredPolicy_no					AS PolicyNo
+				,t.ProductGroupId
 		FROM #Tmp t
 			LEFT JOIN SSS.dbo.DB_ClaimHeader h
 				ON t.ClaimGroupCode = h.ClaimHeaderGroup_id
@@ -121,7 +130,7 @@ FROM
 				ON h.ClaimAdmitType_id = ct.Code
 			LEFT JOIN sss.dbo.DB_Customer  cus
 				ON h.App_id = cus.App_id
-		WHERE t.ClaimGroupTypeId IN(@ClaimHeaderSSS,@ClaimHeaderPA30)
+		WHERE t.ProductGroupId IN(@ClaimHeaderSSS,@ClaimHeaderPA30)
 
 
 		UNION
@@ -133,6 +142,7 @@ FROM
 				,h.Code									AS ClaimHeaderCodeInDB
 				,'2000'									AS ProductGroup
 				,ctp.Detail								AS PolicyNo
+				,t.ProductGroupId
 		FROM #Tmp t
 			INNER JOIN SSSPA.dbo.DB_ClaimHeaderGroup AS hg
 				ON t.ClaimGroupCode = hg.Code
@@ -146,7 +156,7 @@ FROM
 				ON ctd.Application_id = cus.App_id AND cus.Status_id <> '3090' --ไม่ใช่ยกเลิกกรมธรรม์
 			LEFT JOIN SSSPA.dbo.DB_CustomerPolicy  AS ctp
 				ON cus.App_id  = ctp.App_id AND PolicyType_id = '9601' --เป็นเลขกรมธรรม์ ปกติ
-		WHERE t.ClaimGroupTypeId = @ClaimHeaderSSSPA
+		WHERE t.ProductGroupId = @ClaimHeaderSSSPA
 
 		UNION
 
@@ -159,6 +169,7 @@ FROM
 			,cc.ClaimCompensateCode						AS ClaimHeaderCodeInDB
 			,'2222'										AS ProductGroup
 			,cus.InsuredPolicy_no						AS PolicyNo
+			,t.ProductGroupId
 		FROM #Tmp t
 			INNER JOIN SSS.dbo.ClaimCompensateGroup cg
 				ON t.ClaimGroupCode = cg.ClaimCompensateGroupCode
@@ -175,7 +186,7 @@ FROM
 				ON t.ClaimGroupCode = h.ClaimHeaderGroup_id
 			LEFT JOIN sss.dbo.DB_Customer  cus
 				ON h.App_id = cus.App_id
-		WHERE t.ClaimGroupTypeId = @ClaimCompensate
+		WHERE t.ProductGroupId = @ClaimCompensate
 	)d;
 
 SELECT 
@@ -184,6 +195,7 @@ SELECT
 	 , m.TotalAmountSS
      , ISNULL(d.CountDoc,0) CountDoc
 	 , IIF(ISNULL(d.CountDoc,0) = 0,N'ไม่พบเอกสารแนบ','') ValidateDetailResult	 
+	 , m.ProductGroupId ClaimGroupTypeId
 FROM #TmpDetail m
 	LEFT JOIN 
 		(
@@ -232,5 +244,22 @@ FROM #TmpDetail m
 IF OBJECT_ID('tempdb..#Tmp') IS NOT NULL  DROP TABLE #Tmp;
 IF OBJECT_ID('tempdb..#TmpDetail') IS NOT NULL  DROP TABLE #TmpDetail;
 IF OBJECT_ID('tempdb..#TmpClaimType') IS NOT NULL  DROP TABLE #TmpClaimType;	
+
+--DECLARE @ClaimHeaderGroupCodeInDB NVARCHAR(50) = NULL;
+--DECLARE @ClaimHeaderCodeInDB NVARCHAR(50) = NULL;
+--DECLARE @TotalAmountSS DECIMAL(16,2) = NULL;
+--DECLARE @CountDoc INT = NULL;
+--DECLARE @ValidateDetailResult NVARCHAR(50) = NULL;
+--DECLARE @ClaimGroupTypeId INT = NULL;
+
+
+--SELECT 
+--@ClaimHeaderGroupCodeInDB ClaimHeaderGroupCodeInDB
+--,@ClaimHeaderCodeInDB ClaimHeaderCodeInDB
+--,@TotalAmountSS TotalAmountSS
+--,@CountDoc CountDoc
+--,@ValidateDetailResult ValidateDetailResult
+--,@ClaimGroupTypeId ClaimGroupType
+
 
 END
