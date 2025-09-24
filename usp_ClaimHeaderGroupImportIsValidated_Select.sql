@@ -6,9 +6,9 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 -- =============================================
--- Author:		<Sorawit Kamlangsub>
--- Create date: <2025-09-24>
--- Description:	<Find Claim Can Import>
+-- Author:		Sorawit Kamlangsub
+-- Create date: 2025-09-24 14:00
+-- Description:	Find Claim Can Import
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimHeaderGroupImportIsValidated_Select]
 	  @DateFrom DATE	=   NULL
