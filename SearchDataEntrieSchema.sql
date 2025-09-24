@@ -4,7 +4,7 @@ USE [ClaimPayBack];
 GO
 
 -- 🧠 INPUT (แก้ได้ตามต้องการ)
-DECLARE @SearchValue_SQL NVARCHAR(100) = N'SEHO-888-68090044-0';--SEHO-888-68090044-0 SEHH-888-68090007-0
+DECLARE @SearchValue_SQL NVARCHAR(100) = N'CL6809000077';--SEHO-888-68090044-0 SEHH-888-68090007-0
 DECLARE @SchemaName      NVARCHAR(128) = N'dbo'; -- ใส่ชื่อสคีมา หรือให้เป็น NULL เพื่อค้นหาทุกสคีมา
 
 -- 🔍 Detect input type
