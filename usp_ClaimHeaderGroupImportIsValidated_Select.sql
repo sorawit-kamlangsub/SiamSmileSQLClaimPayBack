@@ -193,7 +193,7 @@ SELECT
 	 m.ClaimHeaderGroupCodeInDB
      , m.ClaimHeaderCodeInDB
 	 , m.TotalAmountSS
-     , ISNULL(d.CountDoc,0) CountDoc
+     , IIF(d.CountDoc > 0,1,0) IsValid
 	 , IIF(ISNULL(d.CountDoc,0) = 0,N'ไม่พบเอกสารแนบ','') ValidateDetailResult	 
 	 , m.ProductGroupId ClaimGroupTypeId
 FROM #TmpDetail m
@@ -248,7 +248,7 @@ IF OBJECT_ID('tempdb..#TmpClaimType') IS NOT NULL  DROP TABLE #TmpClaimType;
 --DECLARE @ClaimHeaderGroupCodeInDB NVARCHAR(50) = NULL;
 --DECLARE @ClaimHeaderCodeInDB NVARCHAR(50) = NULL;
 --DECLARE @TotalAmountSS DECIMAL(16,2) = NULL;
---DECLARE @CountDoc INT = NULL;
+--DECLARE @IsValid INT = NULL;
 --DECLARE @ValidateDetailResult NVARCHAR(50) = NULL;
 --DECLARE @ClaimGroupTypeId INT = NULL;
 
@@ -257,9 +257,9 @@ IF OBJECT_ID('tempdb..#TmpClaimType') IS NOT NULL  DROP TABLE #TmpClaimType;
 --@ClaimHeaderGroupCodeInDB ClaimHeaderGroupCodeInDB
 --,@ClaimHeaderCodeInDB ClaimHeaderCodeInDB
 --,@TotalAmountSS TotalAmountSS
---,@CountDoc CountDoc
+--,@IsValid IsValid
 --,@ValidateDetailResult ValidateDetailResult
---,@ClaimGroupTypeId ClaimGroupType
+--,@ClaimGroupTypeId ClaimGroupTypeId
 
 
 END
