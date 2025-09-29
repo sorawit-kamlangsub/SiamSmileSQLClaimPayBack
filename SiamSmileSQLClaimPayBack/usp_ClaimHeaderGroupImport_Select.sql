@@ -17,6 +17,8 @@ GO
 --					Change เงื่อนไขการ ClaimHeaderGroupImportStatusId = 4 SELECT TotalAmount
 -- Update date:2025-09-25 09:24 Bunchuai Chaiket
 --					ถ้า @ClaimHeaderGroupImportStatusId = 4 ไม่ต้อง Filter วันที่
+-- Update Date:2025-09-29 11:00 Sorawit kamlangsub
+--					เพิ่ม Parameter @BranchId
 -- Description:	Ui3-2
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimHeaderGroupImport_Select]
@@ -29,6 +31,7 @@ ALTER PROCEDURE [dbo].[usp_ClaimHeaderGroupImport_Select]
 	,@SortField							NVARCHAR(MAX)  = NULL 
 	,@OrderType							NVARCHAR(MAX)  = NULL
 	,@SearchDetail						NVARCHAR(MAX)  = NULL
+	,@BranchId							INT			   = NULL	
 AS
 BEGIN
 	
