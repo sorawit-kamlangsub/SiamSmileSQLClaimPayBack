@@ -1,10 +1,10 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImport_Select]    Script Date: 29/9/2568 10:54:58 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImport_Select]    Script Date: 29/9/2568 13:12:29 ******/
+--SET ANSI_NULLS ON
+--GO
+--SET QUOTED_IDENTIFIER ON
+--GO
 -- =============================================
 -- Author:		Siriphong Narkphong
 -- Create date: 2022-10-28
@@ -19,13 +19,13 @@ GO
 --					ถ้า @ClaimHeaderGroupImportStatusId = 4 ไม่ต้อง Filter วันที่
 -- Update Date:2025-09-29 11:00 Sorawit kamlangsub
 --					เพิ่ม Parameter @BranchId
---					เพิ่ม ฟิลด์ Branch Name
 -- Description:	Ui3-2
 -- =============================================
-ALTER PROCEDURE [dbo].[usp_ClaimHeaderGroupImport_Select]
+--ALTER PROCEDURE [dbo].[usp_ClaimHeaderGroupImport_Select]
 	-- Add the parameters for the stored procedure here
-	@BillingDateFrom					DATE
-	,@BillingDateTo						DATE
+	DECLARE
+	@BillingDateFrom					DATE = '2025-09-01'
+	,@BillingDateTo						DATE = '2025-09-29'
 	,@ClaimHeaderGroupImportStatusId	INT
 	,@IndexStart						INT = NULL           
 	,@PageSize							INT = NULL             
@@ -33,8 +33,8 @@ ALTER PROCEDURE [dbo].[usp_ClaimHeaderGroupImport_Select]
 	,@OrderType							NVARCHAR(MAX)  = NULL
 	,@SearchDetail						NVARCHAR(MAX)  = NULL
 	,@BranchId							INT			   = NULL	
-AS
-BEGIN
+--AS
+--BEGIN
 	
 	SET NOCOUNT ON;
 	------------------------------------------------------------------------------
@@ -58,7 +58,7 @@ BEGIN
 		  ,hi.InsuranceCompanyName AS InsuranceCompany 
 	      ,hi.BillingRequestGroupId	
 		  ,COUNT(hi.ClaimHeaderGroupImportId) OVER ( ) TotalCount
-		  ,b.Detail	AS BranchName
+		  ,b.Detail
 	FROM dbo.ClaimHeaderGroupImport hi
 		LEFT JOIN ClaimHeaderGroupImportStatus his
 			ON hi.ClaimHeaderGroupImportStatusId = his.ClaimHeaderGroupImportStatusId
@@ -144,12 +144,11 @@ BEGIN
 	AND hi.IsActive = 1
 	AND (hi.ClaimHeaderGroupImportStatusId = @ClaimHeaderGroupImportStatusId OR @ClaimHeaderGroupImportStatusId IS NULL)
 	AND (hi.ClaimHeaderGroupCode LIKE '%'+@SearchDetail+'%' OR @SearchDetail IS NULL)
-	AND (x.Branch_id = @BranchId OR @BranchId IS NULL)
-	
+	AND (x.Branch_id = @BranchId OR @BranchId IS NULL)	
 	ORDER BY 
 		 CASE WHEN @OrderType IS NULL    AND @SortField IS NULL        THEN hi.ClaimHeaderGroupImportId END ASC
 		 --,CASE WHEN @OrderType = 'ASC'    AND @SortField ='Detail'    THEN Detail END ASC
 		 --,CASE WHEN @OrderType = 'DESC'    AND @SortField ='Detail'    THEN Detail END DESC
 	
 	OFFSET @IndexStart ROWS FETCH NEXT @PageSize ROWS ONLY
-END;
+--END;
