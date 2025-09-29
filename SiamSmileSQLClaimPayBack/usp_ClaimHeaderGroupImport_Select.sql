@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImport_Select]    Script Date: 23/9/2568 9:43:42 ******/
+/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImport_Select]    Script Date: 29/9/2568 10:54:58 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -15,6 +15,8 @@ GO
 --				2024-02-01 Chang Check ClaimCompensate
 --				2025-09-17 09:54 
 --					Change เงื่อนไขการ ClaimHeaderGroupImportStatusId = 4 SELECT TotalAmount
+-- Update date:2025-09-25 09:24 Bunchuai Chaiket
+--					ถ้า @ClaimHeaderGroupImportStatusId = 4 ไม่ต้อง Filter วันที่
 -- Description:	Ui3-2
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimHeaderGroupImport_Select]
@@ -31,7 +33,6 @@ AS
 BEGIN
 	
 	SET NOCOUNT ON;
-
 	------------------------------------------------------------------------------
 	IF @IndexStart		IS NULL    SET @IndexStart		= 0;
 	IF @PageSize		IS NULL    SET @PageSize        = 10;
@@ -56,17 +57,13 @@ BEGIN
 	FROM dbo.ClaimHeaderGroupImport hi
 		LEFT JOIN ClaimHeaderGroupImportStatus his
 			ON hi.ClaimHeaderGroupImportStatusId = his.ClaimHeaderGroupImportStatusId
-		--LEFT JOIN DataCenterV1.Organize.Organize ins
-		--	ON hi.InsuranceCompanyId = ins.Organize_ID
-		------2023-02-03-------------------------------------------------
 		LEFT JOIN 
 			(
 				SELECT d.ClaimHeaderGroupImportId
 					,SUM(bi.CoverAmount) CoverAmount
 				FROM dbo.ClaimHeaderGroupImportDetail d
 					LEFT JOIN dbo.BillingRequestItem bi
-						ON d.ClaimHeaderGroupImportDetailId = bi.ClaimHeaderGroupImportDetailId  --Update Chanadol 2023-08-31
-					--Update Chanadol 2024-02-01
+						ON d.ClaimHeaderGroupImportDetailId = bi.ClaimHeaderGroupImportDetailId
 					LEFT JOIN 
 						(
 							SELECT cs.ClaimCompensateCode
@@ -76,7 +73,7 @@ BEGIN
 						)cs
 						ON d.ClaimCode = cs.ClaimHeaderCode
 				WHERE d.IsActive = 1 
-				AND cs.ClaimCompensateCode IS NULL --Update Chanadol 2024-02-01
+				AND cs.ClaimCompensateCode IS NULL
 				AND bi.IsActive = 1
 				GROUP BY d.ClaimHeaderGroupImportId
 			)bi
@@ -88,7 +85,6 @@ BEGIN
 				FROM dbo.ClaimHeaderGroupImportDetail d
 					LEFT JOIN dbo.BillingRequestResultDetail rd
 						ON d.ClaimHeaderGroupImportDetailId = rd.ClaimHeaderGroupImportDetailId
-				--Update Chanadol 2024-02-01
 				LEFT JOIN 
 						(
 							SELECT cs.ClaimCompensateCode
@@ -98,7 +94,7 @@ BEGIN
 						)cs
 						ON d.ClaimCode = cs.ClaimHeaderCode
 				WHERE d.IsActive = 1
-				AND cs.ClaimCompensateCode IS NULL  --Update Chanadol 2024-02-01
+				AND cs.ClaimCompensateCode IS NULL
 				AND rd.IsActive = 1
 				GROUP BY d.ClaimHeaderGroupImportId
 			)rd
@@ -114,12 +110,14 @@ BEGIN
 				AND rd.IsActive = 1
 				GROUP BY d.ClaimHeaderGroupImportId
 			)cc
-			ON hi.ClaimHeaderGroupImportId = cc.ClaimHeaderGroupImportId	
-		----------------------------------------------------------
-	WHERE (hi.CreatedDate >= @BillingDateFrom)
-	AND (hi.CreatedDate < @BillingDateTo)
+			ON hi.ClaimHeaderGroupImportId = cc.ClaimHeaderGroupImportId 
+	WHERE 
+	(
+		(@ClaimHeaderGroupImportStatusId = 4)
+		OR (hi.CreatedDate >= @BillingDateFrom AND hi.CreatedDate < @BillingDateTo)
+	)	
 	AND hi.IsActive = 1
-	AND (hi.ClaimHeaderGroupImportStatusId = @ClaimHeaderGroupImportStatusId OR @ClaimHeaderGroupImportStatusId IS NULL)--
+	AND (hi.ClaimHeaderGroupImportStatusId = @ClaimHeaderGroupImportStatusId OR @ClaimHeaderGroupImportStatusId IS NULL)
 	AND (hi.ClaimHeaderGroupCode LIKE '%'+@SearchDetail+'%' OR @SearchDetail IS NULL)
 	
 	ORDER BY 
@@ -128,4 +126,4 @@ BEGIN
 		 --,CASE WHEN @OrderType = 'DESC'    AND @SortField ='Detail'    THEN Detail END DESC
 	
 	OFFSET @IndexStart ROWS FETCH NEXT @PageSize ROWS ONLY
-END
+END;
