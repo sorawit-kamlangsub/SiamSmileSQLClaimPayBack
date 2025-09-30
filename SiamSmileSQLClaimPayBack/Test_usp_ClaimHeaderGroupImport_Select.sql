@@ -58,7 +58,7 @@ GO
 		  ,hi.InsuranceCompanyName AS InsuranceCompany 
 	      ,hi.BillingRequestGroupId	
 		  ,COUNT(hi.ClaimHeaderGroupImportId) OVER ( ) TotalCount
-		  ,b.Detail
+		  ,b.Detail AS BranchName
 	FROM dbo.ClaimHeaderGroupImport hi
 		LEFT JOIN ClaimHeaderGroupImportStatus his
 			ON hi.ClaimHeaderGroupImportStatusId = his.ClaimHeaderGroupImportStatusId
