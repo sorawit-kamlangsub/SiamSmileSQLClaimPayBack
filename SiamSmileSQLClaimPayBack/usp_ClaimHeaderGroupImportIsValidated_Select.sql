@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImportIsValidated_Select]    Script Date: 24/9/2568 13:54:45 ******/
+/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImportIsValidated_Select]    Script Date: 1/10/2568 10:29:54 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -195,7 +195,7 @@ SELECT
 	 , m.TotalAmountSS
      , IIF(d.CountDoc > 0,1,0) IsValid
 	 , IIF(ISNULL(d.CountDoc,0) = 0,N'ไม่พบเอกสารแนบ','') ValidateDetailResult	 
-	 , m.ProductGroupId ClaimGroupTypeId
+	 , pd.ProductGroupId ClaimGroupTypeId
 FROM #TmpDetail m
 	LEFT JOIN 
 		(
@@ -238,6 +238,8 @@ FROM #TmpDetail m
 			GROUP BY td.ClaimHeaderGroupCodeInDB, td.ClaimHeaderCodeInDB
 		)d
 		ON m.ClaimHeaderCodeInDB = d.ClaimHeaderCodeInDB
+		LEFT JOIN @ProductGroup pd
+			ON pd.ProductGroupCode = m.ProductGroup
 		AND m.ClaimHeaderGroupCodeInDB = d.ClaimHeaderGroupCodeInDB;
 
 

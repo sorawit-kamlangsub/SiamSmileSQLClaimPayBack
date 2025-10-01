@@ -1,8 +1,8 @@
 ﻿USE [ClaimPayBack]
 GO		
 		
-DECLARE @DateFrom			DATE = '2025-09-24';
-DECLARE @DateTo				DATE = '2025-09-25';
+DECLARE @DateFrom			DATE = '2025-09-30';
+DECLARE @DateTo				DATE = '2025-09-30';
 DECLARE @ClaimHeaderSSS		INT = 2;
 DECLARE @ClaimHeaderSSSPA	INT = 3;
 DECLARE @ClaimCompensate	INT = 4;
@@ -180,7 +180,7 @@ SELECT
 	 , m.TotalAmountSS
      , IIF(d.CountDoc > 0,1,0) IsValid
 	 , IIF(ISNULL(d.CountDoc,0) = 0,N'ไม่พบเอกสารแนบ','') ValidateDetailResult	 
-	 , m.ProductGroupId ClaimGroupTypeId
+	 , pd.ProductGroupId ClaimGroupTypeId
 FROM #TmpDetail m
 	LEFT JOIN 
 		(
@@ -223,6 +223,8 @@ FROM #TmpDetail m
 			GROUP BY td.ClaimHeaderGroupCodeInDB, td.ClaimHeaderCodeInDB
 		)d
 		ON m.ClaimHeaderCodeInDB = d.ClaimHeaderCodeInDB
+		LEFT JOIN @ProductGroup pd
+			ON pd.ProductGroupCode = m.ProductGroup
 		AND m.ClaimHeaderGroupCodeInDB = d.ClaimHeaderGroupCodeInDB;
 
 
