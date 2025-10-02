@@ -1,8 +1,8 @@
 ﻿USE [ClaimPayBack]
 GO		
 		
-DECLARE @DateFrom			DATE = '2025-09-30';
-DECLARE @DateTo				DATE = '2025-09-30';
+DECLARE @DateFrom			DATE = '2025-10-1';
+DECLARE @DateTo				DATE = '2025-10-2';
 DECLARE @ClaimHeaderSSS		INT = 2;
 DECLARE @ClaimHeaderSSSPA	INT = 3;
 DECLARE @ClaimCompensate	INT = 4;
@@ -11,6 +11,7 @@ DECLARE @IsResult			BIT = 1;
 DECLARE @Result				VARCHAR(100) = '';		
 DECLARE @Msg				NVARCHAR(500)= '';	
 DECLARE @CountIsError		INT;
+DECLARE @SiamSmileCompanyId	INT = 699804;
 
 DECLARE @ProductGroup TABLE (ProductGroupId INT ,ProductGroupCode VARCHAR(20));
 INSERT @ProductGroup
@@ -39,7 +40,8 @@ FROM dbo.ClaimPayBackDetail d
 		ON d.ClaimPayBackId = d.ClaimPayBackId
 WHERE d.CreatedDate >= @DateFrom
 AND d.CreatedDate < @DateTo
-AND 
+AND d.InsuranceCompanyId <> @SiamSmileCompanyId
+AND
 NOT EXISTS 
 (
 	SELECT 

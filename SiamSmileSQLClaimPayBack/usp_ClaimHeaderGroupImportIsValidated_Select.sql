@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImportIsValidated_Select]    Script Date: 1/10/2568 10:29:54 ******/
+/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImportIsValidated_Select]    Script Date: 2/10/2568 10:47:51 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -26,6 +26,7 @@ DECLARE @IsResult			BIT = 1;
 DECLARE @Result				VARCHAR(100) = '';		
 DECLARE @Msg				NVARCHAR(500)= '';	
 DECLARE @CountIsError		INT;
+DECLARE @SiamSmileCompanyId	INT = 699804;
 
 DECLARE @ProductGroup TABLE (ProductGroupId INT ,ProductGroupCode VARCHAR(20));
 INSERT @ProductGroup
@@ -54,6 +55,7 @@ FROM dbo.ClaimPayBackDetail d
 		ON d.ClaimPayBackId = d.ClaimPayBackId
 WHERE d.CreatedDate >= @DateFrom
 AND d.CreatedDate < @DateTo
+AND d.InsuranceCompanyId <> @SiamSmileCompanyId
 AND 
 NOT EXISTS 
 (
