@@ -361,5 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-/SiamSmileSQLClaimPayBack/SiamSmileSQLClaimPayBack.sln
-/SiamSmileSQLClaimPayBack/SiamSmileSQLClaimPayBack.sln
+
+**/.vs/
+**/SiamSmileSQLClaimPayBack.sln
