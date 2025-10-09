@@ -534,9 +534,19 @@ FROM
 		ON g.ClaimHeaderGroupCode = doc.ClaimHeaderGroupCode
 	LEFT JOIN dbo.ClaimGroupType  cgt
 		ON d.ClaimGroupTypeId = cgt.ClaimGroupTypeId
-
-	LEFT JOIN sss.dbo.MT_Branch b
-		ON d.BranchCode = b.Code COLLATE DATABASE_DEFAULT
+	LEFT JOIN 
+	(
+		SELECT
+			Code
+			,Detail
+		FROM sss.dbo.MT_Branch
+		UNION
+		SELECT
+			CAST(Branch_ID AS VARCHAR(20))	Code
+			,BranchDetail					Detail
+		FROM DataCenterV1.Address.Branch
+	) b
+		ON b.Code = d.BranchCode COLLATE DATABASE_DEFAULT
 	LEFT JOIN sss.dbo.DB_Employee eC
 		ON d.CreatedByCode = eC.Code COLLATE DATABASE_DEFAULT
 
