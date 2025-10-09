@@ -147,14 +147,14 @@ DECLARE @ProductClaimMisc TABLE
 (
 	Id		INT,
 	CPBId	INT,
-	[Name]	VARCHAR(20)
+	ProductName	VARCHAR(20)
 );
 
 INSERT @ProductClaimMisc
 (
 	Id,
 	CPBId,
-	[Name]
+	ProductName
 )
 VALUES
 (12,4,'Motor');
