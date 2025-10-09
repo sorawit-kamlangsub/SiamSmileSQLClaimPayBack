@@ -1,10 +1,10 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]    Script Date: 9/10/2568 10:56:05 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+/****** Object:  StoredProcedure [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]    Script Date: 9/10/2568 8:57:54 ******/
+--SET ANSI_NULLS ON
+--GO
+--SET QUOTED_IDENTIFIER ON
+--GO
 
 
 -- =============================================
@@ -19,10 +19,10 @@ GO
 -- Update date: 20250902 Krekpon.D เพิ่มจำนวนเงินที่จ่ายของ บส.
 -- Description:	
 -- =============================================
-ALTER PROCEDURE [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]
-	 @ProductGroupId		INT 	 
+DECLARE
+	 @ProductGroupId		INT 			= 4
 	,@InsuranceId			INT				= NULL	
-	,@ClaimGroupTypeId		INT				= NULL	  
+	,@ClaimGroupTypeId		INT				= 7	  
 	,@BranchId				INT				= NULL	
 	,@CreateByUser_Code		VARCHAR(20)		= NULL
 
@@ -32,9 +32,9 @@ ALTER PROCEDURE [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]
 	,@OrderType				NVARCHAR(MAX)	= NULL
 	,@SearchDetail			NVARCHAR(MAX)	= NULL 
 	,@IsShowDocumentLink	BIT				= NULL
-AS
-BEGIN
-	SET NOCOUNT ON;
+--AS
+--BEGIN
+--	SET NOCOUNT ON;
 
 DECLARE @pInsCode				VARCHAR(20)		= NULL	/*ถ้าส่ง @InsuranceId จะ set*/
 DECLARE @pBranchCode			VARCHAR(20)		= NULL	/*ถ้าส่ง @BranchId จะ set*/
@@ -498,7 +498,6 @@ IF @pPageSize		IS NULL	SET @pPageSize	 = 10;
 SET @pSortField = NULL;
 SET @pOrderType = NULL;
 
-
 SELECT g.ClaimHeaderGroupCode									ClaimHeaderGroup_id  
 		,b.Detail												Branch
 		,pg.ProductGroupDetail									ProductGroup
@@ -575,7 +574,7 @@ IF OBJECT_ID('tempdb..#TmpDoc') IS NOT NULL  DROP TABLE #TmpDoc;
 IF OBJECT_ID('tempdb..#TmpCondition') IS NOT NULL  DROP TABLE #TmpCondition;	
 IF OBJECT_ID('tempdb..#Tmplst') IS NOT NULL  DROP TABLE #Tmplst;	
 IF OBJECT_ID('tempdb..#TmpCAT') IS NOT NULL  DROP TABLE #TmpCAT;	
-IF OBJECT_ID('tempdb..#TmpIns') IS NOT NULL  DROP TABLE #TmpIns;	
+IF OBJECT_ID('tempdb..#TmpIns') IS NOT NULL  DROP TABLE #TmpIns;		
 
 --DECLARE @DefaultDate AS DATETIME = '2021-10-08 08:22'
 --	DECLARE @amount		AS DECIMAL
@@ -593,4 +592,4 @@ IF OBJECT_ID('tempdb..#TmpIns') IS NOT NULL  DROP TABLE #TmpIns;
 --				,1							DocumentCount
 --				,1							TotalCount
 
-END
+--END
