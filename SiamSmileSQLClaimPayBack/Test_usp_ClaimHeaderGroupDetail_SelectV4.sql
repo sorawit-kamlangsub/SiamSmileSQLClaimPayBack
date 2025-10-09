@@ -509,8 +509,8 @@ SELECT g.ClaimHeaderGroupCode									ClaimHeaderGroup_id
 		,oIns.OrganizeId										InsuranceCompanyId
 		,d.InsuranceCompanyName									InsuranceCompany	 
 		,COUNT(g.ClaimHeaderGroupCode) OVER ()					TotalCount
-		--,IIF(g.ItemCount = doc.docCount ,1,0)					DocumentCount	 
-		,1														DocumentCount
+		,IIF(g.ItemCount = doc.docCount ,1,0)					DocumentCount	 
+		--,1													DocumentCount
 		,g.TransferAmount										TransferAmount
 FROM
 (

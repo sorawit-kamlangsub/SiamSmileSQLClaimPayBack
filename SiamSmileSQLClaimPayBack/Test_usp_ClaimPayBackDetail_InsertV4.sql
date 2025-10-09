@@ -338,7 +338,7 @@ DECLARE
 					,NULL						ICD10
 					,cm.ClaimOnLineCode
 					,cm.CustomerName
-					,NULL						AdmitDate
+					,cm.DateIn					AdmitDate
 					,NULL						SchoolName
 					,1							GroupId
 				FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
