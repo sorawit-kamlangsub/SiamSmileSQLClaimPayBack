@@ -1,10 +1,13 @@
 ﻿USE [ClaimPayBack]
-GO		
+GO
 
+/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImportIsValidated_Select]    Script Date: 9/10/2568 8:53:38 ******/
 SET ANSI_NULLS ON
 GO
+
 SET QUOTED_IDENTIFIER ON
 GO
+
 -- =============================================
 -- Author:		Sorawit Kamlangsub
 -- Create date: 2025-09-24 14:00
@@ -26,6 +29,7 @@ DECLARE @IsResult			BIT = 1;
 DECLARE @Result				VARCHAR(100) = '';		
 DECLARE @Msg				NVARCHAR(500)= '';	
 DECLARE @CountIsError		INT;
+DECLARE @SiamSmileCompanyId	INT = 699804;
 
 DECLARE @ProductGroup TABLE (ProductGroupId INT ,ProductGroupCode VARCHAR(20));
 INSERT @ProductGroup
@@ -54,6 +58,7 @@ FROM dbo.ClaimPayBackDetail d
 		ON d.ClaimPayBackId = d.ClaimPayBackId
 WHERE d.CreatedDate >= @DateFrom
 AND d.CreatedDate < @DateTo
+AND d.InsuranceCompanyId <> @SiamSmileCompanyId
 AND 
 NOT EXISTS 
 (
@@ -195,7 +200,7 @@ SELECT
 	 , m.TotalAmountSS
      , IIF(d.CountDoc > 0,1,0) IsValid
 	 , IIF(ISNULL(d.CountDoc,0) = 0,N'ไม่พบเอกสารแนบ','') ValidateDetailResult	 
-	 , m.ProductGroupId ClaimGroupTypeId
+	 , pd.ProductGroupId ClaimGroupTypeId
 FROM #TmpDetail m
 	LEFT JOIN 
 		(
@@ -238,6 +243,8 @@ FROM #TmpDetail m
 			GROUP BY td.ClaimHeaderGroupCodeInDB, td.ClaimHeaderCodeInDB
 		)d
 		ON m.ClaimHeaderCodeInDB = d.ClaimHeaderCodeInDB
+		LEFT JOIN @ProductGroup pd
+			ON pd.ProductGroupCode = m.ProductGroup
 		AND m.ClaimHeaderGroupCodeInDB = d.ClaimHeaderGroupCodeInDB;
 
 
@@ -261,5 +268,8 @@ IF OBJECT_ID('tempdb..#TmpClaimType') IS NOT NULL  DROP TABLE #TmpClaimType;
 --,@ValidateDetailResult ValidateDetailResult
 --,@ClaimGroupTypeId ClaimGroupTypeId
 
+
 END
 GO
+
+
