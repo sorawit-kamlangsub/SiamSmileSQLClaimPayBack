@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]    Script Date: 9/10/2568 10:56:05 ******/
+/****** Object:  StoredProcedure [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]    Script Date: 9/10/2568 14:42:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -142,22 +142,6 @@ CREATE TABLE #TmpDoc
 	ClaimHeaderGroupCode VARCHAR(20) 
 	,ClaimHeaderCode VARCHAR(20)
 );
-
-DECLARE @ProductClaimMisc TABLE
-(
-	Id			INT,
-	CPBId		INT,
-	ProductName	VARCHAR(20)
-);
-
-INSERT @ProductClaimMisc
-(
-	Id,
-	CPBId,
-	ProductName
-)
-VALUES
-(12,4,'Motor');
  
 IF @pProductGroupId = 2 AND @pClaimGroupTypeId = 5
 	BEGIN
@@ -434,41 +418,6 @@ ELSE IF @pProductGroupId = 3 AND @pClaimGroupTypeId IN (2,3,4,6)
 			AND c.Status_id NOT IN ('3570','3580')  
 		  
 	END
--- ClaimMisc
-ELSE IF @pProductGroupId IN (4) AND @pClaimGroupTypeId = 7
-	BEGIN
-		INSERT INTO #Tmplst
-		        (ClaimHeaderGroupCode
-		        ,ClaimHeaderCode
-		        ,BranchCode
-		        ,CreatedByCode
-		        ,CreatedDate
-		        ,InsuranceCompanyCode
-		        ,InsuranceCompanyName
-		        ,ProductGroupId
-		        ,xRevise
-				,amount
-				,ClaimGroupTypeId
-				,TransferAmount)		
-		SELECT cm.ClaimHeaderGroupCode	ClaimHeaderGroupCode
-		,NULL							ClaimHeaderCode
-		,cm.BranchId					BranchCode
-		,cm.CreatedByUserId				CreatedByCode
-		,cm.CreatedDate					CreatedDate
-		,cm.InsuranceCompanyCode		InsuranceCompanyCode
-		,cm.InsuranceCompanyName		InsuranceCompanyName 
-		,pd.CPBId						ProductGroupId
-		,'0'							xRevise
-		,cm.ClaimAmount					amount 
-		,@pClaimGroupTypeId				ClaimGroupTypeId
-		,NULL							TransferAmount
-		FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
-			INNER JOIN @ProductClaimMisc pd
-				ON cm.ProductTypeId = pd.Id				
-		WHERE cm.IsActive = 1
-		AND cm.ClaimMiscStatusId = 3
-		AND pd.CPBId = @pProductGroupId
-	END
 
 SELECT * 
 		,ROW_NUMBER() OVER(ORDER BY (a.ClaimHeaderGroupCode) ASC) rwId
@@ -575,7 +524,7 @@ IF OBJECT_ID('tempdb..#TmpDoc') IS NOT NULL  DROP TABLE #TmpDoc;
 IF OBJECT_ID('tempdb..#TmpCondition') IS NOT NULL  DROP TABLE #TmpCondition;	
 IF OBJECT_ID('tempdb..#Tmplst') IS NOT NULL  DROP TABLE #Tmplst;	
 IF OBJECT_ID('tempdb..#TmpCAT') IS NOT NULL  DROP TABLE #TmpCAT;	
-IF OBJECT_ID('tempdb..#TmpIns') IS NOT NULL  DROP TABLE #TmpIns;	
+IF OBJECT_ID('tempdb..#TmpIns') IS NOT NULL  DROP TABLE #TmpIns;		
 
 --DECLARE @DefaultDate AS DATETIME = '2021-10-08 08:22'
 --	DECLARE @amount		AS DECIMAL
