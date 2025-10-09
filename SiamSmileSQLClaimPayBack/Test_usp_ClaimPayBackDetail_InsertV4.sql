@@ -333,7 +333,7 @@ DECLARE
 					,NULL						ClaimAdmitTypeCode
 					,NULL						ClaimAdmitType
 					,NULL						ChiefComplainCode
-					,NULL						ChiefComplain
+					,c.ChiefComplainName		ChiefComplain
 					,NULL						ICD10Code
 					,NULL						ICD10
 					,cm.ClaimOnLineCode
@@ -343,9 +343,11 @@ DECLARE
 					,1							GroupId
 				FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
 					INNER JOIN @ProductClaimMisc pd
-						ON cm.ProductTypeId = pd.Id		
+						ON pd.Id = cm.ProductTypeId	
 					LEFT JOIN [ClaimMiscellaneous].[misc].[Hospital] h
-						ON cm.HospitalId = h.HospitalId
+						ON h.HospitalId = cm.HospitalId
+					LEFT JOIN [ClaimMiscellaneous].[misc].[ChiefComplain] c
+						ON c.ChiefComplainId = cm.ChiefComplainId
 				WHERE cm.IsActive = 1
 				AND cm.ClaimMiscStatusId = 3
 				AND pd.CPBId = @ProductGroupId
