@@ -288,6 +288,7 @@ DECLARE
 			END
 		ELSE IF @ProductGroupId IN (4) AND @ClaimGroupTypeId = 7
 			BEGIN
+				 								
 				INSERT INTO @TmpD
 				(
 				    ClaimHeaderGroupCode
@@ -327,7 +328,7 @@ DECLARE
 					,cm.ClaimAmount				Amount
 					,cm.ProductCode
 					,pd.ProductName				[Product]
-					,NULL						HospitalCode
+					,h.HospitalCode				HospitalCode
 					,cm.HospitalName			Hospital
 					,NULL						ClaimAdmitTypeCode
 					,NULL						ClaimAdmitType
@@ -342,10 +343,25 @@ DECLARE
 					,1							GroupId
 				FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
 					INNER JOIN @ProductClaimMisc pd
-						ON cm.ProductTypeId = pd.Id				
+						ON cm.ProductTypeId = pd.Id		
+					LEFT JOIN [ClaimMiscellaneous].[misc].[Hospital] h
+						ON cm.HospitalId = h.HospitalId
 				WHERE cm.IsActive = 1
 				AND cm.ClaimMiscStatusId = 3
 				AND pd.CPBId = @ProductGroupId
+
+				SELECT x.ClaimHeaderGroupCode
+					  ,x.ProductGroupId
+					  ,x.BranchCode
+					  ,x.BranchId			BranchId
+					  ,x.ClaimGroupTypeId
+					  ,x.InsCode
+					  ,x.InsId				InsId
+					  ,x.ClaimCode
+					  ,x.ClaimOnLineCode
+					  ,1					GroupId
+				INTO #TmpX2
+				FROM @TmpD x
 
 				INSERT INTO @TmpGroup
 				(
@@ -365,7 +381,7 @@ DECLARE
 
 				INSERT INTO @TmpH
 				(
-				    ClaimHeaderGroupCode
+					ClaimHeaderGroupCode
 				  , ClaimGroupTypeId
 				  , ProductGroupId
 				  , BranchId
@@ -378,43 +394,43 @@ DECLARE
 				  ,GroupId
 				)
 				SELECT g.ClaimHeaderGroupCode
-					, g.ClaimGroupTypeId
-					, g.ProductGroupId
-					, g.BranchId
-					, g.InsId
-					, s.ItemCount
-					, s.SumAmount
-					, s.ClaimOnLineCode
-					, ROW_NUMBER() OVER(ORDER BY (g.ClaimHeaderGroupCode) asc ) hId
-					, g.HospitalCode
-					,1
+					  ,g.ClaimGroupTypeId
+					  ,g.ProductGroupId
+					  ,g.BranchId
+					  ,g.InsId
+					  ,s.ItemCount
+					  ,s.SumAmount
+					  ,s.ClaimOnLineCode
+					  ,ROW_NUMBER() OVER(ORDER BY (g.ClaimHeaderGroupCode) asc ) hId
+					  ,s.HospitalCode
+					  ,GroupId
 				FROM
-					(
-						SELECT ClaimHeaderGroupCode
-							, ClaimGroupTypeId
-							, ProductGroupId 
-							, BranchId
-							, InsId
-							, HospitalCode
-						FROM @TmpD
-						GROUP BY ClaimHeaderGroupCode
-								, ClaimGroupTypeId
-								, ProductGroupId
-								, BranchId
-								, InsId
-								, HospitalCode
-
-					)g
+				(
+				SELECT ClaimHeaderGroupCode
+						,ClaimGroupTypeId
+					  ,ProductGroupId
+					  ,BranchId
+					  ,InsId
+					  ,GroupId
+				FROM #TmpX2
+				GROUP BY ClaimHeaderGroupCode
+						,ClaimGroupTypeId
+						,ProductGroupId
+						,BranchId
+						,InsId
+						,GroupId
+				)g
 				LEFT JOIN 
 					(
 						SELECT ClaimHeaderGroupCode
-							, COUNT(ClaimCode)		ItemCount
-							, SUM(Amount)			SumAmount
-							, MAX(ClaimOnLineCode)	ClaimOnLineCode
+								,COUNT(ClaimCode)	ItemCount
+								,SUM(Amount)		SumAmount
+								,MAX(ClaimOnLineCode) ClaimOnLineCode
+								,HospitalCode
 						FROM @TmpD
-						GROUP BY ClaimHeaderGroupCode
+						GROUP BY ClaimHeaderGroupCode, HospitalCode
 					)s
-					ON g.ClaimHeaderGroupCode = s.ClaimHeaderGroupCode	
+					ON g.ClaimHeaderGroupCode = s.ClaimHeaderGroupCode
 
 			END
 		ELSE
@@ -1213,6 +1229,7 @@ DECLARE
 
 	IF OBJECT_ID('tempdb..#TmpX') IS NOT NULL  DROP TABLE #TmpX;	
 	IF OBJECT_ID('tempdb..#Tmplst') IS NOT NULL  DROP TABLE #Tmplst;	
+	IF OBJECT_ID('tempdb..#TmpX2') IS NOT NULL  DROP TABLE #TmpX2;
 
 	IF OBJECT_ID('tempdb..@TmpH') IS NOT NULL  DELETE FROM @TmpH;	
 	IF OBJECT_ID('tempdb..@TmpGroup') IS NOT NULL  DELETE FROM @TmpGroup;	
