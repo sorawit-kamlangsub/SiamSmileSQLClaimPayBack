@@ -1,10 +1,10 @@
 ﻿USE [ClaimPayBack]
 GO
 /****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Sub01_Insert_V2]    Script Date: 10/10/2568 10:12:30 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+--SET ANSI_NULLS ON
+--GO
+--SET QUOTED_IDENTIFIER ON
+--GO
 -- =============================================
 -- Author:		Thayart Churlek
 -- Create date: 2025-09-19 15:21
@@ -19,7 +19,8 @@ GO
 */	
 -- Description:	<Description,,>
 -- =============================================
-ALTER PROCEDURE [dbo].[usp_BillingRequest_Sub01_Insert_V2]
+--ALTER PROCEDURE [dbo].[usp_BillingRequest_Sub01_Insert_V2]
+declare
 		@GroupTypeId				INT
 		,@ClaimTypeCode				VARCHAR(20)
 		,@InsuranceCompanyId		INT
@@ -29,10 +30,10 @@ ALTER PROCEDURE [dbo].[usp_BillingRequest_Sub01_Insert_V2]
 		,@InsuranceCompanyName		NVARCHAR(300)
 		,@NewBillingDate			DATE
 		,@CreatedDateFrom			DATE
-		,@CreatedDateTo				DATE
-AS
-BEGIN
-	SET NOCOUNT ON;
+		,@CreatedDateTo				DATE;
+--AS
+--BEGIN
+--	SET NOCOUNT ON;
 
 
 --@GroupTypeId
@@ -271,24 +272,24 @@ BEGIN
 				,@BillingRequestGroupCode OUTPUT;
 
 /* Insert BillingRequestGroup*/
-			INSERT INTO dbo.BillingRequestGroup
-			        (BillingRequestGroupCode
-			        ,InsuranceCompanyId
-			        ,ItemCount
-			        ,PaySS_Total
-			        ,CoverAmount
-			        ,TotalAmount
-			        ,BillingRequestGroupStatusId
-			        ,BillingDate
-			        ,IsActive
-			        ,CreatedDate
-			        ,CreatedByUserId
-			        ,UpdatedDate
-			        ,UpdatedByUserId
-					,ClaimTypeCode
-					,BillingDueDate
-					,ClaimHeaderGroupTypeId
-					,InsuranceCompanyName)
+			--INSERT INTO dbo.BillingRequestGroup
+			--        (BillingRequestGroupCode
+			--        ,InsuranceCompanyId
+			--        ,ItemCount
+			--        ,PaySS_Total
+			--        ,CoverAmount
+			--        ,TotalAmount
+			--        ,BillingRequestGroupStatusId
+			--        ,BillingDate
+			--        ,IsActive
+			--        ,CreatedDate
+			--        ,CreatedByUserId
+			--        ,UpdatedDate
+			--        ,UpdatedByUserId
+			--		,ClaimTypeCode
+			--		,BillingDueDate
+			--		,ClaimHeaderGroupTypeId
+			--		,InsuranceCompanyName)
 			SELECT @BillingRequestGroupCode				BillingRequestGroupCode
 					,@InsuranceCompanyId				InsuranceCompanyId
 					,@ItemCount							ItemCount
@@ -310,18 +311,18 @@ BEGIN
 			SET @BillingRequestGroupId = SCOPE_IDENTITY();				
 			
 /* Insert BillingRequestItem */
-			INSERT INTO dbo.BillingRequestItem
-			        (BillingRequestItemCode
-			        ,BillingRequestGroupId
-			        ,ClaimHeaderGroupImportDetailId
-			        ,PaySS_Total
-			        ,CoverAmount
-			        ,AmountTotal
-			        ,IsActive
-			        ,CreatedDate
-			        ,CreatedByUserId
-			        ,UpdatedDate
-			        ,UpdatedByUserId)
+			--INSERT INTO dbo.BillingRequestItem
+			--        (BillingRequestItemCode
+			--        ,BillingRequestGroupId
+			--        ,ClaimHeaderGroupImportDetailId
+			--        ,PaySS_Total
+			--        ,CoverAmount
+			--        ,AmountTotal
+			--        ,IsActive
+			--        ,CreatedDate
+			--        ,CreatedByUserId
+			--        ,UpdatedDate
+			--        ,UpdatedByUserId)
 			SELECT	
 				i.BillingRequestItemCode
 				,@BillingRequestGroupId				BillingRequestGroupId
@@ -339,13 +340,13 @@ BEGIN
 				AND i.rwId <= @Offset + @BatchSize;
 	
 /* Update ClaimHeaderGroupImport */
-			--SELECT *
-			UPDATE	m 
-				SET m.ClaimHeaderGroupImportStatusId	= 3
-				,m.BillingRequestGroupId			= @BillingRequestGroupId
-				,m.UpdatedDate						= @D2
-				,m.UpdatedByUserId					= @UserId
-				,m.BillingDate						= @NewBillingDate
+			SELECT *
+			--UPDATE	m 
+			--	SET m.ClaimHeaderGroupImportStatusId	= 3
+				--,m.BillingRequestGroupId				= @BillingRequestGroupId
+				--,m.UpdatedDate						= @D2
+				--,m.UpdatedByUserId					= @UserId
+				--,m.BillingDate						= @NewBillingDate
 			FROM dbo.ClaimHeaderGroupImport m
 				INNER JOIN #Tmplst u
 					ON m.ClaimHeaderGroupImportId = u.ClaimHeaderGroupImportId
@@ -353,64 +354,64 @@ BEGIN
 				AND u.rwId <= @Offset + @BatchSize ;
 				
 /* Insert BillingRequestGroupXResultDetail */
-			INSERT INTO dbo.BillingRequestGroupXResultDetail
-					(BillingRequestGroupId
-					,BillingRequestResultDetailId)
+			--INSERT INTO dbo.BillingRequestGroupXResultDetail
+			--		(BillingRequestGroupId
+			--		,BillingRequestResultDetailId)
 			SELECT	
 				@BillingRequestGroupId			BillingRequestGroupId
 				,i.BillingRequestResultDetailId
 			FROM #TmpCover i;
 
 /* Insert BillingExport */
-			INSERT INTO ClaimPayBack.dbo.BillingExport
-					(BillingDate
-					,BillingDueDate
-					,BranchCode
-					,Branch
-					,ClaimHeaderGroupCode
-					,PolicyNo
-					,ApplicationCode
-					,ClaimCode
-					,Province
-					,SchoolName
-					,CustomerDetailCode
-					,IdentityCard
-					,CustName
-					,SchoolLevel
-					,DateHappen
-					,Accident
-					,ChiefComplain
-					,Orgen
-					,Pay
-					,Compensate_Include
-					,Compensate_Out
-					,Amount_Pay
-					,Amount_Dead
-					,Pay_Total
-					,ClaimAdmitType
-					,HospitalId
-					,HospitalName
-					,ICD10_1Code
-					,ICD10
-					,Remark
-					,DateIn
-					,DateOut
-					,ClaimType
-					,BillingRequestGroupCode
-					,BillingRequestItemCode
-					,DocumentLink
-					,InsuranceCompanyId
-					,InsuranceCompanyName
-					,StartCoverDate
-					,IPDCount
-					,ICUCount
-					,ClaimHeaderGroupTypeId
-					,ProductId
-					,[Product]
-					,CreatedByUserId
-					,CreatedDate
-					,BillingBankId
-					,BankAccountNumber)
+			--INSERT INTO ClaimPayBack.dbo.BillingExport
+			--		(BillingDate
+			--		,BillingDueDate
+			--		,BranchCode
+			--		,Branch
+			--		,ClaimHeaderGroupCode
+			--		,PolicyNo
+			--		,ApplicationCode
+			--		,ClaimCode
+			--		,Province
+			--		,SchoolName
+			--		,CustomerDetailCode
+			--		,IdentityCard
+			--		,CustName
+			--		,SchoolLevel
+			--		,DateHappen
+			--		,Accident
+			--		,ChiefComplain
+			--		,Orgen
+			--		,Pay
+			--		,Compensate_Include
+			--		,Compensate_Out
+			--		,Amount_Pay
+			--		,Amount_Dead
+			--		,Pay_Total
+			--		,ClaimAdmitType
+			--		,HospitalId
+			--		,HospitalName
+			--		,ICD10_1Code
+			--		,ICD10
+			--		,Remark
+			--		,DateIn
+			--		,DateOut
+			--		,ClaimType
+			--		,BillingRequestGroupCode
+			--		,BillingRequestItemCode
+			--		,DocumentLink
+			--		,InsuranceCompanyId
+			--		,InsuranceCompanyName
+			--		,StartCoverDate
+			--		,IPDCount
+			--		,ICUCount
+			--		,ClaimHeaderGroupTypeId
+			--		,ProductId
+			--		,[Product]
+			--		,CreatedByUserId
+			--		,CreatedDate
+			--		,BillingBankId
+			--		,BankAccountNumber)
 			SELECT 
 				@NewBillingDate
 				,g.BillingDueDate
@@ -478,12 +479,12 @@ BEGIN
 				AND (g.BillingRequestGroupId = @BillingRequestGroupId);
 				 
 			/* Insert ClaimHeaderGroupImportCancel */
-			INSERT INTO [dbo].[ClaimHeaderGroupImportCancel]
-			      ([ClaimHeaderGroupImportId]
-			      ,[CancelDetail]
-			      ,[IsActive]
-			      ,[CreatedByUserId]
-			      ,[CreatedDate])
+			--INSERT INTO [dbo].[ClaimHeaderGroupImportCancel]
+			--      ([ClaimHeaderGroupImportId]
+			--      ,[CancelDetail]
+			--      ,[IsActive]
+			--      ,[CreatedByUserId]
+			--      ,[CreatedDate])
 			SELECT 
 				i.ClaimHeaderGroupImportId	ClaimHeaderGroupImportId
 				,@TransactionDetail			CancelDetail
@@ -533,4 +534,4 @@ SELECT @IsResult IsResult
 		,@Result Result
 		,@Msg	 Msg;
 
-END
+--END

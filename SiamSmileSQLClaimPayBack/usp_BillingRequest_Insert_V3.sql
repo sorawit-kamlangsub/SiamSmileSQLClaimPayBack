@@ -19,6 +19,8 @@ GO
 ALTER PROCEDURE [dbo].[usp_BillingRequest_Insert_V3]
 		@CreatedByUserId	INT	
 		,@BillingDateTo		DATE
+		,@CreatedDateFrom	DATE
+		,@CreatedDateTo		DATE
 
 AS
 BEGIN
@@ -122,6 +124,8 @@ WHILE ( @intFlag <= @max )
 							,@ClaimHeaderGroupTypeId
 							,@InsuranceCompanyName
 							,@BillingDateTo
+							,@CreatedDateFrom
+							,@CreatedDateTo
 		------------------------------
         SET @intFlag = @intFlag + 1;
     END;

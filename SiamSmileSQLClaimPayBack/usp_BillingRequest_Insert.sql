@@ -15,6 +15,8 @@ GO
 ALTER PROCEDURE [dbo].[usp_BillingRequest_Insert]
 	@CreatedByUserId	INT				--CreatedByUserId and UpdatedByUserId
 	,@BillingDateTo		DATE 
+	,@CreatedDateFrom	DATE
+	,@CreatedDateTo		DATE
 
 AS
 BEGIN
@@ -23,7 +25,7 @@ BEGIN
 --EXECUTE  [dbo].[usp_BillingRequest_Insert_V1] @CreatedByUserId;
 
 
-EXECUTE  [dbo].[usp_BillingRequest_Insert_V3] @CreatedByUserId, @BillingDateTo;
+EXECUTE  [dbo].[usp_BillingRequest_Insert_V3] @CreatedByUserId, @BillingDateTo, @CreatedDateFrom, @CreatedDateTo;
 
 
 
