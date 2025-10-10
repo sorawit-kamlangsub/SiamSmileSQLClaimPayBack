@@ -1,22 +1,24 @@
 ﻿USE [ClaimPayBack]
 GO
 /****** Object:  StoredProcedure [dbo].[usp_BillingRequestValidate_Select]    Script Date: 10/10/2568 9:24:55 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+--SET ANSI_NULLS ON
+--GO
+--SET QUOTED_IDENTIFIER ON
+--GO
 
 -- =============================================
 -- Author:		Mr.Bunchuai Chaiket
 -- Create date: 2025-10-01 15:16
 -- Description:	store สำหรับ Validate รายการ Generate group Import บ.ส. 
 -- =============================================
-ALTER PROCEDURE [dbo].[usp_BillingRequestValidate_Select] 
-	 @BillingDate		DATE = NULL
-AS
-BEGIN
+--ALTER PROCEDURE [dbo].[usp_BillingRequestValidate_Select] 
+declare
+	 @DateFrom		DATE = '2025-10-01',
+	 @DateTo		DATE = '2025-10-10';
+--AS
+--BEGIN
 	
-	SET NOCOUNT ON;
+--	SET NOCOUNT ON;
 -- ================================
 DECLARE @MessageValidate1 NVARCHAR(100) = N'ยอด บ.ส. ไม่เท่ากับ ยอดวางบิล'; 
 DECLARE @MessageValidate2 NVARCHAR(100) = N'ยอด บ.ส. และยอดวางบิลเป็น 0'; 
@@ -24,13 +26,14 @@ DECLARE @MessageValidate3 NVARCHAR(100) = N'ยอดโอนเงิน ไ�
 DECLARE @MessageValidate4 NVARCHAR(100) = N'ยอดวางบิลเป็น ไม่เท่ากับ (ยอดโอนเงิน - ยอด NPL)';  
 -- ================================
 
+IF @DateTo IS NOT NULL SET @DateTo = DATEADD(DAY,1,@DateTo);
 
 SELECT 
 	g.InsuranceCompanyId
 	,g.GroupTypeId
 	,ROW_NUMBER() OVER(ORDER BY (g.InsuranceCompanyId) ASC ) AS rwId
 	,g.ClaimTypeCode
-	,g.BillingDate
+	,g.CreatedDate
 	,g.ClaimHeaderGroupTypeId
 	,g.InsuranceCompanyName
 	,g.ClaimHeaderGroupCode
@@ -46,7 +49,7 @@ FROM
 					ELSE NULL
 					END	GroupTypeId
 				,i.ClaimTypeCode
-				,i.BillingDate
+				,i.CreatedDate
 				,f.ClaimHeaderGroupTypeId
 				,i.InsuranceCompanyName
 				,i.TotalAmount
@@ -58,13 +61,14 @@ FROM
 			AND		i.IsActive = 1
 			AND		i.ClaimHeaderGroupImportStatusId = 2
 			AND		i.BillingRequestGroupId IS NULL
-			AND		i.BillingDate <=  @BillingDate
+			AND		i.CreatedDate >	@DateFrom
+			AND		i.CreatedDate <=  @DateTo
 	) AS g
 WHERE	g.GroupTypeId IS NOT NULL
 GROUP BY	g.InsuranceCompanyId
 			,g.GroupTypeId
 			,g.ClaimTypeCode
-			,g.BillingDate
+			,g.CreatedDate
 			,g.ClaimHeaderGroupTypeId
 			,g.InsuranceCompanyName
 			,g.ClaimHeaderGroupCode;
@@ -178,4 +182,4 @@ IF OBJECT_ID('tempdb..#Tmp2') IS NOT NULL  DROP TABLE #Tmp2;
 --	, @NPLAmount				NPLAmount
 --	, @IsValidate				IsValidate
 
-END;
+--END;
