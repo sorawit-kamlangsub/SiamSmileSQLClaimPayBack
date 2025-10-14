@@ -6,5 +6,8 @@
 2025-10-14 Import Sp
 -usp_ClaimPayBackByTransfer_Select
 -usp_ClaimPayBackTransfer_Select
+	- แก้ => AND t.ClaimGroupTypeId IN (4,7)
+-usp_ClaimPayBackTransferNonClaimCompensateReport_Select
+	- แก้ union claimmisc 
 
 */
