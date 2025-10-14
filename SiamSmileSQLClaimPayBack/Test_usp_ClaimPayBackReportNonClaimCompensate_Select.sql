@@ -96,8 +96,7 @@ CREATE INDEX IX_TmpEmployee_Code ON #TmpEmployee(EmployeeCode);
 	 cpb.BranchId AS BranchId,
 	 cpbd.ClaimOnLineCode AS COL,
 	 cpb.CreatedDate AS CreatedDate,
-	 --CONCAT(dme.EmployeeCode,' ',dme.PersonName) AS CreatedByUser,
-	 NULL AS CreatedByUser,
+	 CONCAT(dme.EmployeeCode,' ',dme.PersonName) AS CreatedByUser,
 	 cpbd.HospitalCode	AS HospitalCode
  FROM  ClaimPayBack cpb
 	 LEFT JOIN ClaimPayBackDetail cpbd
@@ -108,8 +107,8 @@ CREATE INDEX IX_TmpEmployee_Code ON #TmpEmployee(EmployeeCode);
 		ON cpb.ClaimGroupTypeId = cgt.ClaimGroupTypeId
 	 LEFT JOIN #TmpPersonUser dmpu	--2025-08-20 16:10 Krekpon Dokkamklang Mind 
 		ON cpb.CreatedByUserId = dmpu.UserId
-	 --INNER JOIN #TmpEmployee dme	--2025-08-20 16:10 Krekpon Dokkamklang Mind 
-		--ON dmpu.EmployeeId = dme.EmployeeId
+	 INNER JOIN #TmpEmployee dme	--2025-08-20 16:10 Krekpon Dokkamklang Mind 
+		ON dmpu.EmployeeId = dme.EmployeeId
 WHERE   cpb.ClaimGroupTypeId = @ClaimGroupTypeId
 	AND cpb.IsActive = 1 
 	AND cpbd.IsActive = 1
@@ -139,6 +138,7 @@ WHERE   cpb.ClaimGroupTypeId = @ClaimGroupTypeId
 				NULL AS PhoneNo,
 				TmpCPB.CreatedDate AS CreatedDate,
 				--CONCAT(dmeu.EmployeeCode,' ',dmeu.PersonName) AS ApprovedUser ,
+				NULL ApprovedUser,
 				TmpCPB.CreatedByUser AS CteatedUser ,	--2025-08-20 16:10 Krekpon Dokkamklang Mind 
 				icu.ClaimAdmitType AS ClaimAdmitType,
 				--IIF(@ClaimGroupTypeId IN (2,4,6) AND @ProductGroupId IN (2,3) ,icu.RecordedDate,NULL) AS RecordedDate --Wetpisit.P 2025-05-15
