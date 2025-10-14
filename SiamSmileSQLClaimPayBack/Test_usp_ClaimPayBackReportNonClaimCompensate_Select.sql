@@ -137,8 +137,7 @@ WHERE   cpb.ClaimGroupTypeId = @ClaimGroupTypeId
 				IIF(@ClaimGroupTypeId IN (2,4),REPLACE(sssmtc.BankAccountNo,'-',''),NULL) AS BankAccountNo,
 				NULL AS PhoneNo,
 				TmpCPB.CreatedDate AS CreatedDate,
-				--CONCAT(dmeu.EmployeeCode,' ',dmeu.PersonName) AS ApprovedUser ,
-				NULL ApprovedUser,
+				CONCAT(dmeu.EmployeeCode,' ',dmeu.PersonName) AS ApprovedUser ,
 				TmpCPB.CreatedByUser AS CteatedUser ,	--2025-08-20 16:10 Krekpon Dokkamklang Mind 
 				icu.ClaimAdmitType AS ClaimAdmitType,
 				--IIF(@ClaimGroupTypeId IN (2,4,6) AND @ProductGroupId IN (2,3) ,icu.RecordedDate,NULL) AS RecordedDate --Wetpisit.P 2025-05-15
@@ -197,8 +196,8 @@ FROM @TmpClaimPayBack TmpCPB
 		ON TmpCPB.ClaimGroupCodeFromCPBD = icu.Code
 	LEFT JOIN [DataCenterV1].[Address].Branch dab
 		ON TmpCPB.BranchId = dab.Branch_ID
-	--INNER JOIN #TmpEmployee dmeu	--2025-08-20 16:10 Krekpon Dokkamklang Mind 
-	--	ON icu.ApprovedUserFromSSS  = dmeu.EmployeeCode
+	LEFT JOIN #TmpEmployee dmeu	--2025-08-20 16:10 Krekpon Dokkamklang Mind 
+		ON icu.ApprovedUserFromSSS  = dmeu.EmployeeCode
 	LEFT JOIN SSS.dbo.MT_Company sssmtc
 		ON icu.Hospital = sssmtc.Code OR TmpCPB.HospitalCode = sssmtc.Code
 	LEFT JOIN SSS.dbo.MT_Bank sssmtb
