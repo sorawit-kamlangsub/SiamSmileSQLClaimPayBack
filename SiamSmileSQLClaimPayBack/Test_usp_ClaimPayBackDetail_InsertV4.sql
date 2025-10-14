@@ -18,7 +18,7 @@ GO
 -- =============================================
 --ALTER PROCEDURE [Claim].[usp_ClaimPayBackDetail_InsertV4]
 DECLARE
-	@ClaimGroupCodeList		NVARCHAR(MAX) = ''
+	@ClaimGroupCodeList		NVARCHAR(MAX) = 'MORTORFIRST,MORTORSECOND'
 	  , @ProductGroupId			INT = 4
 	  , @ClaimGroupTypeId		INT = 7
 	  , @CreatedByUserId		INT = 1
@@ -331,7 +331,7 @@ DECLARE
 					,h.HospitalCode				HospitalCode
 					,cm.HospitalName			Hospital
 					,NULL						ClaimAdmitTypeCode
-					,NULL						ClaimAdmitType
+					,cxa.ClaimAdmitType			ClaimAdmitType
 					,NULL						ChiefComplainCode
 					,c.ChiefComplainName		ChiefComplain
 					,NULL						ICD10Code
@@ -348,6 +348,27 @@ DECLARE
 						ON h.HospitalId = cm.HospitalId
 					LEFT JOIN [ClaimMiscellaneous].[misc].[ChiefComplain] c
 						ON c.ChiefComplainId = cm.ChiefComplainId
+					INNER JOIN #Tmplst lst
+						ON cm.ClaimHeaderGroupCode = lst.Element
+					LEFT JOIN 
+					(
+						SELECT 
+							x.ClaimMiscId,
+							STUFF((
+								SELECT ',' + a.ClaimAdmitTypeName
+								FROM [ClaimMiscellaneous].[misc].[ClaimMiscXClaimAdmitType] x2
+								JOIN [ClaimMiscellaneous].[misc].[ClaimAdmitType] a
+									ON a.ClaimAdmitTypeId = x2.ClaimAdmitTypeId
+								WHERE x2.IsActive = 1
+								  AND a.IsActive  = 1
+								  AND x2.ClaimMiscId = x.ClaimMiscId
+								FOR XML PATH(''), TYPE
+							).value('.', 'nvarchar(255)'), 1, 1, '') AS ClaimAdmitType
+						FROM [ClaimMiscellaneous].[misc].[ClaimMiscXClaimAdmitType] x
+						WHERE x.IsActive = 1
+						GROUP BY x.ClaimMiscId
+					) cxa
+						ON cxa.ClaimMiscId = cm.ClaimMiscId
 				WHERE cm.IsActive = 1
 				AND cm.ClaimMiscStatusId = 3
 				AND pd.CPBId = @ProductGroupId
@@ -374,7 +395,7 @@ DECLARE
 				  ,GroupId
 				)
 				SELECT @ClaimGroupTypeId		ClaimGroupTypeId
-					, 70						BranchId
+					, BranchId					BranchId
 					, 1							gId
 					, SUM(Amount)				sumPremium
 					,1
@@ -954,8 +975,16 @@ DECLARE
 		-----------------------------------
 		BEGIN TRY
 			Begin TRANSACTION
-	
-	
+					
+				--INSERT INTO @TmpOutGroup(ClaimGroupTypeId,BranchId,gId,GroupId,ClaimPayBackCode)	
+				--SELECT 
+				--	ClaimGroupTypeId
+				--	,BranchId
+				--	,ROW_NUMBER() OVER (ORDER BY (SELECT NULL))	gId
+				--	,GroupId
+				--	,ClaimPayBackCode
+				--FROM @TmpGroup		
+				
 				--INSERT INTO dbo.ClaimPayBack
 				--		(ClaimPayBackCode
 				--		,Amount
@@ -972,6 +1001,7 @@ DECLARE
 				--		)
 				--OUTPUT Inserted.ClaimGroupTypeId,Inserted.BranchId,Inserted.ClaimPayBackId,Inserted.GroupId,Inserted.ClaimPayBackCode INTO @TmpOutGroup(ClaimGroupTypeId,BranchId,gId,GroupId,ClaimPayBackCode) --Update Chanadol 20241112
 				SELECT 
+						--gId							ClaimPayBackId,
 						CONCAT(@g_TransactionCodeControlTypeDetail,@g_YY,@g_MM ,dbo.func_ConvertIntToString((@g_RunningFrom + ig.gId - 1),@g_lenght)) ClaimPayBackCode
 						,ig.sumPremium				Amount
 						--,2
@@ -988,7 +1018,18 @@ DECLARE
 				FROM @TmpGroup ig
 				ORDER BY ig.gId;
 			
-			
+				--INSERT INTO @TmpOutD (ClaimHeaderGroupCode,cdId,ClaimPayBackId,InsuranceCompanyId)
+				--SELECT
+				--	ClaimHeaderGroupCode
+				--	,ROW_NUMBER() OVER (ORDER BY (SELECT NULL))	cdId
+				--	,o.gId
+				--	,h.InsId
+				--FROM @TmpH h
+				--	LEFT JOIN @TmpOutGroup o
+				--		ON h.ClaimGroupTypeId = o.ClaimGroupTypeId
+				--		AND h.BranchId = o.BranchId AND o.GroupId = h.GroupId
+				--ORDER BY h.hId;
+
 				--INSERT INTO dbo.ClaimPayBackDetail
 				--		(ClaimPayBackDetailCode
 				--		,ClaimPayBackId
