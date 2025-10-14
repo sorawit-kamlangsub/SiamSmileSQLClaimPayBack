@@ -1,12 +1,10 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]    Script Date: 19/8/2568 10:14:55 ******/
---SET ANSI_NULLS ON
---GO
---SET QUOTED_IDENTIFIER ON
---GO
-
-
+/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]    Script Date: 14/10/2568 14:46:32 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 
 -- =============================================
 -- Author:		06588 Krekpon Dokkamklang Mind
@@ -24,23 +22,44 @@ GO
 -- Description:	Select icu.ClaimCode AS ClaimNo เพิ่ม
 -- Update date: 2025-08-18 17:52 Krekpon Dokkamklang Mind 
 -- Description:	remove where product
+-- Update date: 2025-08-19 16:34 Krekpon Dokkamklang Mind 
+-- Description:	WHERE isAcive
+-- Update date: 2025-08-20 16:10 Krekpon Dokkamklang Mind 
+-- Description:	ปรับการทำงานตอนดึงข้อมูล
 -- =============================================
---ALTER PROCEDURE [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]
+ALTER PROCEDURE [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]
 	-- Add the parameters for the stored procedure here
-	DECLARE
-	 @DateFrom			DATE = '2024-12-01'
-	,@DateTo			DATE = '2025-08-19'
+	 @DateFrom			DATE 
+	,@DateTo			DATE 
 	,@InsuranceId		INT = NULL
 	,@ProductGroupId	INT = NULL
-	,@ClaimGroupTypeId	INT = 6
+	,@ClaimGroupTypeId	INT = NULL
 
---AS
---BEGIN
+AS
+BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
 	-- interfering with SELECT statements.
-	--SET NOCOUNT ON;
-	--ประกาศ Table เก็บข้อมูลจาก ClaimPayBack
+	SET NOCOUNT ON;
+	--ประกาศ Table เก็บข้อมูลจาก ClaimPayBack 2025-08-20 16:10 Krekpon Dokkamklang Mind 
+SELECT 
+    UserId,
+    EmployeeId
+INTO #TmpPersonUser
+FROM [DataCenterV1].[Person].vw_PersonUser;
 
+CREATE INDEX IX_TmpPersonUser_UserId ON #TmpPersonUser(UserId);
+CREATE INDEX IX_TmpPersonUser_EmpId ON #TmpPersonUser(EmployeeId);
+
+--เอาข้อมูล Master Employee ของ DataCenter มาทำ tmp 2025-08-20 16:10 Krekpon Dokkamklang Mind 
+SELECT 
+    EmployeeId,
+    EmployeeCode,
+    PersonName
+INTO #TmpEmployee
+FROM [DataCenterV1].[Master].vw_Employee;
+
+CREATE INDEX IX_TmpEmployee_Id ON #TmpEmployee(EmployeeId);
+CREATE INDEX IX_TmpEmployee_Code ON #TmpEmployee(EmployeeCode);
 
  DECLARE @TmpClaimPayBack TABLE (
 	 ClaimGroupCodeFromCPBD NVARCHAR(150),
@@ -51,7 +70,7 @@ GO
 	 BranchId		 INT,
 	 COL			 NVARCHAR(150),
 	 CreatedDate	 DATETIME,
-	 CreatedByUserId INT,
+	 CreatedByUser NVARCHAR(150),
 	 HospitalCode VARCHAR(20)
      )
  -- เอาข้อมูลลงใน temp แล้วไป JOIN ต่อกับฝั่ง Base อื่น
@@ -64,7 +83,7 @@ GO
 	  BranchId,
 	  COL,
 	  CreatedDate,
-	  CreatedByUserId,
+	  CreatedByUser,
 	  HospitalCode
       )
  SELECT   
@@ -76,7 +95,7 @@ GO
 	 cpb.BranchId AS BranchId,
 	 cpbd.ClaimOnLineCode AS COL,
 	 cpb.CreatedDate AS CreatedDate,
-	 cpb.CreatedByUserId AS CreatedByUserId,
+	 CONCAT(dme.EmployeeCode,' ',dme.PersonName) AS CreatedByUser,
 	 cpbd.HospitalCode	AS HospitalCode
  FROM  ClaimPayBack cpb
 	 LEFT JOIN ClaimPayBackDetail cpbd
@@ -85,6 +104,10 @@ GO
 		ON cpbd.ProductGroupId = dppg.ProductGroup_ID
 	 LEFT JOIN ClaimGroupType cgt
 		ON cpb.ClaimGroupTypeId = cgt.ClaimGroupTypeId
+	 LEFT JOIN #TmpPersonUser dmpu	--2025-08-20 16:10 Krekpon Dokkamklang Mind 
+		ON cpb.CreatedByUserId = dmpu.UserId
+	 INNER JOIN #TmpEmployee dme	--2025-08-20 16:10 Krekpon Dokkamklang Mind 
+		ON dmpu.EmployeeId = dme.EmployeeId
 WHERE   cpb.ClaimGroupTypeId = @ClaimGroupTypeId
 	AND cpb.IsActive = 1 
 	AND cpbd.IsActive = 1
@@ -108,16 +131,16 @@ WHERE   cpb.ClaimGroupTypeId = @ClaimGroupTypeId
 				IIF(@ClaimGroupTypeId IN (2,4,6) ,sssmp.Detail,NULL) AS Province,
 				IIF(@ClaimGroupTypeId IN (2,4,6) ,icu.CustomerName,NULL) AS CustomerName, --Wetpisit.P 2025-05-15 --Krekpon D. 2025-08-18 remove where product
 				--NULL AS CustomerName,
-				IIF(@ClaimGroupTypeId IN (2,4,6),sssmtb.Detail,NULL) As BankName,
-				IIF(@ClaimGroupTypeId IN (2,4,6),sssmtc.BankAccountName,NULL) AS BankAccountName,
-				IIF(@ClaimGroupTypeId IN (2,4,6),REPLACE(sssmtc.BankAccountNo,'-',''),NULL) AS BankAccountNo,
+				IIF(@ClaimGroupTypeId IN (2,4),sssmtb.Detail,NULL) As BankName,
+				IIF(@ClaimGroupTypeId IN (2,4),sssmtc.BankAccountName,NULL) AS BankAccountName,
+				IIF(@ClaimGroupTypeId IN (2,4),REPLACE(sssmtc.BankAccountNo,'-',''),NULL) AS BankAccountNo,
 				NULL AS PhoneNo,
 				TmpCPB.CreatedDate AS CreatedDate,
 				CONCAT(dmeu.EmployeeCode,' ',dmeu.PersonName) AS ApprovedUser ,
-				CONCAT(dme.EmployeeCode,' ',dme.PersonName) AS CteatedUser ,
+				TmpCPB.CreatedByUser AS CteatedUser ,	--2025-08-20 16:10 Krekpon Dokkamklang Mind 
 				icu.ClaimAdmitType AS ClaimAdmitType,
-				IIF(@ClaimGroupTypeId IN (2,4,6) AND @ProductGroupId IN (2,3) ,icu.RecordedDate,NULL) AS RecordedDate --Wetpisit.P 2025-05-15
-				--NULL AS RecordedDate
+				--IIF(@ClaimGroupTypeId IN (2,4,6) AND @ProductGroupId IN (2,3) ,icu.RecordedDate,NULL) AS RecordedDate --Wetpisit.P 2025-05-15
+				NULL AS RecordedDate
 
 FROM @TmpClaimPayBack TmpCPB
 	 LEFT JOIN(
@@ -127,7 +150,7 @@ FROM @TmpClaimPayBack TmpCPB
 									, chg.Hospital_id AS Hospital
 									, chg.CreatedBy_id AS ApprovedUserFromSSS
 									,CONCAT(tt.Detail,ct.FirstName,' ',ct.LastName) AS CustomerName
-									,hct.RecordedDate
+									--,hct.RecordedDate
 									,ch.Code AS ClaimCode
 
 								FROM sss.dbo.DB_ClaimHeaderGroup chg
@@ -136,13 +159,12 @@ FROM @TmpClaimPayBack TmpCPB
 								--Wetpisit.P 2025-05-15
 								LEFT JOIN SSS.dbo.DB_ClaimHeader ch
 									ON ch.ClaimHeaderGroup_id = chg.Code
-								LEFT JOIN ClaimOnLineV2.dbo.HospitalClaimTracking hct
-									ON hct.ClaimCode = ch.Code
+								--LEFT JOIN ClaimOnLineV2.dbo.HospitalClaimTracking hct
+								--	ON hct.ClaimCode = ch.Code
 								LEFT JOIN SSS.dbo.DB_Customer ct
 									ON ct.App_id = ch.App_id
 								LEFT JOIN SSS.dbo.MT_Title tt
 									ON tt.Code = ct.Title_id
-								--WHERE @ProductGroupId <> 3
 								
 								
 								UNION ALL
@@ -153,7 +175,7 @@ FROM @TmpClaimPayBack TmpCPB
 									, pachg.Hospital_id AS Hospital
 									, pachg.CreatedBy_id AS ApprovedUserFromSSS
 									,CONCAT(tt.Detail,cd.FirstName,' ',cd.LastName) AS CustomerName
-									,hct.RecordedDate
+									--,hct.RecordedDate
 									,ch.Code AS ClaimCode
 
 								FROM SSSPA.dbo.DB_ClaimHeaderGroup pachg
@@ -164,21 +186,16 @@ FROM @TmpClaimPayBack TmpCPB
 									ON ch.ClaimheaderGroup_id = pachg.Code
 								LEFT JOIN SSSPA.dbo.DB_CustomerDetail cd
 									ON cd.Code = ch.CustomerDetail_id
-								LEFT JOIN ClaimOnLineV2.dbo.HospitalClaimTracking hct
-									ON hct.ClaimCode = ch.Code
+								--LEFT JOIN ClaimOnLineV2.dbo.HospitalClaimTracking hct
+								--	ON hct.ClaimCode = ch.Code
 								LEFT JOIN SSSPA.dbo.MT_Title tt
 									ON tt.Code = cd.Title_id
-								--WHERE @ProductGroupId = 3 OR @ProductGroupId IS NULL
 								
 				) icu
 		ON TmpCPB.ClaimGroupCodeFromCPBD = icu.Code
 	LEFT JOIN [DataCenterV1].[Address].Branch dab
 		ON TmpCPB.BranchId = dab.Branch_ID
-	LEFT JOIN [DataCenterV1].[Master].vw_PersonUser dmpu
-		ON TmpCPB.CreatedByUserId = dmpu.UserId
-	LEFT JOIN [DataCenterV1].[Master].vw_Employee dme
-		ON dmpu.EmployeeId = dme.EmployeeId
-	LEFT JOIN [DataCenterV1].[Master].vw_Employee dmeu
+	INNER JOIN #TmpEmployee dmeu	--2025-08-20 16:10 Krekpon Dokkamklang Mind 
 		ON icu.ApprovedUserFromSSS  = dmeu.EmployeeCode
 	LEFT JOIN SSS.dbo.MT_Company sssmtc
 		ON icu.Hospital = sssmtc.Code OR TmpCPB.HospitalCode = sssmtc.Code
@@ -189,5 +206,7 @@ FROM @TmpClaimPayBack TmpCPB
 	LEFT JOIN SSS.dbo.SM_Province sssmp
 		ON sssadr.Province_id = sssmp.Code
 
+IF OBJECT_ID('tempdb..#TmpPersonUser') IS NOT NULL DROP TABLE #TmpPersonUser;
+IF OBJECT_ID('tempdb..#TmpEmployee') IS NOT NULL DROP TABLE #TmpEmployee;
 IF OBJECT_ID('tempdb..@TmpClaimPayBack') IS NOT NULL  DELETE FROM @TmpClaimPayBack; -- ปรับ Code การทำงานให้ทำงานได้ไวขึ้น 2024-07-01
---END
+END
