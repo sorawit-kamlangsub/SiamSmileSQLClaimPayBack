@@ -18,8 +18,8 @@ GO
 -- =============================================
 --ALTER PROCEDURE [Claim].[usp_ClaimPayBackDetail_InsertV4]
 DECLARE
-	@ClaimGroupCodeList		NVARCHAR(MAX) = 'MORTORFIRST,MORTORSECOND'
-	  , @ProductGroupId			INT = 4
+	@ClaimGroupCodeList		NVARCHAR(MAX) = 'TSHM1057368100001'
+	  , @ProductGroupId			INT = 6
 	  , @ClaimGroupTypeId		INT = 7
 	  , @CreatedByUserId		INT = 1
 --AS
@@ -117,7 +117,8 @@ DECLARE
 			ProductName
 		)
 		VALUES
-		(12,4,'Motor');
+		(12,4,'Motor')
+		,(5,6,'House');
 
 	SELECT DISTINCT Element
 	INTO #Tmplst
@@ -286,7 +287,7 @@ DECLARE
 					ON g.ClaimHeaderGroupCode = s.ClaimHeaderGroupCode		
 
 			END
-		ELSE IF @ProductGroupId IN (4) AND @ClaimGroupTypeId = 7
+		ELSE IF @ProductGroupId IN (4,6) AND @ClaimGroupTypeId = 7
 			BEGIN
 				 								
 				INSERT INTO @TmpD
@@ -329,7 +330,7 @@ DECLARE
 					,cm.ProductCode
 					,pd.ProductName				[Product]
 					,h.HospitalCode				HospitalCode
-					,cm.HospitalName			Hospital
+					,h.HospitalName				Hospital
 					,NULL						ClaimAdmitTypeCode
 					,cxa.ClaimAdmitType			ClaimAdmitType
 					,NULL						ChiefComplainCode
@@ -344,9 +345,24 @@ DECLARE
 				FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
 					INNER JOIN @ProductClaimMisc pd
 						ON pd.Id = cm.ProductTypeId	
-					LEFT JOIN [ClaimMiscellaneous].[misc].[Hospital] h
+					LEFT JOIN  
+						(
+							SELECT
+								HospitalId
+								,HospitalName
+								,HospitalCode
+							FROM [ClaimMiscellaneous].[misc].[Hospital]
+							WHERE IsActive = 1
+						) h
 						ON h.HospitalId = cm.HospitalId
-					LEFT JOIN [ClaimMiscellaneous].[misc].[ChiefComplain] c
+					LEFT JOIN 
+						(
+							SELECT
+								ChiefComplainId
+								,ChiefComplainName
+							FROM [ClaimMiscellaneous].[misc].[ChiefComplain]
+							WHERE IsActive = 1
+						) c
 						ON c.ChiefComplainId = cm.ChiefComplainId
 					INNER JOIN #Tmplst lst
 						ON cm.ClaimHeaderGroupCode = lst.Element
