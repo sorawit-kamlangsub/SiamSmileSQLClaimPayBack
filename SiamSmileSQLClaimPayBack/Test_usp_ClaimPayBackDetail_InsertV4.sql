@@ -386,6 +386,7 @@ DECLARE
 					) cxa
 						ON cxa.ClaimMiscId = cm.ClaimMiscId
 				WHERE cm.IsActive = 1
+				AND cm.ClaimHeaderGroupCode <> NULL
 				AND cm.ClaimMiscStatusId = 3
 				AND pd.CPBId = @ProductGroupId
 
