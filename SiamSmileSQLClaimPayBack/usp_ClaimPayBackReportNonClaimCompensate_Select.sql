@@ -31,11 +31,11 @@ GO
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]
 	-- Add the parameters for the stored procedure here
-	 @DateFrom			DATE = '2025-10-15'
-	,@DateTo			DATE = '2025-10-16'
+	 @DateFrom			DATE = NULL
+	,@DateTo			DATE = NULL
 	,@InsuranceId		INT = NULL
 	,@ProductGroupId	INT = NULL
-	,@ClaimGroupTypeId	INT = 2
+	,@ClaimGroupTypeId	INT = NULL
 
 AS
 BEGIN
