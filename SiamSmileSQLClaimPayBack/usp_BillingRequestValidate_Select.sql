@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequestValidate_Select]    Script Date: 16/10/2568 9:36:55 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequestValidate_Select]    Script Date: 16/10/2568 11:36:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -13,11 +13,12 @@ GO
 --				Remove condition BillingAmount <> (TransferAmount - NPLAmount)
 -- Update date: 2025-10-16 10:00 Sorawit
 --				Add Union ClaimCompensateGroup
+--				Update Parameter
 -- Description:	store สำหรับ Validate รายการ Generate group Import บ.ส. 
 ---- =============================================
 ALTER PROCEDURE [dbo].[usp_BillingRequestValidate_Select] 
-	 @DateFrom		DATE = NULL,
-	 @DateTo		DATE = NULL
+	 @DateFrom		DATE,
+	 @DateTo		DATE
 AS
 BEGIN
 	
