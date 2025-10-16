@@ -1,4 +1,4 @@
-USE [ClaimPayBack]
+ï»¿USE [ClaimPayBack]
 GO
 /****** Object:  StoredProcedure [dbo].[usp_PersonalInfo_Select]    Script Date: 16/10/2568 13:34:54 ******/
 SET ANSI_NULLS ON
@@ -9,10 +9,10 @@ GO
 -- =============================================
 -- Author:		Mr.Bunchuai chaiket
 -- Create date: 2025-09-17 09:46 
--- Description:	Function ÊÓËÃÑº Get User info ·Ñé§ËÁ´
+-- Description:	Function à¸ªà¸³à¸«à¸£à¸±à¸š Get User info à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸”
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_PersonalInfo_Select]
-			@UserId	INT = NULL
+			@UserId	INT
 AS
 BEGIN
 SET NOCOUNT ON;
@@ -34,9 +34,6 @@ FROM
 	User_ID
 	, Person_ID
 	, Employee_ID
-	, CreateBy_ID
-	, CreateDate
-	, IsActive 
 		FROM DataCenterV1.Person.PersonUser t 
 		WHERE IsActive = 1 
 	) pu
@@ -47,22 +44,13 @@ FROM
 	SELECT 
 		Employee_ID
 		, EmployeeCode
-		, EmployeeTeam_ID
-		, EmployeeStatus_ID
-		, Department_ID 
 	FROM DataCenterV1.Employee.Employee t
 	WHERE IsActive = 1 
-	) e ON pu.Employee_ID = e.Employee_ID
+	) e 
+	ON pu.Employee_ID = e.Employee_ID
   INNER JOIN DataCenterV1.Person.Title pT 
 	ON p.Title_ID = pT.Title_ID
-  LEFT JOIN DataCenterV1.dbo.AspNetUsers 
-	ON pu.User_ID = DataCenterV1.dbo.AspNetUsers.User_ID
-  INNER JOIN DataCenterV1.Employee.EmployeeTeam et 
-	ON e.EmployeeTeam_ID = et.EmployeeTeam_ID
-  LEFT OUTER JOIN DataCenterV1.Address.Branch eb 
-	ON et.Branch_ID = eb.Branch_ID
-  LEFT OUTER JOIN DataCenterV1.Employee.Department d 
-	ON e.Department_ID = d.Department_ID
-  WHERE pu.User_ID = @UserId
+  WHERE pt.IsActive = 1  
+  AND pu.User_ID = @UserId
 
 END;
