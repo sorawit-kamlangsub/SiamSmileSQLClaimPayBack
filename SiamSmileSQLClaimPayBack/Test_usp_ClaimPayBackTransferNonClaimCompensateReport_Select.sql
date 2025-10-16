@@ -24,7 +24,7 @@ GO
 DECLARE
 	-- Add the parameters for the stored procedure here
 	 @DateFrom			DATE = '2025-10-14'
-	,@DateTo			DATE = '2025-10-14'
+	,@DateTo			DATE = '2025-10-15'
 	,@InsuranceId		INT = NULL
 	,@ProductGroupId	INT = NULL
 	,@ClaimGroupTypeId	INT = 7
