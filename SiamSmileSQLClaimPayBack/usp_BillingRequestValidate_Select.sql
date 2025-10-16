@@ -11,6 +11,8 @@ GO
 -- Create date: 2025-10-01 15:16
 -- Update date: 2025-10-16 08:37
 --				Remove condition BillingAmount <> (TransferAmount - NPLAmount)
+-- Update date: 2025-10-16 10:00 Sorawit
+--				Add Union ClaimCompensateGroup
 -- Description:	store สำหรับ Validate รายการ Generate group Import บ.ส. 
 ---- =============================================
 ALTER PROCEDURE [dbo].[usp_BillingRequestValidate_Select] 
@@ -109,6 +111,22 @@ FROM #TmpLoop t
 				ON hPA.ClaimHeaderGroup_id = chgPA.Code
 			LEFT JOIN SSSPA.dbo.DB_ClaimHeader chPA
 				ON hPA.ClaimHeader_id = chPA.Code 
+
+		UNION
+
+		--ClaimCompensate------
+		SELECT 
+			cg.ClaimCompensateGroupCode		Code
+			,cc.CompensateRemain			PaySS_Total
+			,cc.ClaimHeaderCode				ClaimOnLineCode
+		FROM [SSS].[dbo].[ClaimCompensateGroup] cg
+			LEFT JOIN
+				(
+					SELECT * 
+					FROM SSS.dbo.ClaimCompensate
+					WHERE IsActive = 1
+				)cc
+				ON cg.ClaimCompensateGroupId = cc.ClaimCompensateGroupId
 	)pa
 		ON t.ClaimHeaderGroupCode = pa.Code
 	LEFT JOIN [SSSPA].[dbo].[DB_ClaimHeader] hdPA
@@ -163,7 +181,7 @@ FROM #Tmp2
 	
 
 IF OBJECT_ID('tempdb..#TmpLoop') IS NOT NULL  DROP TABLE #TmpLoop;	
-IF OBJECT_ID('tempdb..#Tmp2') IS NOT NULL  DROP TABLE #Tmp2;	
+IF OBJECT_ID('tempdb..#Tmp2') IS NOT NULL  DROP TABLE #Tmp2;		
 
 --DECLARE @ClaimHeaderGroupCode NVARCHAR(50)
 --, @ClaimHeaderGroupTypeId INT
