@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Insert]    Script Date: 10/10/2568 10:19:40 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Insert]    Script Date: 16/10/2568 10:37:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -10,6 +10,7 @@ GO
 -- Author:		Napaporn Saarnwong
 -- Create date: 2022-10-31  09:05
 --	Updated date: 2023-02-08 Add input data (@BillingDateTo)
+--				  2025-10-16 Add Parameter @CreatedDateFrom @CreatedDateTo Sorawit
 -- Description:	
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_BillingRequest_Insert]
