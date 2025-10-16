@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImportIsValidated_Select]    Script Date: 2/10/2568 10:47:51 ******/
+/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImportIsValidated_Select]    Script Date: 16/10/2568 11:11:10 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -11,8 +11,8 @@ GO
 -- Description:	Find Claim Can Import
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimHeaderGroupImportIsValidated_Select]
-	  @DateFrom DATE	=   NULL
-	, @DateTo	DATE    =	NULL
+	  @DateFrom DATE
+	, @DateTo	DATE
 AS
 BEGIN
 
