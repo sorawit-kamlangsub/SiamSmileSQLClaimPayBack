@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Insert_V3]    Script Date: 10/10/2568 10:16:13 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Insert_V3]    Script Date: 16/10/2568 10:21:15 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -14,6 +14,7 @@ GO
 --				 2023-02-08 Add input data and improve script(i.BillingDate <= @BillingDateTo)
 --				 2023-03-18 Add	insert ClaimHeaderGroupTypeId in BillingRequestGroup Sahatsawat golffy 06958
 --				 2023-03-07 Add insert InsuranceCompanyName in BillingRequestGroup Sahatsawat golffy 06958
+--				 2025-10-16	Add Parameter @CreatedDateFrom @CreatedDateTo Sorawit kem 
 -- Description:
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_BillingRequest_Insert_V3]
