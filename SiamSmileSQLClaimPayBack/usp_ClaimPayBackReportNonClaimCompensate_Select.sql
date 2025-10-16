@@ -26,6 +26,8 @@ GO
 -- Description:	WHERE isAcive
 -- Update date: 2025-08-20 16:10 Krekpon Dokkamklang Mind 
 -- Description:	ปรับการทำงานตอนดึงข้อมูล
+-- Update date: 2025-10-16 15:20 Sorawit Kamlangsub
+-- Description:	ปรับเรียกข้อมูล Employee
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]
 	-- Add the parameters for the stored procedure here
