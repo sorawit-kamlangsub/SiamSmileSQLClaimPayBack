@@ -1,4 +1,4 @@
-USE [ClaimPayBack]
+ï»¿USE [ClaimPayBack]
 GO
 /****** Object:  StoredProcedure [dbo].[usp_OrganizeInfo_Select]    Script Date: 16/10/2568 13:19:07 ******/
 SET ANSI_NULLS ON
@@ -9,10 +9,12 @@ GO
 -- =============================================
 -- Author:		Mr.Bunchuai chaiket
 -- Create date: 2025-09-23 08:52 
--- Description:	Function ÊÓËÃÑº Get User info ·Ñé§ËÁ´
+-- Update date: 2025-10-16 13:30 Sorawit Kamlangsub
+--				à¸›à¸£à¸±à¸š Parameter
+-- Description:	Function à¸ªà¸³à¸«à¸£à¸±à¸š Get User info à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸”
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_OrganizeInfo_Select]
-			@Organize_ID	INT = NULL
+			@Organize_ID	INT
 AS
 BEGIN
 SET NOCOUNT ON;
