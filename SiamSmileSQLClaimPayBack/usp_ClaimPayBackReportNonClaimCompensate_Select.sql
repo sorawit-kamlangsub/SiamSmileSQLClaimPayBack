@@ -1,10 +1,10 @@
 ﻿USE [ClaimPayBack]
 GO
 /****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]    Script Date: 16/10/2568 14:43:45 ******/
---SET ANSI_NULLS ON
---GO
---SET QUOTED_IDENTIFIER ON
---GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 
 -- =============================================
 -- Author:		06588 Krekpon Dokkamklang Mind
@@ -27,8 +27,7 @@ GO
 -- Update date: 2025-08-20 16:10 Krekpon Dokkamklang Mind 
 -- Description:	ปรับการทำงานตอนดึงข้อมูล
 -- =============================================
---ALTER PROCEDURE [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]
-DECLARE
+ALTER PROCEDURE [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]
 	-- Add the parameters for the stored procedure here
 	 @DateFrom			DATE = '2025-10-15'
 	,@DateTo			DATE = '2025-10-16'
@@ -36,11 +35,11 @@ DECLARE
 	,@ProductGroupId	INT = NULL
 	,@ClaimGroupTypeId	INT = 2
 
---AS
---BEGIN
---	-- SET NOCOUNT ON added to prevent extra result sets from
---	-- interfering with SELECT statements.
---	SET NOCOUNT ON;
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
 	--ประกาศ Table เก็บข้อมูลจาก ClaimPayBack 2025-08-20 16:10 Krekpon Dokkamklang Mind 
 --SELECT 
 --    UserId,
@@ -166,6 +165,7 @@ WHERE   cpb.ClaimGroupTypeId = @ClaimGroupTypeId
 				IIF(@ClaimGroupTypeId IN (2,4),REPLACE(sssmtc.BankAccountNo,'-',''),NULL) AS BankAccountNo,
 				NULL AS PhoneNo,
 				TmpCPB.CreatedDate AS CreatedDate,
+				--CONCAT(dmeu.EmployeeCode,' ',dmeu.PersonName) AS ApprovedUser ,
 				CONCAT(pu.EmployeeCode,' ',pu.PersonName) AS ApprovedUser ,
 				TmpCPB.CreatedByUser AS CteatedUser ,	--2025-08-20 16:10 Krekpon Dokkamklang Mind 
 				icu.ClaimAdmitType AS ClaimAdmitType,
@@ -268,4 +268,4 @@ FROM @TmpClaimPayBack TmpCPB
 IF OBJECT_ID('tempdb..#TmpPersonUser') IS NOT NULL DROP TABLE #TmpPersonUser;
 IF OBJECT_ID('tempdb..#TmpEmployee') IS NOT NULL DROP TABLE #TmpEmployee;
 IF OBJECT_ID('tempdb..@TmpClaimPayBack') IS NOT NULL  DELETE FROM @TmpClaimPayBack; -- ปรับ Code การทำงานให้ทำงานได้ไวขึ้น 2024-07-01
---END
+END
