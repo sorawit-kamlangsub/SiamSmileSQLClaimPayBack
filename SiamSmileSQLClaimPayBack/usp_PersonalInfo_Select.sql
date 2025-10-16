@@ -18,17 +18,51 @@ BEGIN
 SET NOCOUNT ON;
 
 -- =============================================
---DECLARE @UserId INT = 3287;
+-- DECLARE @UserId INT = 3287;
 -- =============================================
 
-SELECT 
-	UserId
-	,EmployeeCode
-	,PersonName
-	,Title
-	,FirstName
-	,LastName
-FROM DataCenterV1.[Person].vw_PersonUser
-WHERE UserId = @UserId
+SELECT
+  pu.User_ID		UserId
+  ,e.EmployeeCode
+  ,pT.TitleDetail + p.FirstName + ' ' + p.LastName PersonName
+  ,pT.TitleDetail	Title
+  ,p.FirstName
+  ,p.LastName
+FROM
+  ( 
+  SELECT 
+	User_ID
+	, Person_ID
+	, Employee_ID
+	, CreateBy_ID
+	, CreateDate
+	, IsActive 
+		FROM DataCenterV1.Person.PersonUser t 
+		WHERE IsActive = 1 
+	) pu
+  LEFT OUTER JOIN DataCenterV1.Person.Person p 
+	ON pu.Person_ID = p.Person_ID
+  LEFT OUTER JOIN 
+  ( 
+	SELECT 
+		Employee_ID
+		, EmployeeCode
+		, EmployeeTeam_ID
+		, EmployeeStatus_ID
+		, Department_ID 
+	FROM DataCenterV1.Employee.Employee t
+	WHERE IsActive = 1 
+	) e ON pu.Employee_ID = e.Employee_ID
+  INNER JOIN DataCenterV1.Person.Title pT 
+	ON p.Title_ID = pT.Title_ID
+  LEFT JOIN DataCenterV1.dbo.AspNetUsers 
+	ON pu.User_ID = DataCenterV1.dbo.AspNetUsers.User_ID
+  INNER JOIN DataCenterV1.Employee.EmployeeTeam et 
+	ON e.EmployeeTeam_ID = et.EmployeeTeam_ID
+  LEFT OUTER JOIN DataCenterV1.Address.Branch eb 
+	ON et.Branch_ID = eb.Branch_ID
+  LEFT OUTER JOIN DataCenterV1.Employee.Department d 
+	ON e.Department_ID = d.Department_ID
+  WHERE pu.User_ID = @UserId
 
 END;
