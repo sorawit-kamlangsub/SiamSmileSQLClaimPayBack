@@ -55,6 +55,26 @@ BEGIN
 	 CreatedByUser NVARCHAR(150),
 	 HospitalCode VARCHAR(20)
      )
+
+	SELECT 
+		pu.User_ID
+		,e.EmployeeCode
+		,CONCAT(e.EmployeeCode,' ',pT.TitleDetail,p.FirstName,' ',p.LastName) PersonName
+	INTO #TmpPersonUser
+	FROM DataCenterV1.Person.PersonUser pu
+	LEFT JOIN  DataCenterV1.Person.Person p 
+		ON pu.Person_ID = p.Person_ID
+			AND p.IsActive = 1
+	LEFT JOIN DataCenterV1.Employee.Employee e
+		ON pu.Employee_ID = e.Employee_ID
+			AND e.IsActive = 1
+	LEFT JOIN DataCenterV1.Person.Title pT 
+		ON p.Title_ID = pT.Title_ID
+	WHERE pu.IsActive = 1
+
+	CREATE INDEX IX_TmpPersonUser_User_ID ON #TmpPersonUser(User_ID);
+	CREATE INDEX IX_TmpPersonUser_Code ON #TmpPersonUser(EmployeeCode);
+
  -- เอาข้อมูลลงใน temp แล้วไป JOIN ต่อกับฝั่ง Base อื่น
  INSERT INTO @TmpClaimPayBack(
       ClaimGroupCodeFromCPBD,
@@ -77,7 +97,7 @@ BEGIN
 	 cpb.BranchId								AS BranchId,
 	 cpbd.ClaimOnLineCode						AS COL,
 	 cpb.CreatedDate							AS CreatedDate,
-	 CONCAT(e.EmployeeCode,' ',pT.TitleDetail,p.FirstName,' ',p.LastName)	AS CreatedByUser,
+	 pu.PersonName								AS CreatedByUser,
 	 cpbd.HospitalCode							AS HospitalCode
  FROM  ClaimPayBack cpb
 	 LEFT JOIN ClaimPayBackDetail cpbd
@@ -86,15 +106,9 @@ BEGIN
 		ON cpbd.ProductGroupId = dppg.ProductGroup_ID
 	 LEFT JOIN ClaimGroupType cgt
 		ON cpb.ClaimGroupTypeId = cgt.ClaimGroupTypeId
-	LEFT JOIN DataCenterV1.Person.PersonUser pu
+	 INNER JOIN #TmpPersonUser pu
 		ON pu.User_ID = cpb.CreatedByUserId
-	LEFT JOIN  DataCenterV1.Person.Person p 
-		ON pu.Person_ID = p.Person_ID
-	LEFT JOIN DataCenterV1.Employee.Employee e
-		ON pu.Employee_ID = e.Employee_ID
-	LEFT JOIN DataCenterV1.Person.Title pT 
-		ON p.Title_ID = pT.Title_ID
-WHERE   cpb.ClaimGroupTypeId = @ClaimGroupTypeId
+ WHERE   cpb.ClaimGroupTypeId = @ClaimGroupTypeId
 	AND cpb.IsActive = 1 
 	AND cpbd.IsActive = 1
 	AND ((cpb.CreatedDate >= @DateFrom) AND (cpb.CreatedDate < DATEADD(Day,1,@DateTo)))
@@ -120,7 +134,7 @@ WHERE   cpb.ClaimGroupTypeId = @ClaimGroupTypeId
 				IIF(@ClaimGroupTypeId IN (2,4),REPLACE(sssmtc.BankAccountNo,'-',''),NULL) AS BankAccountNo,
 				NULL AS PhoneNo,
 				TmpCPB.CreatedDate AS CreatedDate,
-				CONCAT(e.EmployeeCode,' ',pT.TitleDetail,p.FirstName,' ',p.LastName) AS ApprovedUser ,
+				pu.PersonName AS ApprovedUser ,
 				TmpCPB.CreatedByUser AS CteatedUser ,
 				icu.ClaimAdmitType AS ClaimAdmitType,
 				NULL AS RecordedDate
@@ -170,14 +184,8 @@ FROM @TmpClaimPayBack TmpCPB
 		ON TmpCPB.ClaimGroupCodeFromCPBD = icu.Code
 	LEFT JOIN [DataCenterV1].[Address].Branch dab
 		ON TmpCPB.BranchId = dab.Branch_ID
-	LEFT JOIN DataCenterV1.Person.PersonUser pu
-		ON pu.User_ID = icu.ApprovedUserFromSSS
-	LEFT JOIN  DataCenterV1.Person.Person p 
-		ON pu.Person_ID = p.Person_ID
-	LEFT JOIN DataCenterV1.Employee.Employee e
-		ON pu.Employee_ID = e.Employee_ID
-	LEFT JOIN DataCenterV1.Person.Title pT 
-		ON p.Title_ID = pT.Title_ID
+	INNER JOIN #TmpPersonUser pu
+		ON icu.ApprovedUserFromSSS = pu.EmployeeCode
 	LEFT JOIN SSS.dbo.MT_Company sssmtc
 		ON icu.Hospital = sssmtc.Code OR TmpCPB.HospitalCode = sssmtc.Code
 	LEFT JOIN SSS.dbo.MT_Bank sssmtb
