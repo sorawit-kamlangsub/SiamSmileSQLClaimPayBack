@@ -196,6 +196,5 @@ FROM @TmpClaimPayBack TmpCPB
 		ON sssadr.Province_id = sssmp.Code
 
 IF OBJECT_ID('tempdb..#TmpPersonUser') IS NOT NULL DROP TABLE #TmpPersonUser;
-IF OBJECT_ID('tempdb..#TmpEmployee') IS NOT NULL DROP TABLE #TmpEmployee;
 IF OBJECT_ID('tempdb..@TmpClaimPayBack') IS NOT NULL  DELETE FROM @TmpClaimPayBack; 
 END
