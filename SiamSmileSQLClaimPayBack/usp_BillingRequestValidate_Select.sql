@@ -185,13 +185,14 @@ FROM #Tmp2
 IF OBJECT_ID('tempdb..#TmpLoop') IS NOT NULL  DROP TABLE #TmpLoop;	
 IF OBJECT_ID('tempdb..#Tmp2') IS NOT NULL  DROP TABLE #Tmp2;		
 
---DECLARE @ClaimHeaderGroupCode NVARCHAR(50)
---, @ClaimHeaderGroupTypeId INT
---, @Amount DECIMAL(16,2)
---, @BillingAmount DECIMAL(16,2)
---, @TransferAmount DECIMAL(16,2)
---, @NPLAmount DECIMAL(16,2)
---, @IsValidate NVARCHAR(50) ;
+--DECLARE @ClaimHeaderGroupCode	NVARCHAR(50)
+--, @ClaimHeaderGroupTypeId		INT
+--, @Amount						DECIMAL(16,2)
+--, @BillingAmount				DECIMAL(16,2)
+--, @TransferAmount				DECIMAL(16,2)
+--, @NPLAmount					DECIMAL(16,2)
+--, @ClaimOnLineCode				NVARCHAR(50) 
+--, @IsValidate					NVARCHAR(50) ;
 
 --SELECT 
 --	@ClaimHeaderGroupCode		ClaimHeaderGroupCode
@@ -200,6 +201,7 @@ IF OBJECT_ID('tempdb..#Tmp2') IS NOT NULL  DROP TABLE #Tmp2;
 --	, @BillingAmount			BillingAmount
 --	, @TransferAmount			TransferAmount
 --	, @NPLAmount				NPLAmount
+--	, @ClaimOnLineCode			ClaimOnLineCode
 --	, @IsValidate				IsValidate
 
 END;
