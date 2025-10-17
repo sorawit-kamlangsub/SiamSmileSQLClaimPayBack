@@ -28,9 +28,9 @@ DECLARE @MessageValidate1 NVARCHAR(100) = N'ยอด บ.ส. ไม่เท�
 DECLARE @MessageValidate2 NVARCHAR(100) = N'ยอด บ.ส. และยอดวางบิลเป็น 0'; 
 DECLARE @MessageValidate3 NVARCHAR(100) = N'ยอดโอนเงิน ไม่เท่ากับ (ยอด บ.ส. + ยอด NPL)'; 
 DECLARE @MessageValidate4 NVARCHAR(100) = N'ยอดวางบิลเป็น ไม่เท่ากับ (ยอดโอนเงิน - ยอด NPL)';  
--- ================================
+---- ================================
 --DECLARE @DateFrom	DATE = '2025-10-15';
---DECLARE @DateTo		DATE = '2025-10-15';
+--DECLARE @DateTo		DATE = '2025-10-17';
 
 IF @DateTo IS NOT NULL SET @DateTo = DATEADD(DAY,1,@DateTo);
 
@@ -82,7 +82,7 @@ GROUP BY	g.InsuranceCompanyId
 SELECT 
 	t.ClaimHeaderGroupCode 
 	,t.ClaimHeaderGroupTypeId					
-	,pa.PaySS_Total  				Amount 
+	,ISNULL(pa.PaySS_Total, 0)	 	Amount 
 	,ISNULL(t.BillingAmount, 0)		BillingAmount
 	,ISNULL(colPH.TotalAmount, 0)	TransferAmount
 	,ISNULL(nplds.NPLAmount, 0)		NPLAmount 
