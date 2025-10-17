@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequestValidate_Select]    Script Date: 16/10/2568 11:36:36 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequestValidate_Select]    Script Date: 17/10/2568 9:35:30 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -86,6 +86,7 @@ SELECT
 	,ISNULL(t.BillingAmount, 0)		BillingAmount
 	,ISNULL(colPH.TotalAmount, 0)	TransferAmount
 	,ISNULL(nplds.NPLAmount, 0)		NPLAmount 
+	,pa.ClaimOnLineCode
 INTO #Tmp2
 FROM #TmpLoop t 
 	LEFT JOIN (
@@ -93,7 +94,7 @@ FROM #TmpLoop t
 		SELECT
 			cgi.ClaimHeaderGroup_id			Code
 			,cv.PaySS_Total					PaySS_Total
-			,ch.ClaimOnLineCode				ClaimOnLineCode 
+			,ch.Code						ClaimOnLineCode 
 		FROM  SSS.dbo.DB_ClaimHeaderGroupItem cgi  
 			LEFT JOIN sss.dbo.DB_ClaimHeader ch
 				ON cgi.ClaimHeader_id = ch.Code
@@ -106,7 +107,7 @@ FROM #TmpLoop t
 		SELECT	
 			chgPA.Code						Code
 			,chPA.PaySS_Total				PaySS_Total
-			,chPA.ClaimOnLineCode			ClaimOnLineCode
+			,chPA.Code						ClaimOnLineCode
 		FROM [SSSPA].[dbo].[DB_ClaimHeaderGroupItem] hPA
 			LEFT JOIN SSSPA.dbo.DB_ClaimHeaderGroup chgPA
 				ON hPA.ClaimHeaderGroup_id = chgPA.Code
