@@ -46,7 +46,7 @@ BEGIN
 		InsId INT,
 		ClaimCode VARCHAR(20),
 		Amount DECIMAL(16, 2),
-		ProductCode VARCHAR(20),
+		ProductCode VARCHAR(255),
 		[Product] NVARCHAR(255),
 		HospitalCode VARCHAR(20),
 		Hospital NVARCHAR(255),
@@ -350,8 +350,8 @@ BEGIN
 					LEFT JOIN 
 					(
 						SELECT 
-							x.ClaimMiscId,
-							STUFF((
+							x.ClaimMiscId
+							,STUFF((
 								SELECT ',' + a.ClaimAdmitTypeName
 								FROM [ClaimMiscellaneous].[misc].[ClaimMiscXClaimAdmitType] x2
 								JOIN [ClaimMiscellaneous].[misc].[ClaimAdmitType] a
@@ -360,7 +360,7 @@ BEGIN
 								  AND a.IsActive  = 1
 								  AND x2.ClaimMiscId = x.ClaimMiscId
 								FOR XML PATH(''), TYPE
-							).value('.', 'nvarchar(255)'), 1, 1, '') AS ClaimAdmitType
+							).value('.', 'nvarchar(255)'), 1, 1, '')	ClaimAdmitType
 						FROM [ClaimMiscellaneous].[misc].[ClaimMiscXClaimAdmitType] x
 						WHERE x.IsActive = 1
 						GROUP BY x.ClaimMiscId
