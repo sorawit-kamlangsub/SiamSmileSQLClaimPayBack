@@ -1,17 +1,17 @@
-USE [ClaimPayBack]
+ÔªøUSE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [Claim].[usp_ClaimHeaderGroupDetail_SelectV5]    Script Date: 17/10/2568 14:30:30 ******/
+/****** Object:  StoredProcedure [Claim].[usp_ClaimHeaderGroupDetail_SelectV5]    Script Date: 21/10/2568 11:09:24 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
 
----- =============================================
----- Author:		Sorawit KamlangSub
----- Create date: 2025-10-17 14:30
----- Description:	
----- =============================================
+-- =============================================
+-- Author:		Sorawit KamlangSub
+-- Create date: 2025-10-17 14:30
+-- Description:	
+-- =============================================
 ALTER PROCEDURE [Claim].[usp_ClaimHeaderGroupDetail_SelectV5]
 	 @ProductGroupId		INT 			= NULL
 	,@InsuranceId			INT				= NULL	
@@ -28,8 +28,20 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
-DECLARE @pInsCode				VARCHAR(20)		= NULL	/*∂È“ Ëß @InsuranceId ®– set*/
-DECLARE @pBranchCode			VARCHAR(20)		= NULL	/*∂È“ Ëß @BranchId ®– set*/
+--DECLARE @ProductGroupId		INT 				= 4;
+--DECLARE @InsuranceId			INT				= NULL;
+--DECLARE @ClaimGroupTypeId		INT				= 7;
+--DECLARE @BranchId				INT				= NULL;
+--DECLARE @CreateByUser_Code		VARCHAR(20)		= NULL;
+--DECLARE @IndexStart			INT					= NULL;
+--DECLARE @PageSize				INT				= NULL;
+--DECLARE @SortField				NVARCHAR(MAX)	= NULL;
+--DECLARE @OrderType				NVARCHAR(MAX)	= NULL;
+--DECLARE @SearchDetail			NVARCHAR(MAX)	= NULL;
+--DECLARE @IsShowDocumentLink	BIT				= NULL
+
+DECLARE @pInsCode				VARCHAR(20)		= NULL	/*‡∏ñ‡πâ‡∏≤‡∏™‡πà‡∏á @InsuranceId ‡∏à‡∏∞ set*/
+DECLARE @pBranchCode			VARCHAR(20)		= NULL	/*‡∏ñ‡πâ‡∏≤‡∏™‡πà‡∏á @BranchId ‡∏à‡∏∞ set*/
 DECLARE @pProductGroupId		INT				= @ProductGroupId
 DECLARE @pClaimGroupTypeId		INT				= @ClaimGroupTypeId
 DECLARE @pIsValidDoc			BIT				= @IsShowDocumentLink
@@ -71,11 +83,11 @@ DECLARE @DisabilityCutoffDate DATE = '2025-08-18';
 
 /*
 ClaimGroupTypeId	ClaimGroupType
-2	‡§≈¡ÕÕπ‰≈πÏ
-3	‡§≈¡ “¢“
-4	‡§≈¡‚√ßæ¬“∫“≈
-5	‡§≈¡‚Õπ·¬°
-6	‡§≈¡‡ ’¬™’«‘µ ∑ÿææ≈¿“æ
+2	‡πÄ‡∏Ñ‡∏•‡∏°‡∏≠‡∏≠‡∏ô‡πÑ‡∏•‡∏ô‡πå
+3	‡πÄ‡∏Ñ‡∏•‡∏°‡∏™‡∏≤‡∏Ç‡∏≤
+4	‡πÄ‡∏Ñ‡∏•‡∏°‡πÇ‡∏£‡∏á‡∏û‡∏¢‡∏≤‡∏ö‡∏≤‡∏•
+5	‡πÄ‡∏Ñ‡∏•‡∏°‡πÇ‡∏≠‡∏ô‡πÅ‡∏¢‡∏Å
+6	‡πÄ‡∏Ñ‡∏•‡∏°‡πÄ‡∏™‡∏µ‡∏¢‡∏ä‡∏µ‡∏ß‡∏¥‡∏ï ‡∏ó‡∏∏‡∏û‡∏û‡∏•‡∏†‡∏≤‡∏û
 */
 
 SELECT Code
@@ -134,22 +146,6 @@ CREATE TABLE #TmpDoc
 	ClaimHeaderGroupCode VARCHAR(20) 
 	,ClaimHeaderCode VARCHAR(20)
 );
-
-DECLARE @ProductClaimMisc TABLE
-(
-	Id		INT,
-	CPBId	INT,
-	ProductName	VARCHAR(20)
-);
-
-INSERT @ProductClaimMisc
-(
-	Id,
-	CPBId,
-	ProductName
-)
-VALUES
-(12,4,'Motor');
  
 IF @pProductGroupId = 2 AND @pClaimGroupTypeId = 5
 	BEGIN
@@ -243,6 +239,22 @@ ELSE IF @pProductGroupId = 2 AND @pClaimGroupTypeId IN (2,3,4,6)
 				ON i.ClaimHeader_id = cl.Code
 			LEFT JOIN sss.dbo.DB_ClaimVoucher v			WITH (NOLOCK)
 				ON i.ClaimHeader_id = v.Code
+			--LEFT JOIN
+			--	(
+			--		SELECT 
+			--			co.ClaimOnLineId
+			--			,co.ClaimOnLineCode
+			--			,cg.PaymentStatusId 
+			--			,SUM(cg.TotalAmount) TotalAmount
+			--		FROM ClaimOnlineV2.dbo.ClaimOnline co
+			--			LEFT JOIN ClaimOnlineV2.dbo.ClaimPayGroup cg
+			--				ON cg.ClaimOnLineId = co.ClaimOnLineId
+			--		WHERE co.IsActive = 1
+			--			AND cg.IsActive = 1 
+			--			AND cg.PaymentStatusId = 4
+			--		GROUP BY co.ClaimOnLineId, co.ClaimOnLineCode, cg.PaymentStatusId
+			--	) colPH
+			--	ON colPH.ClaimOnLineCode = cl.ClaimOnLineCode 
 		WHERE (g.InsuranceCompany_id = @pInsCode OR @pInsCode IS NULL)
 			AND (g.Branch_id = @pBranchCode OR @pBranchCode IS NULL)
 			AND (
@@ -349,6 +361,22 @@ ELSE IF @pProductGroupId = 3 AND @pClaimGroupTypeId IN (2,3,4,6)
 				ON i.ClaimHeaderGroup_id = g.Code
 			LEFT JOIN SSSPA.dbo.DB_ClaimHeader c
 				ON i.ClaimHeader_id = c.Code
+			--LEFT JOIN
+			--	(
+			--		SELECT 
+			--			co.ClaimOnLineId
+			--			,co.ClaimOnLineCode
+			--			,cg.PaymentStatusId 
+			--			,SUM(cg.TotalAmount)	TotalAmount
+			--		FROM ClaimOnlineV2.dbo.ClaimOnline co
+			--			LEFT JOIN ClaimOnlineV2.dbo.ClaimPayGroup cg
+			--				ON cg.ClaimOnLineId = co.ClaimOnLineId
+			--		WHERE co.IsActive = 1 
+			--			AND cg.IsActive = 1 
+			--			AND cg.PaymentStatusId = 4
+			--		GROUP BY co.ClaimOnLineId, co.ClaimOnLineCode, cg.PaymentStatusId
+			--	) colPA
+			--	ON colPA.ClaimOnLineCode = c.ClaimOnLineCode  
 		WHERE (g.InsuranceCompany_id = @pInsCode OR @pInsCode IS NULL)
 			AND (g.Branch_id = @pBranchCode OR @pBranchCode IS NULL)
 			AND (g.CreatedBy_id = @pCreatedByCode OR @pCreatedByCode IS NULL)
@@ -410,24 +438,42 @@ ELSE IF @pProductGroupId IN (4) AND @pClaimGroupTypeId = 7
 				,amount
 				,ClaimGroupTypeId
 				,TransferAmount)		
-		SELECT cm.ClaimHeaderGroupCode	ClaimHeaderGroupCode
-		,NULL							ClaimHeaderCode
-		,cm.BranchId					BranchCode
-		,cm.CreatedByUserId				CreatedByCode
-		,cm.CreatedDate					CreatedDate
-		,cm.InsuranceCompanyCode		InsuranceCompanyCode
-		,cm.InsuranceCompanyName		InsuranceCompanyName 
-		,pd.CPBId						ProductGroupId
-		,'0'							xRevise
-		,cm.ClaimAmount					amount 
-		,@pClaimGroupTypeId				ClaimGroupTypeId
-		,NULL							TransferAmount
+		SELECT 
+				cm.ClaimHeaderGroupCode				ClaimHeaderGroupCode
+				,1									ClaimHeaderCode
+				,cm.BranchId						BranchCode
+				,ISNULL(ud.EmployeeCode, '00000')	CreatedByCode
+				,cm.CreatedDate						CreatedDate
+				,cm.InsuranceCompanyCode			InsuranceCompanyCode
+				,cm.InsuranceCompanyName			InsuranceCompanyName 
+				,pd.ProductGroup_ID					ProductGroupId
+				,'0'								xRevise
+				,cm.ClaimAmount						amount 
+				,@pClaimGroupTypeId					ClaimGroupTypeId
+				,NULL								TransferAmount
 		FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
-			INNER JOIN @ProductClaimMisc pd
-				ON cm.ProductTypeId = pd.Id				
+			INNER JOIN [ClaimPayBack].[dbo].[ClaimPayBackProductGroup] pd
+				ON cm.ProductTypeId = pd.MappingXCliamMisc
+			INNER JOIN [ClaimMiscellaneous].[misc].[ClaimMiscPaymentHeader] cmh
+				ON cm.ClaimMiscId = cmh.ClaimMiscId
+			INNER JOIN [ClaimMiscellaneous].[misc].[ClaimMiscPayment] cmp
+				ON cmh.ClaimMiscPaymentHeaderId = cmp.ClaimMiscPaymentHeaderId
+			LEFT JOIN (
+					SELECT 
+						vpu.UserId
+						,ve.EmployeeCode
+					FROM [DataCenterV1].[Master].vw_PersonUser vpu
+						INNER JOIN [DataCenterV1].[Master].vw_Employee ve
+							ON vpu.EmployeeId = ve.EmployeeId 
+			)ud
+				ON ud.UserId = cm.CreatedByUserId
 		WHERE cm.IsActive = 1
-		AND cm.ClaimMiscStatusId = 3
-		AND pd.CPBId = @pProductGroupId
+			AND cmh.IsActive = 1
+			AND cm.ClaimMiscStatusId = 3
+			AND cmp.IsActive = 1
+			AND cmp.PaymentStatusId = 4
+			AND cm.ClaimHeaderGroupCode IS NOT NULL
+			AND pd.ProductGroup_ID = @pProductGroupId
 	END
 
 SELECT * 
@@ -469,8 +515,8 @@ SELECT g.ClaimHeaderGroupCode									ClaimHeaderGroup_id
 		,oIns.OrganizeId										InsuranceCompanyId
 		,d.InsuranceCompanyName									InsuranceCompany	 
 		,COUNT(g.ClaimHeaderGroupCode) OVER ()					TotalCount
-		,IIF(g.ItemCount = doc.docCount ,1,0)					DocumentCount	 
-		--,1													DocumentCount
+		--,IIF(g.ItemCount = doc.docCount ,1,0)					DocumentCount	 
+		,1													DocumentCount
 		,g.TransferAmount										TransferAmount
 FROM
 (
@@ -547,19 +593,19 @@ IF OBJECT_ID('tempdb..#TmpCAT') IS NOT NULL  DROP TABLE #TmpCAT;
 IF OBJECT_ID('tempdb..#TmpIns') IS NOT NULL  DROP TABLE #TmpIns;		
 
 --DECLARE @DefaultDate AS DATETIME = '2021-10-08 08:22'
---DECLARE @amount		AS DECIMAL
+--	DECLARE @amount		AS DECIMAL
 -- SELECT 
---				 N''						ClaimHeaderGroup_id
+--				 N''							ClaimHeaderGroup_id
 --				,''							Branch
 --				,''							ProductGroup	
---				,''							CreatedByName
---				,@DefaultDate				CreatedDate
---	            ,''							ClaimGroupType
+--				,''							 CreatedByName
+--				,@DefaultDate					CreatedDate
+--	            ,''								ClaimGroupType
 --				,1							ItemCount
 --				,@amount					Amount
 --				,1							InsuranceCompanyId
---				,''							InsuranceCompany
+--				,''								InsuranceCompany
 --				,1							DocumentCount
 --				,1							TotalCount
 
-END
+END;
