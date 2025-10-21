@@ -115,18 +115,34 @@ DECLARE @tmpCliamMisc TABLE
 				,ICD10_Detail					
 			)
 			SELECT
-				cm.ClaimMiscNo							ClaimCode
-				,CONCAT(@ClaimMiscURL,cm.ClaimMiscId)	URLLink
-				,CAST(cm.ProductTypeId AS VARCHAR(20))	Product_Id
-				,pt.ProductTypeName						[Product]
-				,CAST(cm.HospitalId AS VARCHAR(20))		Hospital_Id
-				,cm.HospitalName						Hospital
-				,CAST(cat.ClaimAdmitTypeId AS VARCHAR(20))	ClaimAdmitType_Id
-				,cat.ClaimAdmitTypeName					ClaimAdmitType
-				,CAST(cm.ChiefComplainId AS VARCHAR(20))	ChiefComplain_id
-				,chf.ChiefComplainName					ChiefComplain
-				,NULL									ICD10
-				,NULL									ICD10_Detail			
+				cm.ClaimMiscNo														ClaimCode
+				,CONCAT(@ClaimMiscURL,cm.ClaimMiscId)								URLLink
+				,CAST(cm.ProductTypeId AS VARCHAR(20))								Product_Id
+				,pt.ProductTypeName													[Product]
+				,CAST(cm.HospitalId AS VARCHAR(20))									Hospital_Id
+				,cm.HospitalName													Hospital
+				,NULL																ClaimAdmitType_Id
+				,STUFF((
+					SELECT DISTINCT
+						   ',' + cat.ClaimAdmitTypeName
+					FROM [ClaimMiscellaneous].[misc].[ClaimMiscXClaimAdmitType] cxt
+					LEFT JOIN 
+					(
+						SELECT 
+							ClaimAdmitTypeId
+							,ClaimAdmitTypeName
+						FROM [ClaimMiscellaneous].[misc].[ClaimAdmitType] 
+						WHERE IsActive = 1
+					) cat
+					  ON cat.ClaimAdmitTypeId = cxt.ClaimAdmitTypeId
+					WHERE cxt.IsActive = 1
+					  AND cxt.ClaimMiscId = cm.ClaimMiscId
+					FOR XML PATH(''), TYPE
+				).value('.','nvarchar(max)'), 1, 1, '')									ClaimAdmitType 
+				,CAST(cm.ChiefComplainId AS VARCHAR(20))								ChiefComplain_id
+				,chf.ChiefComplainName													ChiefComplain
+				,NULL																	ICD10
+				,NULL																	ICD10_Detail			
 			FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
 				LEFT JOIN 
 				(
@@ -137,24 +153,6 @@ DECLARE @tmpCliamMisc TABLE
 					WHERE IsActive = 1
 				) pt
 				ON pt.ProductTypeId = cm.ProductTypeId
-				LEFT JOIN 
-				(
-					SELECT
-						ClaimAdmitTypeId
-						,ClaimMiscId
-					FROM [ClaimMiscellaneous].[misc].[ClaimMiscXClaimAdmitType]
-					WHERE IsActive = 1
-				) cxt
-				ON cxt.ClaimMiscId = cm.ClaimMiscId
-				LEFT JOIN 
-				(
-					SELECT
-						ClaimAdmitTypeId
-						,ClaimAdmitTypeName
-					FROM [ClaimMiscellaneous].[misc].[ClaimAdmitType]
-					WHERE IsActive = 1
-				) cat
-				ON cat.ClaimAdmitTypeId = cxt.ClaimAdmitTypeId
 				LEFT JOIN
 				(
 					SELECT
