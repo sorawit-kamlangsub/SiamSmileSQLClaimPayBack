@@ -97,23 +97,6 @@ BEGIN
 		);
 ---------------------------------------------------------------------------------
 
-		DECLARE @ProductClaimMisc TABLE
-		(
-			Id		INT,
-			CPBId	INT,
-			ProductName	VARCHAR(20)
-		);
-
-		INSERT @ProductClaimMisc
-		(
-			Id,
-			CPBId,
-			ProductName
-		)
-		VALUES
-		(12,4,'Motor')
-		,(5,6,'House');
-
 	SELECT DISTINCT Element
 	INTO #Tmplst
 	from dbo.func_SplitStringToTable(@ClaimGroupCodeList,',');
@@ -313,7 +296,7 @@ BEGIN
 				)
 				SELECT
 					cm.ClaimHeaderGroupCode
-					,pd.CPBId					ProductGroupId
+					,pd.ProductGroup_ID			ProductGroupId
 					,NULL						BranchCode
 					,cm.BranchId
 					,@ClaimGroupTypeId			ClaimGroupTypeId
@@ -322,7 +305,7 @@ BEGIN
 					,cm.ClaimMiscCode			ClaimCode
 					,cm.ClaimAmount				Amount
 					,cm.ProductCode
-					,pd.ProductName				[Product]
+					,pd.ProductGroupDetail		[Product]
 					,h.HospitalCode				HospitalCode
 					,h.HospitalName				Hospital
 					,NULL						ClaimAdmitTypeCode
@@ -337,8 +320,12 @@ BEGIN
 					,NULL						SchoolName
 					,1							GroupId
 				FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
-					INNER JOIN @ProductClaimMisc pd
-						ON pd.Id = cm.ProductTypeId	
+					INNER JOIN [ClaimPayBack].[dbo].[ClaimPayBackProductGroup] pd
+						ON cm.ProductTypeId = pd.MappingXCliamMisc
+					INNER JOIN [ClaimMiscellaneous].[misc].[ClaimMiscPaymentHeader] cmh
+						ON cm.ClaimMiscId = cmh.ClaimMiscId
+					INNER JOIN [ClaimMiscellaneous].[misc].[ClaimMiscPayment] cmp
+						ON cmh.ClaimMiscPaymentHeaderId = cmp.ClaimMiscPaymentHeaderId
 					LEFT JOIN  
 						(
 							SELECT
@@ -380,9 +367,12 @@ BEGIN
 					) cxa
 						ON cxa.ClaimMiscId = cm.ClaimMiscId
 				WHERE cm.IsActive = 1
-				AND cm.ClaimHeaderGroupCode <> NULL
-				AND cm.ClaimMiscStatusId = 3
-				AND pd.CPBId = @ProductGroupId
+					AND cmh.IsActive = 1
+					AND cm.ClaimMiscStatusId = 3
+					AND cmp.IsActive = 1
+					AND cmp.PaymentStatusId = 4
+					AND cm.ClaimHeaderGroupCode IS NOT NULL
+					AND pd.ProductGroup_ID = @ProductGroupId
 
 				SELECT x.ClaimHeaderGroupCode
 					  ,x.ProductGroupId
@@ -987,30 +977,30 @@ BEGIN
 		BEGIN TRY
 			Begin TRANSACTION
 					
-				--INSERT INTO @TmpOutGroup(ClaimGroupTypeId,BranchId,gId,GroupId,ClaimPayBackCode)	
-				--SELECT 
-				--	ClaimGroupTypeId
-				--	,BranchId
-				--	,ROW_NUMBER() OVER (ORDER BY (SELECT NULL))	gId
-				--	,GroupId
-				--	,ClaimPayBackCode
-				--FROM @TmpGroup		
+				INSERT INTO @TmpOutGroup(ClaimGroupTypeId,BranchId,gId,GroupId,ClaimPayBackCode)	
+				SELECT 
+					ClaimGroupTypeId
+					,BranchId
+					,ROW_NUMBER() OVER (ORDER BY (SELECT NULL))	gId
+					,GroupId
+					,ClaimPayBackCode
+				FROM @TmpGroup		
 				
-				--INSERT INTO dbo.ClaimPayBack
-				--		(ClaimPayBackCode
-				--		,Amount
-				--		,ClaimPayBackStatusId
-				--		,ClaimGroupTypeId
-				--		,BranchId
-				--		,ClaimPayBackTransferId
-				--		,IsActive
-				--		,CreatedByUserId
-				--		,CreatedDate
-				--		,UpdatedByUserId
-				--		,UpdatedDate
-				--		,GroupId
-				--		)
-				--OUTPUT Inserted.ClaimGroupTypeId,Inserted.BranchId,Inserted.ClaimPayBackId,Inserted.GroupId,Inserted.ClaimPayBackCode INTO @TmpOutGroup(ClaimGroupTypeId,BranchId,gId,GroupId,ClaimPayBackCode) --Update Chanadol 20241112
+				INSERT INTO dbo.ClaimPayBack
+						(ClaimPayBackCode
+						,Amount
+						,ClaimPayBackStatusId
+						,ClaimGroupTypeId
+						,BranchId
+						,ClaimPayBackTransferId
+						,IsActive
+						,CreatedByUserId
+						,CreatedDate
+						,UpdatedByUserId
+						,UpdatedDate
+						,GroupId
+						)
+				OUTPUT Inserted.ClaimGroupTypeId,Inserted.BranchId,Inserted.ClaimPayBackId,Inserted.GroupId,Inserted.ClaimPayBackCode INTO @TmpOutGroup(ClaimGroupTypeId,BranchId,gId,GroupId,ClaimPayBackCode) --Update Chanadol 20241112
 				SELECT 
 						--gId							ClaimPayBackId,
 						CONCAT(@g_TransactionCodeControlTypeDetail,@g_YY,@g_MM ,dbo.func_ConvertIntToString((@g_RunningFrom + ig.gId - 1),@g_lenght)) ClaimPayBackCode
@@ -1027,38 +1017,26 @@ BEGIN
 						,@D							UpdatedDate
 						,ig.GroupId					GroupId
 				FROM @TmpGroup ig
-				ORDER BY ig.gId;
-			
-				--INSERT INTO @TmpOutD (ClaimHeaderGroupCode,cdId,ClaimPayBackId,InsuranceCompanyId)
-				--SELECT
-				--	ClaimHeaderGroupCode
-				--	,ROW_NUMBER() OVER (ORDER BY (SELECT NULL))	cdId
-				--	,o.gId
-				--	,h.InsId
-				--FROM @TmpH h
-				--	LEFT JOIN @TmpOutGroup o
-				--		ON h.ClaimGroupTypeId = o.ClaimGroupTypeId
-				--		AND h.BranchId = o.BranchId AND o.GroupId = h.GroupId
-				--ORDER BY h.hId;
+				ORDER BY ig.gId;		
 
-				--INSERT INTO dbo.ClaimPayBackDetail
-				--		(ClaimPayBackDetailCode
-				--		,ClaimPayBackId
-				--		,ClaimGroupCode
-				--		,ItemCount
-				--		,Amount
-				--		,ProductGroupId
-				--		,InsuranceCompanyId
-				--		,CancelRemark
-				--		,IsActive
-				--		,CreatedByUserId
-				--		,CreatedDate
-				--		,UpdatedByUserId
-				--		,UpdatedDate
-				--		,ClaimOnLineCode
-				--		,HospitalCode
-				--		)
-				--OUTPUT Inserted.ClaimGroupCode,Inserted.ClaimPayBackDetailId,Inserted.ClaimPayBackId,Inserted.InsuranceCompanyId INTO @TmpOutD (ClaimHeaderGroupCode,cdId,ClaimPayBackId,InsuranceCompanyId)
+				INSERT INTO dbo.ClaimPayBackDetail
+						(ClaimPayBackDetailCode
+						,ClaimPayBackId
+						,ClaimGroupCode
+						,ItemCount
+						,Amount
+						,ProductGroupId
+						,InsuranceCompanyId
+						,CancelRemark
+						,IsActive
+						,CreatedByUserId
+						,CreatedDate
+						,UpdatedByUserId
+						,UpdatedDate
+						,ClaimOnLineCode
+						,HospitalCode
+						)
+				OUTPUT Inserted.ClaimGroupCode,Inserted.ClaimPayBackDetailId,Inserted.ClaimPayBackId,Inserted.InsuranceCompanyId INTO @TmpOutD (ClaimHeaderGroupCode,cdId,ClaimPayBackId,InsuranceCompanyId)
 				SELECT	
 						CONCAT(@h_TransactionCodeControlTypeDetail,@h_YY,@h_MM ,dbo.func_ConvertIntToString((@h_RunningFrom + h.hId - 1),@h_lenght)) ClaimPayBackDetailCode
 						,o.gId					ClaimPayBackId
@@ -1082,30 +1060,30 @@ BEGIN
 				ORDER BY h.hId;
 			
 			
-				--INSERT INTO dbo.ClaimPayBackXClaim
-				--		(ClaimPayBackDetailId
-				--		,ClaimCode
-				--		,ProductCode
-				--		,ProductName
-				--		,HospitalCode
-				--		,HospitalName
-				--		,ClaimAdmitTypeCode
-				--		,ClaimAdmitType
-				--		,ChiefComplainCode
-				--		,ChiefComplain
-				--		,ICD10Code
-				--		,ICD10
-				--		,ClaimPay
-				--		,ClaimTransfer
-				--		,IsActive
-				--		,CreatedByUserId
-				--		,CreatedDate
-				--		,UpdatedByUserId
-				--		,UpdatedDate
-				--		,CustomerName
-				--		,AdmitDate
-				--		,SchoolName)
-				--		OUTPUT Inserted.ClaimCode,Inserted.ClaimPayBackXClaimId,Inserted.ClaimPayBackDetailId INTO @TmpOutXClaim (ClaimCode,cxId,cdId) --Kittisak.Ph 2024-04-05
+				INSERT INTO dbo.ClaimPayBackXClaim
+						(ClaimPayBackDetailId
+						,ClaimCode
+						,ProductCode
+						,ProductName
+						,HospitalCode
+						,HospitalName
+						,ClaimAdmitTypeCode
+						,ClaimAdmitType
+						,ChiefComplainCode
+						,ChiefComplain
+						,ICD10Code
+						,ICD10
+						,ClaimPay
+						,ClaimTransfer
+						,IsActive
+						,CreatedByUserId
+						,CreatedDate
+						,UpdatedByUserId
+						,UpdatedDate
+						,CustomerName
+						,AdmitDate
+						,SchoolName)
+						OUTPUT Inserted.ClaimCode,Inserted.ClaimPayBackXClaimId,Inserted.ClaimPayBackDetailId INTO @TmpOutXClaim (ClaimCode,cxId,cdId) --Kittisak.Ph 2024-04-05
 				SELECT o.cdId					ClaimPayBackDetailId
 						,d.ClaimCode			ClaimCode	
 						,d.ProductCode			ProductCode
@@ -1138,7 +1116,7 @@ BEGIN
 	IF @ClaimGroupTypeId = 2				--Update Kittisak.Ph 2025-02-25 
 	BEGIN
 
-		--INSERT INTO [ClaimOnlineV2].[dbo].[ClaimWithdrawal]
+		INSERT INTO [ClaimOnlineV2].[dbo].[ClaimWithdrawal]
 		SELECT NEWID()
 		,ClaimOnLineId
 			,ClaimOnLineItemId
@@ -1158,20 +1136,20 @@ BEGIN
 ------------------------------------- Krekpon.D Mind 06588 2024-06-27 -------------------------------------------
 	IF @ClaimGroupTypeId = 4
 		BEGIN
-				--INSERT INTO [dbo].[ClaimPayBackDetailReport]
-		  --         ([ClaimGroupCode]
-		  --         ,[HospitalName]
-		  --         ,[ClaimCode]
-		  --         ,[CustomerName]
-		  --         ,[Amount]
-		  --         ,[SendDate]
-		  --         ,[PaymentDate]
-		  --         ,[ClaimGroupTypeId]
-		  --         ,[IsActive]
-		  --         ,[CreatedByUserId]
-		  --         ,[CreatedDate]
-		  --         ,[UpdatedByUserId]
-		  --         ,[UpdatedDate])
+				INSERT INTO [dbo].[ClaimPayBackDetailReport]
+		           ([ClaimGroupCode]
+		           ,[HospitalName]
+		           ,[ClaimCode]
+		           ,[CustomerName]
+		           ,[Amount]
+		           ,[SendDate]
+		           ,[PaymentDate]
+		           ,[ClaimGroupTypeId]
+		           ,[IsActive]
+		           ,[CreatedByUserId]
+		           ,[CreatedDate]
+		           ,[UpdatedByUserId]
+		           ,[UpdatedDate])
 				SELECT  claimD.Code AS ClaimGroupCode,
 							sssHospital.Detail AS HospitalName,
 							claimD.CLCode AS ClaimCode,
