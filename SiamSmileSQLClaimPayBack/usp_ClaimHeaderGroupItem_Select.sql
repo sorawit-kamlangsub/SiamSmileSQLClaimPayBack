@@ -12,12 +12,13 @@ GO
 -- Author:		supattra
 -- Create date: 2021-10-07
 -- Update date: 2023-09-21 golffy Add ClaomCompensate
+--				2025-10-21 Add ClaimMisc Sorawit kamlangsub
 -- Description:	<Description,,>
 -- =============================================
 ALTER PROCEDURE [Claim].[usp_ClaimHeaderGroupItem_Select] 
 	 @ClaimGroupCode		NVARCHAR(255)
 	,@ProductGroupId		INT
-	,@ClaimGroupTypeId		INT 
+	,@ClaimGroupTypeId		INT
 
 	,@IndexStart					INT = NULL 
 	,@PageSize						INT = NULL 
@@ -36,8 +37,9 @@ BEGIN
 	----------------------------------------------------------------------------
  	
 --Get URL in ProgramConfig
-DECLARE @SSSURL		NVARCHAR(250)
-DECLARE @SSSPAURL	NVARCHAR(250)
+DECLARE @SSSURL			NVARCHAR(250);
+DECLARE @SSSPAURL		NVARCHAR(250);
+DECLARE @ClaimMiscURL	NVARCHAR(250);
 
 DECLARE @SSSPath	NVARCHAR(250) = 'SSS_URL'
 DECLARE @SSSPAPath	NVARCHAR(250) = 'SSSPA_URL'
@@ -51,15 +53,33 @@ FROM dbo.ProgramConfig
 WHERE ParameterName = @SSSPAPath
 
 -- Set URL
-SET @SSSURL = CONCAT(@SSSURL,'Modules/Claim/frmClaimApproveOverview.aspx?clm=')
-SET @SSSPAURL = CONCAT(@SSSPAURL,'Modules/Claim/frmClaimPA_New.aspx?clm=')
+SET @SSSURL =	CONCAT(@SSSURL,'Modules/Claim/frmClaimApproveOverview.aspx?clm=');
+SET @SSSPAURL = CONCAT(@SSSPAURL,'Modules/Claim/frmClaimPA_New.aspx?clm=');
+SET @ClaimMiscURL = 'https://uatclaimmisc.siamsmile.co.th/viewclaimdetails?id=';
 
 
 DECLARE @tmpClg TABLE (
 	ClaimHeaderGroup_id VARCHAR(20),
 	ClaimHeader_id VARCHAR(20)
 );
+
+DECLARE @tmpCliamMisc TABLE 
+(
+	ClaimCode			VARCHAR(255)
+	,URLLink			VARCHAR(255)
+	,Product_Id			VARCHAR(255)
+	,[Product]			VARCHAR(255)
+	,Hospital_Id		VARCHAR(255)
+	,Hospital			VARCHAR(255)
+	,ClaimAdmitType_Id	VARCHAR(255)
+	,ClaimAdmitType		VARCHAR(255)
+	,ChiefComplain_id	VARCHAR(255)
+	,ChiefComplain		VARCHAR(255)
+	,ICD10				VARCHAR(255)
+	,ICD10_Detail		VARCHAR(255)
+)
 	
+	-- Compenstate
 	IF @ProductGroupId = 2 AND @ClaimGroupTypeId = 5
 		BEGIN
 		    
@@ -76,6 +96,83 @@ DECLARE @tmpClg TABLE (
 			WHERE ccg.ClaimCompensateGroupCode = @ClaimGroupCode
 
 		END
+
+	IF @ProductGroupId IN (4) AND @ClaimGroupTypeId = 7
+		BEGIN
+			INSERT INTO @tmpCliamMisc
+			(
+				ClaimCode			
+				,URLLink			
+				,Product_Id			
+				,[Product]			
+				,Hospital_Id		
+				,Hospital			
+				,ClaimAdmitType_Id	
+				,ClaimAdmitType		
+				,ChiefComplain_id	
+				,ChiefComplain		
+				,ICD10				
+				,ICD10_Detail					
+			)
+			SELECT
+				cm.ClaimMiscNo							ClaimCode
+				,CONCAT(@ClaimMiscURL,cm.ClaimMiscId)	URLLink
+				,CAST(cm.ProductTypeId AS VARCHAR(20))	Product_Id
+				,pt.ProductTypeName						[Product]
+				,CAST(cm.HospitalId AS VARCHAR(20))		Hospital_Id
+				,cm.HospitalName						Hospital
+				,CAST(cat.ClaimAdmitTypeId AS VARCHAR(20))	ClaimAdmitType_Id
+				,cat.ClaimAdmitTypeName					ClaimAdmitType
+				,CAST(cm.ChiefComplainId AS VARCHAR(20))	ChiefComplain_id
+				,chf.ChiefComplainName					ChiefComplain
+				,NULL									ICD10
+				,NULL									ICD10_Detail			
+			FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
+				LEFT JOIN 
+				(
+					SELECT
+						ProductTypeId
+						,ProductTypeName
+					FROM [ClaimMiscellaneous].[misc].[ProductType] 
+					WHERE IsActive = 1
+				) pt
+				ON pt.ProductTypeId = cm.ProductTypeId
+				LEFT JOIN 
+				(
+					SELECT
+						ClaimAdmitTypeId
+						,ClaimMiscId
+					FROM [ClaimMiscellaneous].[misc].[ClaimMiscXClaimAdmitType]
+					WHERE IsActive = 1
+				) cxt
+				ON cxt.ClaimMiscId = cm.ClaimMiscId
+				LEFT JOIN 
+				(
+					SELECT
+						ClaimAdmitTypeId
+						,ClaimAdmitTypeName
+					FROM [ClaimMiscellaneous].[misc].[ClaimAdmitType]
+					WHERE IsActive = 1
+				) cat
+				ON cat.ClaimAdmitTypeId = cxt.ClaimAdmitTypeId
+				LEFT JOIN
+				(
+					SELECT
+						ChiefComplainId
+						,ChiefComplainName
+					FROM [ClaimMiscellaneous].[misc].[ChiefComplain]
+					WHERE IsActive = 1
+				) chf
+				ON chf.ChiefComplainId = cm.ChiefComplainId
+
+			WHERE cm.IsActive = 1
+			AND cm.ClaimHeaderGroupCode = @ClaimGroupCode
+
+
+
+		END
+	
+	-- Ph And Pa
 	ELSE
 		BEGIN
 		    
@@ -138,8 +235,12 @@ DECLARE @tmpClg TABLE (
 		    FROM sssPA.dbo.vw_ClaimHeaderDetail_For_DataExport  vw
 		   	INNER JOIN @tmpClG t
 				ON vw.Code = t.ClaimHeader_id
+		UNION
+			SELECT
+				*
+			FROM @tmpCliamMisc
 	)#tmpDetal
-
+		
 
 	 SELECT 
 			 ClaimCode
@@ -155,13 +256,12 @@ DECLARE @tmpClg TABLE (
 			,ICD10_Detail
 			,URLLink
 			,COUNT(ClaimCode) OVER() TotalCount
-	 FROM #tmpDetal		   
+	 FROM #tmpDetal		
 	   ORDER BY CASE WHEN @SortField IS NULL AND @OrderType IS NULL THEN ClaimCode END DESC 
 		 OFFSET @IndexStart ROWS FETCH NEXT @PageSize ROWS ONLY
 	
 	DELETE FROM @tmpClG
-	DROP TABLE #tmpDetal
-		
+	DROP TABLE #tmpDetal	
 
 	 --SELECT 
 		--	 N''					ClaimCode
