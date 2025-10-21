@@ -97,7 +97,7 @@ DECLARE @tmpCliamMisc TABLE
 
 		END
 
-	IF @ProductGroupId IN (4) AND @ClaimGroupTypeId = 7
+	IF @ProductGroupId IN (4,5,6,7,8,9,10,11) AND @ClaimGroupTypeId = 7
 		BEGIN
 			INSERT INTO @tmpCliamMisc
 			(
