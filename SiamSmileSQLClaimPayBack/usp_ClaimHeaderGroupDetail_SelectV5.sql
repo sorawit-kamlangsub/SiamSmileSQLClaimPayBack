@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [Claim].[usp_ClaimHeaderGroupDetail_SelectV5]    Script Date: 21/10/2568 13:23:50 ******/
+/****** Object:  StoredProcedure [Claim].[usp_ClaimHeaderGroupDetail_SelectV5]    Script Date: 21/10/2568 15:12:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -10,7 +10,6 @@ GO
 -- =============================================
 -- Author:		Sorawit KamlangSub
 -- Create date: 2025-10-17 14:30
--- Update date: 2025-10-21 Add ClaimMisc Sorawit KamlangSub
 -- Description:	
 -- =============================================
 ALTER PROCEDURE [Claim].[usp_ClaimHeaderGroupDetail_SelectV5]
@@ -459,7 +458,8 @@ ELSE IF @pProductGroupId IN (4,5,6,7,8,9,10,11) AND @pClaimGroupTypeId = 7
 				ON cm.ClaimMiscId = cmh.ClaimMiscId
 			INNER JOIN [ClaimMiscellaneous].[misc].[ClaimMiscPayment] cmp
 				ON cmh.ClaimMiscPaymentHeaderId = cmp.ClaimMiscPaymentHeaderId
-			LEFT JOIN (
+			LEFT JOIN 
+			(
 					SELECT 
 						vpu.UserId
 						,ve.EmployeeCode
@@ -470,11 +470,24 @@ ELSE IF @pProductGroupId IN (4,5,6,7,8,9,10,11) AND @pClaimGroupTypeId = 7
 				ON ud.UserId = cm.CreatedByUserId
 		WHERE cm.IsActive = 1
 			AND cmh.IsActive = 1
+			AND pd.ProductGroup_ID = @pProductGroupId
 			AND cm.ClaimMiscStatusId = 3
 			AND cmp.IsActive = 1
 			AND cmp.PaymentStatusId = 4
 			AND cm.ClaimHeaderGroupCode IS NOT NULL
-			AND pd.ProductGroup_ID = @pProductGroupId
+			AND NOT EXISTS	
+			(
+				SELECT x.ClaimCode
+				FROM dbo.ClaimPayBackXClaim x	WITH(NOLOCK)
+				LEFT JOIN dbo.ClaimPayBackDetail cd	WITH(NOLOCK)
+					ON x.ClaimPayBackDetailId = cd.ClaimPayBackDetailId
+				LEFT JOIN dbo.ClaimPayBack cp
+					ON cd.ClaimPayBackId = cp.ClaimPayBackId
+				WHERE x.IsActive = 1
+					AND cp.ClaimGroupTypeId = @pClaimGroupTypeId
+					AND cd.ProductGroupId = @pProductGroupId
+					AND x.ClaimCode = cm.ClaimMiscCode
+			)
 	END
 
 SELECT * 
