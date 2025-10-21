@@ -441,7 +441,7 @@ ELSE IF @pProductGroupId IN (4,5,6,7,8,9,10,11) AND @pClaimGroupTypeId = 7
 		SELECT 
 				cm.ClaimHeaderGroupCode				ClaimHeaderGroupCode
 				,1									ClaimHeaderCode
-				,cm.BranchId						BranchCode
+				,b.tempcode							BranchCode
 				,ISNULL(ud.EmployeeCode, '00000')	CreatedByCode
 				,cm.CreatedDate						CreatedDate
 				,cm.InsuranceCompanyCode			InsuranceCompanyCode
@@ -468,6 +468,8 @@ ELSE IF @pProductGroupId IN (4,5,6,7,8,9,10,11) AND @pClaimGroupTypeId = 7
 							ON vpu.EmployeeId = ve.EmployeeId 
 			)ud
 				ON ud.UserId = cm.CreatedByUserId
+			LEFT JOIN [DataCenterV1].[Address].[Branch] b
+				ON cm.BranchId = b.Branch_ID
 		WHERE cm.IsActive = 1
 			AND cmh.IsActive = 1
 			AND pd.ProductGroup_ID = @pProductGroupId
@@ -558,21 +560,10 @@ FROM
 		ON g.ClaimHeaderGroupCode = doc.ClaimHeaderGroupCode
 	LEFT JOIN dbo.ClaimGroupType  cgt
 		ON d.ClaimGroupTypeId = cgt.ClaimGroupTypeId
-	LEFT JOIN 
-	(
-		SELECT
-			Code
-			,Detail
-		FROM sss.dbo.MT_Branch
-		UNION
-		SELECT
-			CAST(Branch_ID AS VARCHAR(20))	Code
-			,BranchDetail					Detail
-		FROM DataCenterV1.Address.Branch
-	) b
-		ON b.Code = d.BranchCode COLLATE DATABASE_DEFAULT
+	LEFT JOIN [SSS].[dbo].[MT_Branch] b
+		ON d.BranchCode = b.Code					COLLATE DATABASE_DEFAULT
 	LEFT JOIN sss.dbo.DB_Employee eC
-		ON d.CreatedByCode = eC.Code COLLATE DATABASE_DEFAULT
+		ON d.CreatedByCode = eC.Code				COLLATE DATABASE_DEFAULT
 
 	LEFT JOIN DataCenterV1.Product.ProductGroup pg
 		ON d.ProductGroupId = pg.ProductGroup_ID 
