@@ -13,9 +13,9 @@ GO
 -- Description:	
 -- =============================================
 ALTER PROCEDURE [Claim].[usp_ClaimHeaderGroupDetail_SelectV5]
-	 @ProductGroupId		INT 			= NULL
+	 @ProductGroupId		INT 			
 	,@InsuranceId			INT				= NULL	
-	,@ClaimGroupTypeId		INT				= NULL	  
+	,@ClaimGroupTypeId		INT				
 	,@BranchId				INT				= NULL	
 	,@CreateByUser_Code		VARCHAR(20)		= NULL
 	,@IndexStart			INT				= NULL	
