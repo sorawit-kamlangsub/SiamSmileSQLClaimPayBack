@@ -81,11 +81,23 @@
           <AssociatedConnUserName>devdba</AssociatedConnUserName>
           <FullPath>usp_BillingPAExportDetail_Select.sql</FullPath>
         </FileNode>
+        <FileNode Name="usp_BillingRequestGroup_Select.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
+          <AssociatedConnUserName>devdba</AssociatedConnUserName>
+          <FullPath>usp_BillingRequestGroup_Select.sql</FullPath>
+        </FileNode>
         <FileNode Name="usp_ClaimHeaderGroupDetail_SelectV5.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
           <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
           <AssociatedConnUserName>devdba</AssociatedConnUserName>
           <FullPath>usp_ClaimHeaderGroupDetail_SelectV5.sql</FullPath>
+        </FileNode>
+        <FileNode Name="usp_ClaimHeaderGroupItem_Select.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
+          <AssociatedConnUserName>devdba</AssociatedConnUserName>
+          <FullPath>usp_ClaimHeaderGroupItem_Select.sql</FullPath>
         </FileNode>
         <FileNode Name="usp_OrganizeInfo_Select.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
