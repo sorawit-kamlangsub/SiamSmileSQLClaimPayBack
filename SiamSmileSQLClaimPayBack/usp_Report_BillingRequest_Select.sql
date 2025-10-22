@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_Report_BillingRequest_Select]    Script Date: 16/10/2568 10:27:01 ******/
+/****** Object:  StoredProcedure [dbo].[usp_Report_BillingRequest_Select]    Script Date: 22/10/2568 14:24:45 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -53,7 +53,7 @@ SELECT hi.CreatedDate
 	  ,ISNULL(nplo.CoverAmount,0)			NPLTotalAmount
 	  ,ISNULL(ba.CoverAmount,0)				AutoTotalAmount
 	  ,d.PaySS_Total
-	  ,(ISNULL(ba.CoverAmount,0) - d.PaySS_Total) - ISNULL(nplo.CoverAmount,0) TotalAmount
+	  ,(d.PaySS_Total - ISNULL(ba.CoverAmount,0)) - ISNULL(nplo.CoverAmount,0) TotalAmount
 	  ,ct.Detail
 	  ,cgs.ClaimHeaderGroupImportStatusName
 	  ,d.DateHappen
