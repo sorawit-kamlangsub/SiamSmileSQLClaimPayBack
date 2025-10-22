@@ -26,15 +26,15 @@ GO
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimHeaderGroupImport_Select]
 	-- Add the parameters for the stored procedure here
-	@BillingDateFrom					DATE
-	,@BillingDateTo						DATE
-	,@ClaimHeaderGroupImportStatusId	INT
+	@BillingDateFrom					DATE 
+	,@BillingDateTo						DATE 
+	,@ClaimHeaderGroupImportStatusId	INT  
 	,@IndexStart						INT = NULL           
 	,@PageSize							INT = NULL             
 	,@SortField							NVARCHAR(MAX)  = NULL 
 	,@OrderType							NVARCHAR(MAX)  = NULL
 	,@SearchDetail						NVARCHAR(MAX)  = NULL
-	,@BranchId							INT			   = NULL	
+	,@BranchId							INT			   = NULL
 AS
 BEGIN
 	
@@ -138,6 +138,8 @@ BEGIN
 		ON x.ClaimHeaderGroup_id = hi.ClaimHeaderGroupCode
 		LEFT JOIN sss.dbo.MT_Branch b
 			ON x.Branch_id = b.Code
+		LEFT JOIN [DataCenterV1].[Address].[Branch] cb
+			ON cb.tempcode = b.Code
 	WHERE 
 	(
 		(@ClaimHeaderGroupImportStatusId = 4)
@@ -146,7 +148,7 @@ BEGIN
 	AND hi.IsActive = 1
 	AND (hi.ClaimHeaderGroupImportStatusId = @ClaimHeaderGroupImportStatusId OR @ClaimHeaderGroupImportStatusId IS NULL)
 	AND (hi.ClaimHeaderGroupCode LIKE '%'+@SearchDetail+'%' OR @SearchDetail IS NULL)
-	AND (x.Branch_id = @BranchId OR @BranchId IS NULL)
+	AND (cb.Branch_ID = @BranchId OR @BranchId IS NULL)
 	
 	ORDER BY 
 		 CASE WHEN @OrderType IS NULL    AND @SortField IS NULL        THEN hi.ClaimHeaderGroupImportId END ASC
