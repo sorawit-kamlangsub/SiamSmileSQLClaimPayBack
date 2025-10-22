@@ -23,6 +23,7 @@ GO
 -- Update date:2025-10-21 15:53 Sorawit Kamlangsub
 --					Add OPTION (RECOMPILE)
 --					Update Filter BranchId
+--					Add Union All ClaimCompenstate
 -- Description:	Ui3-2
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimHeaderGroupImport_Select]
@@ -61,7 +62,7 @@ BEGIN
 		  ,hi.InsuranceCompanyName AS InsuranceCompany 
 	      ,hi.BillingRequestGroupId	
 		  ,COUNT(hi.ClaimHeaderGroupImportId) OVER ( ) TotalCount
-		  ,ISNULL(b.Detail, N'สำนักงานใหญ่')	AS BranchName
+		  ,b.Detail	AS BranchName
 	FROM dbo.ClaimHeaderGroupImport hi
 		LEFT JOIN ClaimHeaderGroupImportStatus his
 			ON hi.ClaimHeaderGroupImportStatusId = his.ClaimHeaderGroupImportStatusId
@@ -134,6 +135,20 @@ BEGIN
 				SELECT 	 g.Code											ClaimHeaderGroup_id
 						,g.Branch_id									Branch_id
 				 FROM SSSPA.dbo.DB_ClaimHeaderGroup g WITH(NOLOCK)
+
+			UNION ALL
+
+			SELECT 
+				cg.ClaimCompensateGroupCode								ClaimHeaderGroup_id
+				,bh.tempcode											Branch_id
+			FROM [sss].[dbo].[ClaimCompensateGroup] cg
+				LEFT JOIN [DataCenterV1].[Employee].[Employee] e
+					ON e.EmployeeCode = cg.CreatedByCode
+				LEFT JOIN [DataCenterV1].[Employee].[EmployeeTeam] et
+					ON et.EmployeeTeam_ID = e.EmployeeTeam_ID
+				LEFT JOIN [DataCenterV1].[Address].[Branch] bh
+					ON bh.Branch_ID = et.Branch_ID
+
 			) u
 		) x
 		ON x.ClaimHeaderGroup_id = hi.ClaimHeaderGroupCode
