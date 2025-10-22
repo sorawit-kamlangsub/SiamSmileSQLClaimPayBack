@@ -478,8 +478,8 @@ ELSE IF @pProductGroupId IN (4,5,6,7,8,9,10,11) AND @pClaimGroupTypeId = 7
 			AND cmp.PaymentStatusId = 4
 			AND cm.ClaimHeaderGroupCode IS NOT NULL
 			AND (cm.InsuranceCompanyCode = @pInsCode OR @pInsCode IS NULL)
-			--AND (cm.BranchId = @pBranchCode OR @pBranchCode IS NULL) TODO
-			--AND (cm.CreatedByUserId = @pCreatedByCode OR @pCreatedByCode IS NULL) TODO
+			AND (b.tempcode = @pBranchCode OR @pBranchCode IS NULL)
+			--AND (cm.CreatedByUserId = @pCreatedByCode OR @pCreatedByCode IS NULL) --TODO
 			AND (cm.ClaimHeaderGroupCode = @pSearchDetail OR @pSearchDetail IS NULL)	
 			AND NOT EXISTS	
 			(
