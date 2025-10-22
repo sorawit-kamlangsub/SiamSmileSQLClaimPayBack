@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]    Script Date: 22/10/2568 9:58:02 ******/
+/****** Object:  StoredProcedure [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]    Script Date: 22/10/2568 14:04:56 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -17,7 +17,8 @@ GO
 -- Update date: 20250806 Bunchuai Chaiket เพิ่มการ join ClaimOnlineV2.dbo.ClaimOnline ในเงื่อนไข PH/PA เพื่อตรวจสอบสถานะการโอนเงิน
 -- Update date: 20250821 Kittisak.Ph เพิ่มวันที่Cutoff (DisabilityCompensationDate) ชดเชยสูญเสียอวัยวะ
 -- Update date: 20250902 Krekpon.D เพิ่มจำนวนเงินที่จ่ายของ บส.
--- Update date: 20251022 Sorawit.k change to [usp_ClaimHeaderGroupDetail_SelectV5]
+-- Update date: 20251021 Sorawit.k change to [usp_ClaimHeaderGroupDetail_SelectV5]
+-- Update date: 20261022 Sorawit.k change add Claimmisc
 -- Description:	
 -- =============================================
 ALTER PROCEDURE [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]
