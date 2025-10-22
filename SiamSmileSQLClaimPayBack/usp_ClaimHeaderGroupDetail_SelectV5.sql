@@ -442,7 +442,7 @@ ELSE IF @pProductGroupId IN (4,5,6,7,8,9,10,11) AND @pClaimGroupTypeId = 7
 				cm.ClaimHeaderGroupCode				ClaimHeaderGroupCode
 				,1									ClaimHeaderCode
 				,b.tempcode							BranchCode
-				,ISNULL(ud.EmployeeCode, '00000')	CreatedByCode
+				,ISNULL(e.EmployeeCode, '00000')	CreatedByCode
 				,cm.CreatedDate						CreatedDate
 				,cm.InsuranceCompanyCode			InsuranceCompanyCode
 				,cm.InsuranceCompanyName			InsuranceCompanyName 
@@ -458,16 +458,10 @@ ELSE IF @pProductGroupId IN (4,5,6,7,8,9,10,11) AND @pClaimGroupTypeId = 7
 				ON cm.ClaimMiscId = cmh.ClaimMiscId
 			INNER JOIN [ClaimMiscellaneous].[misc].[ClaimMiscPayment] cmp
 				ON cmh.ClaimMiscPaymentHeaderId = cmp.ClaimMiscPaymentHeaderId
-			LEFT JOIN 
-			(
-					SELECT 
-						vpu.UserId
-						,ve.EmployeeCode
-					FROM [DataCenterV1].[Master].vw_PersonUser vpu
-						INNER JOIN [DataCenterV1].[Master].vw_Employee ve
-							ON vpu.EmployeeId = ve.EmployeeId 
-			)ud
-				ON ud.UserId = cm.CreatedByUserId
+			LEFT JOIN [DataCenterV1].[Person].[PersonUser] pu
+				ON pu.[User_ID] = cm.CreatedByUserId
+			LEFT JOIN [DataCenterV1].[Employee].[Employee] e
+				ON pu.Employee_ID = e.Employee_ID
 			LEFT JOIN [DataCenterV1].[Address].[Branch] b
 				ON cm.BranchId = b.Branch_ID
 		WHERE cm.IsActive = 1
@@ -479,7 +473,7 @@ ELSE IF @pProductGroupId IN (4,5,6,7,8,9,10,11) AND @pClaimGroupTypeId = 7
 			AND cm.ClaimHeaderGroupCode IS NOT NULL
 			AND (cm.InsuranceCompanyCode = @pInsCode OR @pInsCode IS NULL)
 			AND (b.tempcode = @pBranchCode OR @pBranchCode IS NULL)
-			--AND (cm.CreatedByUserId = @pCreatedByCode OR @pCreatedByCode IS NULL) --TODO
+			AND (e.EmployeeCode = @pCreatedByCode OR @pCreatedByCode IS NULL)
 			AND (cm.ClaimHeaderGroupCode = @pSearchDetail OR @pSearchDetail IS NULL)	
 			AND NOT EXISTS	
 			(
