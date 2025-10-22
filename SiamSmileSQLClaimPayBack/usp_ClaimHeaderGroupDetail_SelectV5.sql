@@ -146,6 +146,23 @@ CREATE TABLE #TmpDoc
 	ClaimHeaderGroupCode VARCHAR(20) 
 	,ClaimHeaderCode VARCHAR(20)
 );
+
+DECLARE @TmpClaimMisc TABLE 
+(
+	ClaimMiscId				UNIQUEIDENTIFIER
+	,ClaimHeaderGroupCode	VARCHAR(30)
+	,ClaimHeaderCode		VARCHAR(20)
+	,BranchCode				VARCHAR(20)
+	,CreatedByCode			VARCHAR(20)
+	,CreatedDate			DATETIME
+	,InsuranceCompanyCode	VARCHAR(20)
+	,InsuranceCompanyName	NVARCHAR(255)
+	,ProductGroupId			INT
+	,xRevise				VARCHAR(20)
+	,Amount					DECIMAL(16,2) 
+	,ClaimGroupTypeId		INT
+	,TransferAmount			DECIMAL(16,2)
+);
  
 IF @pProductGroupId = 2 AND @pClaimGroupTypeId = 5
 	BEGIN
@@ -425,8 +442,9 @@ ELSE IF @pProductGroupId = 3 AND @pClaimGroupTypeId IN (2,3,4,6)
 -- ClaimMisc
 ELSE IF @pProductGroupId IN (4,5,6,7,8,9,10,11) AND @pClaimGroupTypeId = 7
 	BEGIN
-		INSERT INTO #Tmplst
-		        (ClaimHeaderGroupCode
+		INSERT INTO @TmpClaimMisc
+		        (ClaimMiscId
+				,ClaimHeaderGroupCode
 		        ,ClaimHeaderCode
 		        ,BranchCode
 		        ,CreatedByCode
@@ -439,7 +457,8 @@ ELSE IF @pProductGroupId IN (4,5,6,7,8,9,10,11) AND @pClaimGroupTypeId = 7
 				,ClaimGroupTypeId
 				,TransferAmount)		
 		SELECT 
-				cm.ClaimHeaderGroupCode				ClaimHeaderGroupCode
+				cm.ClaimMiscId
+				,cm.ClaimHeaderGroupCode			ClaimHeaderGroupCode
 				,1									ClaimHeaderCode
 				,b.tempcode							BranchCode
 				,ISNULL(e.EmployeeCode, '00000')	CreatedByCode
@@ -488,6 +507,36 @@ ELSE IF @pProductGroupId IN (4,5,6,7,8,9,10,11) AND @pClaimGroupTypeId = 7
 					AND cd.ProductGroupId = @pProductGroupId
 					AND x.ClaimCode = cm.ClaimMiscCode
 			)
+
+		INSERT INTO #Tmplst
+		(
+			ClaimHeaderGroupCode
+			,ClaimHeaderCode
+			,BranchCode
+			,CreatedByCode
+			,CreatedDate
+			,InsuranceCompanyCode
+			,InsuranceCompanyName
+			,ProductGroupId
+			,xRevise
+			,amount
+			,ClaimGroupTypeId
+			,TransferAmount )
+		SELECT 
+			ClaimHeaderGroupCode
+			,ClaimHeaderCode
+			,BranchCode
+			,CreatedByCode
+			,CreatedDate
+			,InsuranceCompanyCode
+			,InsuranceCompanyName
+			,ProductGroupId
+			,xRevise
+			,amount
+			,ClaimGroupTypeId
+			,TransferAmount
+		FROM @TmpClaimMisc
+
 	END
 
 SELECT * 
@@ -496,7 +545,8 @@ INTO #TmpCondition
 FROM #Tmplst a
 WHERE a.xRevise = '0';
 
-IF @pClaimGroupTypeId <> 4
+--เคลมออนไลน์,เคลมสาขา,เคลมโอนแยก,เคลมเสียชีวิต ทุพพลภาพ
+IF @pClaimGroupTypeId IN (2,3,5,6)
 BEGIN
 
 	INSERT INTO #TmpDoc(ClaimHeaderGroupCode,ClaimHeaderCode)
@@ -509,6 +559,21 @@ BEGIN
 	AND d.IsActive = 1
 	GROUP BY x.ClaimHeaderGroupCode
 			,x.ClaimHeaderCode 
+END
+
+--เคลมเบ็ดเตล็ด (ClaimMisc)
+IF @pClaimGroupTypeId = 7
+BEGIN
+
+		INSERT INTO #TmpDoc(ClaimHeaderGroupCode,ClaimHeaderCode)
+		SELECT DISTINCT
+			tmp.ClaimHeaderGroupCode
+			,tmp.ClaimHeaderCode
+		FROM [ClaimMiscellaneous].[misc].[DocumentClaimOnLine] doc
+		INNER JOIN @TmpClaimMisc tmp
+			ON tmp.ClaimMiscId = doc.ClaimMiscId
+		WHERE doc.IsActive = 1
+
 END
 
 /*Set Page*/
@@ -529,8 +594,8 @@ SELECT g.ClaimHeaderGroupCode									ClaimHeaderGroup_id
 		,oIns.OrganizeId										InsuranceCompanyId
 		,d.InsuranceCompanyName									InsuranceCompany	 
 		,COUNT(g.ClaimHeaderGroupCode) OVER ()					TotalCount
-		--,IIF(g.ItemCount = doc.docCount ,1,0)					DocumentCount	 
-		,1													DocumentCount
+		,IIF(g.ItemCount = doc.docCount ,1,0)					DocumentCount	 
+		--,1													DocumentCount
 		,g.TransferAmount										TransferAmount
 FROM
 (
