@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImport_Select]    Script Date: 22/10/2568 9:14:13 ******/
+/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImport_Select]    Script Date: 22/10/2568 15:52:42 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -20,8 +20,9 @@ GO
 -- Update Date:2025-09-29 11:00 Sorawit kamlangsub
 --					เพิ่ม Parameter @BranchId
 --					เพิ่ม ฟิลด์ Branch Name
--- Update date:2025-10-21 09:25 Sorawit Kamlangsub
---					เพิ่ม OPTION (RECOMPILE)
+-- Update date:2025-10-21 15:53 Sorawit Kamlangsub
+--					Add OPTION (RECOMPILE)
+--					Update Filter BranchId
 -- Description:	Ui3-2
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimHeaderGroupImport_Select]
