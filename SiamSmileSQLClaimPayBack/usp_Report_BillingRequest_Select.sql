@@ -16,6 +16,8 @@ GO
 --				เพิ่ม SELECT ClaimHeaderGroupImportStatusName
 -- Update date: 2025-10-16 19:24
 --				SELEC DateHappen, DateIn
+-- Update date: 2025-10-22 14:26 Bunchuai Chaiket
+--				Add OPTION (RECOMPILE)
 -- Description:	Report BillingRequestResult ClaimHeaderGroupImportStatusName และเพิ่ม parameter @ClaimHeaderGroupImportStatusId
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_Report_BillingRequest_Select]
@@ -136,5 +138,7 @@ AND (
     OR (@ClaimHeaderGroupImportStatusId IS NOT NULL AND hi.ClaimHeaderGroupImportStatusId = @ClaimHeaderGroupImportStatusId)
 )
 AND hi.IsActive = 1
+
+OPTION (RECOMPILE);
 
 END;
