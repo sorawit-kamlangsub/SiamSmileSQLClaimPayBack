@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImport_Select]    Script Date: 29/9/2568 10:54:58 ******/
+/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImport_Select]    Script Date: 22/10/2568 9:14:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -58,7 +58,7 @@ BEGIN
 		  ,hi.InsuranceCompanyName AS InsuranceCompany 
 	      ,hi.BillingRequestGroupId	
 		  ,COUNT(hi.ClaimHeaderGroupImportId) OVER ( ) TotalCount
-		  ,b.Detail	AS BranchName
+		  ,ISNULL(b.Detail, N'สำนักงานใหญ่')	AS BranchName
 	FROM dbo.ClaimHeaderGroupImport hi
 		LEFT JOIN ClaimHeaderGroupImportStatus his
 			ON hi.ClaimHeaderGroupImportStatusId = his.ClaimHeaderGroupImportStatusId
@@ -152,4 +152,5 @@ BEGIN
 		 --,CASE WHEN @OrderType = 'DESC'    AND @SortField ='Detail'    THEN Detail END DESC
 	
 	OFFSET @IndexStart ROWS FETCH NEXT @PageSize ROWS ONLY
+	OPTION (RECOMPILE)
 END;
