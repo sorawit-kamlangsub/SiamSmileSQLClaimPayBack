@@ -15,6 +15,7 @@ GO
 --				2023-10-09 16:48 Chanadol Koonkam Add Column ClaimHeaderGroupTypeName
 --				2025-09-17 15:37 Bunchuai Chaiket เพิ่ม LEFT JOIN [Organize]/ SFTPConfig สำหรับการตรวจสอบ บ.ที่มี/ ไม่มี SFTP
 --				2025-09-19 16:21 Krekpon Dokkamklang เพิ่ม paremeter การรับข้อมูลในการกรอง
+--				2025-10-21 09:21 Sorawit Kamlangsub เพิ่ม OPTION (RECOMPILE)
 -- Description:	
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_BillingRequestGroup_Select]
