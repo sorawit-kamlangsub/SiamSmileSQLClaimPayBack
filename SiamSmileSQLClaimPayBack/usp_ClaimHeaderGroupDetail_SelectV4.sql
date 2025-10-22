@@ -17,6 +17,7 @@ GO
 -- Update date: 20250806 Bunchuai Chaiket เพิ่มการ join ClaimOnlineV2.dbo.ClaimOnline ในเงื่อนไข PH/PA เพื่อตรวจสอบสถานะการโอนเงิน
 -- Update date: 20250821 Kittisak.Ph เพิ่มวันที่Cutoff (DisabilityCompensationDate) ชดเชยสูญเสียอวัยวะ
 -- Update date: 20250902 Krekpon.D เพิ่มจำนวนเงินที่จ่ายของ บส.
+-- Update date: 20251022 Sorawit.k change to [usp_ClaimHeaderGroupDetail_SelectV5]
 -- Description:	
 -- =============================================
 ALTER PROCEDURE [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]
