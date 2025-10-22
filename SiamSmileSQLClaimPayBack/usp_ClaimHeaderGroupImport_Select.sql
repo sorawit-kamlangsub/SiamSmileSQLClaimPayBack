@@ -20,6 +20,8 @@ GO
 -- Update Date:2025-09-29 11:00 Sorawit kamlangsub
 --					เพิ่ม Parameter @BranchId
 --					เพิ่ม ฟิลด์ Branch Name
+-- Update date:2025-10-21 09:25 Sorawit Kamlangsub
+--					เพิ่ม OPTION (RECOMPILE)
 -- Description:	Ui3-2
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimHeaderGroupImport_Select]
@@ -152,5 +154,6 @@ BEGIN
 		 --,CASE WHEN @OrderType = 'DESC'    AND @SortField ='Detail'    THEN Detail END DESC
 	
 	OFFSET @IndexStart ROWS FETCH NEXT @PageSize ROWS ONLY
+
 	OPTION (RECOMPILE)
 END;
