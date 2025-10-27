@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupValidateAmountPay_Select]    Script Date: 27/10/2568 12:32:57 ******/
+/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupValidateAmountPay_Select]    Script Date: 27/10/2568 12:35:22 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -17,6 +17,8 @@ GO
 --				ตัดเงื่อนไข ไม่ตรวจสอบเลขกรมธรรม์ กรณีเป็น PA และเคลมโรงพยาบาล
 -- Update date: 2025-10-22 10:30 Bunchuai Chaiket
 --				เพิ่ม validate ข้อมูลจาก ClaimMisc
+-- Update date: 2025-10-27 12:28 Sorawit kamlangsub
+--				change THEN NULL To ''
 -- Description:	Function สำหรับ Validate ยอดเงิน บ.ส. และยอดเงินโอน
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimHeaderGroupValidateAmountPay_Select]  
@@ -142,7 +144,7 @@ ELSE IF @ProductGroupId = 3
 							ctmpPA.Code IS NULL
 						)
 						THEN @PolicyWarning + ' , ' 
-					END, NULL
+					END, ''
 				)
 				+
 				ISNULL(
