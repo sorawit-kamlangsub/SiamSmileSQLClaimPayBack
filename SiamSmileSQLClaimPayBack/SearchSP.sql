@@ -9,7 +9,7 @@ INNER JOIN
 INNER JOIN 
     sys.schemas s ON o.schema_id = s.schema_id
 WHERE 
-    m.definition LIKE '%usp_BillingRequest_Sub01_Insert_V2%'
+    m.definition LIKE '%MappingXCliamMisc%'
  --AND m.definition LIKE '@ApproveStatusId'
     AND o.type = 'P'  -- 'P' stands for stored procedures
 ORDER BY 
