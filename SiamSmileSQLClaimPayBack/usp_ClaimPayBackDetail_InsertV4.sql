@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [Claim].[usp_ClaimPayBackDetail_InsertV4]    Script Date: 29/10/2568 10:53:45 ******/
+/****** Object:  StoredProcedure [Claim].[usp_ClaimPayBackDetail_InsertV4]    Script Date: 29/10/2568 13:23:05 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -330,7 +330,7 @@ BEGIN
 					,1							GroupId
 				FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
 					LEFT JOIN [DataCenterV1].[Product].[ProductGroup] pd
-						ON cm.ProductGroupMappingId = pd.ProductGroup_ID
+						ON cm.ProductGroupId = pd.ProductGroup_ID
 					LEFT JOIN  
 						(
 							SELECT
@@ -974,16 +974,7 @@ BEGIN
 	
 		-----------------------------------
 		BEGIN TRY
-			Begin TRANSACTION
-					
-				INSERT INTO @TmpOutGroup(ClaimGroupTypeId,BranchId,gId,GroupId,ClaimPayBackCode)	
-				SELECT 
-					ClaimGroupTypeId
-					,BranchId
-					,ROW_NUMBER() OVER (ORDER BY (SELECT NULL))	gId
-					,GroupId
-					,ClaimPayBackCode
-				FROM @TmpGroup		
+			Begin TRANSACTION						
 				
 				INSERT INTO dbo.ClaimPayBack
 						(ClaimPayBackCode
@@ -1001,10 +992,8 @@ BEGIN
 						)
 				OUTPUT Inserted.ClaimGroupTypeId,Inserted.BranchId,Inserted.ClaimPayBackId,Inserted.GroupId,Inserted.ClaimPayBackCode INTO @TmpOutGroup(ClaimGroupTypeId,BranchId,gId,GroupId,ClaimPayBackCode) --Update Chanadol 20241112
 				SELECT 
-						--gId							ClaimPayBackId,
 						CONCAT(@g_TransactionCodeControlTypeDetail,@g_YY,@g_MM ,dbo.func_ConvertIntToString((@g_RunningFrom + ig.gId - 1),@g_lenght)) ClaimPayBackCode
 						,ig.sumPremium				Amount
-						--,2
 						,IIF(ig.GroupId = 2, 5, 2)	ClaimPayBackStatusId
 						,ig.ClaimGroupTypeId		ClaimGroupTypeId		
 						,ig.BranchId				BranchId
