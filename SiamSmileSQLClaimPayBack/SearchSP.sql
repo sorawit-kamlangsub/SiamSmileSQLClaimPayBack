@@ -9,7 +9,7 @@ INNER JOIN
 INNER JOIN 
     sys.schemas s ON o.schema_id = s.schema_id
 WHERE 
-    m.definition LIKE '%MappingXCliamMisc%'
+    m.definition LIKE '%cm.ProductTypeId%'
  --AND m.definition LIKE '@ApproveStatusId'
     AND o.type = 'P'  -- 'P' stands for stored procedures
 ORDER BY 
