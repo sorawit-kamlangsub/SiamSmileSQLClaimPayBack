@@ -23,8 +23,8 @@ GO
 --ALTER PROCEDURE [dbo].[usp_ClaimPayBackTransferNonClaimCompensateReport_Select]
 DECLARE
 	-- Add the parameters for the stored procedure here
-	 @DateFrom			DATE = '2025-10-14'
-	,@DateTo			DATE = '2025-10-15'
+	 @DateFrom			DATE = '2025-10-29'
+	,@DateTo			DATE = '2025-10-29'
 	,@InsuranceId		INT = NULL
 	,@ProductGroupId	INT = NULL
 	,@ClaimGroupTypeId	INT = 7
@@ -33,26 +33,25 @@ DECLARE
 
 --	SET NOCOUNT ON;
     -- Insert statements for procedure here
---เอาข้อมูลของ  Master PersonUser ของ DataCenter มาทำ tmp 2025-08-20 16:26 06588 Krekpon.D Mind 
-SELECT 
-    UserId,
-    EmployeeId
-INTO #TmpPersonUser
-FROM [DataCenterV1].[Master].vw_PersonUser;
 
-CREATE INDEX IX_TmpPersonUser_UserId ON #TmpPersonUser(UserId);
-CREATE INDEX IX_TmpPersonUser_EmpId ON #TmpPersonUser(EmployeeId);
+	SELECT 
+		pu.User_ID
+		,e.EmployeeCode
+		,CONCAT(e.EmployeeCode,' ',pT.TitleDetail,p.FirstName,' ',p.LastName) PersonName
+	INTO #TmpPersonUser
+	FROM DataCenterV1.Person.PersonUser pu
+	LEFT JOIN  DataCenterV1.Person.Person p 
+		ON pu.Person_ID = p.Person_ID
+			AND p.IsActive = 1
+	LEFT JOIN DataCenterV1.Employee.Employee e
+		ON pu.Employee_ID = e.Employee_ID
+			AND e.IsActive = 1
+	LEFT JOIN DataCenterV1.Person.Title pT 
+		ON p.Title_ID = pT.Title_ID
+	WHERE pu.IsActive = 1
 
---เอาข้อมูล Master Employee ของ DataCenter มาทำ tmp 2025-08-20 16:26 06588 Krekpon.D Mind 
-SELECT 
-    EmployeeId,
-    EmployeeCode,
-    PersonName
-INTO #TmpEmployee
-FROM [DataCenterV1].[Master].vw_Employee;
-
-CREATE INDEX IX_TmpEmployee_Id ON #TmpEmployee(EmployeeId);
-CREATE INDEX IX_TmpEmployee_Code ON #TmpEmployee(EmployeeCode);
+	CREATE INDEX IX_TmpPersonUser_User_ID ON #TmpPersonUser(User_ID);
+	CREATE INDEX IX_TmpPersonUser_Code ON #TmpPersonUser(EmployeeCode);
 
 --ประกาศ Table เก็บข้อมูลจาก ClaimPayBack
 DECLARE @TmpClaimPayBack TABLE (
@@ -68,6 +67,7 @@ DECLARE @TmpClaimPayBack TABLE (
 	 CreatedDate	 DATETIME,
 	 CreatedByUser   NVARCHAR(150)
      )
+
  -- เอาข้อมูลลงใน temp แล้วไป JOIN ต่อกับฝั่ง Base อื่น
  INSERT INTO @TmpClaimPayBack(
       ClaimGroupCodeFromCPBD,
@@ -93,8 +93,7 @@ DECLARE @TmpClaimPayBack TABLE (
      cpbt.TransferDate AS CreatedDate,
 	 cpbd.ClaimOnLineCode AS COL,
 	 cpb.CreatedDate AS CreatedDate,
-	 CONCAT(dme.EmployeeCode,' ',dme.PersonName) AS CreatedByUser -- 2025-08-20 16:26 06588 Krekpon.D Mind 
- 
+	 CONCAT(pu.EmployeeCode,' ',pu.PersonName) AS CreatedByUser -- 2025-08-20 16:26 06588 Krekpon.D Mind 
  FROM ClaimPayBackTransfer cpbt 
 	 INNER JOIN ClaimPayBack cpb
 		ON cpbt.ClaimPayBackTransferId = cpb.ClaimPayBackTransferId
@@ -104,11 +103,8 @@ DECLARE @TmpClaimPayBack TABLE (
 		ON cpbd.ProductGroupId = dppg.ProductGroup_ID
 	 LEFT JOIN ClaimGroupType cgt
 		ON cpb.ClaimGroupTypeId = cgt.ClaimGroupTypeId
-	 LEFT JOIN #TmpPersonUser dmpu --2025-08-20 16:26 06588 Krekpon.D Mind 
-		ON cpb.CreatedByUserId = dmpu.UserId
-	 LEFT JOIN #TmpEmployee dme --2025-08-20 16:26 06588 Krekpon.D Mind 
-		ON dmpu.EmployeeId = dme.EmployeeId
-   
+	 INNER JOIN #TmpPersonUser pu
+		ON pu.[User_ID] = cpb.CreatedByUserId
  WHERE  cpbt.ClaimPayBackTransferStatusId = 3   --เอาที่จ่ายแล้ว
 		AND cpbt.ClaimGroupTypeId = @ClaimGroupTypeId
 		AND cpbt.IsActive = 1
@@ -116,7 +112,6 @@ DECLARE @TmpClaimPayBack TABLE (
 		AND ((cpbt.TransferDate >= @DateFrom) AND (cpbt.TransferDate < DATEADD(Day,1,@DateTo)))
 		AND (cpbd.ProductGroupId = @ProductGroupId OR @ProductGroupId IS NULL)
 		AND (cpbd.InsuranceCompanyId = @InsuranceId OR @InsuranceId IS NULL)
-
 
 SELECT 			icu.InsuranceCompany_Name AS InsuranceCompany_Name,
 				dab.BranchDetail AS Branch,
@@ -188,6 +183,23 @@ FROM	@TmpClaimPayBack tmpCpbd
 									ON cd.Code = ch.CustomerDetail_id
 								LEFT JOIN SSSPA.dbo.MT_Title tt
 									ON tt.Code = cd.Title_id
+
+								UNION ALL
+
+								SELECT 
+									ClaimHeaderGroupCode	Code
+									,InsuranceCompanyName	InsuranceCompany_Name
+									,NULL					ClaimAdmitType
+									,h.HospitalCode			Hospital
+									,u.EmployeeCode			ApprovedUserFromSSS
+									,cm.ClaimMiscCode		ClaimCode
+									,cm.CustomerName		CustomerName
+								FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
+								LEFT JOIN [ClaimMiscellaneous].[misc].[Hospital] h
+									ON h.HospitalId = cm.HospitalId 
+								LEFT JOIN #TmpPersonUser u
+									ON u.[User_ID] = cm.CreatedByUserId
+
 								
 				) icu
 		ON tmpCpbd.ClaimGroupCodeFromCPBD = icu.Code
@@ -195,7 +207,7 @@ FROM	@TmpClaimPayBack tmpCpbd
 		ON icu.Hospital = ssicu.Code
 	LEFT JOIN [DataCenterV1].[Address].Branch dab
 		ON tmpCpbd.BranchId = dab.Branch_ID
-	LEFT JOIN #TmpEmployee dmeu
+	INNER JOIN #TmpPersonUser dmeu
 		ON icu.ApprovedUserFromSSS  = dmeu.EmployeeCode
 	LEFT JOIN SSS.dbo.MT_Bank sssmtb
 		ON ssicu.Bank_id = sssmtb.Code
@@ -204,8 +216,7 @@ FROM	@TmpClaimPayBack tmpCpbd
 	LEFT JOIN SSS.dbo.SM_Province sssmp
 		ON sssadr.Province_id = sssmp.Code
 
-IF OBJECT_ID('tempdb..#TmpPersonUser') IS NOT NULL DROP TABLE #TmpPersonUser; --2025-08-20 16:26 06588 Krekpon.D Mind 
-IF OBJECT_ID('tempdb..#TmpEmployee') IS NOT NULL DROP TABLE #TmpEmployee; --2025-08-20 16:26 06588 Krekpon.D Mind 
+IF OBJECT_ID('tempdb..#TmpPersonUser') IS NOT NULL DROP TABLE #TmpPersonUser;
 IF OBJECT_ID('tempdb..@TmpClaimPayBack') IS NOT NULL  DELETE FROM @TmpClaimPayBack; -- ปรับ Code ใหม่ให้ทำงานได้เร็วขึ้น 2024-07-01
 
 
