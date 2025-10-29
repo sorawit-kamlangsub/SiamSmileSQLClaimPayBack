@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]    Script Date: 16/10/2568 16:15:57 ******/
+/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]    Script Date: 29/10/2568 14:05:28 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -28,6 +28,8 @@ GO
 -- Description:	ปรับการทำงานตอนดึงข้อมูล
 -- Update date: 2025-10-16 15:20 Sorawit Kamlangsub
 -- Description:	ปรับเรียกข้อมูล Employee
+-- Update date: 2025-10-29 14:31 Sorawit Kamlangsub
+-- Description:	Add UNION ClaimMisc
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]
 	-- Add the parameters for the stored procedure here
@@ -179,7 +181,22 @@ FROM @TmpClaimPayBack TmpCPB
 									ON cd.Code = ch.CustomerDetail_id
 								LEFT JOIN SSSPA.dbo.MT_Title tt
 									ON tt.Code = cd.Title_id
-								
+
+								UNION ALL
+
+								SELECT 
+									ClaimHeaderGroupCode	Code
+									,InsuranceCompanyName	InsuranceCompany_Name
+									,NULL					ClaimAdmitType
+									,h.HospitalCode			Hospital
+									,u.EmployeeCode			ApprovedUserFromSSS
+									,cm.CustomerName		CustomerName
+									,cm.ClaimMiscCode		ClaimCode
+								FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
+								LEFT JOIN [ClaimMiscellaneous].[misc].[Hospital] h
+									ON h.HospitalId = cm.HospitalId 
+								LEFT JOIN #TmpPersonUser u
+									ON u.[User_ID] = cm.CreatedByUserId
 				) icu
 		ON TmpCPB.ClaimGroupCodeFromCPBD = icu.Code
 	LEFT JOIN [DataCenterV1].[Address].Branch dab

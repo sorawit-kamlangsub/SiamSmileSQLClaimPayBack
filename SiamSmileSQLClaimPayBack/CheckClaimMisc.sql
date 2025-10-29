@@ -1,17 +1,21 @@
 USE [ClaimMiscellaneous]
-GO
-
-DECLARE @ClaimHeaderGroupCode NVARCHAR(50) = 'CHSPO88868100008';
+GO 
 
 SELECT 
 	cm.ClaimHeaderGroupCode		เลขที่บส
+	,pg.ProductGroupDetail		ชื่อกลุ่มผลิตภัณ
+	,cm.ProductTypeId
+	,cm.ProductGroupId
 	,cms.ClaimMiscStatusName    สถานะบส
 	,cm.ClaimAmount				ยอดวางบิล
 	,cph.SumPaymentAmount		ยอดเงินโอนทั้งหมด
 	,cph.UpdatedDate			วันที่โอนเงิน
 	,cp.Amount					ยอดโอนเงินรวมทั้งหมด 
+	,cm.CreatedByUserId
+	,cm.ClaimMiscCode
+INTO #temp
 FROM misc.ClaimMisc cm
-	INNER JOIN misc.ClaimMiscPaymentHeader cph
+	LEFT JOIN misc.ClaimMiscPaymentHeader cph
 		ON cm.ClaimMiscId = cph.ClaimMiscId
 	INNER JOIN 
 	(
@@ -23,21 +27,30 @@ FROM misc.ClaimMisc cm
 		GROUP BY ClaimMiscPaymentHeaderId
 	)cp
 		ON cph.ClaimMiscPaymentHeaderId = cp.ClaimMiscPaymentHeaderId
-	LEFT JOIN misc.ClaimMiscStatus cms
+	INNER JOIN misc.ClaimMiscStatus cms
 		ON cm.ClaimMiscStatusId = cms.ClaimMiscStatusId
+	LEFT JOIN [DataCenterV1].[Product].[ProductGroup] pg 
+		ON cm.ProductGroupId = pg.ProductGroup_ID
 WHERE cm.IsActive = 1
-	AND cph.IsActive = 1 
+	AND cph.IsActive = 1
+	AND cm.ClaimHeaderGroupCode IS NOT NULL
+	AND cm.ClaimMiscStatusId = 3
 
-	AND cm.ClaimHeaderGroupCode = @ClaimHeaderGroupCode;
-
+SELECT * FROM #temp;
 
 SELECT 
 	cpb.ClaimPayBackId
 	,cpbd.ClaimGroupCode
 	,cpbx.ClaimCode
+	,cpb.CreatedDate
 FROM [ClaimPayBack].[dbo].[ClaimPayBack] cpb
 	INNER JOIN [ClaimPayBack].[dbo].[ClaimPayBackDetail] cpbd
 		ON cpb.ClaimPayBackId = cpbd.ClaimPayBackId
 	INNER JOIN [ClaimPayBack].[dbo].[ClaimPayBackXClaim] cpbx
 		ON cpbd.ClaimPayBackDetailId = cpbx.ClaimPayBackDetailId
-WHERE cpbd.ClaimGroupCode = @ClaimHeaderGroupCode;
+	INNER JOIN #temp tmp 
+		ON cpbd.ClaimGroupCode = tmp.เลขที่บส
+WHERE cpbd.IsActive = 1
+
+
+IF OBJECT_ID('tempdb..#temp') IS NOT NULL  DROP TABLE #temp;	
