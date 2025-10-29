@@ -1,10 +1,11 @@
 USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_TmpClaimHeaderGroupImport_Validate_V2]    Script Date: 16/10/2568 9:00:48 ******/
+/****** Object:  StoredProcedure [dbo].[usp_TmpClaimHeaderGroupImport_Validate_V2]    Script Date: 29/10/2568 14:48:17 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+
 
 
 -- =============================================
@@ -18,6 +19,7 @@ GO
 -- update date: 2024-07-09 Krekpon.Mind เพิ่ม IsActive
 -- update date: 2025-04-11 Wetpisit.P เพิ่ม validate เช็คเลขกรมธรรม์ใน บ.ส.โดยดึงข้อมูล PolicyNo มาใส่ #TmpDetail เพื่อนำไปเช็ค,เพิ่มเงื่อนไขการเช็คจำนวนเอกสารใน #tmpDoc
 -- update date: 2025-10-02 10:02 เพิ่ม IsActive ใน LEFT JOIN ClaimHeaderGroupImport
+-- Update date: 2025-10-16 14:01 Clear comment Krekpon.D
 -- Description:	
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_TmpClaimHeaderGroupImport_Validate_V2]
@@ -28,7 +30,6 @@ BEGIN
 	
 SET NOCOUNT ON;
 
---DECLARE @ClaimHeaderGroupTypeId INT;
 DECLARE @ClaimHeaderSSS INT = 2;
 DECLARE @ClaimHeaderSSSPA INT = 3;
 DECLARE @ClaimCompensate INT = 4;
@@ -107,10 +108,6 @@ IF @IsResult = 1
 			INNER JOIN #Tmp x
 				ON m.ClaimHeaderGroupCode = x.ClaimHeaderGroupCode;
 
-
-
-		--SELECT @ClaimHeaderGroupTypeId = ClaimHeaderGroupTypeId
-		--FROM #Tmp
 		
 		SELECT d.TmpClaimHeaderGroupImportId
 			,d.ClaimHeaderGroupCodeInDB
@@ -246,33 +243,7 @@ IF @IsResult = 1
 						INNER JOIN #TmpClaimType ct
 							ON td.ClaimHeaderGroupCodeInDB = ct.ClaimHeaderGroupCode
 					WHERE dl.DocumentTypeId IN (5,6)
-					--AND	(
-					--		(	
-					--			td.ProductGroup IN('P30','1000') AND --PA30,PH
-					--				(
-					--					(
-					--						ct.ClaimTypeCode = @ClaimTypeCode_H AND dl.DocumentListID IN (24,134) --เคลมโรงพยาบาล(24) กับหนังสือแจ้งชำระค่ารักษาพยาบาล (134)
-					--					)
-					--					OR
-					--					(
-					--						ct.ClaimTypeCode = @ClaimTypeCode_C AND dl.DocumentListID IN (22,23) --เคลมสาขา(22) เคลมลูกค้า (23)
-					--					)
-					--				)
-					--		)
-					--		OR 
-					--		(
-					--			td.ProductGroup = '2000' AND  --PA
-					--			(
-					--				(
-					--					ct.ClaimTypeCode = @ClaimTypeCode_H AND dl.DocumentListID IN(26,135) --เคลมโรงพยาบาล(26) กับหนังสือแจ้งชำระค่ารักษาพยาบาล (135)
-					--				)
-					--				OR 
-					--				(
-					--					ct.ClaimTypeCode = @ClaimTypeCode_C AND dl.DocumentListID IN (25) --เคลมโรงเรียน(25)
-					--				)
-					--			)
-					--		)
-					--	) 
+
 					AND d.IsEnable = 1
 					GROUP BY td.ClaimHeaderGroupCodeInDB, td.ClaimHeaderCodeInDB
 				)d
@@ -294,22 +265,6 @@ IF @IsResult = 1
 				,s.ClaimHeaderGroupCode AS ClaimHeaderGroupCodeInFlie
 				,c.ClaimHeaderGroupCodeInDB
 
-				--,CONCAT(
-				--		CASE
-				--			WHEN s.ClaimHeaderGroupCode IS NOT NULL THEN N'รายการบส.ซ้ำกันในไฟล์'
-				--			WHEN img.ClaimHeaderGroupCode IS NOT NULL THEN N'รายการบส.ซ้ำกับในระบบ'
-				--			WHEN c.ClaimHeaderGroupCodeInDB IS NULL THEN N'ไม่พบเลขบส.นี้ในฐานข้อมูล'
-				--			WHEN ISNULL(t.ItemCount,0)<>ISNULL(c.ItemCountInDB,0) THEN N'ข้อมูลจำนวนเคลมไม่ตรงกับในฐานข้อมูล'
-				--			WHEN ISNULL(t.TotalAmount ,0) = 0 THEN N'ไม่มียอดเงินในรายการ บ.ส.'
-				--			WHEN ISNULL(t.TotalAmount,0)<>ISNULL(c.TotalAmountInDB,0) THEN N'ข้อมูลจำนวนเงินรวมไม่ตรงกับในฐานข้อมูล'
-				--			WHEN imd.ClaimCodeInSystem IS NOT NULL AND t.ClaimHeaderGroupCode LIKE '%_0' THEN N'มีรายการเคลมนี้ในระบบแล้ว'
-				--			WHEN t.ClaimHeaderGroupTypeId IN (@ClaimHeaderSSS,@ClaimHeaderPA30) AND pg.[2000] >0 AND pg.[1000]>0 THEN N'มีรายการ PH และ PA30 อยู่'
-				--			ELSE ''  
-				--			END 
-				--		,IIF(a.ClaimTypeCode = '',N'ไม่ได้ MappingType (H,C),','')
-				--		,''
-
-				--	)ValidateResult
 				----------------------Update 2023-08-08--------------------
 				,CONCAT
 					(
@@ -319,9 +274,7 @@ IF @IsResult = 1
 						,IIF(t.ItemCount<>ISNULL(c.ItemCountInDB,0) AND t.ClaimHeaderGroupTypeId = pg.ProductGroupId AND s.ClaimHeaderGroupCode IS NULL,N'ข้อมูลจำนวนเคลมไม่ตรงกับในฐานข้อมูล, ','')
 						,IIF(t.TotalAmount = 0,N'ไม่มียอดเงินในรายการ บ.ส., ','')
 						,IIF(t.TotalAmount<>ISNULL(c.TotalAmountInDB,0) AND t.ClaimHeaderGroupTypeId = pg.ProductGroupId AND s.ClaimHeaderGroupCode IS NULL,CONCAT(N'ข้อมูลจำนวนเงินรวมไม่ตรงกับในฐานข้อมูล','( ',FORMAT(c.TotalAmountInDB,'N'),'), '),'')
-						--,IIF(imd.ClaimCodeInSystem IS NOT NULL AND t.ClaimHeaderGroupCode LIKE '%_0',N'มีรายการเคลมนี้ในระบบแล้ว, ','')
 						,IIF(imd.ClaimCodeInSystem IS NOT NULL AND t.ClaimHeaderGroupCode LIKE '%_0' AND cbd.ClaimGroupCode = t.ClaimHeaderGroupCode AND imd.ClaimHeaderGroupCode = t.ClaimHeaderGroupCode ,N'มีรายการเคลมนี้ในระบบแล้ว, ','') -- Update 2024-02-01 Kittisak.Ph เช็ครายการเคลมซ้ำ ใน บ.ส.เดียวกัน --Update 2024-06-17 Krekpon.Mind เพิ่มเงื่อนไข
-						--,IIF(t.ClaimHeaderGroupTypeId IN (@ClaimHeaderSSS,@ClaimHeaderPA30) AND pg.[2000] >0 AND pg.[1000]>0 ,N'มีรายการ PH และ PA30 อยู่, ','')
 						,IIF(t.ClaimHeaderGroupTypeId IN (@ClaimHeaderSSS,@ClaimHeaderPA30) AND t.ClaimHeaderGroupTypeId <> pg.ProductGroupId,CONCAT(N'รายการ บ.ส. นี้ ไม่ใช่กลุ่ม', 
 									' ',IIF(t.ClaimHeaderGroupTypeId = @ClaimHeaderSSS,'PH','PA30'),N' ตามกลุ่มที่ระบุ, '),'')
 						,IIF(doc.CountDoc > 0 ,N'บ.ส. ไม่มีเอกสารแนบ, ','')
@@ -357,8 +310,7 @@ IF @IsResult = 1
 				(
 					SELECT  d.ClaimHeaderGroupCodeInDB AS ClaimCodeInSystem,
 							imd.ClaimHeaderGroupCode AS ClaimHeaderGroupCode --Update 2024-06-17 Krekpon.Mind เพิ่มเงื่อนไข
-							
-						--,MAX(imd.ClaimCode) xClaimCode
+
 					FROM #TmpDetail d
 						INNER JOIN dbo.ClaimHeaderGroupImportDetail imd 
 							ON d.ClaimHeaderCodeInDB = imd.ClaimCode
@@ -376,39 +328,6 @@ IF @IsResult = 1
 					HAVING COUNT(TmpClaimHeaderGroupImportId) >1
 				)s
 				ON t.ClaimHeaderGroupCode = s.ClaimHeaderGroupCode
-			--LEFT JOIN 
-			--	(
-			--		SELECT p.[2000]
-			--				,p.[1000] 
-			--				,p.TmpCode
-			--		FROM
-			--			(
-			--				SELECT 
-			--					hg.ProductGroup_id
-			--					,t.TmpCode
-			--					,t.TmpClaimHeaderGroupImportId
-			--				FROM #Tmp t
-			--					LEFT JOIN SSS.dbo.DB_ClaimHeaderGroup hg
-			--						ON t.ClaimHeaderGroupCode = hg.Code
-			--			)d
-			--		PIVOT
-			--		(
-			--			COUNT(TmpClaimHeaderGroupImportId) FOR ProductGroup_id IN ([1000],[2000])
-			--		)p
-			--	)pg
-			--	ON pg.TmpCode = t.TmpCode
-			--LEFT JOIN
-			--	(
-			--				SELECT 
-			--					hg.Code ClaimHeaderGroupCode
-			--					,CASE hg.ProductGroup_id
-			--						WHEN '1000' THEN 2
-			--						WHEN '2000' THEN 5
-			--						ELSE ''
-			--					END AS ProductGroup_id
-			--				FROM SSS.dbo.DB_ClaimHeaderGroup hg
-			--			)d
-			--			ON t.ClaimHeaderGroupCode = d.ClaimHeaderGroupCode
 
 			LEFT JOIN #TmpClaimType a
 				ON t.TmpClaimHeaderGroupImportId = a.TmpClaimHeaderGroupImportId
@@ -424,7 +343,6 @@ IF @IsResult = 1
 				ON t.ClaimHeaderGroupCode = doc.ClaimHeaderGroupCodeInDB
 			-------------------------------------------------------------------	
 			LEFT JOIN [ClaimPayBack].[dbo].[ClaimPayBackDetail] cbd ON cbd.ClaimGroupCode = t.ClaimHeaderGroupCode
-			--WHERE img.IsActive=1; --Kittisak.Ph 2024-01-24 แก้ไขให้ Import ไฟล์ได้ กรณีมีการ Re Import ไฟล์ บ.ส.
 			SELECT @CountIsError = COUNT(ValidateResult)
 			FROM #TmpUpdate
 			WHERE TmpCode = @TmpCode 
@@ -501,10 +419,6 @@ ELSE				BEGIN	SET @Result = 'Failure'END
 		,@Result Result					  					
 		,@Msg	 Msg 		
 
-
-
-
---IsResult = 1 and Result = 1  ข้อมูลถูกต้อง เปิดปุ่มให้บันทึกได้
 
 
 END
