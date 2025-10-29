@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [Claim].[usp_ClaimPayBackDetail_InsertV4]    Script Date: 22/10/2568 14:07:29 ******/
+/****** Object:  StoredProcedure [Claim].[usp_ClaimPayBackDetail_InsertV4]    Script Date: 29/10/2568 10:53:45 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -301,7 +301,7 @@ BEGIN
 				  , CustomerName
 				  ,	AdmitDate
 				  ,	SchoolName 
-				  ,GroupId
+				  , GroupId
 				)
 				SELECT
 					cm.ClaimHeaderGroupCode
@@ -329,12 +329,8 @@ BEGIN
 					,NULL						SchoolName
 					,1							GroupId
 				FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
-					INNER JOIN [ClaimPayBack].[dbo].[ClaimPayBackProductGroup] pd
-						ON cm.ProductTypeId = pd.MappingXCliamMisc
-					INNER JOIN [ClaimMiscellaneous].[misc].[ClaimMiscPaymentHeader] cmh
-						ON cm.ClaimMiscId = cmh.ClaimMiscId
-					INNER JOIN [ClaimMiscellaneous].[misc].[ClaimMiscPayment] cmp
-						ON cmh.ClaimMiscPaymentHeaderId = cmp.ClaimMiscPaymentHeaderId
+					LEFT JOIN [DataCenterV1].[Product].[ProductGroup] pd
+						ON cm.ProductGroupMappingId = pd.ProductGroup_ID
 					LEFT JOIN  
 						(
 							SELECT
@@ -375,13 +371,7 @@ BEGIN
 						GROUP BY x.ClaimMiscId
 					) cxa
 						ON cxa.ClaimMiscId = cm.ClaimMiscId
-				WHERE cm.IsActive = 1
-					AND cmh.IsActive = 1
-					AND cm.ClaimMiscStatusId = 3
-					AND cmp.IsActive = 1
-					AND cmp.PaymentStatusId = 4
-					AND cm.ClaimHeaderGroupCode IS NOT NULL
-					AND pd.ProductGroup_ID = @ProductGroupId
+				WHERE cm.IsActive = 1					
 
 				SELECT x.ClaimHeaderGroupCode
 					  ,x.ProductGroupId
