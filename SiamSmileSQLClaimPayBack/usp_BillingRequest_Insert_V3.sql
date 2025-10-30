@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Insert_V3]    Script Date: 30/10/2568 15:14:51 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Insert_V3]    Script Date: 30/10/2568 16:59:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -15,6 +15,7 @@ GO
 --				 2023-03-18 Add	insert ClaimHeaderGroupTypeId in BillingRequestGroup Sahatsawat golffy 06958
 --				 2023-03-07 Add insert InsuranceCompanyName in BillingRequestGroup Sahatsawat golffy 06958
 --				 2025-10-16	Add Parameter @CreatedDateFrom @CreatedDateTo Sorawit kem 
+--				 2025-10-30 Add ClaimMisc Sorawit Kamlangsub
 -- Description:
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_BillingRequest_Insert_V3]
@@ -26,12 +27,6 @@ ALTER PROCEDURE [dbo].[usp_BillingRequest_Insert_V3]
 AS
 BEGIN
 	SET NOCOUNT ON;
-
---DECLARE
---		@CreatedByUserId	INT	 = 1
---		,@BillingDateTo		DATE = '2025-10-31'
---		,@CreatedDateFrom	DATE = '2025-10-29'
---		,@CreatedDateTo		DATE = '2025-10-31'
 
 
 DECLARE @IsResult	BIT			 = 1;
@@ -81,8 +76,6 @@ GROUP BY	g.InsuranceCompanyId
 			,g.InsuranceCompanyName;
 
 DECLARE @TmpResult TABLE (IsResult BIT, Result VARCHAR(100), Msg NVARCHAR(MAX));
-
-SELECT * FROM #TmpLoop
 
 --WHILE Loop---------------------------------
 DECLARE @max INT;
