@@ -1,6 +1,6 @@
 USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImport_Insert]    Script Date: 30/10/2568 11:30:28 ******/
+/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImport_Insert]    Script Date: 30/10/2568 14:43:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -134,6 +134,16 @@ IF @IsResult = 1
 			FROM #Tmp m
 				INNER JOIN SSSPA.dbo.DB_ClaimHeaderGroup g
 					ON m.ClaimHeaderGroupCode = g.Code
+
+			UNION
+
+			SELECT 
+				g.ClaimHeaderGroupCode
+				,g.InsuranceCompanyName	InsuranceCompany_Name
+			FROM #Tmp m
+				INNER JOIN [ClaimMiscellaneous].[misc].[ClaimMisc] g
+					ON m.ClaimHeaderGroupCode = g.ClaimHeaderGroupCode
+
 				) h
 
 		SELECT @ClaimHeaderGroupTypeId = MIN(ClaimHeaderGroupTypeId)
