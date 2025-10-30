@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Sub01_Insert_V2]    Script Date: 10/10/2568 10:12:30 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Sub01_Insert_V2]    Script Date: 30/10/2568 16:55:17 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -16,6 +16,8 @@ GO
 				Change BillingDate to NewBillingDate
 	Update date: 2025-09-25 11:14
 				เพิ่มการ insert ลง ClaimHeaderGroupImportCancel เพื่อลงประวัติการทำรายการ
+	Update date: 2025-10-30 16:56
+				Add ClaimMisc
 */	
 -- Description:	<Description,,>
 -- =============================================
@@ -34,6 +36,18 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
+--DECLARE
+--		@GroupTypeId				INT				= 1
+--		,@ClaimTypeCode				VARCHAR(20)		= NULL
+--		,@InsuranceCompanyId		INT				= 5
+--		,@CreatedByUserId			INT				= 1
+--		,@BillingDate				DATE			= '2025-10-30'
+--		,@ClaimHeaderGroupTypeId	INT				= 6
+--		,@InsuranceCompanyName		NVARCHAR(300)	= 'บริษัท ชับบ์สามัคคีประกันภัย จำกัด (มหาชน)'
+--		,@NewBillingDate			DATE			= '2025-10-30'
+--		,@CreatedDateFrom			DATE			= '2025-10-29'
+--		,@CreatedDateTo				DATE			= '2025-10-30'
+--		;
 
 --@GroupTypeId
 --1 SSS + โอนแยก + PA30
@@ -85,14 +99,14 @@ IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 	AND i.ClaimHeaderGroupImportStatusId = 2
 	AND i.BillingRequestGroupId IS NULL
 	AND i.InsuranceCompanyId = @pInsuranceCompanyId
-	AND i.ClaimTypeCode = @ClaimTypeCode
+	AND (i.ClaimTypeCode = @ClaimTypeCode OR @ClaimTypeCode IS NULL)
 	AND	i.CreatedDate >	@CreatedDateFrom
 	AND	i.CreatedDate <=  @CreatedDateTo
 	AND f.ClaimHeaderGroupTypeId = @ClaimHeaderGroupTypeId
 	AND 
 	(
 		(
-			@pGroupTypeId = 1 AND f.ClaimHeaderGroupTypeId IN (2,4,5)
+			@pGroupTypeId = 1 AND f.ClaimHeaderGroupTypeId IN (2,4,5,6)
 		)
 		OR	
 		(
