@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Insert_V3]    Script Date: 16/10/2568 10:21:15 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Insert_V3]    Script Date: 30/10/2568 15:14:51 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -50,6 +50,7 @@ FROM
 						WHEN f.ClaimHeaderGroupTypeId = 3 THEN 2
 						WHEN f.ClaimHeaderGroupTypeId = 4 THEN 1
 						WHEN f.ClaimHeaderGroupTypeId = 5 THEN 1
+						WHEN f.ClaimHeaderGroupTypeId = 6 THEN 1
 						ELSE NULL
 						END	GroupTypeId
 					,i.ClaimTypeCode
