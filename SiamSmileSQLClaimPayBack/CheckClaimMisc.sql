@@ -13,6 +13,7 @@ SELECT
 	,cp.Amount					ยอดโอนเงินรวมทั้งหมด 
 	,cm.CreatedByUserId
 	,cm.ClaimMiscCode
+	,cm.ClaimOnLineCode
 INTO #temp
 FROM misc.ClaimMisc cm
 	LEFT JOIN misc.ClaimMiscPaymentHeader cph
