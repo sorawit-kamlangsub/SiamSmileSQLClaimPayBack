@@ -33,6 +33,12 @@ BEGIN
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
 
+--DECLARE
+--	@TmpCode VARCHAR(20)  = 'IMCHG6810000133'
+--	,@FileName NVARCHAR(255) = 'EX_importBillingRequestGroup.xlsx'
+--	,@CreateByUseId INT = 0
+--	,@ImportFrom INT = 1;
+
 DECLARE @ClaimHeaderSSS INT = 2;
 DECLARE @ClaimHeaderSSSPA INT = 3;
 DECLARE @ClaimCompensate INT = 4;
@@ -606,7 +612,132 @@ IF @IsResult = 1
 				--WHERE @ClaimHeaderGroupTypeId = @ClaimCompensate
 			END
 
-		
+		--ClaimMisc
+		ELSE IF @ClaimHeaderGroupTypeId = 6
+			BEGIN
+				INSERT INTO @TmpDetail
+				(
+				    ClaimHeaderGroupCode,
+				    ClaimCode,
+				    Province,
+				    IdentityCard,
+				    CustName,
+				    DateHappen,
+				    Pay,
+				    HospitalId,
+				    HospitalName,
+				    DateIn,
+				    DateOut,
+				    ApplicationCode,
+				    ProductId,
+				    Product,
+				    DateNotice,
+				    StartCoverDate,
+				    ClaimAdmitTypeCode,
+				    ClaimAdmitType,
+				    ClaimType,
+				    ICD10_1Code,
+				    ICD10,
+				    IPDCount,
+				    ICUCount,
+				    Net,
+				    Compensate_Include,
+				    Pay_Total,
+				    DiscountSS,
+				    PaySS_Total,
+				    PolicyNo,
+				    SchoolName,
+				    CustomerDetailCode,
+				    SchoolLevel,
+				    Accident,
+				    ChiefComplain,
+				    Orgen,
+				    Amount_Compeasate_in,
+				    Amount_Compeasate_out,
+				    Amount_Pay,
+				    Amount_Dead,
+				    Remark,
+				    CreatedByBranchCode
+				)
+				SELECT	
+					cm.ClaimHeaderGroupCode							ClaimHeaderGroupCode
+					,cm.ClaimMiscCode								ClaimCode
+					,NULL											Province
+					,cm.CitizenId									IdentityCard
+					,cm.CustomerName								CustName
+					,cm.DateHappen									DateHappen
+					,cm.ClaimAmount									Pay
+					,cm.HospitalId									HospitalId
+					,cm.HospitalName								HospitalName
+					,cm.DateIn										DateIn
+					,cm.DateOut										DateOut
+					,cm.ApplicationCode								ApplicationCode
+					,cm.ProductGroupId								ProductId
+					,pd.ProductGroupDetail							[Product]
+					,cm.DateNotice									DateNotice
+					,cm.StartCoverDate								StartCoverDate
+					,NULL											ClaimAdmitTypeCode
+					,cxa.ClaimAdmitType								ClaimAdmitType
+					,NULL											ClaimType
+					,NULL											ICD10_1Code
+					,NULL											ICD10
+					,NULL											IPDCount
+					,cm.ICUCount									ICUCount
+					,cm.ClaimAmount									Net
+					,@Compensate_Include							Compensate_Include
+					,cm.ClaimAmount									Pay_Total
+					,NULL											DiscountSS
+					,cm.ClaimAmount									PaySS_Total
+					,cm.PolicyNo									PolicyNo
+					,NULL											SchoolName
+					,NULL											CustomerDetailCode
+					,NULL											SchoolLevel
+					,NULL											Accident
+					,chp.ChiefComplainName							ChiefComplain
+					,NULL											Orgen
+					,NULL											Amount_Compeasate_in
+					,NULL											Amount_Compeasate_out
+					,cm.ClaimAmount									Amount_Pay
+					,NULL											Amount_Dead
+					,cm.RemarkClaim									Remark	
+					,dtB.tempcode									CreatedByBranchCode  
+				FROM #Tmp t
+				LEFT JOIN [ClaimMiscellaneous].[misc].[ClaimMisc] cm
+					ON cm.ClaimHeaderGroupCode = t.ClaimHeaderGroupCode
+				LEFT JOIN [DataCenterV1].[Product].[ProductGroup] pd
+					ON cm.ProductGroupId = pd.ProductGroup_ID
+				LEFT JOIN 
+				(
+					SELECT 
+						x.ClaimMiscId
+						,STUFF((
+							SELECT ',' + a.ClaimAdmitTypeName
+							FROM [ClaimMiscellaneous].[misc].[ClaimMiscXClaimAdmitType] x2
+							JOIN [ClaimMiscellaneous].[misc].[ClaimAdmitType] a
+								ON a.ClaimAdmitTypeId = x2.ClaimAdmitTypeId
+							WHERE x2.IsActive = 1
+							  AND a.IsActive  = 1
+							  AND x2.ClaimMiscId = x.ClaimMiscId
+							FOR XML PATH(''), TYPE
+						).value('.', 'nvarchar(255)'), 1, 1, '')	ClaimAdmitType
+					FROM [ClaimMiscellaneous].[misc].[ClaimMiscXClaimAdmitType] x
+					WHERE x.IsActive = 1
+					GROUP BY x.ClaimMiscId
+				) cxa
+					ON cxa.ClaimMiscId = cm.ClaimMiscId
+				LEFT JOIN 
+					(
+						SELECT
+							ChiefComplainId
+							,ChiefComplainName
+						FROM [ClaimMiscellaneous].[misc].[ChiefComplain]
+						WHERE IsActive = 1
+					) chp
+					ON chp.ChiefComplainId = cm.ChiefComplainId
+				LEFT JOIN DataCenterV1.Address.Branch dtB
+					ON cm.BranchId = dtB.Branch_ID;
+
+			END
 
 
 		SELECT m.ClaimCode
@@ -642,14 +773,14 @@ IF @IsResult = 1
 							 ,UpdatedDate
 							 ,UpdatedByUserId
 						 )
-				SELECT @FileName
-					,@CountItemFile
-					,@ClaimHeaderGroupTypeId 
-					,1
-					,@D
-					,@CreateByUseId
-					,@D
-					,@CreateByUseId
+				SELECT @FileName				[FileName]
+					,@CountItemFile				ItemCount
+					,@ClaimHeaderGroupTypeId	ClaimHeaderGroupTypeId
+					,1							IsActive
+					,@D							CreatedDate
+					,@CreateByUseId				CreatedByUserId
+					,@D							UpdatedDate
+					,@CreateByUseId				UpdatedByUserId
 
 				SET @ClaimHeaderGroupImportFileId = SCOPE_IDENTITY();
 
@@ -674,19 +805,19 @@ IF @IsResult = 1
 						 )
 				OUTPUT Inserted.ClaimHeaderGroupImportId , Inserted.ClaimHeaderGroupCode INTO @TmpOut
 				SELECT t1.ClaimHeaderGroupCode
-					,@ClaimHeaderGroupImportFileId
-					,t1.ItemCount
-					,t1.TotalAmount
+					,@ClaimHeaderGroupImportFileId	ClaimGroupImportFileId
+					,t1.ItemCount					
+					,t1.TotalAmount					
 					
-					,t1.BillingDate
-					,2
+					,t1.BillingDate					
+					,2								ClaimHeaderGroupImportStatusId
 					,t1.InsuranceCompanyId
-					,NULL
-					,1
-					,@D
-					,@CreateByUseId
-					,@D
-					,@CreateByUseId
+					,NULL							BillingRequestGroupId
+					,1								IsActive
+					,@D								CreatedDate
+					,@CreateByUseId					CreatedByUserId
+					,@D								UpdatedDate
+					,@CreateByUseId					CreatedByUserId
 					,t1.ClaimTypeCode
 					,tc.InsuranceCompany_Name
 				FROM #Tmp t1
@@ -744,7 +875,8 @@ IF @IsResult = 1
 							 ,UpdatedByUserId
 							 ,CreatedByBranchId
 						 )
-				SELECT u.ClaimHeaderGroupImportId
+				SELECT 
+					u.ClaimHeaderGroupImportId
 					,m.ClaimCode
 					,m.ClaimHeaderGroupCode
 					,m.Province
@@ -777,7 +909,7 @@ IF @IsResult = 1
 					,CASE 	
 						WHEN @ClaimHeaderGroupTypeId IN (2,4,5) THEN p.PolicyNo
 						ELSE m.PolicyNo
-						END
+						END	PolicyNo
 					,m.SchoolName
 					,m.CustomerDetailCode
 					,m.SchoolLevel
@@ -789,14 +921,14 @@ IF @IsResult = 1
 					,m.Amount_Pay
 					,m.Amount_Dead
 					,m.Remark
-					,1
-					,@D
-					,@CreateByUseId
-					,@D
-					,@CreateByUseId
+					,1						IsActive
+					,@D						CreatedDate
+					,@CreateByUseId			CreatedByUserId
+					,@D						UpdatedDate
+					,@CreateByUseId			UpdatedByUserId
 					,dtB.Branch_ID			BranchId
 				FROM @TmpDetail m
-					INNER JOIN @TmpOut u
+					LEFT JOIN @TmpOut u
 						ON m.ClaimHeaderGroupCode = u.ClaimHeaderGroupCode
 					LEFT JOIN #TmpDcrPolicyNo p 
 						ON m.ClaimCode = p.ClaimCode
@@ -804,6 +936,7 @@ IF @IsResult = 1
 						ON m.CreatedByBranchCode = dtB.tempcode;
 
 				--Delete TmpClaimHeaderGroupImport
+				--SELECT *
 				DELETE m
 				FROM dbo.TmpClaimHeaderGroupImport m 
 				WHERE m.TmpCode = @TmpCode;
@@ -841,8 +974,8 @@ IF @IsResult = 1
 		IF OBJECT_ID('tempdb..#TmpFile') IS NOT NULL  DROP TABLE #TmpFile;
 		IF OBJECT_ID('tempdb..#TmpGroup') IS NOT NULL  DROP TABLE #TmpGroup;
 		IF OBJECT_ID('tempdb..#TmpCompany') IS NOT NULL  DROP TABLE #TmpCompany;
-		IF OBJECT_ID('tempdb..@TmpDetail') IS NOT NULL  DELETE FROM @TmpDetail;
 		IF OBJECT_ID('tempdb..#TmpDcrPolicyNo') IS NOT NULL  DROP TABLE #TmpDcrPolicyNo;	
+		IF OBJECT_ID('tempdb..@TmpDetail') IS NOT NULL  DELETE FROM @TmpDetail;
 	END	;
 
 										  					
