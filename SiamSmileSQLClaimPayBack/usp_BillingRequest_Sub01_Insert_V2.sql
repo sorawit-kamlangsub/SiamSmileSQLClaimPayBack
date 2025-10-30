@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Sub01_Insert_V2]    Script Date: 30/10/2568 16:55:17 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Sub01_Insert_V2]    Script Date: 30/10/2568 17:01:40 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -16,7 +16,7 @@ GO
 				Change BillingDate to NewBillingDate
 	Update date: 2025-09-25 11:14
 				เพิ่มการ insert ลง ClaimHeaderGroupImportCancel เพื่อลงประวัติการทำรายการ
-	Update date: 2025-10-30 16:56
+	Update date: 2025-10-30 16:56 Sorawit Kamlangsub
 				Add ClaimMisc
 */	
 -- Description:	<Description,,>
