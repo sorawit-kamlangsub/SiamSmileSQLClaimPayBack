@@ -27,6 +27,12 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
+--DECLARE
+--		@CreatedByUserId	INT	 = 1
+--		,@BillingDateTo		DATE = '2025-10-31'
+--		,@CreatedDateFrom	DATE = '2025-10-29'
+--		,@CreatedDateTo		DATE = '2025-10-31'
+
 
 DECLARE @IsResult	BIT			 = 1;
 DECLARE @Result		VARCHAR(100) = '';
@@ -75,6 +81,8 @@ GROUP BY	g.InsuranceCompanyId
 			,g.InsuranceCompanyName;
 
 DECLARE @TmpResult TABLE (IsResult BIT, Result VARCHAR(100), Msg NVARCHAR(MAX));
+
+SELECT * FROM #TmpLoop
 
 --WHILE Loop---------------------------------
 DECLARE @max INT;
