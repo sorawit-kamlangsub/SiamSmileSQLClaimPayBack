@@ -30,11 +30,12 @@ AS
 BEGIN
 	
 SET NOCOUNT ON;
---DECLARE @TmpCode VARCHAR(20) = 'IMCHG6810000131'
+--DECLARE @TmpCode VARCHAR(20) = 'IMCHG6810000133'
 DECLARE @ClaimHeaderSSS INT = 2;
 DECLARE @ClaimHeaderSSSPA INT = 3;
 DECLARE @ClaimCompensate INT = 4;
 DECLARE @ClaimHeaderPA30 INT = 5;
+DECLARE @ClaimMisc INT = 6;
 DECLARE @IsResult    BIT             = 1;		
 DECLARE @Result        VARCHAR(100) = '';		
 DECLARE @Msg        NVARCHAR(500)= '';	
@@ -51,6 +52,7 @@ VALUES
 ,(3,'2000')
 ,(4,'2222')
 ,(5,'P30')
+,(6,'Misc')
 DECLARE @ClaimTypeCode_H	VARCHAR(20) = '1000'
 DECLARE @ClaimTypeCode_C	VARCHAR(20) = '2000'
 ----------------------------------------------
@@ -218,7 +220,7 @@ IF @IsResult = 1
 					,cm.ClaimAmount					TotalAmountSS
 					,cm.InsuranceCompanyId			InsuranceCompanyId
 					,NULL							ClaimHeaderCodeInDB
-					,NULL							ProductGroup
+					,'Misc'							ProductGroup
 					,cm.PolicyNo					PolicyNo
 					,t.ClaimHeaderGroupTypeId
 					,doc.CountDoc					CountDoc
@@ -314,7 +316,6 @@ IF @IsResult = 1
 				,img.ClaimHeaderGroupCode AS ClaimHeaderGroupInSystem
 				,s.ClaimHeaderGroupCode AS ClaimHeaderGroupCodeInFlie
 				,c.ClaimHeaderGroupCodeInDB
-
 				----------------------Update 2023-08-08--------------------
 				,CONCAT
 					(
@@ -325,8 +326,25 @@ IF @IsResult = 1
 						,IIF(t.TotalAmount = 0,N'ไม่มียอดเงินในรายการ บ.ส., ','')
 						,IIF(t.TotalAmount<>ISNULL(c.TotalAmountInDB,0) AND t.ClaimHeaderGroupTypeId = pg.ProductGroupId AND s.ClaimHeaderGroupCode IS NULL,CONCAT(N'ข้อมูลจำนวนเงินรวมไม่ตรงกับในฐานข้อมูล','( ',FORMAT(c.TotalAmountInDB,'N'),'), '),'')
 						,IIF(imd.ClaimCodeInSystem IS NOT NULL AND t.ClaimHeaderGroupCode LIKE '%_0' AND cbd.ClaimGroupCode = t.ClaimHeaderGroupCode AND imd.ClaimHeaderGroupCode = t.ClaimHeaderGroupCode ,N'มีรายการเคลมนี้ในระบบแล้ว, ','') -- Update 2024-02-01 Kittisak.Ph เช็ครายการเคลมซ้ำ ใน บ.ส.เดียวกัน --Update 2024-06-17 Krekpon.Mind เพิ่มเงื่อนไข
-						,IIF(t.ClaimHeaderGroupTypeId IN (@ClaimHeaderSSS,@ClaimHeaderPA30) AND t.ClaimHeaderGroupTypeId <> pg.ProductGroupId,CONCAT(N'รายการ บ.ส. นี้ ไม่ใช่กลุ่ม', 
-									' ',IIF(t.ClaimHeaderGroupTypeId = @ClaimHeaderSSS,'PH','PA30'),N' ตามกลุ่มที่ระบุ, '),'')
+						,IIF(t.ClaimHeaderGroupTypeId <> pg.ProductGroupId ,CONCAT(N'รายการ บ.ส. นี้ ไม่ใช่กลุ่ม', 
+									' ',
+									--IIF(t.ClaimHeaderGroupTypeId = @ClaimHeaderSSS,'PH','PA30')
+									CASE
+										WHEN
+											t.ClaimHeaderGroupTypeId = @ClaimHeaderSSS
+										THEN 'PH'
+										WHEN 
+											t.ClaimHeaderGroupTypeId = @ClaimHeaderSSSPA
+										THEN 
+											'PA30'
+										WHEN 
+											t.ClaimHeaderGroupTypeId = @ClaimMisc
+										THEN 
+											'เบ็ดเตล็ด'
+										ELSE
+											'-'
+									END
+									,N' ตามกลุ่มที่ระบุ, '),'')
 						,IIF(doc.CountDoc > 0 ,N'บ.ส. ไม่มีเอกสารแนบ, ','')
 						,IIF(a.ClaimTypeCode = '',N'ไม่ได้ MappingType (H,C), ','')
 
@@ -334,7 +352,8 @@ IF @IsResult = 1
 					)ValidateResult
 				---------------------------------------------------------------
 				,a.ClaimTypeCode
-
+				,t.ClaimHeaderGroupTypeId
+				,pg.ProductGroupId
 		INTO #TmpUpdate
 		FROM #Tmp t
 			LEFT JOIN 
@@ -359,9 +378,8 @@ IF @IsResult = 1
 				ON t.ClaimHeaderGroupCode = img.ClaimHeaderGroupCode
 			LEFT JOIN
 				(
-					SELECT  d.ClaimHeaderGroupCodeInDB AS ClaimCodeInSystem,
-							imd.ClaimHeaderGroupCode AS ClaimHeaderGroupCode --Update 2024-06-17 Krekpon.Mind เพิ่มเงื่อนไข
-
+					SELECT  d.ClaimHeaderGroupCodeInDB AS ClaimCodeInSystem
+							,imd.ClaimHeaderGroupCode AS ClaimHeaderGroupCode --Update 2024-06-17 Krekpon.Mind เพิ่มเงื่อนไข
 					FROM #TmpDetail d
 						INNER JOIN dbo.ClaimHeaderGroupImportDetail imd 
 							ON d.ClaimHeaderCodeInDB = imd.ClaimCode
@@ -426,8 +444,9 @@ IF @IsResult = 1
                      , CountDoc 
 					 ,TotalAmountSS
 					 ,ValidateDetailResult
-					 ,IIF(ValidateDetailResult = '',1,0)
+					 ,IIF(ValidateDetailResult = '',1,0)	IsValid
 				FROM #TmpDoc 
+				WHERE ClaimHeaderGroupCodeInDB IS NOT NULL
 				ORDER BY TmpClaimHeaderGroupImportId;
 
 				--SELECT *
