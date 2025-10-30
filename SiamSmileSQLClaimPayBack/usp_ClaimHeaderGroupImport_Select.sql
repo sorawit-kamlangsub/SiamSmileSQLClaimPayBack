@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImport_Select]    Script Date: 22/10/2568 15:52:42 ******/
+/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImport_Select]    Script Date: 30/10/2568 14:33:55 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -148,6 +148,15 @@ BEGIN
 					ON et.EmployeeTeam_ID = e.EmployeeTeam_ID
 				LEFT JOIN [DataCenterV1].[Address].[Branch] bh
 					ON bh.Branch_ID = et.Branch_ID
+
+			UNION ALL
+			
+			SELECT 
+				cm.ClaimHeaderGroupCode	ClaimHeaderGroup_id
+				,bh.tempcode			Branch_id
+			FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
+				LEFT JOIN [DataCenterV1].[Address].[Branch] bh
+					ON bh.Branch_ID = cm.BranchId
 
 			) u
 		) x
