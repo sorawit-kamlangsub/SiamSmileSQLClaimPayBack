@@ -27,7 +27,7 @@ SELECT
 	,be.PolicyNo	
 	,be.[Product]	
 	,be.ClaimCode
-	,NULL	BranchName
+	,NULL				BranchName
 	,be.SchoolName	
 	,be.CustName	
 	,be.DateHappen
@@ -36,21 +36,21 @@ SELECT
 	,be.DateOut
 	,be.ChiefComplain
 	,be.Accident
-	,NULL	Injury
-	,NULL	Organs
+	,NULL				Injury
+	,NULL				Organs
 	,be.Remark
-	,NULL	CompensationIPD
-	,NULL	CompensationOPD
-	,NULL	ExpenseIPD
-	,NULL	ExpenseOPD
-	,NULL	Dead
-	,NULL	Expense
-	,NULL	ClaimPayBackAmount
-	,NULL	UnCoverAmount
-	,NULL	TotalPay
-	,NULL	PayRemark
-	,NULL	ContinueClaim
-	,NULL	DocumentLink
+	,NULL				CompensationIPD
+	,NULL				CompensationOPD
+	,NULL				ExpenseIPD
+	,NULL				ExpenseOPD
+	,NULL				Dead
+	,NULL				Expense
+	,NULL				ClaimPayBackAmount
+	,NULL				UnCoverAmount
+	,NULL				TotalPay
+	,NULL				PayRemark
+	,NULL				ContinueClaim
+	,NULL				DocumentLink
 FROM BillingExport be
 WHERE be.ClaimCode = @ClaimCode
 AND be.ClaimHeaderGroupTypeId = @BillingRequestGroupCode
