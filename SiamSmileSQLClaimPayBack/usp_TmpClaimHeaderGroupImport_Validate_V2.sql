@@ -1,6 +1,6 @@
 USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_TmpClaimHeaderGroupImport_Validate_V2]    Script Date: 29/10/2568 15:19:43 ******/
+/****** Object:  StoredProcedure [dbo].[usp_TmpClaimHeaderGroupImport_Validate_V2]    Script Date: 3/11/2568 14:05:27 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -218,7 +218,7 @@ IF @IsResult = 1
 					,cm.ClaimHeaderGroupCode		ClaimHeaderGroupCodeInDB
 					,cm.ClaimAmount					TotalAmount
 					,cm.ClaimAmount					TotalAmountSS
-					,cm.InsuranceCompanyId			InsuranceCompanyId
+					,org.Organize_ID				InsuranceCompanyId
 					,NULL							ClaimHeaderCodeInDB
 					,'Misc'							ProductGroup
 					,cm.PolicyNo					PolicyNo
@@ -227,6 +227,10 @@ IF @IsResult = 1
 				FROM #Tmp t
 					INNER JOIN [ClaimMiscellaneous].[misc].[ClaimMisc] cm
 						ON t.ClaimHeaderGroupCode = cm.ClaimHeaderGroupCode
+					LEFT JOIN [ClaimMiscellaneous].[misc].[InsuranceCompany] ins
+						ON ins.InsuranceCompanyId = cm.InsuranceCompanyId
+					LEFT JOIN [DataCenterV1].[Organize].[Organize] org
+						ON org.OrganizeCode = ins.InsuranceCompanyCode
 					LEFT JOIN
 					(
 						SELECT
