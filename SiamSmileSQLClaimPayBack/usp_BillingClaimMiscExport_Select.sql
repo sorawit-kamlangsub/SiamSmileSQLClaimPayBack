@@ -14,13 +14,12 @@ GO
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_BillingClaimMiscExport_Select]
 	 @ClaimCode VARCHAR(20)
-	 ,@BillingRequestGroupCode INT
 AS
 BEGIN
 	SET NOCOUNT ON;
 
 --DECLARE @ClaimCode VARCHAR(20) = 'CLMI68100000117'
---DECLARE @BillingRequestGroupCode INT = 6
+DECLARE @BillingRequestGroupCode INT = 6
 
 SELECT 
 	be.ClaimHeaderGroupCode	
