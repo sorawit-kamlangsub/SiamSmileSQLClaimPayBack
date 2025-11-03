@@ -1,6 +1,6 @@
 USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingClaimMiscExport_Select]    Script Date: 31/10/2568 16:31:43 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingClaimMiscExport_Select]    Script Date: 3/11/2568 18:19:22 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -18,7 +18,7 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
---DECLARE @ClaimCode VARCHAR(20) = 'CLMI68100000117'
+--DECLARE @ClaimCode VARCHAR(20) = 'CLMI68100000158'
 DECLARE @BillingRequestGroupCode INT = 6
 
 SELECT 
@@ -50,7 +50,21 @@ SELECT
 	,NULL				PayRemark
 	,NULL				ContinueClaim
 	,NULL				DocumentLink
+	,doc.DocumentId
+	,doc.DocumentCode
 FROM BillingExport be
+LEFT JOIN [ClaimMiscellaneous].[misc].[ClaimMisc] cm
+	ON cm.ClaimHeaderGroupCode = be.ClaimHeaderGroupCode
+LEFT JOIN 
+	(
+		SELECT	
+			ClaimMiscId
+			,DocumentId
+			,DocumentCode
+		FROM [ClaimMiscellaneous].[misc].[Document]
+		WHERE IsActive = 1
+	) doc
+	ON doc.ClaimMiscId = cm.ClaimMiscId
 WHERE be.ClaimCode = @ClaimCode
 AND be.ClaimHeaderGroupTypeId = @BillingRequestGroupCode
 
