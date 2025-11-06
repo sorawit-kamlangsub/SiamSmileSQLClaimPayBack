@@ -1,6 +1,6 @@
 USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImport_Insert]    Script Date: 30/10/2568 14:43:37 ******/
+/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImport_Insert]    Script Date: 6/11/2568 15:15:00 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -18,6 +18,8 @@ GO
 --	UpdatedDate: 2025-09-25 08:38 (Bunchuai Chaiket) 
 --				 - เพิ่มการ Insert การสร้างรายการลง ClaimHeaderGroupImportCancel
 --				 - เพิ่ม parameters @ImportFrom เพื่อแยกว่ารายการที่ Import มาจากช่องทางไหน กำหนด 1 ImportExcel 2 Import จากการตั้งเบิก
+-- UpdateDate:	2025-11-06 15:20 Sorawit Kamlangsub
+--				- Add ClaimMisc
 -- Description:	<Description,,>
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimHeaderGroupImport_Insert]
@@ -671,7 +673,7 @@ IF @IsResult = 1
 				)
 				SELECT	
 					cm.ClaimHeaderGroupCode							ClaimHeaderGroupCode
-					,cm.ClaimMiscCode								ClaimCode
+					,cm.ClaimMiscNo									ClaimCode
 					,NULL											Province
 					,cm.CitizenId									IdentityCard
 					,cm.CustomerName								CustName
