@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]    Script Date: 22/10/2568 14:04:56 ******/
+/****** Object:  StoredProcedure [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]    Script Date: 7/11/2568 10:34:10 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -474,30 +474,25 @@ ELSE IF @pProductGroupId IN (4,5,6,7,8,9,10,11) AND @pClaimGroupTypeId = 7
 				,cm.CreatedDate						CreatedDate
 				,cm.InsuranceCompanyCode			InsuranceCompanyCode
 				,cm.InsuranceCompanyName			InsuranceCompanyName 
-				,pd.ProductGroup_ID					ProductGroupId
+				,cm.ProductGroupId					ProductGroupId
 				,'0'								xRevise
-				,cm.ClaimAmount						amount 
+				,ISNULL(cm.PayAmount, 0)			amount 
 				,@pClaimGroupTypeId					ClaimGroupTypeId
 				,NULL								TransferAmount
 		FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
-			INNER JOIN [ClaimPayBack].[dbo].[ClaimPayBackProductGroup] pd
-				ON cm.ProductTypeId = pd.MappingXCliamMisc
+			LEFT JOIN [DataCenterV1].[Product].[ProductGroup] pd
+				ON cm.ProductGroupId = pd.ProductGroup_ID
 			INNER JOIN [ClaimMiscellaneous].[misc].[ClaimMiscPaymentHeader] cmh
 				ON cm.ClaimMiscId = cmh.ClaimMiscId
-			INNER JOIN [ClaimMiscellaneous].[misc].[ClaimMiscPayment] cmp
-				ON cmh.ClaimMiscPaymentHeaderId = cmp.ClaimMiscPaymentHeaderId
 			LEFT JOIN [DataCenterV1].[Person].[PersonUser] pu
 				ON pu.[User_ID] = cm.CreatedByUserId
 			LEFT JOIN [DataCenterV1].[Employee].[Employee] e
 				ON pu.Employee_ID = e.Employee_ID
 			LEFT JOIN [DataCenterV1].[Address].[Branch] b
 				ON cm.BranchId = b.Branch_ID
-		WHERE cm.IsActive = 1
-			AND cmh.IsActive = 1
-			AND pd.ProductGroup_ID = @pProductGroupId
-			AND cm.ClaimMiscStatusId = 3
-			AND cmp.IsActive = 1
-			AND cmp.PaymentStatusId = 4
+		WHERE cm.IsActive = 1 
+			AND cm.ProductGroupId = @pProductGroupId
+			AND cm.ClaimMiscStatusId = 3  
 			AND cm.ClaimHeaderGroupCode IS NOT NULL
 			AND (cm.InsuranceCompanyCode = @pInsCode OR @pInsCode IS NULL)
 			AND (b.tempcode = @pBranchCode OR @pBranchCode IS NULL)
@@ -603,8 +598,8 @@ SELECT g.ClaimHeaderGroupCode									ClaimHeaderGroup_id
 		,oIns.OrganizeId										InsuranceCompanyId
 		,d.InsuranceCompanyName									InsuranceCompany	 
 		,COUNT(g.ClaimHeaderGroupCode) OVER ()					TotalCount
-		,IIF(g.ItemCount = doc.docCount ,1,0)					DocumentCount	 
-		--,1													DocumentCount
+		--,IIF(g.ItemCount = doc.docCount ,1,0)					DocumentCount	 
+		,1													DocumentCount
 		,g.TransferAmount										TransferAmount
 FROM
 (
