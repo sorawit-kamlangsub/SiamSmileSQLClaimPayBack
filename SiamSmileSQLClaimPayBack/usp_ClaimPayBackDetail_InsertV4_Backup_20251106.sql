@@ -103,6 +103,7 @@ BEGIN
 			,ClaimPay DECIMAL(16,2)
 			,ClaimPayBackXClaimCreatedByUserId INT
 			,ClaimPayBackXClaimCreatedDate DATETIME2
+			,RoundNo int
 		);
 ---------------------------------------------------------------------------------
 
@@ -925,6 +926,25 @@ BEGIN
 	--‡§≈¡ÕÕπ‰≈πÏ
 	IF @ClaimGroupTypeId = 2				--Update Chanadol 2025-02-26 
 	BEGIN
+
+        DECLARE @roundAmount INT = 5;
+        DECLARE @lastNumber INT;
+        DECLARE @startNumber INT;
+        DECLARE @total INT;
+        --SELECT TOP 1 @lastNumber = RoundNo  FROM [ClaimOnlineV2].[dbo].ClaimWithdrawal ORDER BY ClaimPayBackXClaimCreatedDate desc
+        --SELECT TOP 1 @lastNumber = MAX(RoundNo) FROM [ClaimOnlineV2].[dbo].ClaimWithdrawal GROUP BY ClaimPayBackXClaimCreatedDate ORDER BY ClaimPayBackXClaimCreatedDate DESC;
+        SELECT TOP 1 @lastNumber = cw.RoundNo
+        FROM [ClaimOnlineV2].[dbo].ClaimWithdrawal cw
+        WHERE cw.ClaimPayBackXClaimCreatedDate = (
+                SELECT MAX(ClaimPayBackXClaimCreatedDate)
+                FROM [ClaimOnlineV2].[dbo].ClaimWithdrawal
+        )
+        ORDER BY cw.RoundNo DESC;
+        SELECT @total = COUNT(ClaimCode) from @TmpD
+        --SELECT @lastNumber lastNumber
+        SET @startNumber = ISNULL(@lastNumber, 0) + 1;
+        --SELECT @startNumber
+
 	    INSERT INTO @TmpXClaim(
 			ClaimOnLineId 
 			,ClaimOnLineItemId 
@@ -932,6 +952,7 @@ BEGIN
 			,ClaimPay 
 			,ClaimPayBackXClaimCreatedByUserId 
 			,ClaimPayBackXClaimCreatedDate 
+			,RoundNo
 		)
 		SELECT
 			ci.ClaimOnLineId
@@ -940,6 +961,7 @@ BEGIN
 			,d.Amount ClaimPay
 			,@CreatedByUserId AS ClaimPayBackXClaimCreatedByUserId
 			,@D ClaimPayBackXClaimCreatedDate
+			,(( (@startNumber - 1) + (ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) - 1) ) % @roundAmount) + 1
 		FROM @TmpD d
 			INNER JOIN ClaimOnlineV2.dbo.ClaimOnlineItem ci
 				ON d.ClaimCode = ci.ClaimCode
@@ -1105,6 +1127,18 @@ BEGIN
 	BEGIN
 
 		INSERT INTO [ClaimOnlineV2].[dbo].[ClaimWithdrawal]
+        (
+          [ClaimWithdrawalId]
+		  ,[ClaimOnLineId]
+		  ,[ClaimOnLineItemId]
+		  ,[ClaimPayBackXClaimId]
+		  ,[ClaimCode]
+		  ,[ClaimPay]
+		  ,[IsActive]
+		  ,[ClaimPayBackXClaimCreatedByUserId]
+		  ,[ClaimPayBackXClaimCreatedDate]
+		  ,[RoundNo]
+         )
 		SELECT NEWID()
 		,ClaimOnLineId
 			,ClaimOnLineItemId
@@ -1114,7 +1148,7 @@ BEGIN
 			,1
 			,ClaimPayBackXClaimCreatedByUserId
 			,ClaimPayBackXClaimCreatedDate
-			,1 --New 20251106
+			,tx.RoundNo
 		FROM @TmpXClaim tx
 		LEFT JOIN @TmpOutXClaim x ON tx.ClaimCode = x.ClaimCode
 
