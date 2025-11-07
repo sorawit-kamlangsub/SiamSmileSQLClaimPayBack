@@ -509,7 +509,7 @@ ELSE IF @pProductGroupId IN (4,5,6,7,8,9,10,11) AND @pClaimGroupTypeId = 7
 				WHERE x.IsActive = 1
 					AND cp.ClaimGroupTypeId = @pClaimGroupTypeId
 					AND cd.ProductGroupId = @pProductGroupId
-					AND x.ClaimCode = cm.ClaimMiscCode
+					AND x.ClaimCode = cm.ClaimMiscNo
 			)
 
 		INSERT INTO #Tmplst
