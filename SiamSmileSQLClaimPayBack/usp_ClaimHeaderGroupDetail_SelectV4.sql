@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]    Script Date: 7/11/2568 10:34:10 ******/
+/****** Object:  StoredProcedure [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]    Script Date: 7/11/2568 17:01:24 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -482,8 +482,6 @@ ELSE IF @pProductGroupId IN (4,5,6,7,8,9,10,11) AND @pClaimGroupTypeId = 7
 		FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
 			LEFT JOIN [DataCenterV1].[Product].[ProductGroup] pd
 				ON cm.ProductGroupId = pd.ProductGroup_ID
-			INNER JOIN [ClaimMiscellaneous].[misc].[ClaimMiscPaymentHeader] cmh
-				ON cm.ClaimMiscId = cmh.ClaimMiscId
 			LEFT JOIN [DataCenterV1].[Person].[PersonUser] pu
 				ON pu.[User_ID] = cm.CreatedByUserId
 			LEFT JOIN [DataCenterV1].[Employee].[Employee] e
