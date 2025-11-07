@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]    Script Date: 29/10/2568 14:05:28 ******/
+/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]    Script Date: 7/11/2568 10:38:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -191,7 +191,7 @@ FROM @TmpClaimPayBack TmpCPB
 									,h.HospitalCode			Hospital
 									,u.EmployeeCode			ApprovedUserFromSSS
 									,cm.CustomerName		CustomerName
-									,cm.ClaimMiscCode		ClaimCode
+									,cm.ClaimMiscNo			ClaimCode
 								FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
 								LEFT JOIN [ClaimMiscellaneous].[misc].[Hospital] h
 									ON h.HospitalId = cm.HospitalId 
