@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImport_Select]    Script Date: 30/10/2568 14:33:55 ******/
+/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImport_Select]    Script Date: 10/11/2568 16:57:17 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -24,6 +24,8 @@ GO
 --					Add OPTION (RECOMPILE)
 --					Update Filter BranchId
 --					Add Union All ClaimCompenstate
+-- Update date:2025-11-10 17:20 Sorawit Kamlangsub
+--					แก้ไข AND cs.ClaimCompensateCode IS NULL ให้อยู่ใน Sub Query Left Join
 -- Description:	Ui3-2
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimHeaderGroupImport_Select]
@@ -79,10 +81,10 @@ BEGIN
 								,cs.ClaimHeaderCode
 							FROM SSS.dbo.ClaimCompensate cs
 							WHERE cs.IsActive = 1	
+							AND cs.ClaimCompensateCode IS NULL
 						)cs
 						ON d.ClaimCode = cs.ClaimHeaderCode
 				WHERE d.IsActive = 1 
-				AND cs.ClaimCompensateCode IS NULL
 				AND bi.IsActive = 1
 				GROUP BY d.ClaimHeaderGroupImportId
 			)bi
@@ -99,11 +101,11 @@ BEGIN
 							SELECT cs.ClaimCompensateCode
 								,cs.ClaimHeaderCode
 							FROM SSS.dbo.ClaimCompensate cs
-							WHERE cs.IsActive = 1	
+							WHERE cs.IsActive = 1
+							AND cs.ClaimCompensateCode IS NULL
 						)cs
 						ON d.ClaimCode = cs.ClaimHeaderCode
 				WHERE d.IsActive = 1
-				AND cs.ClaimCompensateCode IS NULL
 				AND rd.IsActive = 1
 				GROUP BY d.ClaimHeaderGroupImportId
 			)rd
