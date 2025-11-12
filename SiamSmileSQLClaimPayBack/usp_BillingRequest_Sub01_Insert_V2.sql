@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Sub01_Insert_V2]    Script Date: 12/11/2568 9:14:38 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Sub01_Insert_V2]    Script Date: 12/11/2568 11:03:34 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -243,14 +243,14 @@ BEGIN
 	IF @SftpId IS NULL
 	BEGIN 
 		SET @TotalRows = @D_Total;
-		SET @BatchSize = 2;
+		SET @BatchSize = 20;
 	END
 
 /* Check Ergo */
 	IF @InsuranceCompanyId = @SpecialInsuranceCompanyId AND @ClaimHeaderGroupTypeId IN (3,5)
 	BEGIN 
 		SET @TotalRows = @D_Total;
-		SET @BatchSize = 2;
+		SET @BatchSize = 20;
 	END
 	ELSE IF @InsuranceCompanyId = @SpecialInsuranceCompanyId AND @ClaimHeaderGroupTypeId NOT IN (3,5)
 	BEGIN 
