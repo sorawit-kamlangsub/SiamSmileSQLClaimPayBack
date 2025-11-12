@@ -21,12 +21,12 @@ GO
 -- =============================================
 --ALTER PROCEDURE [dbo].[usp_BillingRequest_Sub01_Insert_V2]
 DECLARE
-		@GroupTypeId				INT				= 2
+		@GroupTypeId				INT				= 1
 		,@ClaimTypeCode				VARCHAR(20)		= '2000'
 		,@InsuranceCompanyId		INT				= 389190
 		,@CreatedByUserId			INT				= 6772
 		,@BillingDate				DATE			= '2025-11-15'
-		,@ClaimHeaderGroupTypeId	INT				= 3
+		,@ClaimHeaderGroupTypeId	INT				= 2
 		,@InsuranceCompanyName		NVARCHAR(300)	= 'บริษัท เออร์โกประกันภัย (ประเทศไทย) จำกัด (มหาชน)'
 		,@NewBillingDate			DATE			= '2025-11-15'
 		,@CreatedDateFrom			DATE			= '2025-11-12'
@@ -40,22 +40,22 @@ DECLARE
 --@GroupTypeId
 --1 SSS + โอนแยก + PA30
 --2 SSSPA
-DECLARE @pGroupTypeId				INT				= @GroupTypeId;
-DECLARE @pInsuranceCompanyId		INT				= @InsuranceCompanyId;
-DECLARE @UserId						INT				= @CreatedByUserId;
+DECLARE @pGroupTypeId					INT				= @GroupTypeId;
+DECLARE @pInsuranceCompanyId			INT				= @InsuranceCompanyId;
+DECLARE @UserId							INT				= @CreatedByUserId;
 
-DECLARE @D2							DATETIME2		= SYSDATETIME();
+DECLARE @D2								DATETIME2		= SYSDATETIME();
 
-DECLARE @Date						DATE = @D2;
+DECLARE @Date							DATE = @D2;
 
-DECLARE @IsResult					BIT				= 1;
-DECLARE @Result						VARCHAR(100)	= '';
-DECLARE @Msg						NVARCHAR(500)	= '';
+DECLARE @IsResult						BIT				= 1;
+DECLARE @Result							VARCHAR(100)	= '';
+DECLARE @Msg							NVARCHAR(500)	= '';
 
-DECLARE	@BillindDueDate				DATE;
-DECLARE @DaysToAdd					INT				= 15;
-DECLARE @TransactionDetail			NVARCHAR(500)	= N'Generate Group เสร็จสิ้น';
-DECLARE @SpecialInsuranceCompany	INT				= 389190;
+DECLARE	@BillindDueDate					DATE;
+DECLARE @DaysToAdd						INT				= 15;
+DECLARE @TransactionDetail				NVARCHAR(500)	= N'Generate Group เสร็จสิ้น';
+DECLARE @SpecialInsuranceCompanyCode	VARCHAR(50)		= '100000000039';
 
 IF @CreatedDateTo IS NOT NULL SET @CreatedDateTo = DATEADD(DAY,1,@CreatedDateTo);
 
@@ -170,15 +170,39 @@ BEGIN
 	DECLARE @ClaimHeaderGroupCodeIndex3 VARCHAR(1);
 	DECLARE @ClaimType VARCHAR(1);
 	DECLARE @InsuranceCompanyCode VARCHAR(30);
-	DECLARE @SftpId INT = NULL;
+	DECLARE @IsSFTP BIT = 0;
 
 	SELECT 
 		@InsuranceCompanyCode = o.OrganizeCode 
-		,@SftpId = c.SFTPConfigId
+		,@IsSFTP =
+			CASE 
+				WHEN sfd.SFTPConfigId IS NOT NULL THEN 
+					CASE 
+						WHEN p.IsSFTP = 1 THEN 1
+						WHEN p.IsSFTP = 0 THEN 0
+					ELSE 1
+				END
+			ELSE 0
+		END
 	FROM DataCenterV1.Organize.Organize o
-		LEFT JOIN dbo.SFTPConfig c
-			ON o.OrganizeCode = c.InsuranceCompanyCode
-        AND c.IsActive = 1
+			LEFT JOIN (
+				SELECT
+					InsuranceCompanyCode
+					,SFTPConfigId
+				FROM dbo.SFTPConfig 
+				WHERE IsActive = 1
+			)sfd
+				ON sfd.InsuranceCompanyCode = o.OrganizeCode
+			LEFT JOIN (
+				SELECT 
+					InsuranceCompanyCode
+					,ProductTypeId
+					,IsSFTP
+				FROM dbo.SFTPConfigProduct
+				WHERE IsActive = 1
+				AND ProductTypeId = @ClaimHeaderGroupTypeId
+			) p
+				ON p.InsuranceCompanyCode = o.OrganizeCode
 	WHERE o.Organize_ID = @InsuranceCompanyId
 
 	SET @Last2numbersOfInsurance = RIGHT(@InsuranceCompanyCode,2);
@@ -227,22 +251,10 @@ BEGIN
 	DECLARE @TotalRows INT = 1;
 
 /*Check SFTP For Loop */
-	IF @SftpId IS NULL
+	IF @IsSFTP = 0
 	BEGIN 
 		SET @TotalRows = @D_Total;
-		SET @BatchSize = 2;
-	END
-
-/* Check Ergo */
-	IF @InsuranceCompanyId = @SpecialInsuranceCompany AND @ClaimHeaderGroupTypeId IN (3,5)
-	BEGIN 
-		SET @TotalRows = @D_Total;
-		SET @BatchSize = 2;
-	END
-	ELSE IF @InsuranceCompanyId = @SpecialInsuranceCompany AND @ClaimHeaderGroupTypeId NOT IN (3,5)
-	BEGIN 
-		SET @TotalRows = 1;
-		SET @BatchSize = @D_Total;
+		SET @BatchSize = 3;
 	END
 	
 /* Generate Code */
@@ -322,7 +334,7 @@ BEGIN
 					,@ClaimTypeCode						ClaimTypeCode
 					,@BillindDueDate					BillindDueDate
 					,@ClaimHeaderGroupTypeId			ClaimHeaderGroupTypeId
-					,@InsuranceCompanyName	
+					,@InsuranceCompanyName				InsuranceCompanyName
 				
 			SET @BillingRequestGroupId = SCOPE_IDENTITY();				
 			
