@@ -20,40 +20,42 @@ GO
 -- Description:	<Description,,>
 -- =============================================
 --ALTER PROCEDURE [dbo].[usp_BillingRequest_Sub01_Insert_V2]
-declare
-		@GroupTypeId				INT
-		,@ClaimTypeCode				VARCHAR(20)
-		,@InsuranceCompanyId		INT
-		,@CreatedByUserId			INT
-		,@BillingDate				DATE
-		,@ClaimHeaderGroupTypeId	INT
-		,@InsuranceCompanyName		NVARCHAR(300)
-		,@NewBillingDate			DATE
-		,@CreatedDateFrom			DATE
-		,@CreatedDateTo				DATE;
+DECLARE
+		@GroupTypeId				INT				= 2
+		,@ClaimTypeCode				VARCHAR(20)		= '2000'
+		,@InsuranceCompanyId		INT				= 389190
+		,@CreatedByUserId			INT				= 6772
+		,@BillingDate				DATE			= '2025-11-15'
+		,@ClaimHeaderGroupTypeId	INT				= 3
+		,@InsuranceCompanyName		NVARCHAR(300)	= 'บริษัท เออร์โกประกันภัย (ประเทศไทย) จำกัด (มหาชน)'
+		,@NewBillingDate			DATE			= '2025-11-15'
+		,@CreatedDateFrom			DATE			= '2025-11-12'
+		,@CreatedDateTo				DATE			= '2025-11-12'
+		;
+
 --AS
 --BEGIN
 --	SET NOCOUNT ON;
 
-
 --@GroupTypeId
 --1 SSS + โอนแยก + PA30
 --2 SSSPA
-DECLARE @pGroupTypeId			INT				= @GroupTypeId;
-DECLARE @pInsuranceCompanyId	INT				= @InsuranceCompanyId;
-DECLARE @UserId					INT				= @CreatedByUserId;
+DECLARE @pGroupTypeId				INT				= @GroupTypeId;
+DECLARE @pInsuranceCompanyId		INT				= @InsuranceCompanyId;
+DECLARE @UserId						INT				= @CreatedByUserId;
 
-DECLARE @D2						DATETIME2		= SYSDATETIME();
+DECLARE @D2							DATETIME2		= SYSDATETIME();
 
-DECLARE @Date					DATE = @D2;
+DECLARE @Date						DATE = @D2;
 
-DECLARE @IsResult				BIT				= 1;
-DECLARE @Result					VARCHAR(100)	= '';
-DECLARE @Msg					NVARCHAR(500)	= '';
+DECLARE @IsResult					BIT				= 1;
+DECLARE @Result						VARCHAR(100)	= '';
+DECLARE @Msg						NVARCHAR(500)	= '';
 
-DECLARE	@BillindDueDate			DATE;
-DECLARE @DaysToAdd				INT				= 15;
-DECLARE @TransactionDetail		NVARCHAR(500)	= N'Generate Group เสร็จสิ้น';
+DECLARE	@BillindDueDate				DATE;
+DECLARE @DaysToAdd					INT				= 15;
+DECLARE @TransactionDetail			NVARCHAR(500)	= N'Generate Group เสร็จสิ้น';
+DECLARE @SpecialInsuranceCompany	INT				= 389190;
 
 IF @CreatedDateTo IS NOT NULL SET @CreatedDateTo = DATEADD(DAY,1,@CreatedDateTo);
 
@@ -86,6 +88,7 @@ IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 	AND i.ClaimHeaderGroupImportStatusId = 2
 	AND i.BillingRequestGroupId IS NULL
 	AND i.InsuranceCompanyId = @pInsuranceCompanyId
+	--AND (i.ClaimTypeCode = @ClaimTypeCode OR @ClaimTypeCode IS NULL)
 	AND i.ClaimTypeCode = @ClaimTypeCode
 	AND	i.CreatedDate >	@CreatedDateFrom
 	AND	i.CreatedDate <=  @CreatedDateTo
@@ -93,6 +96,7 @@ IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 	AND 
 	(
 		(
+			--@pGroupTypeId = 1 AND f.ClaimHeaderGroupTypeId IN (2,4,5,6)
 			@pGroupTypeId = 1 AND f.ClaimHeaderGroupTypeId IN (2,4,5)
 		)
 		OR	
@@ -226,7 +230,19 @@ BEGIN
 	IF @SftpId IS NULL
 	BEGIN 
 		SET @TotalRows = @D_Total;
-		SET @BatchSize = 20;
+		SET @BatchSize = 2;
+	END
+
+/* Check Ergo */
+	IF @InsuranceCompanyId = @SpecialInsuranceCompany AND @ClaimHeaderGroupTypeId IN (3,5)
+	BEGIN 
+		SET @TotalRows = @D_Total;
+		SET @BatchSize = 2;
+	END
+	ELSE IF @InsuranceCompanyId = @SpecialInsuranceCompany AND @ClaimHeaderGroupTypeId NOT IN (3,5)
+	BEGIN 
+		SET @TotalRows = 1;
+		SET @BatchSize = @D_Total;
 	END
 	
 /* Generate Code */
