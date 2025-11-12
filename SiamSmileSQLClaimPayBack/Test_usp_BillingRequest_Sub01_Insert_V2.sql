@@ -55,7 +55,6 @@ DECLARE @Msg							NVARCHAR(500)	= '';
 DECLARE	@BillindDueDate					DATE;
 DECLARE @DaysToAdd						INT				= 15;
 DECLARE @TransactionDetail				NVARCHAR(500)	= N'Generate Group เสร็จสิ้น';
-DECLARE @SpecialInsuranceCompanyCode	VARCHAR(50)		= '100000000039';
 
 IF @CreatedDateTo IS NOT NULL SET @CreatedDateTo = DATEADD(DAY,1,@CreatedDateTo);
 
