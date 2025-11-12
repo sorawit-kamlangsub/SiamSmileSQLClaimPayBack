@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Sub01_Insert_V2]    Script Date: 30/10/2568 17:01:40 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Sub01_Insert_V2]    Script Date: 12/11/2568 9:14:38 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -52,21 +52,22 @@ BEGIN
 --@GroupTypeId
 --1 SSS + โอนแยก + PA30
 --2 SSSPA
-DECLARE @pGroupTypeId			INT				= @GroupTypeId;
-DECLARE @pInsuranceCompanyId	INT				= @InsuranceCompanyId;
-DECLARE @UserId					INT				= @CreatedByUserId;
+DECLARE @pGroupTypeId				INT				= @GroupTypeId;
+DECLARE @pInsuranceCompanyId		INT				= @InsuranceCompanyId;
+DECLARE @UserId						INT				= @CreatedByUserId;
 
-DECLARE @D2						DATETIME2		= SYSDATETIME();
+DECLARE @D2							DATETIME2		= SYSDATETIME();
 
-DECLARE @Date					DATE = @D2;
+DECLARE @Date						DATE = @D2;
 
-DECLARE @IsResult				BIT				= 1;
-DECLARE @Result					VARCHAR(100)	= '';
-DECLARE @Msg					NVARCHAR(500)	= '';
+DECLARE @IsResult					BIT				= 1;
+DECLARE @Result						VARCHAR(100)	= '';
+DECLARE @Msg						NVARCHAR(500)	= '';
 
-DECLARE	@BillindDueDate			DATE;
-DECLARE @DaysToAdd				INT				= 15;
-DECLARE @TransactionDetail		NVARCHAR(500)	= N'Generate Group เสร็จสิ้น';
+DECLARE	@BillindDueDate				DATE;
+DECLARE @DaysToAdd					INT				= 15;
+DECLARE @TransactionDetail			NVARCHAR(500)	= N'Generate Group เสร็จสิ้น';
+DECLARE @SpecialInsuranceCompany	INT				= 389190;
 
 IF @CreatedDateTo IS NOT NULL SET @CreatedDateTo = DATEADD(DAY,1,@CreatedDateTo);
 
@@ -99,14 +100,16 @@ IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 	AND i.ClaimHeaderGroupImportStatusId = 2
 	AND i.BillingRequestGroupId IS NULL
 	AND i.InsuranceCompanyId = @pInsuranceCompanyId
-	AND (i.ClaimTypeCode = @ClaimTypeCode OR @ClaimTypeCode IS NULL)
+	--AND (i.ClaimTypeCode = @ClaimTypeCode OR @ClaimTypeCode IS NULL)
+	AND i.ClaimTypeCode = @ClaimTypeCode
 	AND	i.CreatedDate >	@CreatedDateFrom
 	AND	i.CreatedDate <=  @CreatedDateTo
 	AND f.ClaimHeaderGroupTypeId = @ClaimHeaderGroupTypeId
 	AND 
 	(
 		(
-			@pGroupTypeId = 1 AND f.ClaimHeaderGroupTypeId IN (2,4,5,6)
+			--@pGroupTypeId = 1 AND f.ClaimHeaderGroupTypeId IN (2,4,5,6)
+			@pGroupTypeId = 1 AND f.ClaimHeaderGroupTypeId IN (2,4,5)
 		)
 		OR	
 		(
@@ -239,7 +242,19 @@ BEGIN
 	IF @SftpId IS NULL
 	BEGIN 
 		SET @TotalRows = @D_Total;
-		SET @BatchSize = 20;
+		SET @BatchSize = 2;
+	END
+
+/* Check Ergo */
+	IF @InsuranceCompanyId = @SpecialInsuranceCompany AND @ClaimHeaderGroupTypeId IN (3,5)
+	BEGIN 
+		SET @TotalRows = @D_Total;
+		SET @BatchSize = 2;
+	END
+	ELSE IF @InsuranceCompanyId = @SpecialInsuranceCompany AND @ClaimHeaderGroupTypeId NOT IN (3,5)
+	BEGIN 
+		SET @TotalRows = 1;
+		SET @BatchSize = @D_Total;
 	END
 	
 /* Generate Code */
