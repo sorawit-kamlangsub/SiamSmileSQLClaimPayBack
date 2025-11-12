@@ -68,7 +68,7 @@ DECLARE @Msg						NVARCHAR(500)	= '';
 DECLARE	@BillindDueDate				DATE;
 DECLARE @DaysToAdd					INT				= 15;
 DECLARE @TransactionDetail			NVARCHAR(500)	= N'Generate Group เสร็จสิ้น';
-DECLARE @SpecialInsuranceCompany	INT				= 389190;
+DECLARE @SpecialInsuranceCompanyId	INT				= 389190;
 
 IF @CreatedDateTo IS NOT NULL SET @CreatedDateTo = DATEADD(DAY,1,@CreatedDateTo);
 
@@ -247,12 +247,12 @@ BEGIN
 	END
 
 /* Check Ergo */
-	IF @InsuranceCompanyId = @SpecialInsuranceCompany AND @ClaimHeaderGroupTypeId IN (3,5)
+	IF @InsuranceCompanyId = @SpecialInsuranceCompanyId AND @ClaimHeaderGroupTypeId IN (3,5)
 	BEGIN 
 		SET @TotalRows = @D_Total;
 		SET @BatchSize = 2;
 	END
-	ELSE IF @InsuranceCompanyId = @SpecialInsuranceCompany AND @ClaimHeaderGroupTypeId NOT IN (3,5)
+	ELSE IF @InsuranceCompanyId = @SpecialInsuranceCompanyId AND @ClaimHeaderGroupTypeId NOT IN (3,5)
 	BEGIN 
 		SET @TotalRows = 1;
 		SET @BatchSize = @D_Total;
