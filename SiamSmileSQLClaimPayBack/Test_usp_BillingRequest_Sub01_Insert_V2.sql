@@ -440,7 +440,7 @@ BEGIN
 			--		,BillingBankId
 			--		,BankAccountNumber)
 			SELECT 
-				@NewBillingDate
+				@NewBillingDate		BillingDate
 				,g.BillingDueDate
 				,c.CreatedByBranchId BranchCode
 				,br.BranchDetail Branch
