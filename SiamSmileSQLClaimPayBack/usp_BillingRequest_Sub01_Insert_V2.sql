@@ -17,7 +17,6 @@ GO
 	Update date: 2025-09-25 11:14
 				เพิ่มการ insert ลง ClaimHeaderGroupImportCancel เพื่อลงประวัติการทำรายการ
 	Update date: 2025-11-12 10:55 Sorawit Kamlangsub
-				เพิ่ม @SpecialInsuranceCompany 
 				เพิ่มเงื่อนไขให้ บ.เออโก(Ergo) PH,เคลมโอนแยก ไม่ให้แบ่ง File Export (@BatchSize)
 */	
 -- Description:	<Description,,>
