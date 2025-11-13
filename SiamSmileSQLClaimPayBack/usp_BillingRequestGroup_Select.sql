@@ -1,6 +1,6 @@
-USE [ClaimPayBack]
+﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequestGroup_Select]    Script Date: 22/10/2568 9:19:18 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequestGroup_Select]    Script Date: 13/11/2568 11:43:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -13,9 +13,10 @@ GO
 -- Update date: 2023-02-02 16:50 Siriphong	Narkphung Add Column ClaimType
 --				2023-07-03 12:47 Sahatsawat golffy Change Column InsuranceCompanyName
 --				2023-10-09 16:48 Chanadol Koonkam Add Column ClaimHeaderGroupTypeName
---				2025-09-17 15:37 Bunchuai Chaiket ���� LEFT JOIN [Organize]/ SFTPConfig ����Ѻ��õ�Ǩ�ͺ �.�����/ ����� SFTP
---				2025-09-19 16:21 Krekpon Dokkamklang ���� paremeter ����Ѻ������㹡�á�ͧ
---				2025-10-21 09:21 Sorawit Kamlangsub ���� OPTION (RECOMPILE)
+--				2025-09-17 15:37 Bunchuai Chaiket เพิ่ม LEFT JOIN [Organize]/ SFTPConfig สำหรับการตรวจสอบ บ.ที่มี/ ไม่มี SFTP
+--				2025-09-19 16:21 Krekpon Dokkamklang เพิ่ม paremeter การรับข้อมูลในการกรอง
+--				2025-10-21 09:21 Sorawit Kamlangsub เพิ่ม OPTION (RECOMPILE)
+--				2025-11-12 15:42 Sorawit Kamlangsub เพิ่ม Left join SFTPConfigProduct และ ปรับเงื่อนไข IsSftp
 -- Description:	
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_BillingRequestGroup_Select]
@@ -34,14 +35,14 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
-----------------------------------------------------------
+------------------------------------------------------------
 IF @IndexStart			IS NULL    SET @IndexStart		= 0;
 IF @PageSize			IS NULL    SET @PageSize        = 10;
 IF @SearchDetail		IS NULL    SET @SearchDetail    = '';
 ----------------------------------------------------------
 
 --DECLARE @InsurunceCompanyId				INT = NULL;
---DECLARE @BillingDate					DATE = '2025-09-16';
+--DECLARE @BillingDate					DATE = '2025-11-12';
 --DECLARE @BillingRequestGroupStatusId	INT = 2;
 --DECLARE @SearchDetail	VARCHAR(MAX) = NULL;
 	
@@ -59,7 +60,15 @@ IF @SearchDetail		IS NULL    SET @SearchDetail    = '';
 			,g.BillingDueDate
 			,ct.Detail									AS ClaimType 
 			,COUNT(g.BillingRequestGroupId) OVER ( )	AS TotalCount
-			,IIF(sfc.SFTPConfigId IS NULL, 0, 1)  		AS IsSFTP
+			,CASE 
+				WHEN sfd.SFTPConfigId IS NOT NULL THEN 
+						CASE 
+							WHEN p.IsSFTP = 1 THEN 1
+							WHEN p.IsSFTP = 0 THEN 0
+						ELSE 1
+					END
+				ELSE 0
+			END	As IsSFTP 
 	FROM	dbo.BillingRequestGroup AS g
 			LEFT JOIN dbo.BillingRequestGroupStatus AS s
 				ON g.BillingRequestGroupStatusId = s.BillingRequestGroupStatusId
@@ -80,19 +89,23 @@ IF @SearchDetail		IS NULL    SET @SearchDetail    = '';
 			LEFT JOIN dbo.ClaimHeaderGroupType cgt
 				ON g.ClaimHeaderGroupTypeId = cgt.ClaimHeaderGroupTypeId
 			LEFT JOIN (
-				SELECT 
-					Organize_ID
-					,OrganizeCode
-				FROM [DataCenterV1].[Organize].[Organize]
-				WHERE OrganizeType_ID = 2
-			) mtc
-				ON g.InsuranceCompanyId = mtc.Organize_ID
-			LEFT JOIN (
-				SELECT *
-				FROM dbo.SFTPConfig
+				SELECT
+					InsuranceCompanyCode
+					,SFTPConfigId
+				FROM dbo.SFTPConfig 
 				WHERE IsActive = 1
-			) sfc
-				ON mtc.OrganizeCode = sfc.InsuranceCompanyCode
+			)sfd
+				ON sfd.InsuranceCompanyCode = o.OrganizeCode
+			LEFT JOIN (
+				SELECT 
+					InsuranceCompanyCode
+					,ProductTypeId
+					,IsSFTP
+				FROM dbo.SFTPConfigProduct
+				WHERE IsActive = 1
+			) p
+				ON p.ProductTypeId = g.ClaimHeaderGroupTypeId
+					AND p.InsuranceCompanyCode = o.OrganizeCode
 
 	WHERE	(g.InsuranceCompanyId = @InsurunceCompanyId OR @InsurunceCompanyId IS NULL)
 	AND		(cg.BillingDate = @BillingDate OR @BillingDate IS NULL)
@@ -124,4 +137,3 @@ IF @SearchDetail		IS NULL    SET @SearchDetail    = '';
 	OPTION(RECOMPILE);
 
 END;
-
