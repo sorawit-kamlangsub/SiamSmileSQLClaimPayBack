@@ -100,7 +100,6 @@ IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 	AND i.ClaimHeaderGroupImportStatusId = 2
 	AND i.BillingRequestGroupId IS NULL
 	AND i.InsuranceCompanyId = @pInsuranceCompanyId
-	--AND (i.ClaimTypeCode = @ClaimTypeCode OR @ClaimTypeCode IS NULL)
 	AND i.ClaimTypeCode = @ClaimTypeCode
 	AND	i.CreatedDate >	@CreatedDateFrom
 	AND	i.CreatedDate <=  @CreatedDateTo
@@ -108,7 +107,6 @@ IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 	AND 
 	(
 		(
-			--@pGroupTypeId = 1 AND f.ClaimHeaderGroupTypeId IN (2,4,5,6)
 			@pGroupTypeId = 1 AND f.ClaimHeaderGroupTypeId IN (2,4,5)
 		)
 		OR	
