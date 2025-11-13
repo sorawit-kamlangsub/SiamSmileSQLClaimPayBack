@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Sub01_Insert_V2]    Script Date: 12/11/2568 11:03:34 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Sub01_Insert_V2]    Script Date: 13/11/2568 10:51:58 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -18,7 +18,7 @@ GO
 				เพิ่มการ insert ลง ClaimHeaderGroupImportCancel เพื่อลงประวัติการทำรายการ
 	Update date: 2025-11-12 10:55 Sorawit Kamlangsub
 				เพิ่ม @SpecialInsuranceCompany 
-				เพิ่มเงื่อนไขให้ บ.เออโก(Ergo) PH,เคลมโอนแยก ไม่ให้แบ่ง File Export
+				เพิ่มเงื่อนไขให้ บ.เออโก(Ergo) PH,เคลมโอนแยก ไม่ให้แบ่ง File Export (@BatchSize)
 */	
 -- Description:	<Description,,>
 -- =============================================
@@ -264,7 +264,7 @@ BEGIN
 	IF @IsSFTP = 0
 	BEGIN 
 		SET @TotalRows = @D_Total;
-		SET @BatchSize = 3;
+		SET @BatchSize = 20;
 	END
 	
 /* Generate Code */
