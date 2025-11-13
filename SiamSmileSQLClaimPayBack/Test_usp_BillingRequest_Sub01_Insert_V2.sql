@@ -21,16 +21,16 @@ GO
 -- =============================================
 --ALTER PROCEDURE [dbo].[usp_BillingRequest_Sub01_Insert_V2]
 DECLARE
-		@GroupTypeId				INT				= 1
-		,@ClaimTypeCode				VARCHAR(20)		= '2000'
+		@GroupTypeId				INT				= 2
+		,@ClaimTypeCode				VARCHAR(20)		= '1000'
 		,@InsuranceCompanyId		INT				= 389190
 		,@CreatedByUserId			INT				= 6772
 		,@BillingDate				DATE			= '2025-11-15'
-		,@ClaimHeaderGroupTypeId	INT				= 2
+		,@ClaimHeaderGroupTypeId	INT				= 3
 		,@InsuranceCompanyName		NVARCHAR(300)	= 'บริษัท เออร์โกประกันภัย (ประเทศไทย) จำกัด (มหาชน)'
 		,@NewBillingDate			DATE			= '2025-11-15'
-		,@CreatedDateFrom			DATE			= '2025-11-12'
-		,@CreatedDateTo				DATE			= '2025-11-12'
+		,@CreatedDateFrom			DATE			= '2025-11-13'
+		,@CreatedDateTo				DATE			= '2025-11-13'
 		;
 
 --AS
