@@ -40,21 +40,21 @@ DECLARE
 --@GroupTypeId
 --1 SSS + โอนแยก + PA30
 --2 SSSPA
-DECLARE @pGroupTypeId					INT				= @GroupTypeId;
-DECLARE @pInsuranceCompanyId			INT				= @InsuranceCompanyId;
-DECLARE @UserId							INT				= @CreatedByUserId;
+DECLARE @pGroupTypeId			INT				= @GroupTypeId;
+DECLARE @pInsuranceCompanyId	INT				= @InsuranceCompanyId;
+DECLARE @UserId					INT				= @CreatedByUserId;
 
-DECLARE @D2								DATETIME2		= SYSDATETIME();
+DECLARE @D2						DATETIME2		= SYSDATETIME();
 
-DECLARE @Date							DATE = @D2;
+DECLARE @Date					DATE = @D2;
 
-DECLARE @IsResult						BIT				= 1;
-DECLARE @Result							VARCHAR(100)	= '';
-DECLARE @Msg							NVARCHAR(500)	= '';
+DECLARE @IsResult				BIT				= 1;
+DECLARE @Result					VARCHAR(100)	= '';
+DECLARE @Msg					NVARCHAR(500)	= '';
 
-DECLARE	@BillindDueDate					DATE;
-DECLARE @DaysToAdd						INT				= 15;
-DECLARE @TransactionDetail				NVARCHAR(500)	= N'Generate Group เสร็จสิ้น';
+DECLARE	@BillindDueDate			DATE;
+DECLARE @DaysToAdd				INT				= 15;
+DECLARE @TransactionDetail		NVARCHAR(500)	= N'Generate Group เสร็จสิ้น';
 
 IF @CreatedDateTo IS NOT NULL SET @CreatedDateTo = DATEADD(DAY,1,@CreatedDateTo);
 
