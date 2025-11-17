@@ -1,10 +1,11 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Sub01_Insert_V2]    Script Date: 13/11/2568 11:35:17 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Sub01_Insert_V2]    Script Date: 11/17/2025 12:14:17 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+
 -- =============================================
 -- Author:		Thayart Churlek
 -- Create date: 2025-09-19 15:21
@@ -19,6 +20,11 @@ GO
 	Update date: 2025-11-12 10:55 Sorawit Kamlangsub
 				เพิ่มเงื่อนไขให้ บ.เออโก(Ergo) PH,เคลมโอนแยก ไม่ให้แบ่ง File Export (@BatchSize)
 				Config ด้วยตาราง SFTPConfigProduct
+	Update date: 2025-11-17 09:17 Krekpon.D
+				เพิ่มการเรียงข้อมูลตาม บ.ส.
+	Update date: 2025-11-17 12:17 Sorawit Kamlangsub
+				เพิ่ม #TmpX2
+				แก้ไขบั๊กการเรียงข้อมูลตาม บ.ส.
 */	
 -- Description:	<Description,,>
 -- =============================================
@@ -121,6 +127,7 @@ IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 		,d.ClaimHeaderGroupImportId
 		,d.ClaimCode
 		,d.PaySS_Total
+		,d.ClaimHeaderGroupCode
 	INTO #TmpX
 	FROM dbo.ClaimHeaderGroupImportDetail d
 		INNER JOIN #Tmplst lst
@@ -150,6 +157,16 @@ IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 		AND	d.IsActive = 1
 		AND	cs.ClaimCompensateCode IS NULL;
 
+/*SetUp Sort*/
+SELECT 
+	d.*
+    ,PARSENAME(REPLACE(d.ClaimHeaderGroupCode,'-','.'),4)				AS P1
+    ,CAST(PARSENAME(REPLACE(d.ClaimHeaderGroupCode,'-','.'),3) AS INT)	AS P2
+    ,CAST(PARSENAME(REPLACE(d.ClaimHeaderGroupCode,'-','.'),2) AS INT)	AS P3
+    ,CAST(PARSENAME(REPLACE(d.ClaimHeaderGroupCode,'-','.'),1) AS INT)	AS P4
+INTO #TmpX2
+FROM #TmpX d;
+
 /*SetUp TmpDetail*/
 	SELECT	
 		d.ClaimHeaderGroupImportDetailId
@@ -158,9 +175,10 @@ IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 		,d.PaySS_Total							 PaySS_Total
 		,ISNULL(c.SumCover,0)					 SumCover
 		,(d.PaySS_Total - ISNULL(c.SumCover,0))  TotalAmount
-		,ROW_NUMBER() OVER(ORDER BY (ClaimHeaderGroupImportDetailId) ASC) rwId
+		,ROW_NUMBER() OVER (ORDER BY d.P1, d.P2, d.P3, d.P4) AS rwId
+		,d.ClaimHeaderGroupCode
 	INTO #TmpDetail
-	FROM #TmpX d
+	FROM #TmpX2 d
 		LEFT JOIN 
 		(
 			SELECT ClaimCode
@@ -168,7 +186,9 @@ IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 			FROM #TmpCover 
 			GROUP BY ClaimCode
 		) c
-			ON d.ClaimCode = c.ClaimCode;
+			ON d.ClaimCode = c.ClaimCode
+	ORDER BY
+		d.P1, d.P2, d.P3, d.P4;
 
 IF (@IsResult = 1)
 BEGIN
@@ -557,6 +577,7 @@ IF OBJECT_ID('tempdb..#TmpDetail') IS NOT NULL  DROP TABLE #TmpDetail;
 IF OBJECT_ID('tempdb..#TmpCover') IS NOT NULL  DROP TABLE #TmpCover;	
 IF OBJECT_ID('tempdb..#Tmplst') IS NOT NULL  DROP TABLE #Tmplst;
 IF OBJECT_ID('tempdb..#TmpDt_') IS NOT NULL  DROP TABLE #TmpDt_;
+IF OBJECT_ID('tempdb..#TmpX2') IS NOT NULL  DROP TABLE #TmpX2;
 
 
 IF (@IsResult = 1) 

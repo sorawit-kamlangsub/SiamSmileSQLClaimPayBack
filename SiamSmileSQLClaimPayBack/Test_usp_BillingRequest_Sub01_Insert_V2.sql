@@ -21,16 +21,16 @@ GO
 -- =============================================
 --ALTER PROCEDURE [dbo].[usp_BillingRequest_Sub01_Insert_V2]
 DECLARE
-		@GroupTypeId				INT				= 2
+		@GroupTypeId				INT				= 1
 		,@ClaimTypeCode				VARCHAR(20)		= '1000'
-		,@InsuranceCompanyId		INT				= 389190
+		,@InsuranceCompanyId		INT				= 27
 		,@CreatedByUserId			INT				= 6772
-		,@BillingDate				DATE			= '2025-11-15'
-		,@ClaimHeaderGroupTypeId	INT				= 3
-		,@InsuranceCompanyName		NVARCHAR(300)	= 'บริษัท เออร์โกประกันภัย (ประเทศไทย) จำกัด (มหาชน)'
-		,@NewBillingDate			DATE			= '2025-11-15'
-		,@CreatedDateFrom			DATE			= '2025-11-13'
-		,@CreatedDateTo				DATE			= '2025-11-13'
+		,@BillingDate				DATE			= '2025-11-17'
+		,@ClaimHeaderGroupTypeId	INT				= 2
+		,@InsuranceCompanyName		NVARCHAR(300)	= 'บริษัท บางกอกสหประกันภัย จำกัด (มหาชน)'
+		,@NewBillingDate			DATE			= '2025-11-17'
+		,@CreatedDateFrom			DATE			= '2025-11-17'
+		,@CreatedDateTo				DATE			= '2025-11-17'
 		;
 
 --AS
@@ -87,7 +87,6 @@ IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 	AND i.ClaimHeaderGroupImportStatusId = 2
 	AND i.BillingRequestGroupId IS NULL
 	AND i.InsuranceCompanyId = @pInsuranceCompanyId
-	--AND (i.ClaimTypeCode = @ClaimTypeCode OR @ClaimTypeCode IS NULL)
 	AND i.ClaimTypeCode = @ClaimTypeCode
 	AND	i.CreatedDate >	@CreatedDateFrom
 	AND	i.CreatedDate <=  @CreatedDateTo
@@ -95,7 +94,6 @@ IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 	AND 
 	(
 		(
-			--@pGroupTypeId = 1 AND f.ClaimHeaderGroupTypeId IN (2,4,5,6)
 			@pGroupTypeId = 1 AND f.ClaimHeaderGroupTypeId IN (2,4,5)
 		)
 		OR	
@@ -110,6 +108,7 @@ IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 		,d.ClaimHeaderGroupImportId
 		,d.ClaimCode
 		,d.PaySS_Total
+		,d.ClaimHeaderGroupCode
 	INTO #TmpX
 	FROM dbo.ClaimHeaderGroupImportDetail d
 		INNER JOIN #Tmplst lst
@@ -139,6 +138,16 @@ IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 		AND	d.IsActive = 1
 		AND	cs.ClaimCompensateCode IS NULL;
 
+/*SetUp Sort*/
+SELECT 
+	d.*
+    ,PARSENAME(REPLACE(d.ClaimHeaderGroupCode,'-','.'),4)				AS P1
+    ,CAST(PARSENAME(REPLACE(d.ClaimHeaderGroupCode,'-','.'),3) AS INT)	AS P2
+    ,CAST(PARSENAME(REPLACE(d.ClaimHeaderGroupCode,'-','.'),2) AS INT)	AS P3
+    ,CAST(PARSENAME(REPLACE(d.ClaimHeaderGroupCode,'-','.'),1) AS INT)	AS P4
+INTO #TmpX2
+FROM #TmpX d;
+
 /*SetUp TmpDetail*/
 	SELECT	
 		d.ClaimHeaderGroupImportDetailId
@@ -147,9 +156,10 @@ IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 		,d.PaySS_Total							 PaySS_Total
 		,ISNULL(c.SumCover,0)					 SumCover
 		,(d.PaySS_Total - ISNULL(c.SumCover,0))  TotalAmount
-		,ROW_NUMBER() OVER(ORDER BY (ClaimHeaderGroupImportDetailId) ASC) rwId
+		,ROW_NUMBER() OVER (ORDER BY d.P1, d.P2, d.P3, d.P4) AS rwId
+		,d.ClaimHeaderGroupCode
 	INTO #TmpDetail
-	FROM #TmpX d
+	FROM #TmpX2 d
 		LEFT JOIN 
 		(
 			SELECT ClaimCode
@@ -157,7 +167,9 @@ IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 			FROM #TmpCover 
 			GROUP BY ClaimCode
 		) c
-			ON d.ClaimCode = c.ClaimCode;
+			ON d.ClaimCode = c.ClaimCode
+	ORDER BY
+		d.P1, d.P2, d.P3, d.P4;
 
 IF (@IsResult = 1)
 BEGIN
@@ -253,7 +265,7 @@ BEGIN
 	IF @IsSFTP = 0
 	BEGIN 
 		SET @TotalRows = @D_Total;
-		SET @BatchSize = 3;
+		SET @BatchSize = 20;
 	END
 	
 /* Generate Code */
@@ -275,7 +287,7 @@ BEGIN
 	-----------------------------------
 	BEGIN TRY
 		Begin TRANSACTION
-	
+
 	WHILE @Offset < @TotalRows
 	BEGIN
 		DECLARE @ItemCount		INT = NULL;
@@ -546,7 +558,7 @@ IF OBJECT_ID('tempdb..#TmpDetail') IS NOT NULL  DROP TABLE #TmpDetail;
 IF OBJECT_ID('tempdb..#TmpCover') IS NOT NULL  DROP TABLE #TmpCover;	
 IF OBJECT_ID('tempdb..#Tmplst') IS NOT NULL  DROP TABLE #Tmplst;
 IF OBJECT_ID('tempdb..#TmpDt_') IS NOT NULL  DROP TABLE #TmpDt_;
-
+IF OBJECT_ID('tempdb..#TmpX2') IS NOT NULL  DROP TABLE #TmpX2;
 
 IF (@IsResult = 1) 
 	BEGIN	
