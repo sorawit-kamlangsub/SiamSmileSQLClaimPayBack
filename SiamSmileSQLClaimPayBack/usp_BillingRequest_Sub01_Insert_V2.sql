@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Sub01_Insert_V2]    Script Date: 11/17/2025 12:14:17 PM ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Sub01_Insert_V2]    Script Date: 18/11/2568 8:43:17 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -284,7 +284,7 @@ BEGIN
 	IF @IsSFTP = 0
 	BEGIN 
 		SET @TotalRows = @D_Total;
-		SET @BatchSize = 20;
+		SET @BatchSize = 5;
 	END
 	
 /* Generate Code */
