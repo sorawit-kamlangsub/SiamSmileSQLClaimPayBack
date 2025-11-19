@@ -1,8 +1,8 @@
 USE [ClaimPayBack]
 GO
 
-DECLARE @BillingRequestGroupCode NVARCHAR(50) = 'BQGPH05H6811033'
-,@NewBillingDate			DATE			= '2025-11-17'
+DECLARE @BillingRequestGroupCode NVARCHAR(50) = 'BQGPH05H6811009'
+,@NewBillingDate			DATE			= '2025-11-19'
 ,@CreatedByUserId			INT				= 6772
 
 DECLARE @D2						DATETIME2		= SYSDATETIME();
@@ -20,7 +20,6 @@ FROM dbo.ClaimHeaderGroupImport m
 	INNER JOIN dbo.BillingRequestGroup bg
 		ON bg.BillingRequestGroupId = m.BillingRequestGroupId	
 WHERE bg.BillingRequestGroupCode = @BillingRequestGroupCode
---WHERE m.CreatedDate >= @NewBillingDate
 
 --SELECT *
 DELETE be
