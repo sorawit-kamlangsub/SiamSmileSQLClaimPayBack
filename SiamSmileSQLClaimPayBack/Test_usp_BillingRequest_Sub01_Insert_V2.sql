@@ -21,16 +21,16 @@ GO
 -- =============================================
 --ALTER PROCEDURE [dbo].[usp_BillingRequest_Sub01_Insert_V2]
 DECLARE
-		@GroupTypeId				INT				= 1
-		,@ClaimTypeCode				VARCHAR(20)		= '1000'
+		@GroupTypeId				INT				= 2
+		,@ClaimTypeCode				VARCHAR(20)		= '2000'
 		,@InsuranceCompanyId		INT				= 27
 		,@CreatedByUserId			INT				= 6772
-		,@BillingDate				DATE			= '2025-11-17'
-		,@ClaimHeaderGroupTypeId	INT				= 2
+		,@BillingDate				DATE			= '2025-11-24'
+		,@ClaimHeaderGroupTypeId	INT				= 3
 		,@InsuranceCompanyName		NVARCHAR(300)	= 'บริษัท บางกอกสหประกันภัย จำกัด (มหาชน)'
-		,@NewBillingDate			DATE			= '2025-11-17'
-		,@CreatedDateFrom			DATE			= '2025-11-17'
-		,@CreatedDateTo				DATE			= '2025-11-17'
+		,@NewBillingDate			DATE			= '2025-11-24'
+		,@CreatedDateFrom			DATE			= '2025-11-24'
+		,@CreatedDateTo				DATE			= '2025-11-24'
 		;
 
 --AS
@@ -269,13 +269,13 @@ BEGIN
 	END
 	
 /* Generate Code */
-		EXECUTE dbo.usp_GenerateCode_FromTo 
-				 @D_TT
-				,@D_Total
-				,@D_YY OUTPUT
-				,@D_MM OUTPUT
-				,@D_RunningFrom OUTPUT
-				,@D_RunningTo OUTPUT
+		--EXECUTE dbo.usp_GenerateCode_FromTo 
+		--		 @D_TT
+		--		,@D_Total
+		--		,@D_YY OUTPUT
+		--		,@D_MM OUTPUT
+		--		,@D_RunningFrom OUTPUT
+		--		,@D_RunningTo OUTPUT
 
 			SELECT	
 				CONCAT(@D_TT, @D_YY, @D_MM, dbo.func_ConvertIntToString((@D_RunningFrom + rwId - 1), @D_Lenght))	BillingRequestItemCode
@@ -305,10 +305,10 @@ BEGIN
 		DECLARE @BillingRequestGroupId INT = NULL;
 
 /* Generate Code */
-		EXECUTE dbo.usp_GenerateCode 
-				 @G_TT
-				,@G_RunningLenght
-				,@BillingRequestGroupCode OUTPUT;
+		--EXECUTE dbo.usp_GenerateCode 
+		--		 @G_TT
+		--		,@G_RunningLenght
+		--		,@BillingRequestGroupCode OUTPUT;
 
 /* Insert BillingRequestGroup*/
 			--INSERT INTO dbo.BillingRequestGroup
