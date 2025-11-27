@@ -1,6 +1,6 @@
 USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_GetDocumentIdDocStorage_Select]    Script Date: 27/11/2568 8:48:35 ******/
+/****** Object:  StoredProcedure [dbo].[usp_GetDocumentIdDocStorage_Select]    Script Date: 27/11/2568 13:45:55 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -21,7 +21,7 @@ BEGIN
 	from dbo.func_SplitStringToTable(@ClaimHeaderGroupCodes,',');
 	
 	SELECT 
-		cm.ApplicationCode
+		IIF(doc.DocumentSubTypeId = 339,cm.ApplicationCode,doc.DocumentCode) MainIndex
 		,cm.ClaimHeaderGroupCode
 		,doc.DocumentId
 	FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
@@ -30,27 +30,35 @@ BEGIN
 		LEFT JOIN
 		(
 				SELECT
-					ClaimMiscId
-					,DocumentId
-				FROM [ClaimMiscellaneous].[misc].[Document]
-				WHERE IsActive = 1
+					doc.ClaimMiscId
+					,doc.DocumentId
+					,doc.DocumentCode
+					,doct.DocumentSubTypeId
+				FROM [ClaimMiscellaneous].[misc].[Document] doc
+					LEFT JOIN [ClaimMiscellaneous].[misc].[DocumentType] doct
+						ON doct.DocumentTypeId = doc.DocumentTypeId
+				WHERE doc.IsActive = 1
 
 				UNION ALL 
 
 				SELECT 
 					ClaimMiscId
 					,DocumentId
+					,DocumentCode
+					,DocumentSubTypeId
 				FROM [ClaimMiscellaneous].[misc].[DocumentClaimOnLine]
 				WHERE IsActive = 1
 		) doc
 			ON doc.ClaimMiscId = cm.ClaimMiscId
 	WHERE cm.IsActive = 1
 
-	--DECLARE @ApplicationCode		NVARCHAR(MAX)
+	IF OBJECT_ID('tempdb..#Tmplst') IS NOT NULL  DROP TABLE #Tmplst;
+
+	--DECLARE @MainIndex				NVARCHAR(MAX)
 	--DECLARE @DocumentId				UNIQUEIDENTIFIER
 	--DECLARE @ClaimHeaderGroupCode	NVARCHAR(MAX)
 	--SELECT
-	--	@ApplicationCode		ApplicationCode
+	--	@MainIndex				MainIndex
 	--	,@DocumentId			DocumentId
 	--	,@ClaimHeaderGroupCode	ClaimHeaderGroupCode
 
