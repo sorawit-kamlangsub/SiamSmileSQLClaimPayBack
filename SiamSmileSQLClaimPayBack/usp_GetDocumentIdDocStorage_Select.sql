@@ -1,6 +1,6 @@
 USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_GetDocumentIdDocStorage_Select]    Script Date: 27/11/2568 13:45:55 ******/
+/****** Object:  StoredProcedure [dbo].[usp_GetDocumentIdDocStorage_Select]    Script Date: 2/12/2568 13:51:28 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -21,7 +21,11 @@ BEGIN
 	from dbo.func_SplitStringToTable(@ClaimHeaderGroupCodes,',');
 	
 	SELECT 
-		IIF(doc.DocumentSubTypeId = 339,cm.ApplicationCode,doc.DocumentCode) MainIndex
+		CASE 
+			WHEN doc.TbType = 'ClaimMisc' THEN doc.DocumentId
+			WHEN doc.TbType = 'ClaimOnline' AND doc.DocumentSubTypeId = 339 THEN cm.ApplicationCode
+			WHEN doc.TbType = 'ClaimOnline' AND doc.DocumentSubTypeId <> 339 THEN doc.DocumentCode
+		END MainIndex
 		,cm.ClaimHeaderGroupCode
 		,doc.DocumentId
 	FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
@@ -34,6 +38,7 @@ BEGIN
 					,doc.DocumentId
 					,doc.DocumentCode
 					,doct.DocumentSubTypeId
+					,'ClaimMisc'			TbType
 				FROM [ClaimMiscellaneous].[misc].[Document] doc
 					LEFT JOIN [ClaimMiscellaneous].[misc].[DocumentType] doct
 						ON doct.DocumentTypeId = doc.DocumentTypeId
@@ -46,6 +51,7 @@ BEGIN
 					,DocumentId
 					,DocumentCode
 					,DocumentSubTypeId
+					,'ClaimOnline'			TbType
 				FROM [ClaimMiscellaneous].[misc].[DocumentClaimOnLine]
 				WHERE IsActive = 1
 		) doc
