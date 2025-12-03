@@ -3,21 +3,6 @@
   <Items>
     <LogicalFolder Name="Connections" Type="2" Sorted="true">
       <Items>
-        <ConnectionNode Name="147.50.133.169:devcrud">
-          <Created>2025-11-24T10:36:41.661442+07:00</Created>
-          <Type>SQL</Type>
-          <Server>147.50.133.169</Server>
-          <UserName>devcrud</UserName>
-          <Authentication>SQL</Authentication>
-          <InitialDB />
-          <LoginTimeout>30</LoginTimeout>
-          <TrustServerCertificate>False</TrustServerCertificate>
-          <HostNameInServerCertificate />
-          <EncryptionOption>False</EncryptionOption>
-          <ExecutionTimeout>0</ExecutionTimeout>
-          <ConnectionProtocol>NotSpecified</ConnectionProtocol>
-          <ApplicationName>Microsoft SQL Server Management Studio - Query</ApplicationName>
-        </ConnectionNode>
         <ConnectionNode Name="147.50.133.169:devdba">
           <Created>2025-09-19T10:24:18.6271281+07:00</Created>
           <Type>SQL</Type>
@@ -103,9 +88,9 @@
           <FullPath>Test_usp_ClaimPayBackTransferNonClaimCompensateReport_Select.sql</FullPath>
         </FileNode>
         <FileNode Name="UnExportGroupIns.sql">
-          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devcrud</AssociatedConnectionMoniker>
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
           <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
-          <AssociatedConnUserName>devcrud</AssociatedConnUserName>
+          <AssociatedConnUserName>devdba</AssociatedConnUserName>
           <FullPath>UnExportGroupIns.sql</FullPath>
         </FileNode>
         <FileNode Name="usp_BillingClaimMiscExport_Select.sql">
@@ -167,6 +152,12 @@
           <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
           <AssociatedConnUserName>devdba</AssociatedConnUserName>
           <FullPath>usp_ClaimPayBackDetail_InsertV5.sql</FullPath>
+        </FileNode>
+        <FileNode Name="usp_GetDocumentIdDocStorage_Select.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
+          <AssociatedConnUserName>devdba</AssociatedConnUserName>
+          <FullPath>usp_GetDocumentIdDocStorage_Select.sql</FullPath>
         </FileNode>
         <FileNode Name="usp_OrganizeInfo_Select.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
@@ -253,9 +244,9 @@
           <FullPath>Test_usp_BillingRequestValidate_Select.sql</FullPath>
         </FileNode>
         <FileNode Name="Test_usp_BillingRequest_Sub01_Insert_V2.sql">
-          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devcrud</AssociatedConnectionMoniker>
-          <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
-          <AssociatedConnUserName>devcrud</AssociatedConnUserName>
+          <AssociatedConnectionMoniker />
+          <AssociatedConnSrvName />
+          <AssociatedConnUserName />
           <FullPath>Test_usp_BillingRequest_Sub01_Insert_V2.sql</FullPath>
         </FileNode>
         <FileNode Name="usp_BillingRequest_Sub01_Insert_V2.sql">

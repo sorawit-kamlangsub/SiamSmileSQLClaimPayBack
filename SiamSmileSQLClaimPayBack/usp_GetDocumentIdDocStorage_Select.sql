@@ -22,7 +22,7 @@ BEGIN
 	
 	SELECT 
 		CASE 
-			WHEN doc.TbType = 'ClaimMisc' THEN CAST(doc.DocumentId AS NVARCHAR(MAX))
+			WHEN doc.TbType = 'ClaimMisc' THEN cm.ClaimMiscNo
 			WHEN doc.TbType = 'ClaimOnline' AND doc.DocumentSubTypeId = 339 THEN cm.ApplicationCode
 			WHEN doc.TbType = 'ClaimOnline' AND doc.DocumentSubTypeId <> 339 THEN doc.DocumentCode
 		END MainIndex
@@ -43,6 +43,7 @@ BEGIN
 					LEFT JOIN [ClaimMiscellaneous].[misc].[DocumentType] doct
 						ON doct.DocumentTypeId = doc.DocumentTypeId
 				WHERE doc.IsActive = 1
+				AND doc.DocumentTypeId <> 3
 
 				UNION ALL 
 
@@ -54,6 +55,7 @@ BEGIN
 					,'ClaimOnline'			TbType
 				FROM [ClaimMiscellaneous].[misc].[DocumentClaimOnLine]
 				WHERE IsActive = 1
+				AND DocumentSubTypeId <> 340
 		) doc
 			ON doc.ClaimMiscId = cm.ClaimMiscId
 	WHERE cm.IsActive = 1
