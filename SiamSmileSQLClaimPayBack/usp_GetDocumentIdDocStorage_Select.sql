@@ -22,7 +22,7 @@ BEGIN
 	
 	SELECT 
 		CASE 
-			WHEN doc.TbType = 'ClaimMisc' THEN doc.DocumentId
+			WHEN doc.TbType = 'ClaimMisc' THEN CAST(doc.DocumentId AS NVARCHAR(MAX))
 			WHEN doc.TbType = 'ClaimOnline' AND doc.DocumentSubTypeId = 339 THEN cm.ApplicationCode
 			WHEN doc.TbType = 'ClaimOnline' AND doc.DocumentSubTypeId <> 339 THEN doc.DocumentCode
 		END MainIndex
