@@ -87,15 +87,15 @@ SELECT c.ClaimPayBackXClaimId
 	  ,CASE 
 		WHEN d.ProductGroupId = 2 THEN CONCAT(@SSSURL,dbo.uFnStringToBase64(c.ClaimCode))
 		WHEN d.ProductGroupId = 3 THEN CONCAT(@SSSPAURL,dbo.uFnStringToBase64(c.ClaimCode))
-		--WHEN d.ProductGroupId > 3 THEN CONCAT(@ClaimMiscURL,cm.ClaimMiscId)
+		WHEN d.ProductGroupId IN (4,5,6,7,8,9,10,11) THEN CONCAT(@ClaimMiscURL,cm.ClaimMiscId)
 		ELSE ''
 		END		URLLink
 	  ,COUNT(c.ClaimPayBackXClaimId) OVER ( ) AS TotalCount
 FROM dbo.ClaimPayBackXClaim c
 	INNER JOIN dbo.ClaimPayBackDetail d
 		ON c.ClaimPayBackDetailId = d.ClaimPayBackDetailId
-	--INNER JOIN [ClaimMiscellaneous].[misc].ClaimMisc cm
-	--	on c.ClaimCode = cm.ClaimMiscNo
+	INNER JOIN [ClaimMiscellaneous].[misc].ClaimMisc cm
+		on c.ClaimCode = cm.ClaimMiscNo
 WHERE (c.ClaimPayBackDetailId = @ClaimPayBackDetailId)
 AND (c.IsActive = 1)
 
