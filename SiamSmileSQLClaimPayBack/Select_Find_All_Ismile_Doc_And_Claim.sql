@@ -16,10 +16,13 @@ FROM ISC_SmileDoc.dbo.DocumentIndexData did
                 ON bqi.ClaimHeaderGroupImportDetailId = chid.ClaimHeaderGroupImportDetailId  
     ) tbi
         ON did.DocumentIndexData = tbi.ClaimCode COLLATE DATABASE_DEFAULT
--- WHERE 
--- a.S3IsUploaded = 1
--- AND a.S3Key IS NOT NULL
--- AND a.S3Key <> ''
+ WHERE 
+ a.S3IsUploaded = 1
+ AND a.S3Key IS NOT NULL
+ AND a.S3Key <> ''
 
-WHERE 
-a.S3IsUploaded IS NULL
+--WHERE 
+--a.S3IsUploaded IS NULL
+
+--DocStorage
+--SELECT COUNT(DocumentId) FROM [dbo].[DocumentFile] WHERE [S3IsUploaded] = N'1' 
