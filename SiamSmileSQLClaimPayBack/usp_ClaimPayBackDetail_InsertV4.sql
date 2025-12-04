@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [Claim].[usp_ClaimPayBackDetail_InsertV4]    Script Date: 27/11/2568 10:03:33 ******/
+/****** Object:  StoredProcedure [Claim].[usp_ClaimPayBackDetail_InsertV4]    Script Date: 4/12/2568 16:45:28 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -21,6 +21,7 @@ GO
 -- Description: Add ClaimMisc
 -- Update date: 2025-11-06 Kittisak.Ph Add RoundNumber to ClaimWithdrawal
 -- Update date: 2025-11-27 Sorawit Kamlangsub Add ClaimMisc
+-- Update date: 2025-12-4 Sorawit Kamlangsub แก้ไข @TmpD เพิ่มขนาด Field ProductCode จาก 20 เป็น 255
 -- =============================================
 ALTER PROCEDURE [Claim].[usp_ClaimPayBackDetail_InsertV4]
 	@ClaimGroupCodeList		NVARCHAR(MAX)
@@ -57,7 +58,7 @@ BEGIN
 		InsId INT,
 		ClaimCode VARCHAR(20),
 		Amount DECIMAL(16, 2),
-		ProductCode VARCHAR(20),
+		ProductCode VARCHAR(255),
 		[Product] NVARCHAR(255),
 		HospitalCode VARCHAR(20),
 		Hospital NVARCHAR(255),
@@ -1293,6 +1294,7 @@ BEGIN
 
 	IF OBJECT_ID('tempdb..#TmpX') IS NOT NULL  DROP TABLE #TmpX;	
 	IF OBJECT_ID('tempdb..#Tmplst') IS NOT NULL  DROP TABLE #Tmplst;	
+	IF OBJECT_ID('tempdb..#TmpX2') IS NOT NULL  DROP TABLE #TmpX2;
 
 	IF OBJECT_ID('tempdb..@TmpH') IS NOT NULL  DELETE FROM @TmpH;	
 	IF OBJECT_ID('tempdb..@TmpGroup') IS NOT NULL  DELETE FROM @TmpGroup;	
