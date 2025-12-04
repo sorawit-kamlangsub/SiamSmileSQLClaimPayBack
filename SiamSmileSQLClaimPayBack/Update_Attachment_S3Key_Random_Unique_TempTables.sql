@@ -68,12 +68,12 @@ WHERE RowNo > @PoolCount;
 ----------------------------
 -- 4) UPDATE ด้วยคู่ RowNo ระหว่าง #Target กับ #Pool
 ----------------------------
---SELECT *
-UPDATE a
-SET 
-    a.S3Key = p.S3Key,
-    a.S3IsUploaded = 1,
-    a.S3Bucket = 'p-isc-ss-1-bucketdata' 
+SELECT *
+--UPDATE a
+--SET 
+--    a.S3Key = p.S3Key,
+--    a.S3IsUploaded = 1,
+--    a.S3Bucket = 'p-isc-ss-1-bucketdata' 
 FROM ISC_SmileDoc.dbo.Attachment a
     INNER JOIN #Target t 
         ON a.DocumentID = t.DocumentID
