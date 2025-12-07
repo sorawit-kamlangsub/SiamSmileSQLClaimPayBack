@@ -32,8 +32,8 @@ GO
 --ALTER PROCEDURE [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]
 DECLARE
 	-- Add the parameters for the stored procedure here
-	 @DateFrom			DATE =	'2025-10-29'
-	,@DateTo			DATE =	'2025-10-29'
+	 @DateFrom			DATE =	'2025-12-4'
+	,@DateTo			DATE =	'2025-12-4'
 	,@InsuranceId		INT =	NULL
 	,@ProductGroupId	INT =	NULL
 	,@ClaimGroupTypeId	INT =	7
@@ -190,7 +190,7 @@ FROM @TmpClaimPayBack TmpCPB
 									,h.HospitalCode			Hospital
 									,u.EmployeeCode			ApprovedUserFromSSS
 									,cm.CustomerName		CustomerName
-									,cm.ClaimMiscCode		ClaimCode
+									,cm.ClaimMiscNo			ClaimCode
 								FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
 								LEFT JOIN [ClaimMiscellaneous].[misc].[Hospital] h
 									ON h.HospitalId = cm.HospitalId 

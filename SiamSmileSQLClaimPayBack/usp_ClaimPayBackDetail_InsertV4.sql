@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [Claim].[usp_ClaimPayBackDetail_InsertV4]    Script Date: 6/11/2568 15:36:58 ******/
+/****** Object:  StoredProcedure [Claim].[usp_ClaimPayBackDetail_InsertV4]    Script Date: 4/12/2568 16:45:28 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -19,12 +19,15 @@ GO
 -- Description: Change to EXECUTE usp_ClaimPayBackDetail_InsertV5
 -- Update date: 2025-10-22 13:48 Sorawit Kamlangsub
 -- Description: Add ClaimMisc
+-- Update date: 2025-11-06 Kittisak.Ph Add RoundNumber to ClaimWithdrawal
+-- Update date: 2025-11-27 Sorawit Kamlangsub Add ClaimMisc
+-- Update date: 2025-12-4 Sorawit Kamlangsub แก้ไข @TmpD เพิ่มขนาด Field ProductCode จาก 20 เป็น 255
 -- =============================================
 ALTER PROCEDURE [Claim].[usp_ClaimPayBackDetail_InsertV4]
 	@ClaimGroupCodeList		NVARCHAR(MAX)
 	  , @ProductGroupId			INT
-	  , @ClaimGroupTypeId		INT
-	  , @CreatedByUserId		INT
+	  , @ClaimGroupTypeId		INT 
+	  , @CreatedByUserId		INT 
 AS
 BEGIN
 	
@@ -103,6 +106,7 @@ BEGIN
 			,ClaimPay DECIMAL(16,2)
 			,ClaimPayBackXClaimCreatedByUserId INT
 			,ClaimPayBackXClaimCreatedDate DATETIME2
+			,RoundNo int
 		);
 ---------------------------------------------------------------------------------
 
@@ -272,189 +276,185 @@ BEGIN
 					)s
 					ON g.ClaimHeaderGroupCode = s.ClaimHeaderGroupCode		
 
-			END
-		ELSE IF @ProductGroupId IN (4,5,6,7,8,9,10,11) AND @ClaimGroupTypeId = 7
-			BEGIN
-				 								
-				INSERT INTO @TmpD
-				(
-				    ClaimHeaderGroupCode
-				  , ProductGroupId
-				  , BranchCode
-				  , BranchId
-				  , ClaimGroupTypeId
-				  , InsCode
-				  , InsId
-				  , ClaimCode
-				  , Amount
-				  , ProductCode
-				  , [Product]
-				  , HospitalCode
-				  , Hospital
-				  , ClaimAdmitTypeCode
-				  , ClaimAdmitType
-				  , ChiefComplainCode
-				  , ChiefComplain
-				  , ICD10Code
-				  , ICD10
-				  , ClaimOnLineCode
-				  , CustomerName
-				  ,	AdmitDate
-				  ,	SchoolName 
-				  , GroupId
-				)
-				SELECT
-					cm.ClaimHeaderGroupCode
-					,pd.ProductGroup_ID			ProductGroupId
-					,NULL						BranchCode
-					,cm.BranchId
-					,@ClaimGroupTypeId			ClaimGroupTypeId
-					,cm.InsuranceCompanyCode	InsCode
-					,cm.InsuranceCompanyId		InsId
-					,cm.ClaimMiscNo				ClaimCode
-					,cm.ClaimAmount				Amount
-					,cm.ProductCode
-					,pd.ProductGroupDetail		[Product]
-					,h.HospitalCode				HospitalCode
-					,h.HospitalName				Hospital
-					,NULL						ClaimAdmitTypeCode
-					,cxa.ClaimAdmitType			ClaimAdmitType
-					,NULL						ChiefComplainCode
-					,c.ChiefComplainName		ChiefComplain
-					,NULL						ICD10Code
-					,NULL						ICD10
-					,cm.ClaimOnLineCode
-					,cm.CustomerName
-					,cm.DateIn					AdmitDate
-					,NULL						SchoolName
-					,1							GroupId
-				FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
-					LEFT JOIN [DataCenterV1].[Product].[ProductGroup] pd
-						ON cm.ProductGroupId = pd.ProductGroup_ID
-					LEFT JOIN  
-						(
-							SELECT
-								HospitalId
-								,HospitalName
-								,HospitalCode
-							FROM [ClaimMiscellaneous].[misc].[Hospital]
-							WHERE IsActive = 1
-						) h
-						ON h.HospitalId = cm.HospitalId
-					LEFT JOIN 
-						(
-							SELECT
-								ChiefComplainId
-								,ChiefComplainName
-							FROM [ClaimMiscellaneous].[misc].[ChiefComplain]
-							WHERE IsActive = 1
-						) c
-						ON c.ChiefComplainId = cm.ChiefComplainId
-					INNER JOIN #Tmplst lst
-						ON cm.ClaimHeaderGroupCode = lst.Element
-					LEFT JOIN 
-					(
-						SELECT 
-							x.ClaimMiscId
-							,STUFF((
-								SELECT ',' + a.ClaimAdmitTypeName
-								FROM [ClaimMiscellaneous].[misc].[ClaimMiscXClaimAdmitType] x2
-								JOIN [ClaimMiscellaneous].[misc].[ClaimAdmitType] a
-									ON a.ClaimAdmitTypeId = x2.ClaimAdmitTypeId
-								WHERE x2.IsActive = 1
-								  AND a.IsActive  = 1
-								  AND x2.ClaimMiscId = x.ClaimMiscId
-								FOR XML PATH(''), TYPE
-							).value('.', 'nvarchar(255)'), 1, 1, '')	ClaimAdmitType
-						FROM [ClaimMiscellaneous].[misc].[ClaimMiscXClaimAdmitType] x
-						WHERE x.IsActive = 1
-						GROUP BY x.ClaimMiscId
-					) cxa
-						ON cxa.ClaimMiscId = cm.ClaimMiscId
-				WHERE cm.IsActive = 1					
-
-				SELECT x.ClaimHeaderGroupCode
-					  ,x.ProductGroupId
-					  ,x.BranchCode
-					  ,x.BranchId			BranchId
-					  ,x.ClaimGroupTypeId
-					  ,x.InsCode
-					  ,x.InsId				InsId
-					  ,x.ClaimCode
-					  ,x.ClaimOnLineCode
-					  ,1					GroupId
-				INTO #TmpX2
-				FROM @TmpD x
-
-				INSERT INTO @TmpGroup
-				(
-				    ClaimGroupTypeId
-				  , BranchId
-				  , gId
-				  , sumPremium
-				  ,GroupId
-				)
-				SELECT @ClaimGroupTypeId		ClaimGroupTypeId
-					, BranchId					BranchId
-					, 1							gId
-					, SUM(Amount)				sumPremium
-					,1
-				FROM @TmpD
-				GROUP BY ClaimGroupTypeId, BranchId
-
-				INSERT INTO @TmpH
-				(
-					ClaimHeaderGroupCode
-				  , ClaimGroupTypeId
-				  , ProductGroupId
-				  , BranchId
-				  , InsId
-				  , ItemCount
-				  , SumAmount
-				  , ClaimOnLineCode
-				  , hId
-				  , HospitalCode
-				  ,GroupId
-				)
-				SELECT g.ClaimHeaderGroupCode
-					  ,g.ClaimGroupTypeId
-					  ,g.ProductGroupId
-					  ,g.BranchId
-					  ,g.InsId
-					  ,s.ItemCount
-					  ,s.SumAmount
-					  ,s.ClaimOnLineCode
-					  ,ROW_NUMBER() OVER(ORDER BY (g.ClaimHeaderGroupCode) asc ) hId
-					  ,s.HospitalCode
-					  ,GroupId
-				FROM
-				(
-				SELECT ClaimHeaderGroupCode
-						,ClaimGroupTypeId
-					  ,ProductGroupId
-					  ,BranchId
-					  ,InsId
-					  ,GroupId
-				FROM #TmpX2
-				GROUP BY ClaimHeaderGroupCode
-						,ClaimGroupTypeId
-						,ProductGroupId
-						,BranchId
-						,InsId
-						,GroupId
-				)g
-				LEFT JOIN 
-					(
-						SELECT ClaimHeaderGroupCode
-								,COUNT(ClaimCode)	ItemCount
-								,SUM(Amount)		SumAmount
-								,MAX(ClaimOnLineCode) ClaimOnLineCode
-								,HospitalCode
-						FROM @TmpD
-						GROUP BY ClaimHeaderGroupCode, HospitalCode
-					)s
-					ON g.ClaimHeaderGroupCode = s.ClaimHeaderGroupCode
-
+                        END
+                ELSE IF @ProductGroupId IN (4,5,6,7,8,9,10,11) AND @ClaimGroupTypeId = 7
+                        BEGIN
+                                                                                                
+                                INSERT INTO @TmpD
+                                (
+                                    ClaimHeaderGroupCode
+                                  , ProductGroupId
+                                  , BranchCode
+                                  , BranchId
+                                  , ClaimGroupTypeId
+                                  , InsCode
+                                  , InsId
+                                  , ClaimCode
+                                  , Amount
+                                  , ProductCode
+                                  , [Product]
+                                  , HospitalCode
+                                  , Hospital
+                                  , ClaimAdmitTypeCode
+                                  , ClaimAdmitType
+                                  , ChiefComplainCode
+                                  , ChiefComplain
+                                  , ICD10Code
+                                  , ICD10
+                                  , ClaimOnLineCode
+                                  , CustomerName
+                                  , AdmitDate
+                                  , SchoolName
+                                  , GroupId
+                                )
+                                SELECT
+                                        cm.ClaimHeaderGroupCode
+                                        ,pd.ProductGroup_ID			ProductGroupId
+                                        ,NULL						BranchCode
+                                        ,cm.BranchId
+                                        ,@ClaimGroupTypeId			ClaimGroupTypeId
+                                        ,cm.InsuranceCompanyCode	InsCode
+                                        ,cm.InsuranceCompanyId		InsId
+                                        ,cm.ClaimMiscNo				ClaimCode
+                                        ,cm.ClaimAmount				Amount
+                                        ,cm.ProductCode
+                                        ,pd.ProductGroupDetail		[Product]
+                                        ,h.HospitalCode				HospitalCode
+                                        ,h.HospitalName				Hospital
+                                        ,NULL						ClaimAdmitTypeCode
+                                        ,cxa.ClaimAdmitType			ClaimAdmitType
+                                        ,NULL						ChiefComplainCode
+                                        ,c.ChiefComplainName		ChiefComplain
+                                        ,NULL						ICD10Code
+                                        ,NULL						ICD10
+                                        ,cm.ClaimOnLineCode
+                                        ,cm.CustomerName
+                                        ,cm.DateIn					AdmitDate
+                                        ,NULL						SchoolName
+                                        ,1							GroupId
+                                FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
+                                        LEFT JOIN [DataCenterV1].[Product].[ProductGroup] pd
+                                                ON cm.ProductGroupId = pd.ProductGroup_ID
+                                        LEFT JOIN  
+                                                (
+                                                        SELECT
+                                                                HospitalId
+                                                                ,HospitalName
+                                                                ,HospitalCode
+                                                        FROM [ClaimMiscellaneous].[misc].[Hospital]
+                                                        WHERE IsActive = 1
+                                                ) h
+                                                ON h.HospitalId = cm.HospitalId
+                                        LEFT JOIN
+                                                (
+                                                        SELECT
+                                                                ChiefComplainId
+                                                                ,ChiefComplainName
+                                                        FROM [ClaimMiscellaneous].[misc].[ChiefComplain]
+                                                        WHERE IsActive = 1
+                                                ) c
+                                                ON c.ChiefComplainId = cm.ChiefComplainId
+                                        INNER JOIN #Tmplst lst
+                                                ON cm.ClaimHeaderGroupCode = lst.Element
+                                        LEFT JOIN
+                                        (
+                                                SELECT
+                                                        x.ClaimMiscId
+                                                        ,STUFF((
+                                                                SELECT ',' + a.ClaimAdmitTypeName
+                                                                FROM [ClaimMiscellaneous].[misc].[ClaimMiscXClaimAdmitType] x2
+                                                                JOIN [ClaimMiscellaneous].[misc].[ClaimAdmitType] a
+                                                                        ON a.ClaimAdmitTypeId = x2.ClaimAdmitTypeId
+                                                                WHERE x2.IsActive = 1
+                                                                  AND a.IsActive  = 1
+                                                                  AND x2.ClaimMiscId = x.ClaimMiscId
+                                                                FOR XML PATH(''), TYPE
+                                                        ).value('.', 'nvarchar(255)'), 1, 1, '')        ClaimAdmitType
+                                                FROM [ClaimMiscellaneous].[misc].[ClaimMiscXClaimAdmitType] x
+                                                WHERE x.IsActive = 1
+                                                GROUP BY x.ClaimMiscId
+                                        ) cxa
+                                                ON cxa.ClaimMiscId = cm.ClaimMiscId
+                                WHERE cm.IsActive = 1                                        
+                                SELECT x.ClaimHeaderGroupCode
+                                          ,x.ProductGroupId
+                                          ,x.BranchCode
+                                          ,x.BranchId			BranchId
+                                          ,x.ClaimGroupTypeId
+                                          ,x.InsCode
+                                          ,x.InsId				InsId
+                                          ,x.ClaimCode
+                                          ,x.ClaimOnLineCode
+                                          ,1					GroupId
+                                INTO #TmpX2
+                                FROM @TmpD x
+                                INSERT INTO @TmpGroup
+                                (
+                                    ClaimGroupTypeId
+                                  , BranchId
+                                  , gId
+                                  , sumPremium
+                                  ,GroupId
+                                )
+                                SELECT @ClaimGroupTypeId	ClaimGroupTypeId
+                                        , BranchId			BranchId
+                                        , 1					gId
+                                        , SUM(Amount)		sumPremium
+                                        ,1
+                                FROM @TmpD
+                                GROUP BY ClaimGroupTypeId, BranchId
+                                INSERT INTO @TmpH
+                                (
+									ClaimHeaderGroupCode
+                                  , ClaimGroupTypeId
+                                  , ProductGroupId
+                                  , BranchId
+                                  , InsId
+                                  , ItemCount
+                                  , SumAmount
+                                  , ClaimOnLineCode
+                                  , hId
+                                  , HospitalCode
+                                  ,GroupId
+                                )
+                                SELECT g.ClaimHeaderGroupCode
+                                          ,g.ClaimGroupTypeId
+                                          ,g.ProductGroupId
+                                          ,g.BranchId
+                                          ,g.InsId
+                                          ,s.ItemCount
+                                          ,s.SumAmount
+                                          ,s.ClaimOnLineCode
+                                          ,ROW_NUMBER() OVER(ORDER BY (g.ClaimHeaderGroupCode) asc ) hId
+                                          ,s.HospitalCode
+                                          ,GroupId
+                                FROM
+                                (
+                                SELECT ClaimHeaderGroupCode
+                                                ,ClaimGroupTypeId
+                                          ,ProductGroupId
+                                          ,BranchId
+                                          ,InsId
+                                          ,GroupId
+                                FROM #TmpX2
+                                GROUP BY ClaimHeaderGroupCode
+                                                ,ClaimGroupTypeId
+                                                ,ProductGroupId
+                                                ,BranchId
+                                                ,InsId
+                                                ,GroupId
+                                )g
+                                LEFT JOIN
+                                        (
+                                                SELECT ClaimHeaderGroupCode
+                                                                ,COUNT(ClaimCode)		ItemCount
+                                                                ,SUM(Amount)			SumAmount
+                                                                ,MAX(ClaimOnLineCode)	ClaimOnLineCode
+                                                                ,HospitalCode
+                                                FROM @TmpD
+                                                GROUP BY ClaimHeaderGroupCode, HospitalCode
+                                        )s
+                                        ON g.ClaimHeaderGroupCode = s.ClaimHeaderGroupCode
 			END
 		ELSE
 			BEGIN
@@ -925,6 +925,33 @@ BEGIN
 	--เคลมออนไลน์
 	IF @ClaimGroupTypeId = 2				--Update Chanadol 2025-02-26 
 	BEGIN
+
+	DECLARE @roundAmount INT = 5;
+	DECLARE @lastNumber INT;
+	DECLARE @startNumber INT;
+	DECLARE @total INT;
+	
+	SELECT TOP 1 @lastNumber = cw.RoundNo
+	FROM [ClaimOnlineV2].[dbo].ClaimWithdrawal cw
+	WHERE cw.ClaimPayBackXClaimCreatedDate = (
+		SELECT MAX(ClaimPayBackXClaimCreatedDate)
+		FROM [ClaimOnlineV2].[dbo].ClaimWithdrawal
+	)
+	ORDER BY cw.RoundNo DESC;
+
+	SELECT @total = COUNT(ClaimCode) from @TmpD
+
+	--SELECT @lastNumber lastNumber
+	SET @startNumber = ISNULL(@lastNumber, 0) + 1;
+	--SELECT @startNumber
+		
+		--ปรับ IsActive รายการที่ส่งตั้งเบิกครั้งก่อน 2025-11-12 By Kittisak.Ph
+		UPDATE cwd
+		SET cwd.IsActive=0
+		FROM ClaimOnlineV2.dbo.ClaimWithdrawal cwd
+		INNER JOIN @TmpD tmpd 
+		ON tmpd.ClaimCode = cwd.ClaimCode
+
 	    INSERT INTO @TmpXClaim(
 			ClaimOnLineId 
 			,ClaimOnLineItemId 
@@ -932,6 +959,7 @@ BEGIN
 			,ClaimPay 
 			,ClaimPayBackXClaimCreatedByUserId 
 			,ClaimPayBackXClaimCreatedDate 
+			,RoundNo
 		)
 		SELECT
 			ci.ClaimOnLineId
@@ -940,6 +968,7 @@ BEGIN
 			,d.Amount ClaimPay
 			,@CreatedByUserId AS ClaimPayBackXClaimCreatedByUserId
 			,@D ClaimPayBackXClaimCreatedDate
+			,(( (@startNumber - 1) + (ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) - 1) ) % @roundAmount) + 1
 		FROM @TmpD d
 			INNER JOIN ClaimOnlineV2.dbo.ClaimOnlineItem ci
 				ON d.ClaimCode = ci.ClaimCode
@@ -974,8 +1003,9 @@ BEGIN
 	
 		-----------------------------------
 		BEGIN TRY
-			Begin TRANSACTION						
-				
+			Begin TRANSACTION
+	
+	
 				INSERT INTO dbo.ClaimPayBack
 						(ClaimPayBackCode
 						,Amount
@@ -992,21 +1022,23 @@ BEGIN
 						)
 				OUTPUT Inserted.ClaimGroupTypeId,Inserted.BranchId,Inserted.ClaimPayBackId,Inserted.GroupId,Inserted.ClaimPayBackCode INTO @TmpOutGroup(ClaimGroupTypeId,BranchId,gId,GroupId,ClaimPayBackCode) --Update Chanadol 20241112
 				SELECT 
-						CONCAT(@g_TransactionCodeControlTypeDetail,@g_YY,@g_MM ,dbo.func_ConvertIntToString((@g_RunningFrom + ig.gId - 1),@g_lenght)) ClaimPayBackCode
-						,ig.sumPremium				Amount
-						,IIF(ig.GroupId = 2, 5, 2)	ClaimPayBackStatusId
-						,ig.ClaimGroupTypeId		ClaimGroupTypeId		
-						,ig.BranchId				BranchId
-						,NULL						ClaimPayBackTransferId
-						,1							IsActive
-						,@CreatedByUserId			CreatedByUserId
-						,@D							CreatedDate
-						,@CreatedByUserId			UpdatedByUserId
-						,@D							UpdatedDate
-						,ig.GroupId					GroupId
+						CONCAT(@g_TransactionCodeControlTypeDetail,@g_YY,@g_MM ,dbo.func_ConvertIntToString((@g_RunningFrom + ig.gId - 1),@g_lenght)) Code
+						,ig.sumPremium
+						--,2
+						,IIF(ig.GroupId = 2, 5, 2)
+						,ig.ClaimGroupTypeId
+						,ig.BranchId
+						,NULL
+						,1
+						,@CreatedByUserId
+						,@D
+						,@CreatedByUserId
+						,@D
+						,ig.GroupId
 				FROM @TmpGroup ig
-				ORDER BY ig.gId;		
-
+				ORDER BY ig.gId;
+			
+			
 				INSERT INTO dbo.ClaimPayBackDetail
 						(ClaimPayBackDetailCode
 						,ClaimPayBackId
@@ -1026,21 +1058,21 @@ BEGIN
 						)
 				OUTPUT Inserted.ClaimGroupCode,Inserted.ClaimPayBackDetailId,Inserted.ClaimPayBackId,Inserted.InsuranceCompanyId INTO @TmpOutD (ClaimHeaderGroupCode,cdId,ClaimPayBackId,InsuranceCompanyId)
 				SELECT	
-						CONCAT(@h_TransactionCodeControlTypeDetail,@h_YY,@h_MM ,dbo.func_ConvertIntToString((@h_RunningFrom + h.hId - 1),@h_lenght)) ClaimPayBackDetailCode
-						,o.gId					ClaimPayBackId
-						,h.ClaimHeaderGroupCode	ClaimGroupCode
-						,h.ItemCount			ItemCount
-						,h.SumAmount			Amount
-						,h.ProductGroupId		ProductGroupId
-						,h.InsId				InsuranceCompanyId
-						,NULL					CancelRemark
-						,1						IsActive
-						,@CreatedByUserId		CreatedByUserId
-						,@D						CreatedDate
-						,@CreatedByUserId		UpdatedByUserId
-						,@D						UpdatedDate
-						,h.ClaimOnLineCode		ClaimOnLineCode
-						,h.HospitalCode			HospitalCode
+						CONCAT(@h_TransactionCodeControlTypeDetail,@h_YY,@h_MM ,dbo.func_ConvertIntToString((@h_RunningFrom + h.hId - 1),@h_lenght)) Code
+						,o.gId
+						,h.ClaimHeaderGroupCode
+						,h.ItemCount
+						,h.SumAmount
+						,h.ProductGroupId
+						,h.InsId
+						,NULL
+						,1
+						,@CreatedByUserId
+						,@D
+						,@CreatedByUserId
+						,@D
+						,h.ClaimOnLineCode
+						,h.HospitalCode
 				FROM @TmpH h
 					LEFT JOIN @TmpOutGroup o
 						ON h.ClaimGroupTypeId = o.ClaimGroupTypeId
@@ -1072,28 +1104,28 @@ BEGIN
 						,AdmitDate
 						,SchoolName)
 						OUTPUT Inserted.ClaimCode,Inserted.ClaimPayBackXClaimId,Inserted.ClaimPayBackDetailId INTO @TmpOutXClaim (ClaimCode,cxId,cdId) --Kittisak.Ph 2024-04-05
-				SELECT o.cdId					ClaimPayBackDetailId
-						,d.ClaimCode			ClaimCode	
-						,d.ProductCode			ProductCode
-						,d.[Product]			ProductName
-						,d.HospitalCode			HospitalCode
-						,d.Hospital				HospitalName
-						,d.ClaimAdmitTypeCode	ClaimAdmitTypeCode
-						,d.ClaimAdmitType		ClaimAdmitType
-						,d.ChiefComplainCode	ChiefComplainCode
-						,d.ChiefComplain		ChiefComplain
-						,d.ICD10Code			ICD10Code
-						,d.ICD10				ICD10
-						,d.Amount				ClaimPay
-						,0						ClaimTransfer
-						,1						IsActive
-						,@CreatedByUserId		CreatedByUserId
-						,@D						CreatedDate
-						,@CreatedByUserId		UpdatedByUserId
-						,@D						UpdatedDate	
-						,d.CustomerName			CustomerName		
-						,d.AdmitDate			AdmitDate
-						,d.SchoolName			SchoolName
+				SELECT o.cdId
+						,d.ClaimCode
+						,d.ProductCode
+						,d.[Product]
+						,d.HospitalCode
+						,d.Hospital
+						,d.ClaimAdmitTypeCode
+						,d.ClaimAdmitType
+						,d.ChiefComplainCode
+						,d.ChiefComplain
+						,d.ICD10Code
+						,d.ICD10
+						,d.Amount
+						,0
+						,1
+						,@CreatedByUserId
+						,@D
+						,@CreatedByUserId
+						,@D
+						,d.CustomerName				
+						,d.AdmitDate
+						,d.SchoolName
 				FROM @TmpD d
 					LEFT JOIN @TmpOutD o
 						ON d.ClaimHeaderGroupCode = o.ClaimHeaderGroupCode
@@ -1105,6 +1137,18 @@ BEGIN
 	BEGIN
 
 		INSERT INTO [ClaimOnlineV2].[dbo].[ClaimWithdrawal]
+		(
+		[ClaimWithdrawalId]
+      ,[ClaimOnLineId]
+      ,[ClaimOnLineItemId]
+      ,[ClaimPayBackXClaimId]
+      ,[ClaimCode]
+      ,[ClaimPay]
+      ,[IsActive]
+      ,[ClaimPayBackXClaimCreatedByUserId]
+      ,[ClaimPayBackXClaimCreatedDate]
+      ,[RoundNo]
+	  )
 		SELECT NEWID()
 		,ClaimOnLineId
 			,ClaimOnLineItemId
@@ -1114,6 +1158,7 @@ BEGIN
 			,1
 			,ClaimPayBackXClaimCreatedByUserId
 			,ClaimPayBackXClaimCreatedDate
+			,tx.RoundNo
 		FROM @TmpXClaim tx
 		LEFT JOIN @TmpOutXClaim x ON tx.ClaimCode = x.ClaimCode
 
@@ -1275,5 +1320,5 @@ BEGIN
 	--	,1 UpdatedByUserId		
 	--	,@D AS UpdatedDate 
 
-	END;
+	END
 

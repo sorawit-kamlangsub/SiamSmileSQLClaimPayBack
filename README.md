@@ -8,3 +8,7 @@
 
 ```bash
 git update-index --skip-worktree SiamSmileSQLClaimPayBack/SiamSmileSQLClaimPayBack.sln
+```
+วิธียกเลิก 
+```bash
+git update-index --no-skip-worktree SiamSmileSQLClaimPayBack/SiamSmileSQLClaimPayBack.sln
