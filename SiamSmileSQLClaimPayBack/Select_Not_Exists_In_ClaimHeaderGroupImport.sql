@@ -1,4 +1,4 @@
--- ????? temp table ??????????????????????????
+﻿-- สร้าง temp table เก็บลิสต์ที่ต้องการตรวจสอบ
 DECLARE @List TABLE (ClaimHeaderGroupCode VARCHAR(50));
 
 INSERT INTO @List VALUES
@@ -252,7 +252,7 @@ INSERT INTO @List VALUES
 ('BUAH-888-68040003-0'),
 ('BUAH-888-68040006-0')
 
--- ?????????????? �??????? DB�
+-- หาว่ารายการไหน “ไม่มีใน DB”
 SELECT L.ClaimHeaderGroupCode
 FROM @List L
 WHERE NOT EXISTS (
