@@ -22,6 +22,7 @@ GO
 -- Update date: 2025-11-06 Kittisak.Ph Add RoundNumber to ClaimWithdrawal
 -- Update date: 2025-11-27 Sorawit Kamlangsub Add ClaimMisc
 -- Update date: 2025-12-4 Sorawit Kamlangsub แก้ไข @TmpD เพิ่มขนาด Field ProductCode จาก 20 เป็น 255
+-- Update date: 2025-12-9 Sorawit Kamlangsub แก้ไข ClaimMisc เพิ่ม Left Join DataCenterV1 ด้วย cm.InsCode เอา Organize_Id มาเก็บใน InsId
 -- =============================================
 ALTER PROCEDURE [Claim].[usp_ClaimPayBackDetail_InsertV4]
 	@ClaimGroupCodeList		NVARCHAR(MAX)
