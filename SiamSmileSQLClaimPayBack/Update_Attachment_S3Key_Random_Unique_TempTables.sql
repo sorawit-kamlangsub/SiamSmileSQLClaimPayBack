@@ -37,16 +37,24 @@ WHERE
 
 
 SELECT
-    IDENTITY(INT, 1, 1) AS RowNo,  
+    IDENTITY(INT, 1, 1) AS RowNo,
     a.DocumentID,
     a.S3Key
 INTO #Pool
-FROM ISC_SmileDoc.dbo.Attachment a
-WHERE 
-    a.S3IsUploaded = 1
-    AND a.S3Bucket = 'p-isc-ss-1-bucketdata'
-    AND a.S3Key IS NOT NULL
-    AND a.S3Key <> ''
+FROM 
+(
+    SELECT 
+        MIN(DocumentID) AS DocumentID,   -- เลือก DocumentID ตัวใดตัวหนึ่ง
+        S3Key
+    FROM ISC_SmileDoc.dbo.Attachment
+    WHERE 
+        S3IsUploaded = 1
+        AND S3Bucket = 'p-isc-ss-1-bucketdata'
+        AND S3Key IS NOT NULL
+        AND S3Key <> ''
+    GROUP BY 
+        S3Key   -- ทำให้มั่นใจว่า S3Key ไม่ซ้ำ
+) a
 ORDER BY 
     NEWID();   -- สุ่มลำดับ
 
