@@ -314,7 +314,7 @@ BEGIN
                                         ,cm.BranchId
                                         ,@ClaimGroupTypeId			ClaimGroupTypeId
                                         ,cm.InsuranceCompanyCode	InsCode
-                                        ,cm.InsuranceCompanyId		InsId
+                                        ,ins.Organize_ID			InsId
                                         ,cm.ClaimMiscNo				ClaimCode
                                         ,ISNULL(cm.PayAmount, 0)	Amount
                                         ,cm.ProductCode
@@ -375,6 +375,16 @@ BEGIN
                                                 GROUP BY x.ClaimMiscId
                                         ) cxa
                                                 ON cxa.ClaimMiscId = cm.ClaimMiscId
+										LEFT JOIN 
+										(
+											SELECT 
+												OrganizeCode
+												,Organize_ID
+											FROM [DataCenterV1].[Organize].[Organize]
+											WHERE IsActive = 1
+										) ins
+											ON ins.OrganizeCode = cm.InsuranceCompanyCode
+											
                                 WHERE cm.IsActive = 1                                        
                                 SELECT x.ClaimHeaderGroupCode
                                           ,x.ProductGroupId
