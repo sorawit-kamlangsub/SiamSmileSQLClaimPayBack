@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [Claim].[usp_ClaimPayBackDetail_InsertV4]    Script Date: 4/12/2568 16:45:28 ******/
+/****** Object:  StoredProcedure [Claim].[usp_ClaimPayBackDetail_InsertV4]    Script Date: 9/12/2568 9:47:18 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -316,7 +316,7 @@ BEGIN
                                         ,cm.InsuranceCompanyCode	InsCode
                                         ,cm.InsuranceCompanyId		InsId
                                         ,cm.ClaimMiscNo				ClaimCode
-                                        ,cm.ClaimAmount				Amount
+                                        ,ISNULL(cm.PayAmount, 0)	Amount
                                         ,cm.ProductCode
                                         ,pd.ProductGroupDetail		[Product]
                                         ,h.HospitalCode				HospitalCode
