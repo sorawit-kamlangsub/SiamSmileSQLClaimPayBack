@@ -36,7 +36,7 @@ WHERE
 ----------------------------
 
 
-SELECT
+SELECT TOP(1000)
     IDENTITY(INT, 1, 1) AS RowNo,
     a.DocumentID,
     a.S3Key
