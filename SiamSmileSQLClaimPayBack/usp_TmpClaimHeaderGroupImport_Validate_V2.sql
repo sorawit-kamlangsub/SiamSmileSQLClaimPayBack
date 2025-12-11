@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_TmpClaimHeaderGroupImport_Validate_V2]    Script Date: 3/11/2568 14:05:27 ******/
+/****** Object:  StoredProcedure [dbo].[usp_TmpClaimHeaderGroupImport_Validate_V2]    Script Date: 29/10/2568 14:48:17 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -20,7 +20,6 @@ GO
 -- update date: 2025-04-11 Wetpisit.P เพิ่ม validate เช็คเลขกรมธรรม์ใน บ.ส.โดยดึงข้อมูล PolicyNo มาใส่ #TmpDetail เพื่อนำไปเช็ค,เพิ่มเงื่อนไขการเช็คจำนวนเอกสารใน #tmpDoc
 -- update date: 2025-10-02 10:02 เพิ่ม IsActive ใน LEFT JOIN ClaimHeaderGroupImport
 -- Update date: 2025-10-16 14:01 Clear comment Krekpon.D
--- Update date: 2025-10-30 09:34 Add ClaimMisc and Clean Script Sorawit kamlangsub
 -- Description:	
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_TmpClaimHeaderGroupImport_Validate_V2]
@@ -30,12 +29,11 @@ AS
 BEGIN
 	
 SET NOCOUNT ON;
---DECLARE @TmpCode VARCHAR(20) = 'IMCHG6810000133'
+
 DECLARE @ClaimHeaderSSS INT = 2;
 DECLARE @ClaimHeaderSSSPA INT = 3;
 DECLARE @ClaimCompensate INT = 4;
 DECLARE @ClaimHeaderPA30 INT = 5;
-DECLARE @ClaimMisc INT = 6;
 DECLARE @IsResult    BIT             = 1;		
 DECLARE @Result        VARCHAR(100) = '';		
 DECLARE @Msg        NVARCHAR(500)= '';	
@@ -52,7 +50,6 @@ VALUES
 ,(3,'2000')
 ,(4,'2222')
 ,(5,'P30')
-,(6,'Misc')
 DECLARE @ClaimTypeCode_H	VARCHAR(20) = '1000'
 DECLARE @ClaimTypeCode_C	VARCHAR(20) = '2000'
 ----------------------------------------------
@@ -120,8 +117,6 @@ IF @IsResult = 1
 			,d.ClaimHeaderCodeInDB
 			,d.ProductGroup
 			,d.PolicyNo
-			,d.ClaimHeaderGroupTypeId
-			,d.CountDoc
 		INTO #TmpDetail
 		FROM
 			(	--SSS------
@@ -133,8 +128,6 @@ IF @IsResult = 1
 						,h.Code									AS ClaimHeaderCodeInDB
 						,IIF(h.Product_id = 'P30',h.Product_id,'1000') AS ProductGroup
 						,cus.InsuredPolicy_no					AS PolicyNo
-						,t.ClaimHeaderGroupTypeId
-						,NULL									CountDoc
 				FROM #Tmp t
 					LEFT JOIN SSS.dbo.DB_ClaimHeader h
 						ON t.ClaimHeaderGroupCode = h.ClaimHeaderGroup_id
@@ -159,8 +152,6 @@ IF @IsResult = 1
 						,h.Code									AS ClaimHeaderCodeInDB
 						,'2000'									AS ProductGroup
 						,ctp.Detail								AS PolicyNo
-						,t.ClaimHeaderGroupTypeId
-						,NULL									CountDoc
 				FROM #Tmp t
 					INNER JOIN SSSPA.dbo.DB_ClaimHeaderGroup AS hg
 						ON t.ClaimHeaderGroupCode = hg.Code
@@ -187,17 +178,12 @@ IF @IsResult = 1
 					,cc.ClaimCompensateCode						AS ClaimHeaderCodeInDB
 					,'2222'										AS ProductGroup
 					,cus.InsuredPolicy_no						AS PolicyNo
-					,t.ClaimHeaderGroupTypeId
-					,NULL										CountDoc
 				FROM #Tmp t
 					INNER JOIN SSS.dbo.ClaimCompensateGroup cg
 						ON t.ClaimHeaderGroupCode = cg.ClaimCompensateGroupCode
 					LEFT JOIN
 						(
-							SELECT 
-								CompensateRemain
-								,ClaimCompensateCode
-								,ClaimCompensateGroupId
+							SELECT * 
 							FROM SSS.dbo.ClaimCompensate
 							WHERE IsActive = 1
 						)cc
@@ -209,39 +195,6 @@ IF @IsResult = 1
 					LEFT JOIN sss.dbo.DB_Customer  cus
 						ON h.App_id = cus.App_id
 				WHERE t.ClaimHeaderGroupTypeId = @ClaimCompensate
-
-				UNION
-
-				-- ClaimMisc 
-				SELECT 
-					t.TmpClaimHeaderGroupImportId	
-					,cm.ClaimHeaderGroupCode		ClaimHeaderGroupCodeInDB
-					,cm.ClaimAmount					TotalAmount
-					,cm.ClaimAmount					TotalAmountSS
-					,org.Organize_ID				InsuranceCompanyId
-					,NULL							ClaimHeaderCodeInDB
-					,'Misc'							ProductGroup
-					,cm.PolicyNo					PolicyNo
-					,t.ClaimHeaderGroupTypeId
-					,doc.CountDoc					CountDoc
-				FROM #Tmp t
-					INNER JOIN [ClaimMiscellaneous].[misc].[ClaimMisc] cm
-						ON t.ClaimHeaderGroupCode = cm.ClaimHeaderGroupCode
-					LEFT JOIN [ClaimMiscellaneous].[misc].[InsuranceCompany] ins
-						ON ins.InsuranceCompanyId = cm.InsuranceCompanyId
-					LEFT JOIN [DataCenterV1].[Organize].[Organize] org
-						ON org.OrganizeCode = ins.InsuranceCompanyCode
-					LEFT JOIN
-					(
-						SELECT
-							ClaimMiscId
-							,COUNT(DocumentId)	CountDoc
-						FROM [ClaimMiscellaneous].[misc].[Document]
-						WHERE IsActive = 1
-						GROUP BY ClaimMiscId
-					) doc
-						ON doc.ClaimMiscId = cm.ClaimMiscId
-
 			)d;
 
 		----------------Update 2023-08-09-----------------------
@@ -249,8 +202,8 @@ IF @IsResult = 1
 			 , m.ClaimHeaderGroupCodeInDB
              , m.ClaimHeaderCodeInDB
 			 , m.TotalAmountSS
-             , CASE WHEN d.CountDoc >= 1 OR m.CountDoc >= 1 THEN 1 ELSE 0 END CountDoc
-			 , CASE WHEN d.CountDoc >= 1 OR m.CountDoc >= 1 THEN '' ELSE N'ไม่พบเอกสารแนบ' END ValidateDetailResult
+             , ISNULL(d.CountDoc,0) CountDoc
+			 , IIF(ISNULL(d.CountDoc,0) = 0,N'ไม่พบเอกสารแนบ','') ValidateDetailResult
 		INTO #TmpDoc
 		FROM #TmpDetail m
 			LEFT JOIN 
@@ -278,33 +231,24 @@ IF @IsResult = 1
 									-- กรณีเป็นเคลมโอนแยก
 									MAX(CASE WHEN td.ProductGroup = '2222' THEN 1 ELSE 0 END) = 1
 								THEN 1
-								WHEN
-									--Claim Misc
-									SUM(CASE WHEN td.ClaimHeaderGroupTypeId = 6 THEN 1 ELSE 0 END) >= 1
-								THEN 1
 								ELSE 0
 							 END AS CountDoc
 					FROM ISC_SmileDoc.dbo.DocumentIndexData dd WITH(NOLOCK)
 						LEFT JOIN ISC_SmileDoc.dbo.Document d WITH(NOLOCK)
 							ON dd.DocumentID = d.DocumentID
-						LEFT JOIN 
-						(
-							SELECT
-								DocumentListID
-							FROM ISC_SmileDoc.dbo.DocumentList 
-							WHERE DocumentTypeId IN (5,6)
-						) dl
+						LEFT JOIN ISC_SmileDoc.dbo.DocumentList dl
 							ON d.DocumentListID = dl.DocumentListID
 						INNER JOIN #TmpDetail td
 							ON dd.DocumentIndexData = td.ClaimHeaderCodeInDB COLLATE DATABASE_DEFAULT
 						INNER JOIN #TmpClaimType ct
 							ON td.ClaimHeaderGroupCodeInDB = ct.ClaimHeaderGroupCode
-					WHERE d.IsEnable = 1
+					WHERE dl.DocumentTypeId IN (5,6)
+
+					AND d.IsEnable = 1
 					GROUP BY td.ClaimHeaderGroupCodeInDB, td.ClaimHeaderCodeInDB
 				)d
 				ON m.ClaimHeaderCodeInDB = d.ClaimHeaderCodeInDB
 				AND m.ClaimHeaderGroupCodeInDB = d.ClaimHeaderGroupCodeInDB;
-
 		---------------------------------------------------------------------------
 
 		SELECT 
@@ -320,6 +264,7 @@ IF @IsResult = 1
 				,img.ClaimHeaderGroupCode AS ClaimHeaderGroupInSystem
 				,s.ClaimHeaderGroupCode AS ClaimHeaderGroupCodeInFlie
 				,c.ClaimHeaderGroupCodeInDB
+
 				----------------------Update 2023-08-08--------------------
 				,CONCAT
 					(
@@ -330,34 +275,15 @@ IF @IsResult = 1
 						,IIF(t.TotalAmount = 0,N'ไม่มียอดเงินในรายการ บ.ส., ','')
 						,IIF(t.TotalAmount<>ISNULL(c.TotalAmountInDB,0) AND t.ClaimHeaderGroupTypeId = pg.ProductGroupId AND s.ClaimHeaderGroupCode IS NULL,CONCAT(N'ข้อมูลจำนวนเงินรวมไม่ตรงกับในฐานข้อมูล','( ',FORMAT(c.TotalAmountInDB,'N'),'), '),'')
 						,IIF(imd.ClaimCodeInSystem IS NOT NULL AND t.ClaimHeaderGroupCode LIKE '%_0' AND cbd.ClaimGroupCode = t.ClaimHeaderGroupCode AND imd.ClaimHeaderGroupCode = t.ClaimHeaderGroupCode ,N'มีรายการเคลมนี้ในระบบแล้ว, ','') -- Update 2024-02-01 Kittisak.Ph เช็ครายการเคลมซ้ำ ใน บ.ส.เดียวกัน --Update 2024-06-17 Krekpon.Mind เพิ่มเงื่อนไข
-						,IIF(t.ClaimHeaderGroupTypeId <> pg.ProductGroupId ,CONCAT(N'รายการ บ.ส. นี้ ไม่ใช่กลุ่ม', 
-									' ',
-									--IIF(t.ClaimHeaderGroupTypeId = @ClaimHeaderSSS,'PH','PA30')
-									CASE
-										WHEN
-											t.ClaimHeaderGroupTypeId = @ClaimHeaderSSS
-										THEN 'PH'
-										WHEN 
-											t.ClaimHeaderGroupTypeId = @ClaimHeaderSSSPA
-										THEN 
-											'PA30'
-										WHEN 
-											t.ClaimHeaderGroupTypeId = @ClaimMisc
-										THEN 
-											'เบ็ดเตล็ด'
-										ELSE
-											'-'
-									END
-									,N' ตามกลุ่มที่ระบุ, '),'')
+						,IIF(t.ClaimHeaderGroupTypeId IN (@ClaimHeaderSSS,@ClaimHeaderPA30) AND t.ClaimHeaderGroupTypeId <> pg.ProductGroupId,CONCAT(N'รายการ บ.ส. นี้ ไม่ใช่กลุ่ม', 
+									' ',IIF(t.ClaimHeaderGroupTypeId = @ClaimHeaderSSS,'PH','PA30'),N' ตามกลุ่มที่ระบุ, '),'')
 						,IIF(doc.CountDoc > 0 ,N'บ.ส. ไม่มีเอกสารแนบ, ','')
 						,IIF(a.ClaimTypeCode = '',N'ไม่ได้ MappingType (H,C), ','')
-
 						--,IIF(c.PolicyNo = '' OR c.PolicyNo IS NULL,'ไม่มีกรมธรรม์ในรายการ บ.ส.','' ) --kittisak.Ph 20250513
 					)ValidateResult
 				---------------------------------------------------------------
 				,a.ClaimTypeCode
-				,t.ClaimHeaderGroupTypeId
-				,pg.ProductGroupId
+
 		INTO #TmpUpdate
 		FROM #Tmp t
 			LEFT JOIN 
@@ -382,8 +308,9 @@ IF @IsResult = 1
 				ON t.ClaimHeaderGroupCode = img.ClaimHeaderGroupCode
 			LEFT JOIN
 				(
-					SELECT  d.ClaimHeaderGroupCodeInDB AS ClaimCodeInSystem
-							,imd.ClaimHeaderGroupCode AS ClaimHeaderGroupCode --Update 2024-06-17 Krekpon.Mind เพิ่มเงื่อนไข
+					SELECT  d.ClaimHeaderGroupCodeInDB AS ClaimCodeInSystem,
+							imd.ClaimHeaderGroupCode AS ClaimHeaderGroupCode --Update 2024-06-17 Krekpon.Mind เพิ่มเงื่อนไข
+
 					FROM #TmpDetail d
 						INNER JOIN dbo.ClaimHeaderGroupImportDetail imd 
 							ON d.ClaimHeaderCodeInDB = imd.ClaimCode
@@ -428,11 +355,11 @@ IF @IsResult = 1
 		BEGIN TRY			
 			BEGIN TRANSACTION
 
-				--SELECT *
 				DELETE hd
 				FROM dbo.TmpClaimHeaderGroupImportDetail hd
 					INNER JOIN #TmpDoc d
 						ON hd.TmpClaimHeaderGroupImportId = d.TmpClaimHeaderGroupImportId;
+
 
 				INSERT INTO dbo.TmpClaimHeaderGroupImportDetail
 				(
@@ -448,12 +375,10 @@ IF @IsResult = 1
                      , CountDoc 
 					 ,TotalAmountSS
 					 ,ValidateDetailResult
-					 ,IIF(ValidateDetailResult = '',1,0)	IsValid
+					 ,IIF(ValidateDetailResult = '',1,0)
 				FROM #TmpDoc 
-				WHERE ClaimHeaderGroupCodeInDB IS NOT NULL
 				ORDER BY TmpClaimHeaderGroupImportId;
 
-				--SELECT *
 				UPDATE m
 					SET m.ValidateResult = u.ValidateResult
 					,m.IsValid = IIF(u.ValidateResult = '',1,0)
@@ -462,6 +387,7 @@ IF @IsResult = 1
 				FROM dbo.TmpClaimHeaderGroupImport m
 					INNER JOIN #TmpUpdate u
 						ON m.TmpClaimHeaderGroupImportId = u.TmpClaimHeaderGroupImportId;
+
 
 
 			SET @IsResult = 1			  					
