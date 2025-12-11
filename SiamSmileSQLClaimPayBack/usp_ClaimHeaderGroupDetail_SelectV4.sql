@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]    Script Date: 7/11/2568 17:01:24 ******/
+/****** Object:  StoredProcedure [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]    Script Date: 11/12/2568 11:07:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -33,13 +33,15 @@ ALTER PROCEDURE [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]
 	,@OrderType				NVARCHAR(MAX)	= NULL
 	,@SearchDetail			NVARCHAR(MAX)	= NULL 
 	,@IsShowDocumentLink	BIT				= NULL
+	,@ProductTypeId			INT				= NULL
 AS
 BEGIN
 	SET NOCOUNT ON;
 
---DECLARE @ProductGroupId		INT 				= 4;
+--DECLARE @ProductGroupId		INT 				= NULL;
+--DECLARE @ProductTypeId		INT 				= NULL;
 --DECLARE @InsuranceId			INT				= NULL;
---DECLARE @ClaimGroupTypeId		INT				= 7;
+--DECLARE @ClaimGroupTypeId		INT				= NULL;
 --DECLARE @BranchId				INT				= NULL;
 --DECLARE @CreateByUser_Code		VARCHAR(20)		= NULL;
 --DECLARE @IndexStart			INT					= NULL;
@@ -148,6 +150,7 @@ CREATE TABLE #Tmplst
 	,Amount					DECIMAL(16,2) 
 	,ClaimGroupTypeId		INT
 	,TransferAmount			DECIMAL(16,2)
+	,ProductTypeDetail		VARCHAR(100)
 );
 
 CREATE TABLE #TmpDoc 
@@ -171,6 +174,7 @@ DECLARE @TmpClaimMisc TABLE
 	,Amount					DECIMAL(16,2) 
 	,ClaimGroupTypeId		INT
 	,TransferAmount			DECIMAL(16,2)
+	,ProductTypeDetail		VARCHAR(100)
 );
  
 IF @pProductGroupId = 2 AND @pClaimGroupTypeId = 5
@@ -188,7 +192,8 @@ IF @pProductGroupId = 2 AND @pClaimGroupTypeId = 5
 		        ,xRevise
 				,amount 
 				,ClaimGroupTypeId
-				,TransferAmount)
+				,TransferAmount
+				,ProductTypeDetail)
 		SELECT 
 				cg.ClaimCompensateGroupCode				ClaimHeaderGroupCode
 				,c.ClaimCompensateCode					ClaimHeaderCode		
@@ -202,10 +207,20 @@ IF @pProductGroupId = 2 AND @pClaimGroupTypeId = 5
 				,c.CompensateRemain						amount
 				,@pClaimGroupTypeId						ClaimGroupTypeId
 				,0										TransferAmount
+				,pd.Detail								ProductTypeDetail
 
 		FROM sss.dbo.ClaimCompensate c	WITH (NOLOCK)
 			INNER JOIN sss.dbo.ClaimCompensateGroup cg	WITH (NOLOCK)
 				ON c.ClaimCompensateGroupId = cg.ClaimCompensateGroupId
+			LEFT JOIN (
+				SELECT 
+					m.Code
+					,g.Detail
+				FROM [sss].[dbo].[MT_Product] m
+					LEFT JOIN [sss].[dbo].[MT_ProductGroup] g 
+						ON m.ProductGroup_id = g.Code 
+			) pd
+				ON c.ProductCode = pd.Code
 		WHERE (cg.ItemCount > 0)
 		AND (cg.CreatedDate >= @fix_ClaimCompensateCreatedDatefrom)
 		AND (cg.InsuranceCompanyCode = @pInsCode OR @pInsCode IS NULL)
@@ -241,7 +256,8 @@ ELSE IF @pProductGroupId = 2 AND @pClaimGroupTypeId IN (2,3,4,6)
 		        ,xRevise
 				,amount
 				,ClaimGroupTypeId
-				,TransferAmount)
+				,TransferAmount
+				,ProductTypeDetail)
 		SELECT	
 				g.Code														ClaimHeaderGroupCode
 				,i.ClaimHeader_id											ClaimHeaderCode
@@ -255,6 +271,7 @@ ELSE IF @pProductGroupId = 2 AND @pClaimGroupTypeId IN (2,3,4,6)
 				,v.PaySS_Total												amount
 				,@pClaimGroupTypeId											ClaimGroupTypeId
 				,0															TransferAmount
+				,mtg.Detail														ProductTypeDetail
 
 		FROM sss.dbo.DB_ClaimHeaderGroupItem i			WITH (NOLOCK)
 			INNER JOIN SSS.dbo.DB_ClaimHeaderGroup g	WITH (NOLOCK)
@@ -265,6 +282,8 @@ ELSE IF @pProductGroupId = 2 AND @pClaimGroupTypeId IN (2,3,4,6)
 				ON i.ClaimHeader_id = cl.Code
 			LEFT JOIN sss.dbo.DB_ClaimVoucher v			WITH (NOLOCK)
 				ON i.ClaimHeader_id = v.Code
+			LEFT JOIN [sss].[dbo].[MT_ProductGroup] mtg
+				ON g.ProductGroup_id = mtg.Code
 			--LEFT JOIN
 			--	(
 			--		SELECT 
@@ -368,7 +387,8 @@ ELSE IF @pProductGroupId = 3 AND @pClaimGroupTypeId IN (2,3,4,6)
 		        ,xRevise
 				,amount
 				,ClaimGroupTypeId
-				,TransferAmount)
+				,TransferAmount
+				,ProductTypeDetail)
 		SELECT g.Code														ClaimHeaderGroupCode
 				,i.ClaimHeader_id											ClaimHeaderCode
 				,g.Branch_id												BranchCode
@@ -381,12 +401,15 @@ ELSE IF @pProductGroupId = 3 AND @pClaimGroupTypeId IN (2,3,4,6)
 				,c.PaySS_Total												amount 
 				,@pClaimGroupTypeId											ClaimGroupTypeId
 				,0															TransferAmount
+				,mtg.Detail													ProductTypeDetail
 
 		FROM SSSPA.dbo.DB_ClaimHeaderGroupItem i WITH (NOLOCK)
 			INNER JOIN SSSPA.dbo.DB_ClaimHeaderGroup g WITH (NOLOCK)
 				ON i.ClaimHeaderGroup_id = g.Code
 			LEFT JOIN SSSPA.dbo.DB_ClaimHeader c
 				ON i.ClaimHeader_id = c.Code
+			LEFT JOIN [SSSPA].[dbo].[MT_ProductGroup] mtg
+				ON g.ProductGroup_id = mtg.Code
 			--LEFT JOIN
 			--	(
 			--		SELECT 
@@ -464,21 +487,23 @@ ELSE IF @pProductGroupId IN (4,5,6,7,8,9,10,11) AND @pClaimGroupTypeId = 7
 		        ,xRevise
 				,amount
 				,ClaimGroupTypeId
-				,TransferAmount)		
+				,TransferAmount
+				,ProductTypeDetail)		
 		SELECT 
 				cm.ClaimMiscId
-				,cm.ClaimHeaderGroupCode			ClaimHeaderGroupCode
-				,1									ClaimHeaderCode
-				,b.tempcode							BranchCode
-				,ISNULL(e.EmployeeCode, '00000')	CreatedByCode
-				,cm.CreatedDate						CreatedDate
-				,cm.InsuranceCompanyCode			InsuranceCompanyCode
-				,cm.InsuranceCompanyName			InsuranceCompanyName 
-				,cm.ProductGroupId					ProductGroupId
-				,'0'								xRevise
-				,ISNULL(cm.PayAmount, 0)			amount 
-				,@pClaimGroupTypeId					ClaimGroupTypeId
-				,NULL								TransferAmount
+				,cm.ClaimHeaderGroupCode									ClaimHeaderGroupCode
+				,1															ClaimHeaderCode
+				,b.tempcode													BranchCode
+				,ISNULL(e.EmployeeCode, '00000')							CreatedByCode
+				,cm.CreatedDate												CreatedDate
+				,cm.InsuranceCompanyCode									InsuranceCompanyCode
+				,cm.InsuranceCompanyName									InsuranceCompanyName 
+				,cm.ProductGroupId											ProductGroupId
+				,'0'														xRevise
+				,ISNULL(cm.PayAmount, 0) 									amount 
+				,@pClaimGroupTypeId											ClaimGroupTypeId
+				,NULL														TransferAmount
+				,pt.ProductTypeDetail										ProductTypeDetail
 		FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
 			LEFT JOIN [DataCenterV1].[Product].[ProductGroup] pd
 				ON cm.ProductGroupId = pd.ProductGroup_ID
@@ -488,14 +513,18 @@ ELSE IF @pProductGroupId IN (4,5,6,7,8,9,10,11) AND @pClaimGroupTypeId = 7
 				ON pu.Employee_ID = e.Employee_ID
 			LEFT JOIN [DataCenterV1].[Address].[Branch] b
 				ON cm.BranchId = b.Branch_ID
+			LEFT JOIN [DataCenterV1].[Product].[ProductType] pt
+				ON cm.ProductTypeId = pt.ProductType_ID
 		WHERE cm.IsActive = 1 
 			AND cm.ProductGroupId = @pProductGroupId
+			AND (cm.ProductTypeId = @ProductTypeId OR @ProductTypeId IS NULL)
 			AND cm.ClaimMiscStatusId = 3  
 			AND cm.ClaimHeaderGroupCode IS NOT NULL
 			AND (cm.InsuranceCompanyCode = @pInsCode OR @pInsCode IS NULL)
 			AND (b.tempcode = @pBranchCode OR @pBranchCode IS NULL)
 			AND (e.EmployeeCode = @pCreatedByCode OR @pCreatedByCode IS NULL)
-			AND (cm.ClaimHeaderGroupCode = @pSearchDetail OR @pSearchDetail IS NULL)	
+			AND (cm.ClaimHeaderGroupCode = @pSearchDetail OR @pSearchDetail IS NULL)
+			AND cm.ProductTypeId NOT IN (34)
 			AND NOT EXISTS	
 			(
 				SELECT x.ClaimCode
@@ -523,7 +552,8 @@ ELSE IF @pProductGroupId IN (4,5,6,7,8,9,10,11) AND @pClaimGroupTypeId = 7
 			,xRevise
 			,amount
 			,ClaimGroupTypeId
-			,TransferAmount )
+			,TransferAmount
+			,ProductTypeDetail)
 		SELECT 
 			ClaimHeaderGroupCode
 			,ClaimHeaderCode
@@ -537,6 +567,7 @@ ELSE IF @pProductGroupId IN (4,5,6,7,8,9,10,11) AND @pClaimGroupTypeId = 7
 			,amount
 			,ClaimGroupTypeId
 			,TransferAmount
+			,ProductTypeDetail
 		FROM @TmpClaimMisc
 
 	END
@@ -597,8 +628,9 @@ SELECT g.ClaimHeaderGroupCode									ClaimHeaderGroup_id
 		,d.InsuranceCompanyName									InsuranceCompany	 
 		,COUNT(g.ClaimHeaderGroupCode) OVER ()					TotalCount
 		--,IIF(g.ItemCount = doc.docCount ,1,0)					DocumentCount	 
-		,1													DocumentCount
+		,1														DocumentCount
 		,g.TransferAmount										TransferAmount
+		,d.ProductTypeDetail									ProductTypeDetail
 FROM
 (
 	SELECT ClaimHeaderGroupCode			ClaimHeaderGroupCode
