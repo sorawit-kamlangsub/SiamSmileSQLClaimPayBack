@@ -1,8 +1,9 @@
-DECLARE @DateFrom DATE = '2025-08-01';
-DECLARE @DateTo DATE = '2025-12-09';
+DECLARE @DateFrom DATE = '2025-08-9';
+DECLARE @DateTo DATE = '2025-12-11';
 DECLARE @StartDateFrom DATETIME2 = @DateFrom;
 DECLARE @EndDateTo DATETIME2	= DATEADD(DAY, 1, @DateTo);
 DECLARE @D DATETIME	= GETDATE()
+DECLARE @S3Bucket NVARCHAR(255) = 'p-isc-ss-1-bucketdata'
 		
 	SELECT
 		td.ClaimHeaderGroupCodeInDB
@@ -135,7 +136,7 @@ FROM
     FROM ISC_SmileDoc.dbo.Attachment
     WHERE 
         S3IsUploaded = 1
-        AND S3Bucket = 'p-isc-ss-1-bucketdata'
+        AND S3Bucket = @S3Bucket
         AND S3Key IS NOT NULL
         AND S3Key <> ''
     GROUP BY 
@@ -155,24 +156,23 @@ DECLARE @Document TABLE
 	DocumentID INT
 );
 
-INSERT INTO ISC_SmileDoc.dbo.Document
-(
-	DocumentID
-	,DocumentListID
-	,ProjectPermissionID
-	,BranchID
-	,DocumentDate
-	,VoucherRef
-	,IsEnable
-	,DateAction
-	,PersonIDAction
-	,DocumentStatusID
-	,DateStatus
-	,PersonIDStatus
-	,IPAddress
-	,GUI
-)
-OUTPUT Inserted.DocumentID INTO @Document(DocumentID)
+--INSERT INTO ISC_SmileDoc.dbo.Document
+--(
+--	DocumentListID
+--	,ProjectPermissionID
+--	,BranchID
+--	,DocumentDate
+--	,VoucherRef
+--	,IsEnable
+--	,DateAction
+--	,PersonIDAction
+--	,DocumentStatusID
+--	,DateStatus
+--	,PersonIDStatus
+--	,IPAddress
+--	,GUI
+--)
+--OUTPUT Inserted.DocumentID INTO @Document(DocumentID)
 SELECT 
 	1	DocumentListID
 	,1	ProjectPermissionID
@@ -188,6 +188,91 @@ SELECT
 	,NULL	IPAddress
 	,NULL	GUI
 FROM #Tmp
+
+SELECT *
+--UPDATE t
+--SET t.RowNo = d.DocumentID
+FROM #Tmp t
+INNER JOIN
+(
+    SELECT 
+        DocumentID,
+        ROW_NUMBER() OVER (ORDER BY DocumentID) AS RowNo
+    FROM @Document
+) d
+    ON t.RowNo = d.RowNo;
+
+SELECT *
+--UPDATE p
+--SET p.RowNo = d.DocumentID
+FROM #Pool p
+INNER JOIN
+(
+    SELECT 
+        DocumentID,
+        ROW_NUMBER() OVER (ORDER BY DocumentID) AS RowNo
+    FROM @Document
+) d
+    ON p.RowNo = d.RowNo;
+
+--INSERT INTO ISC_SmileDoc.dbo.DocumentIndexData
+--(
+--	DocumentID
+--	,DocumentIndexID
+--	,DocumentIndexData
+--	,DateAction
+--	,PersonIDAction
+--	,IPAddress
+--)
+SELECT
+	RowNo					DocumentID
+	,1						DocumentIndexID
+	,ClaimHeaderCodeInDB	DocumentIndexData
+	,@D						DateAction
+	,1						PersonIDAction
+	,NULL					IPAddress
+FROM #Tmp
+
+--INSERT INTO ISC_SmileDoc.dbo.Attachment
+--(
+--	DocumentID
+--	,AttachmentName
+--	,AttachmentURL
+--	,AttachmentSortOrder
+--	,IsEnable
+--	,DateAction
+--	,PersonIDAction
+--	,IPAddress
+--	,S3IsUploaded
+--	,S3UploadedDate
+--	,S3Bucket
+--	,S3Key
+--	,S3StorageType
+--	,S3StorageTypeUpdateDate
+--	,IsDelete
+--	,IsLocalFileDeleted
+--	,LocalFileDeletedDate
+--)
+SELECT
+	RowNo		DocumentID
+	,NULL		AttachmentName
+	,NULL		AttachmentURL
+	,1			AttachmentSortOrder
+	,1			IsEnable
+	,@D			DateAction
+	,1			PersonIDAction
+	,NULL		IPAddress
+	,1			S3IsUploaded
+	,@D			S3UploadedDate
+	,@S3Bucket	S3Bucket
+	,S3Key		S3Key
+	,NULL		S3StorageType
+	,NULL		S3StorageTypeUpdateDate
+	,NULL		IsDelete
+	,NULL		IsLocalFileDeleted
+	,NULL		LocalFileDeletedDate
+FROM #Pool
+
 
 IF OBJECT_ID('tempdb..#Tmp') IS NOT NULL  DROP TABLE #Tmp;
 IF OBJECT_ID('tempdb..#Pool') IS NOT NULL DROP TABLE #Pool;
