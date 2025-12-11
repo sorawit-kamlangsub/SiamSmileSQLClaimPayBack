@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]    Script Date: 11/12/2568 11:07:48 ******/
+/****** Object:  StoredProcedure [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]    Script Date: 11/12/2568 16:57:24 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -19,12 +19,13 @@ GO
 -- Update date: 20250902 Krekpon.D เพิ่มจำนวนเงินที่จ่ายของ บส.
 -- Update date: 20251021 Sorawit.k change to [usp_ClaimHeaderGroupDetail_SelectV5]
 -- Update date: 20261022 Sorawit.k change add Claimmisc
+-- Update date: 20251211 Bunchuai.c เปลี่ยนการ filter ข้อมูลของ ClaimMisc filter ข้อมูลตาม ProductTypeId
 -- Description:	
 -- =============================================
 ALTER PROCEDURE [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]
-	 @ProductGroupId		INT 			
-	,@InsuranceId			INT				= NULL	
-	,@ClaimGroupTypeId		INT				
+	 @ProductGroupId		INT 			= NULL
+	,@InsuranceId			INT				= NULL
+	,@ClaimGroupTypeId		INT				= NULL
 	,@BranchId				INT				= NULL	
 	,@CreateByUser_Code		VARCHAR(20)		= NULL
 	,@IndexStart			INT				= NULL	
@@ -38,18 +39,20 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
---DECLARE @ProductGroupId		INT 				= NULL;
---DECLARE @ProductTypeId		INT 				= NULL;
+--======= for test =======
+--DECLARE @ProductGroupId			INT 			= 11;
+--DECLARE @ProductTypeId			INT 			= 7;
 --DECLARE @InsuranceId			INT				= NULL;
 --DECLARE @ClaimGroupTypeId		INT				= NULL;
 --DECLARE @BranchId				INT				= NULL;
 --DECLARE @CreateByUser_Code		VARCHAR(20)		= NULL;
---DECLARE @IndexStart			INT					= NULL;
---DECLARE @PageSize				INT				= NULL;
+--DECLARE @IndexStart				INT				= 0;
+--DECLARE @PageSize				INT				= 10;
 --DECLARE @SortField				NVARCHAR(MAX)	= NULL;
 --DECLARE @OrderType				NVARCHAR(MAX)	= NULL;
 --DECLARE @SearchDetail			NVARCHAR(MAX)	= NULL;
---DECLARE @IsShowDocumentLink	BIT				= NULL
+--DECLARE @IsShowDocumentLink		BIT				= NULL
+--==============
 
 DECLARE @pInsCode				VARCHAR(20)		= NULL	/*ถ้าส่ง @InsuranceId จะ set*/
 DECLARE @pBranchCode			VARCHAR(20)		= NULL	/*ถ้าส่ง @BranchId จะ set*/
@@ -472,7 +475,7 @@ ELSE IF @pProductGroupId = 3 AND @pClaimGroupTypeId IN (2,3,4,6)
 		  
 	END
 -- ClaimMisc
-ELSE IF @pProductGroupId IN (4,5,6,7,8,9,10,11) AND @pClaimGroupTypeId = 7
+ELSE IF @pProductGroupId IN (4,11) AND @pClaimGroupTypeId = 7
 	BEGIN
 		INSERT INTO @TmpClaimMisc
 		        (ClaimMiscId
@@ -515,16 +518,36 @@ ELSE IF @pProductGroupId IN (4,5,6,7,8,9,10,11) AND @pClaimGroupTypeId = 7
 				ON cm.BranchId = b.Branch_ID
 			LEFT JOIN [DataCenterV1].[Product].[ProductType] pt
 				ON cm.ProductTypeId = pt.ProductType_ID
-		WHERE cm.IsActive = 1 
-			AND cm.ProductGroupId = @pProductGroupId
-			AND (cm.ProductTypeId = @ProductTypeId OR @ProductTypeId IS NULL)
+		WHERE cm.IsActive = 1  
 			AND cm.ClaimMiscStatusId = 3  
 			AND cm.ClaimHeaderGroupCode IS NOT NULL
-			AND (cm.InsuranceCompanyCode = @pInsCode OR @pInsCode IS NULL)
-			AND (b.tempcode = @pBranchCode OR @pBranchCode IS NULL)
-			AND (e.EmployeeCode = @pCreatedByCode OR @pCreatedByCode IS NULL)
-			AND (cm.ClaimHeaderGroupCode = @pSearchDetail OR @pSearchDetail IS NULL)
+			AND (@pInsCode IS NULL OR cm.InsuranceCompanyCode = @pInsCode)
+			AND (@pBranchCode IS NULL OR b.tempcode = @pBranchCode)
+			AND (@pCreatedByCode IS NULL OR e.EmployeeCode = @pCreatedByCode)
+			AND (@pSearchDetail IS NULL OR cm.ClaimHeaderGroupCode = @pSearchDetail)
 			AND cm.ProductTypeId NOT IN (34)
+			AND 
+			(
+				(
+					@pProductGroupId = 4
+					AND 
+						(
+							(@ProductTypeId IS NOT NULL AND cm.ProductTypeId = @ProductTypeId)
+							OR
+							(@ProductTypeId IS NULL AND cm.ProductTypeId = 7)
+						)
+				)
+				OR
+				(
+					@pProductGroupId = 11 
+					AND
+						(
+							(@ProductTypeId IS NOT NULL AND cm.ProductTypeId = @ProductTypeId)
+							OR
+							(@ProductTypeId IS NULL AND cm.ProductTypeId IN (10,27,38,41,42,32,33))
+						)
+				)
+			) 
 			AND NOT EXISTS	
 			(
 				SELECT x.ClaimCode

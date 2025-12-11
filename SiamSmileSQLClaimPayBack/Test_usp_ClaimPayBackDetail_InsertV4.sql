@@ -18,7 +18,7 @@ GO
 -- =============================================
 --ALTER PROCEDURE [Claim].[usp_ClaimPayBackDetail_InsertV4]
 DECLARE
-	@ClaimGroupCodeList		NVARCHAR(MAX) = 'CHTAO88868120001'
+	@ClaimGroupCodeList		NVARCHAR(MAX) = 'CHCMO88868120009'
 	  , @ProductGroupId			INT = 11
 	  , @ClaimGroupTypeId		INT = 7
 	  , @CreatedByUserId		INT = 1
@@ -271,7 +271,7 @@ DECLARE
 					ON g.ClaimHeaderGroupCode = s.ClaimHeaderGroupCode		
 
                         END
-                ELSE IF @ProductGroupId IN (4,5,6,7,8,9,10,11) AND @ClaimGroupTypeId = 7
+                ELSE IF @ProductGroupId IN (4,11) AND @ClaimGroupTypeId = 7
                         BEGIN
                                                                                                 
                                 INSERT INTO @TmpD
@@ -308,9 +308,9 @@ DECLARE
                                         ,cm.BranchId
                                         ,@ClaimGroupTypeId			ClaimGroupTypeId
                                         ,cm.InsuranceCompanyCode	InsCode
-                                        ,cm.InsuranceCompanyId		InsId
+                                        ,ins.Organize_ID			InsId
                                         ,cm.ClaimMiscNo				ClaimCode
-                                        ,cm.ClaimAmount				Amount
+                                        ,ISNULL(cm.PayAmount, 0)	Amount
                                         ,cm.ProductCode
                                         ,pd.ProductGroupDetail		[Product]
                                         ,h.HospitalCode				HospitalCode
@@ -369,6 +369,16 @@ DECLARE
                                                 GROUP BY x.ClaimMiscId
                                         ) cxa
                                                 ON cxa.ClaimMiscId = cm.ClaimMiscId
+										LEFT JOIN 
+										(
+											SELECT 
+												OrganizeCode
+												,Organize_ID
+											FROM [DataCenterV1].[Organize].[Organize]
+											WHERE IsActive = 1
+										) ins
+											ON ins.OrganizeCode = cm.InsuranceCompanyCode
+											
                                 WHERE cm.IsActive = 1                                        
                                 SELECT x.ClaimHeaderGroupCode
                                           ,x.ProductGroupId
