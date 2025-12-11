@@ -45,6 +45,12 @@
           <AssociatedConnUserName>devdba</AssociatedConnUserName>
           <FullPath>Insert_Attachment_S3Key_Random.sql</FullPath>
         </FileNode>
+        <FileNode Name="Insert_Attachment_S3Key_Random_CHGC.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
+          <AssociatedConnUserName>devdba</AssociatedConnUserName>
+          <FullPath>Insert_Attachment_S3Key_Random_CHGC.sql</FullPath>
+        </FileNode>
         <FileNode Name="Note.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
           <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
