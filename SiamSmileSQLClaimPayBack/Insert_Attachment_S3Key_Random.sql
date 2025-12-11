@@ -162,23 +162,23 @@ BEGIN TRY
 				DocumentID INT
 			);
 
-			INSERT INTO ISC_SmileDoc.dbo.Document
-			(
-				DocumentListID
-				,ProjectPermissionID
-				,BranchID
-				,DocumentDate
-				,VoucherRef
-				,IsEnable
-				,DateAction
-				,PersonIDAction
-				,DocumentStatusID
-				,DateStatus
-				,PersonIDStatus
-				,IPAddress
-				,GUI
-			)
-			OUTPUT Inserted.DocumentID INTO @Document(DocumentID)
+			--INSERT INTO ISC_SmileDoc.dbo.Document
+			--(
+			--	DocumentListID
+			--	,ProjectPermissionID
+			--	,BranchID
+			--	,DocumentDate
+			--	,VoucherRef
+			--	,IsEnable
+			--	,DateAction
+			--	,PersonIDAction
+			--	,DocumentStatusID
+			--	,DateStatus
+			--	,PersonIDStatus
+			--	,IPAddress
+			--	,GUI
+			--)
+			--OUTPUT Inserted.DocumentID INTO @Document(DocumentID)
 			SELECT 
 				1	DocumentListID
 				,1	ProjectPermissionID
@@ -209,15 +209,15 @@ BEGIN TRY
 			INNER JOIN @Document d
 				ON t.Seq = d.Seq;
 
-			INSERT INTO ISC_SmileDoc.dbo.DocumentIndexData
-			(
-				DocumentID
-				,DocumentIndexID
-				,DocumentIndexData
-				,DateAction
-				,PersonIDAction
-				,IPAddress
-			)
+			--INSERT INTO ISC_SmileDoc.dbo.DocumentIndexData
+			--(
+			--	DocumentID
+			--	,DocumentIndexID
+			--	,DocumentIndexData
+			--	,DateAction
+			--	,PersonIDAction
+			--	,IPAddress
+			--)
 			SELECT
 				m.DocumentID              AS DocumentID
 				,1                        AS DocumentIndexID
@@ -229,26 +229,26 @@ BEGIN TRY
 			INNER JOIN #Map m
 				ON t.RowNo = m.RowNo;
 
-			INSERT INTO ISC_SmileDoc.dbo.Attachment
-			(
-				DocumentID
-				,AttachmentName
-				,AttachmentURL
-				,AttachmentSortOrder
-				,IsEnable
-				,DateAction
-				,PersonIDAction
-				,IPAddress
-				,S3IsUploaded
-				,S3UploadedDate
-				,S3Bucket
-				,S3Key
-				,S3StorageType
-				,S3StorageTypeUpdateDate
-				,IsDelete
-				,IsLocalFileDeleted
-				,LocalFileDeletedDate
-			)
+			--INSERT INTO ISC_SmileDoc.dbo.Attachment
+			--(
+			--	DocumentID
+			--	,AttachmentName
+			--	,AttachmentURL
+			--	,AttachmentSortOrder
+			--	,IsEnable
+			--	,DateAction
+			--	,PersonIDAction
+			--	,IPAddress
+			--	,S3IsUploaded
+			--	,S3UploadedDate
+			--	,S3Bucket
+			--	,S3Key
+			--	,S3StorageType
+			--	,S3StorageTypeUpdateDate
+			--	,IsDelete
+			--	,IsLocalFileDeleted
+			--	,LocalFileDeletedDate
+			--)
 			SELECT
 				m.DocumentID     AS DocumentID         -- ใช้ DocumentID จาก #Map
 				,NULL            AS AttachmentName
