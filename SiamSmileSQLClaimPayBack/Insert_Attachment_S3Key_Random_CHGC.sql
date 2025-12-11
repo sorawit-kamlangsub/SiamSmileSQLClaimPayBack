@@ -98,33 +98,8 @@ DECLARE @ClaimHeaderGroupCodes NVARCHAR(MAX) = 'BUAH-888-66020001-0,BUAH-888-660
 	) td	
 	INNER JOIN #Tmplst lst
 		ON td.ClaimHeaderGroupCodeInDB = lst.Element
-	WHERE NOT EXISTS (
-
-		SELECT 
-			1
-		FROM ISC_SmileDoc.dbo.DocumentIndexData dd WITH(NOLOCK)
-			LEFT JOIN ISC_SmileDoc.dbo.Document d WITH(NOLOCK)
-				ON dd.DocumentID = d.DocumentID
-			LEFT JOIN 
-			(
-				SELECT
-					DocumentListID
-				FROM ISC_SmileDoc.dbo.DocumentList 
-				WHERE DocumentTypeId IN (5,6)
-			) dl
-			ON d.DocumentListID = dl.DocumentListID
-		WHERE dd.DocumentIndexData = td.ClaimHeaderCodeInDB COLLATE DATABASE_DEFAULT
-
-	)
-	AND NOT EXISTS (
-	
-		SELECT 1
-		FROM ClaimPayBack.dbo.ClaimHeaderGroupImport H
-		WHERE H.ClaimHeaderGroupCode = td.ClaimHeaderGroupCodeInDB
-		  AND H.IsActive = 1
-		  AND H.ClaimHeaderGroupImportStatusId <> 2
-	)
-	AND (td.TotalAmountSS > 0 OR td.TotalAmount > 0)
+	WHERE td.TotalAmountSS > 0 
+		OR td.TotalAmount > 0
 
 	ORDER BY ProductGroup 
 
