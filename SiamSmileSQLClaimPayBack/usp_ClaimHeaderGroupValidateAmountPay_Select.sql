@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupValidateAmountPay_Select]    Script Date: 27/10/2568 12:35:22 ******/
+/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupValidateAmountPay_Select]    Script Date: 11/12/2568 11:09:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -30,15 +30,16 @@ BEGIN
 SET NOCOUNT ON;
 
 -- =============================================
---DECLARE @ProductGroupId				INT				= 4;
---DECLARE @ClaimGroupTypeId			INT				= 7; 
---DECLARE @ClaimHeaderGroupCode		VARCHAR(MAX)	= 'CLMI68146-CLMP68110';
+--DECLARE @ProductGroupId				INT				= 7;
+--DECLARE @ClaimGroupTypeId			INT				= NULL; 
+--DECLARE @ClaimHeaderGroupCode		VARCHAR(MAX)	= 'CHSPO88868120017';
 -- =============================================
 
 -- Set message 
 DECLARE @AmountWarning					VARCHAR(MAX) = N'ยอด บ.ส. ไม่เท่ากับยอดโอน';	
 DECLARE @PolicyWarning					VARCHAR(MAX) = N'ไม่มีเลขที่กรมธรรม์';	
 DECLARE @ClaimHeaderGroupAmountWarning	VARCHAR(MAX) = N'ยอดเงินตาม บ.ส. ไม่ถูกต้อง';
+DECLARE @ClaimHeaderPaymentWarning		VARCHAR(MAX) = N'บ.ส.นี้อยู่ระหว่างดำเนินการโอนเงิน';
 DECLARE @InsuranceCompanyId				VARCHAR(MAX) = '100000000041';
 
 -- Create temp table
@@ -242,14 +243,14 @@ ELSE IF @ProductGroupId > 3
 			,WarningMessage
 		)
 		SELECT 
-				cm.ClaimHeaderGroupCode		ClaimHeaderGroupCode
-				,cph.PayAmount				TransferAmount
-				,ISNULL(cm.ClaimAmount, 0)	Amount
-				,0							NPLAmount5
+				cm.ClaimHeaderGroupCode				ClaimHeaderGroupCode
+				,cph.PayAmount						TransferAmount
+				,ISNULL(cm.PayAmount, 0)			Amount
+				,ISNULL(colnlp.NPLAmount, 0)		NPLAmount
 				,(
 					ISNULL(
 						CASE 
-							WHEN ISNULL(cm.ClaimAmount, 0) = 0 
+							WHEN ISNULL(cm.PayAmount, 0) = 0 
 								THEN @ClaimHeaderGroupAmountWarning + ' , ' 
 							ELSE ''
 						END, NULL
@@ -257,7 +258,7 @@ ELSE IF @ProductGroupId > 3
 					+
 					ISNULL(
 						CASE 
-							WHEN ISNULL(cph.PayAmount, 0) <> (ISNULL(cm.ClaimAmount, 0) + ISNULL(colnlp.NPLAmount, 0))
+							WHEN ISNULL(cph.PayAmount, 0) <> (ISNULL(cm.PayAmount, 0) + ISNULL(colnlp.NPLAmount, 0))
 								THEN CONCAT(@AmountWarning, ' , ')
 							ELSE ''
 						END, NULL
@@ -270,49 +271,60 @@ ELSE IF @ProductGroupId > 3
 							ELSE ''
 						END, NULL
 					)
+					+
+					ISNULL(
+						CASE 
+							WHEN cph.ClaimMiscPaymentHeaderId  IS NOT NULL
+								THEN CONCAT(@ClaimHeaderPaymentWarning, ' , ')
+							ELSE ''
+						END, NULL
+					)
 				 ) AS WarningMessage 
 				 
 		FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
 			INNER JOIN #Tmp t
 				ON cm.ClaimHeaderGroupCode = t.Element
-			INNER JOIN [ClaimPayBack].[dbo].[ClaimPayBackProductGroup] pd
-				ON cm.ProductTypeId = pd.MappingXCliamMisc
-			INNER JOIN [ClaimMiscellaneous].[misc].[ClaimMiscPaymentHeader] cmh
-				ON cm.ClaimMiscId = cmh.ClaimMiscId
-			INNER JOIN [ClaimMiscellaneous].[misc].[ClaimMiscPayment] cmp
-				ON cmh.ClaimMiscPaymentHeaderId = cmp.ClaimMiscPaymentHeaderId
 			LEFT JOIN (
 				SELECT 
-					ClaimOnLineId
+					nplh.ClaimOnLineId
 					,SUM(npld.Amount)	NPLAmount
 				FROM ClaimOnlineV2.dbo.NPLHeader nplh
-					INNER JOIN ClaimOnlineV2.dbo.NPLDetail npld
+					LEFT JOIN ClaimOnlineV2.dbo.NPLDetail npld
 						ON nplh.NPLHeaderId = npld.NPLHeaderId
 				WHERE nplh.IsActive = 1
 					AND npld.IsActive = 1
 				GROUP BY ClaimOnLineId
 			)colnlp
-				ON colnlp.ClaimOnLineId = cm.ClaimOnLineId
-			INNER JOIN ClaimPayBackProductGroup cpg
-				ON cm.ProductTypeId = cpg.MappingXCliamMisc
-					AND cpg.ProductGroup_ID = @ProductGroupId
+				ON colnlp.ClaimOnLineId = cm.ClaimOnLineId 
 			INNER JOIN 
 			(
 				SELECT 
-					ClaimMiscId													ClaimMiscId
-					,(ISNULL(SumPaymentAmount, 0) - ISNULL(SumRefuntAmount, 0))	PayAmount
-				FROM [ClaimMiscellaneous].[misc].[ClaimMiscPaymentHeader]
-				WHERE IsActive = 1
+					ph.ClaimMiscId						ClaimMiscId
+					,SUM(
+						CASE 
+							WHEN ph.PaymentTypeId IN (2,3) THEN ISNULL(ph.SumAmount, 0)
+							WHEN ph.PaymentTypeId IN (4) THEN -ISNULL(ph.SumAmount, 0)
+							ELSE 0
+						END
+						) PayAmount
+					,cp.ClaimMiscPaymentHeaderId
+				FROM [ClaimMiscellaneous].[misc].[ClaimMiscPaymentHeader] ph
+					LEFT JOIN 
+					(
+						SELECT *
+						FROM [ClaimMiscellaneous].[misc].[ClaimMiscPayment] 
+						WHERE IsActive = 1 
+							AND PaymentStatusId <> 4
+							AND PremiumSourceStatusId <> 5
+					)cp
+						ON ph.ClaimMiscPaymentHeaderId = cp.ClaimMiscPaymentHeaderId
+				WHERE ph.IsActive = 1 
+				GROUP BY  ph.ClaimMiscId, cp.ClaimMiscPaymentHeaderId
 			)
 			cph
 				ON cm.ClaimMiscId = cph.ClaimMiscId
 		WHERE cm.IsActive = 1
-			AND cmh.IsActive = 1
-			AND cm.ClaimMiscStatusId = 3
-			AND cmp.IsActive = 1
-			AND cmp.PaymentStatusId = 4
-			AND cm.ClaimHeaderGroupCode IS NOT NULL
-
+			 
  	END
 
 -- set result
