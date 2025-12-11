@@ -1,4 +1,4 @@
-DECLARE @DateFrom DATE = '2025-08-9';
+DECLARE @DateFrom DATE = '2025-12-9';
 DECLARE @DateTo DATE = '2025-12-11';
 DECLARE @StartDateFrom DATETIME2 = @DateFrom;
 DECLARE @EndDateTo DATETIME2	= DATEADD(DAY, 1, @DateTo);
@@ -151,128 +151,142 @@ SELECT @PoolCount = COUNT(*) FROM #Pool;
 DELETE FROM #Tmp
 WHERE RowNo > @PoolCount;
 
-DECLARE @Document TABLE
-(
-	DocumentID INT
-);
 
---INSERT INTO ISC_SmileDoc.dbo.Document
---(
---	DocumentListID
---	,ProjectPermissionID
---	,BranchID
---	,DocumentDate
---	,VoucherRef
---	,IsEnable
---	,DateAction
---	,PersonIDAction
---	,DocumentStatusID
---	,DateStatus
---	,PersonIDStatus
---	,IPAddress
---	,GUI
---)
---OUTPUT Inserted.DocumentID INTO @Document(DocumentID)
-SELECT 
-	1	DocumentListID
-	,1	ProjectPermissionID
-	,90		BranchID
-	,@D		DocumentDate
-	,NULL	VoucherRef
-	,1		IsEnable
-	,@D		DateAction
-	,1		PersonIDAction
-	,2		DocumentStatusID
-	,@D		DateStatus
-	,1		PersonIDStatus
-	,NULL	IPAddress
-	,NULL	GUI
-FROM #Tmp
+BEGIN TRY
+	Begin TRANSACTION
+		COMMIT TRANSACTION
 
-SELECT *
---UPDATE t
---SET t.RowNo = d.DocumentID
-FROM #Tmp t
-INNER JOIN
-(
-    SELECT 
-        DocumentID,
-        ROW_NUMBER() OVER (ORDER BY DocumentID) AS RowNo
-    FROM @Document
-) d
-    ON t.RowNo = d.RowNo;
+			DECLARE @Document TABLE
+			(
+				Seq        INT IDENTITY(1,1),
+				DocumentID INT
+			);
 
-SELECT *
---UPDATE p
---SET p.RowNo = d.DocumentID
-FROM #Pool p
-INNER JOIN
-(
-    SELECT 
-        DocumentID,
-        ROW_NUMBER() OVER (ORDER BY DocumentID) AS RowNo
-    FROM @Document
-) d
-    ON p.RowNo = d.RowNo;
+			INSERT INTO ISC_SmileDoc.dbo.Document
+			(
+				DocumentListID
+				,ProjectPermissionID
+				,BranchID
+				,DocumentDate
+				,VoucherRef
+				,IsEnable
+				,DateAction
+				,PersonIDAction
+				,DocumentStatusID
+				,DateStatus
+				,PersonIDStatus
+				,IPAddress
+				,GUI
+			)
+			OUTPUT Inserted.DocumentID INTO @Document(DocumentID)
+			SELECT 
+				1	DocumentListID
+				,1	ProjectPermissionID
+				,90		BranchID
+				,@D		DocumentDate
+				,NULL	VoucherRef
+				,1		IsEnable
+				,@D		DateAction
+				,1		PersonIDAction
+				,2		DocumentStatusID
+				,@D		DateStatus
+				,1		PersonIDStatus
+				,NULL	IPAddress
+				,NULL	GUI
+			FROM #Tmp
 
---INSERT INTO ISC_SmileDoc.dbo.DocumentIndexData
---(
---	DocumentID
---	,DocumentIndexID
---	,DocumentIndexData
---	,DateAction
---	,PersonIDAction
---	,IPAddress
---)
-SELECT
-	RowNo					DocumentID
-	,1						DocumentIndexID
-	,ClaimHeaderCodeInDB	DocumentIndexData
-	,@D						DateAction
-	,1						PersonIDAction
-	,NULL					IPAddress
-FROM #Tmp
+			SELECT
+				t.RowNo,
+				d.DocumentID
+			INTO #Map
+			FROM
+			(
+				SELECT 
+					RowNo,
+					ROW_NUMBER() OVER (ORDER BY RowNo) AS Seq
+				FROM #Tmp
+			) t
+			INNER JOIN @Document d
+				ON t.Seq = d.Seq;
 
---INSERT INTO ISC_SmileDoc.dbo.Attachment
---(
---	DocumentID
---	,AttachmentName
---	,AttachmentURL
---	,AttachmentSortOrder
---	,IsEnable
---	,DateAction
---	,PersonIDAction
---	,IPAddress
---	,S3IsUploaded
---	,S3UploadedDate
---	,S3Bucket
---	,S3Key
---	,S3StorageType
---	,S3StorageTypeUpdateDate
---	,IsDelete
---	,IsLocalFileDeleted
---	,LocalFileDeletedDate
---)
-SELECT
-	RowNo		DocumentID
-	,NULL		AttachmentName
-	,NULL		AttachmentURL
-	,1			AttachmentSortOrder
-	,1			IsEnable
-	,@D			DateAction
-	,1			PersonIDAction
-	,NULL		IPAddress
-	,1			S3IsUploaded
-	,@D			S3UploadedDate
-	,@S3Bucket	S3Bucket
-	,S3Key		S3Key
-	,NULL		S3StorageType
-	,NULL		S3StorageTypeUpdateDate
-	,NULL		IsDelete
-	,NULL		IsLocalFileDeleted
-	,NULL		LocalFileDeletedDate
-FROM #Pool
+			INSERT INTO ISC_SmileDoc.dbo.DocumentIndexData
+			(
+				DocumentID
+				,DocumentIndexID
+				,DocumentIndexData
+				,DateAction
+				,PersonIDAction
+				,IPAddress
+			)
+			SELECT
+				m.DocumentID              AS DocumentID
+				,1                        AS DocumentIndexID
+				,t.ClaimHeaderCodeInDB    AS DocumentIndexData
+				,@D                       AS DateAction
+				,1                        AS PersonIDAction
+				,NULL                     AS IPAddress
+			FROM #Tmp t
+			INNER JOIN #Map m
+				ON t.RowNo = m.RowNo;
 
+			INSERT INTO ISC_SmileDoc.dbo.Attachment
+			(
+				DocumentID
+				,AttachmentName
+				,AttachmentURL
+				,AttachmentSortOrder
+				,IsEnable
+				,DateAction
+				,PersonIDAction
+				,IPAddress
+				,S3IsUploaded
+				,S3UploadedDate
+				,S3Bucket
+				,S3Key
+				,S3StorageType
+				,S3StorageTypeUpdateDate
+				,IsDelete
+				,IsLocalFileDeleted
+				,LocalFileDeletedDate
+			)
+			SELECT
+				m.DocumentID     AS DocumentID         -- ใช้ DocumentID จาก #Map
+				,NULL            AS AttachmentName
+				,NULL            AS AttachmentURL
+				,1               AS AttachmentSortOrder
+				,1               AS IsEnable
+				,@D              AS DateAction
+				,1               AS PersonIDAction
+				,NULL            AS IPAddress
+				,1               AS S3IsUploaded
+				,@D              AS S3UploadedDate
+				,@S3Bucket       AS S3Bucket
+				,p.S3Key         AS S3Key
+				,NULL            AS S3StorageType
+				,NULL            AS S3StorageTypeUpdateDate
+				,NULL            AS IsDelete
+				,NULL            AS IsLocalFileDeleted
+				,NULL            AS LocalFileDeletedDate
+			FROM #Pool p
+			INNER JOIN #Tmp t
+				ON p.RowNo = t.RowNo  
+			INNER JOIN #Map m
+				ON t.RowNo = m.RowNo;
+
+		--Result--
+
+		SELECT
+			*
+		FROM #Tmp
+
+END TRY
+BEGIN CATCH
+
+	Print('บันทึก ไม่สำเร็จ');
+
+	IF @@Trancount > 0 ROLLBACK;
+END CATCH
 
 IF OBJECT_ID('tempdb..#Tmp') IS NOT NULL  DROP TABLE #Tmp;
 IF OBJECT_ID('tempdb..#Pool') IS NOT NULL DROP TABLE #Pool;
+IF OBJECT_ID('tempdb..#Map') IS NOT NULL DROP TABLE #Map;
