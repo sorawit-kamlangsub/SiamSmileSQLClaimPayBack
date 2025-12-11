@@ -250,7 +250,7 @@ BEGIN TRY
 			--	,LocalFileDeletedDate
 			--)
 			SELECT
-				m.DocumentID     AS DocumentID         -- ใช้ DocumentID จาก #Map
+				m.DocumentID     AS DocumentID         
 				,NULL            AS AttachmentName
 				,NULL            AS AttachmentURL
 				,1               AS AttachmentSortOrder
