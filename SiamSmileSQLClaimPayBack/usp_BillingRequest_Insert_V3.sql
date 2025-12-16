@@ -15,7 +15,7 @@ GO
 --				 2023-03-18 Add	insert ClaimHeaderGroupTypeId in BillingRequestGroup Sahatsawat golffy 06958
 --				 2023-03-07 Add insert InsuranceCompanyName in BillingRequestGroup Sahatsawat golffy 06958
 --				 2025-10-16	Add Parameter @CreatedDateFrom @CreatedDateTo Sorawit kem 
---				 2025-10-30 Add ClaimMisc Sorawit Kamlangsub
+--				 2025-10-30 Add ClaimMisc ClaimHeaderGroupTypeId = 6 @ClaimHeaderGroupTypeId = 3 Sorawit Kamlangsub
 -- Description:
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_BillingRequest_Insert_V3]
@@ -51,7 +51,7 @@ FROM
 						WHEN f.ClaimHeaderGroupTypeId = 3 THEN 2
 						WHEN f.ClaimHeaderGroupTypeId = 4 THEN 1
 						WHEN f.ClaimHeaderGroupTypeId = 5 THEN 1
-						WHEN f.ClaimHeaderGroupTypeId = 6 THEN 1
+						WHEN f.ClaimHeaderGroupTypeId = 6 THEN 3
 						ELSE NULL
 						END	GroupTypeId
 					,i.ClaimTypeCode
@@ -106,19 +106,27 @@ WHILE ( @intFlag <= @max )
         FROM	#TmpLoop
 		WHERE	rwId = @intFlag;
 
-		INSERT INTO @TmpResult ( IsResult, Result, Msg)
+		IF (@ClaimHeaderGroupTypeId = 3)
+			BEGIN
+				INSERT INTO @TmpResult ( IsResult, Result, Msg)
+				EXECUTE [dbo].[usp_BillingRequest_ClaimMisc_Insert] 
+									@GroupTypeId
+									,@ClaimTypeCode
+									,@InsuranceCompanyId
+									,@CreatedByUserId
+									,@BillingDate 
+									,@ClaimHeaderGroupTypeId
+									,@InsuranceCompanyName
+									,@BillingDateTo
+									,@CreatedDateFrom
+									,@CreatedDateTo
+			END
+		ELSE
+			BEGIN
+				INSERT INTO @TmpResult ( IsResult, Result, Msg)
 
-/* Original
-		EXECUTE [dbo].[usp_BillingRequest_Sub01_Insert] 
-					@GroupTypeId
-					,@ClaimTypeCode
-					,@InsuranceCompanyId
-					,@CreatedByUserId
-					,@BillingDate 
-					,@ClaimHeaderGroupTypeId
-					,@InsuranceCompanyName
-*/
-		EXECUTE [dbo].[usp_BillingRequest_Sub01_Insert_V2] 
+		/* Original
+				EXECUTE [dbo].[usp_BillingRequest_Sub01_Insert] 
 							@GroupTypeId
 							,@ClaimTypeCode
 							,@InsuranceCompanyId
@@ -126,9 +134,19 @@ WHILE ( @intFlag <= @max )
 							,@BillingDate 
 							,@ClaimHeaderGroupTypeId
 							,@InsuranceCompanyName
-							,@BillingDateTo
-							,@CreatedDateFrom
-							,@CreatedDateTo
+		*/
+				EXECUTE [dbo].[usp_BillingRequest_Sub01_Insert_V2] 
+									@GroupTypeId
+									,@ClaimTypeCode
+									,@InsuranceCompanyId
+									,@CreatedByUserId
+									,@BillingDate 
+									,@ClaimHeaderGroupTypeId
+									,@InsuranceCompanyName
+									,@BillingDateTo
+									,@CreatedDateFrom
+									,@CreatedDateTo
+			END;
 		------------------------------
         SET @intFlag = @intFlag + 1;
     END;
