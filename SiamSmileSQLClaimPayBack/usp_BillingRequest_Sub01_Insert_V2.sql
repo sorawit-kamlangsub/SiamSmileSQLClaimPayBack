@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Sub01_Insert_V2]    Script Date: 27/11/2568 11:11:08 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Sub01_Insert_V2]    Script Date: 16/12/2568 15:53:06 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -25,8 +25,6 @@ GO
 	Update date: 2025-11-17 12:17 Sorawit Kamlangsub
 				เพิ่ม #TmpX2
 				แก้ไขบั๊กการเรียงข้อมูลตาม บ.ส.
-	Update date: 2025-11-27 11:25 Sorawit Kamlangsub
-				แก้ไข Sort ของ ClaimMisc
 */	
 -- Description:	<Description,,>
 -- =============================================
@@ -162,14 +160,10 @@ IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 /*SetUp Sort*/
 SELECT 
 	d.*
-    --,PARSENAME(REPLACE(d.ClaimHeaderGroupCode,'-','.'),4)				AS P1
-    --,CAST(PARSENAME(REPLACE(d.ClaimHeaderGroupCode,'-','.'),3) AS INT)	AS P2
-    --,CAST(PARSENAME(REPLACE(d.ClaimHeaderGroupCode,'-','.'),2) AS INT)	AS P3
-    --,CAST(PARSENAME(REPLACE(d.ClaimHeaderGroupCode,'-','.'),1) AS INT)	AS P4
-    ,''	P1
-    ,0	P2
-    ,0	P3
-    ,0	P4
+    ,PARSENAME(REPLACE(d.ClaimHeaderGroupCode,'-','.'),4)				AS P1
+    ,CAST(PARSENAME(REPLACE(d.ClaimHeaderGroupCode,'-','.'),3) AS INT)	AS P2
+    ,CAST(PARSENAME(REPLACE(d.ClaimHeaderGroupCode,'-','.'),2) AS INT)	AS P3
+    ,CAST(PARSENAME(REPLACE(d.ClaimHeaderGroupCode,'-','.'),1) AS INT)	AS P4
 INTO #TmpX2
 FROM #TmpX d;
 
@@ -290,7 +284,7 @@ BEGIN
 	IF @IsSFTP = 0
 	BEGIN 
 		SET @TotalRows = @D_Total;
-		SET @BatchSize = 5;
+		SET @BatchSize = 20;
 	END
 	
 /* Generate Code */
@@ -543,19 +537,19 @@ BEGIN
 				AND (g.BillingRequestGroupId = @BillingRequestGroupId);
 				 
 			/* Insert ClaimHeaderGroupImportCancel */
-			INSERT INTO [dbo].[ClaimHeaderGroupImportCancel]
-			      ([ClaimHeaderGroupImportId]
-			      ,[CancelDetail]
-			      ,[IsActive]
-			      ,[CreatedByUserId]
-			      ,[CreatedDate])
-			SELECT 
-				i.ClaimHeaderGroupImportId	ClaimHeaderGroupImportId
-				,@TransactionDetail			CancelDetail
-				,1							IsActive
-				,@UserId					CreatedByUserId
-				,@D2						CreatedDate
-			FROM #Tmplst i;
+			--INSERT INTO [dbo].[ClaimHeaderGroupImportCancel]
+			--      ([ClaimHeaderGroupImportId]
+			--      ,[CancelDetail]
+			--      ,[IsActive]
+			--      ,[CreatedByUserId]
+			--      ,[CreatedDate])
+			--SELECT 
+			--	i.ClaimHeaderGroupImportId	ClaimHeaderGroupImportId
+			--	,@TransactionDetail			CancelDetail
+			--	,1							IsActive
+			--	,@UserId					CreatedByUserId
+			--	,@D2						CreatedDate
+			--FROM #Tmplst i;
  /* Move to next batch */
 		SET @Offset = @Offset + @BatchSize;
 
