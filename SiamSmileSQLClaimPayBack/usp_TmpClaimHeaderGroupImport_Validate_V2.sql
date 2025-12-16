@@ -30,7 +30,7 @@ AS
 BEGIN
 	
 SET NOCOUNT ON;
---DECLARE @TmpCode VARCHAR(20) = 'IMCHG6810000133'
+--DECLARE @TmpCode VARCHAR(20) = 'IMCHG6812000071'
 DECLARE @ClaimHeaderSSS INT = 2;
 DECLARE @ClaimHeaderSSSPA INT = 3;
 DECLARE @ClaimCompensate INT = 4;
@@ -228,8 +228,8 @@ IF @IsResult = 1
 			 , m.ClaimHeaderGroupCodeInDB
              , m.ClaimHeaderCodeInDB
 			 , m.TotalAmountSS
-             , ISNULL(d.CountDoc,0) CountDoc
-			 , IIF(ISNULL(d.CountDoc,0) = 0,N'ไม่พบเอกสารแนบ','') ValidateDetailResult
+			 , IIF(m.ProductGroup = 'Misc',1,ISNULL(d.CountDoc,0)) CountDoc
+			 , IIF(IIF(m.ProductGroup = 'Misc',1,ISNULL(d.CountDoc,0)) = 0,N'ไม่พบเอกสารแนบ','') ValidateDetailResult
 		INTO #TmpDoc
 		FROM #TmpDetail m
 			LEFT JOIN 
@@ -256,10 +256,6 @@ IF @IsResult = 1
 								WHEN 
 									-- กรณีเป็นเคลมโอนแยก
 									MAX(CASE WHEN td.ProductGroup = '2222' THEN 1 ELSE 0 END) = 1
-								THEN 1
-								WHEN 
-									-- กรณีเป็นเคลมเบ็ดเตล็ด (เคลมย่อย)
-									MAX(CASE WHEN td.ProductGroup = 'Misc' THEN 1 ELSE 0 END) = 1
 								THEN 1
 								ELSE 0
 							 END AS CountDoc
@@ -405,7 +401,7 @@ IF @IsResult = 1
 
 		BEGIN TRY			
 			BEGIN TRANSACTION
-
+				
 				--SELECT *
 				DELETE hd
 				FROM dbo.TmpClaimHeaderGroupImportDetail hd
