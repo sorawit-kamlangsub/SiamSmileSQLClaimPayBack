@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequestGroup_Select]    Script Date: 17/12/2568 13:31:55 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequestGroup_Select]    Script Date: 17/12/2568 13:43:51 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -37,6 +37,19 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
+
+--DECLARE
+--		@InsurunceCompanyId				INT = NULL
+--		,@BillingDate					DATE = '2025-12-17'
+--		,@BillingRequestGroupStatusId	INT = NULL
+--		,@ClaimType						NVARCHAR(25) = NULL
+--		,@ClaimHeaderGroupTypeId		INT = NULL
+--		,@IndexStart					INT = 0 
+--		,@PageSize						INT = 20 
+--		,@SortField						NVARCHAR(MAX) = NULL
+--		,@OrderType						NVARCHAR(MAX) = NULL
+--		,@SearchDetail					NVARCHAR(MAX) = NULL
+
 ------------------------------------------------------------
 IF @IndexStart			IS NULL    SET @IndexStart		= 0;
 IF @PageSize			IS NULL    SET @PageSize        = 10;
@@ -50,7 +63,7 @@ IF @SearchDetail		IS NULL    SET @SearchDetail    = '';
 	
 	SELECT	g.BillingRequestGroupId										
 			,g.BillingRequestGroupCode									
-			--,cgt.ClaimHeaderGroupTypeName
+			,cgt.ClaimHeaderGroupTypeName
 			,ISNULL(bexcm.ProductTypeName,cgt.ClaimHeaderGroupTypeName)				AS ClaimHeaderGroupTypeName
 			,g.InsuranceCompanyId	 			AS InsuranceCompanyId
 			,o.OrganizeCode						AS OrganizeCode 
@@ -110,8 +123,7 @@ IF @SearchDetail		IS NULL    SET @SearchDetail    = '';
 				ON p.ProductTypeId = g.ClaimHeaderGroupTypeId
 					AND p.InsuranceCompanyCode = o.OrganizeCode
 			LEFT JOIN (
-				SELECT be.ClaimHeaderGroupCode
-					   ,be.BillingRequestGroupCode
+				SELECT be.BillingRequestGroupCode
 					   ,cm.ProductTypeId
 					   ,pt.ProductTypeName
 				FROM dbo.BillingExport be
@@ -119,6 +131,10 @@ IF @SearchDetail		IS NULL    SET @SearchDetail    = '';
 						ON be.ClaimHeaderGroupCode = cm.ClaimHeaderGroupCode
 					LEFT JOIN [ClaimMiscellaneous].[misc].[ProductType] pt
 						ON cm.ProductTypeId = pt.ProductTypeId
+				WHERE cm.IsActive = 1
+				GROUP BY be.BillingRequestGroupCode
+					   ,cm.ProductTypeId
+					   ,pt.ProductTypeName
 			) bexcm
 			ON g.BillingRequestGroupCode = bexcm.BillingRequestGroupCode
 
