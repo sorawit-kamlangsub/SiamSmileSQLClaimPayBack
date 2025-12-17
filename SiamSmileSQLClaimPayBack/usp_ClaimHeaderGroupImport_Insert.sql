@@ -1,6 +1,6 @@
-USE [ClaimPayBack]
+ÔªøUSE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImport_Insert]    Script Date: 6/11/2568 15:15:00 ******/
+/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImport_Insert]    Script Date: 17/12/2568 9:07:17 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -10,14 +10,14 @@ GO
 --	Author:		Siriphong Narkphung
 --	Create date: 2022-11-01
 --	Update date: 2023-02-02 Add Parameter @BillingDate and save it to ClaimHeaderGroupImport in column BillingDate
---				 2023-03-24 ‡æ‘Ë¡ join [vw_CodeGroup_ClaimStyle] 06958 
---				 2023-07-03 ‡æ‘Ë¡ insert InsuranceCompanyName from ClaimHeaderGroupImport 06958
---	UpdatedDate: bell 20230815 0857  ‡æ‘Ë¡ CreatedByBranchCode 
+--				 2023-03-24 ‡πÄ‡∏û‡∏¥‡πà‡∏° join [vw_CodeGroup_ClaimStyle] 06958 
+--				 2023-07-03 ‡πÄ‡∏û‡∏¥‡πà‡∏° insert InsuranceCompanyName from ClaimHeaderGroupImport 06958
+--	UpdatedDate: bell 20230815 0857  ‡πÄ‡∏û‡∏¥‡πà‡∏° CreatedByBranchCode 
 --	UpdatedDate: 2023-10-17 change select TmpDetail from union to If
---	UpdatedDate: 2025-04-11 Wetpisit.P ‡æ‘Ë¡ where tmp.IsValid = 1 ‡Õ“‡©æ“–√“¬°“√∑’Ë‰¡Ëµ‘¥ validate,‡Õ“‡ß◊ËÕπ‰¢‡™Á§ xResult ÕÕ°‡π◊ËÕß®“°¡’°“√‡ª≈’Ë¬π‡ß◊ËÕπ‰¢°“√ validate
+--	UpdatedDate: 2025-04-11 Wetpisit.P ‡πÄ‡∏û‡∏¥‡πà‡∏° where tmp.IsValid = 1 ‡πÄ‡∏≠‡∏≤‡πÄ‡∏â‡∏û‡∏≤‡∏∞‡∏£‡∏≤‡∏¢‡∏Å‡∏≤‡∏£‡∏ó‡∏µ‡πà‡πÑ‡∏°‡πà‡∏ï‡∏¥‡∏î validate,‡πÄ‡∏≠‡∏≤‡πÄ‡∏á‡∏∑‡πà‡∏≠‡∏ô‡πÑ‡∏Ç‡πÄ‡∏ä‡πá‡∏Ñ xResult ‡∏≠‡∏≠‡∏Å‡πÄ‡∏ô‡∏∑‡πà‡∏≠‡∏á‡∏à‡∏≤‡∏Å‡∏°‡∏µ‡∏Å‡∏≤‡∏£‡πÄ‡∏õ‡∏•‡∏µ‡πà‡∏¢‡∏ô‡πÄ‡∏á‡∏∑‡πà‡∏≠‡∏ô‡πÑ‡∏Ç‡∏Å‡∏≤‡∏£ validate
 --	UpdatedDate: 2025-09-25 08:38 (Bunchuai Chaiket) 
---				 - ‡æ‘Ë¡°“√ Insert °“√ √È“ß√“¬°“√≈ß ClaimHeaderGroupImportCancel
---				 - ‡æ‘Ë¡ parameters @ImportFrom ‡æ◊ËÕ·¬°«Ë“√“¬°“√∑’Ë Import ¡“®“°™ËÕß∑“ß‰Àπ °”Àπ¥ 1 ImportExcel 2 Import ®“°°“√µ—Èß‡∫‘°
+--				 - ‡πÄ‡∏û‡∏¥‡πà‡∏°‡∏Å‡∏≤‡∏£ Insert ‡∏Å‡∏≤‡∏£‡∏™‡∏£‡πâ‡∏≤‡∏á‡∏£‡∏≤‡∏¢‡∏Å‡∏≤‡∏£‡∏•‡∏á ClaimHeaderGroupImportCancel
+--				 - ‡πÄ‡∏û‡∏¥‡πà‡∏° parameters @ImportFrom ‡πÄ‡∏û‡∏∑‡πà‡∏≠‡πÅ‡∏¢‡∏Å‡∏ß‡πà‡∏≤‡∏£‡∏≤‡∏¢‡∏Å‡∏≤‡∏£‡∏ó‡∏µ‡πà Import ‡∏°‡∏≤‡∏à‡∏≤‡∏Å‡∏ä‡πà‡∏≠‡∏á‡∏ó‡∏≤‡∏á‡πÑ‡∏´‡∏ô ‡∏Å‡∏≥‡∏´‡∏ô‡∏î 1 ImportExcel 2 Import ‡∏à‡∏≤‡∏Å‡∏Å‡∏≤‡∏£‡∏ï‡∏±‡πâ‡∏á‡πÄ‡∏ö‡∏¥‡∏Å
 -- UpdateDate:	2025-11-06 15:20 Sorawit Kamlangsub
 --				- Add ClaimMisc
 -- Description:	<Description,,>
@@ -56,8 +56,8 @@ DECLARE @xResult VARCHAR(100)='0';
 DECLARE @Msg        NVARCHAR(500)= '';
 DECLARE @DiscountSS_PA DECIMAL(16,2) = 0;
 DECLARE @Orgen DECIMAL(16,2) = 0;
-DECLARE @CancelDetail1 NVARCHAR(500)= N'Import ∫. . ‡√’¬∫√ÈÕ¬ Õ¬ŸË√–À«Ë“ß√Õ°“√ Generate Group «“ß∫‘≈';
-DECLARE @CancelDetail2 NVARCHAR(500)= N'‰¥È√—∫¢ÈÕ¡Ÿ≈ ∫. . ‡√’¬∫√ÈÕ¬ Õ¬ŸË√–À«Ë“ß√Õ°“√ Generate Group «“ß∫‘≈';
+DECLARE @CancelDetail1 NVARCHAR(500)= N'Import ‡∏ö.‡∏™. ‡πÄ‡∏£‡∏µ‡∏¢‡∏ö‡∏£‡πâ‡∏≠‡∏¢ ‡∏≠‡∏¢‡∏π‡πà‡∏£‡∏∞‡∏´‡∏ß‡πà‡∏≤‡∏á‡∏£‡∏≠‡∏Å‡∏≤‡∏£ Generate Group ‡∏ß‡∏≤‡∏á‡∏ö‡∏¥‡∏•';
+DECLARE @CancelDetail2 NVARCHAR(500)= N'‡πÑ‡∏î‡πâ‡∏£‡∏±‡∏ö‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏• ‡∏ö.‡∏™. ‡πÄ‡∏£‡∏µ‡∏¢‡∏ö‡∏£‡πâ‡∏≠‡∏¢ ‡∏≠‡∏¢‡∏π‡πà‡∏£‡∏∞‡∏´‡∏ß‡πà‡∏≤‡∏á‡∏£‡∏≠‡∏Å‡∏≤‡∏£ Generate Group ‡∏ß‡∏≤‡∏á‡∏ö‡∏¥‡∏•';
 
 DECLARE @TmpOut TABLE (ClaimHeaderGroupImportId INT ,ClaimHeaderGroupCode VARCHAR(30)) 
 ----------------------------------------------
@@ -78,7 +78,7 @@ BEGIN
 	IF (@xIsResult <> 1)
 		BEGIN
 			SET @IsResult = 0;
-			SET @Msg = N'°√ÿ≥“µ√«® Õ∫¢ÈÕ¡Ÿ≈„À¡ËÕ’°§√—Èß';
+			SET @Msg = N'‡∏Å‡∏£‡∏∏‡∏ì‡∏≤‡∏ï‡∏£‡∏ß‡∏à‡∏™‡∏≠‡∏ö‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏•‡πÉ‡∏´‡∏°‡πà‡∏≠‡∏µ‡∏Å‡∏Ñ‡∏£‡∏±‡πâ‡∏á';
 		END	
 END	
 ---------------------------------------------------------------------
@@ -389,8 +389,8 @@ IF @IsResult = 1
 					,h.ClaimType_id													AS ClaimAdmitTypeCode ---xxxx
 					,ctpa.Detail													AS ClaimAdmitType---xxxx
 					,CASE 
-						WHEN cst.Code = '4110' OR cst.Code = '4120' THEN '‡§≈¡‚√ßæ¬“∫“≈'  
-						ELSE '‡§≈¡≈Ÿ°§È“' 
+						WHEN cst.Code = '4110' OR cst.Code = '4120' THEN '‡πÄ‡∏Ñ‡∏•‡∏°‡πÇ‡∏£‡∏á‡∏û‡∏¢‡∏≤‡∏ö‡∏≤‡∏•'  
+						ELSE '‡πÄ‡∏Ñ‡∏•‡∏°‡∏•‡∏π‡∏Å‡∏Ñ‡πâ‡∏≤' 
 					END AS ClaimType  --2023-03-24 06958
 					,icd.Code														AS ICD10_1Code
 					,icd.Detail_Thai												AS ICD10
@@ -575,7 +575,7 @@ IF @IsResult = 1
 					,NULL											AS Amount_Pay
 					,NULL											AS Amount_Dead
 					,NULL											AS Remark	
-					,'9901'											AS CreatedByBranchCode  -- 10-04-2024 Fix Branch  ”π—°ß“π„À≠Ë type ‚Õπ·¬° cc.CreatedByBranchCode	
+					,'9901'											AS CreatedByBranchCode  -- 10-04-2024 Fix Branch ‡∏™‡∏≥‡∏ô‡∏±‡∏Å‡∏á‡∏≤‡∏ô‡πÉ‡∏´‡∏ç‡πà type ‡πÇ‡∏≠‡∏ô‡πÅ‡∏¢‡∏Å cc.CreatedByBranchCode	
 				FROM #Tmp AS t
 					LEFT JOIN SSS.dbo.ClaimCompensateGroup AS cg
 						ON t.ClaimHeaderGroupCode = cg.ClaimCompensateGroupCode
@@ -690,7 +690,7 @@ IF @IsResult = 1
 					,cm.StartCoverDate								StartCoverDate
 					,NULL											ClaimAdmitTypeCode
 					,cxa.ClaimAdmitType								ClaimAdmitType
-					,NULL											ClaimType
+					,'‡πÄ‡∏Ñ‡∏•‡∏°‡∏•‡∏π‡∏Å‡∏Ñ‡πâ‡∏≤'										ClaimType
 					,NULL											ICD10_1Code
 					,NULL											ICD10
 					,NULL											IPDCount
@@ -969,14 +969,14 @@ IF @IsResult = 1
 						FROM @TmpOut i;
 
 			SET @IsResult = 1			  					
-			SET @Msg = '∫—π∑÷°  ”‡√Á®'	 						
+			SET @Msg = '‡∏ö‡∏±‡∏ô‡∏ó‡∏∂‡∏Å ‡∏™‡∏≥‡πÄ‡∏£‡πá‡∏à'	 						
 										  					
 			COMMIT TRANSACTION			  					
 		END TRY							  					
 		BEGIN CATCH						  					
 										  					
 			SET @IsResult = 0			  					
-			SET @Msg = '∫—π∑÷° ‰¡Ë ”‡√Á®'		
+			SET @Msg = '‡∏ö‡∏±‡∏ô‡∏ó‡∏∂‡∏Å ‡πÑ‡∏°‡πà‡∏™‡∏≥‡πÄ‡∏£‡πá‡∏à'		
 							
 			IF @@TRANCOUNT > 0 ROLLBACK	  					
 		END CATCH
