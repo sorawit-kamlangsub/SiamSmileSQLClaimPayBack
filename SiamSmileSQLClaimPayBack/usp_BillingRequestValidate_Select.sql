@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequestValidate_Select]    Script Date: 17/10/2568 9:35:30 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequestValidate_Select]    Script Date: 17/12/2568 15:31:35 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -14,8 +14,12 @@ GO
 -- Update date: 2025-10-16 10:00 Sorawit
 --				Add Union ClaimCompensateGroup
 --				Update Parameter
+-- Update date	2025-11-10 13:00 Bunchuai Chaiket
+--				LEFT JOIN ClaimHeaderGroupImportDetail and BillingRequestResultDetail
+-- Update date	2025-11-20 10:01
+--				ขั้นตอนการ UNION เปลี่ยน ClaimCode to ClaimOnLineCode
 -- Description:	store สำหรับ Validate รายการ Generate group Import บ.ส. 
----- =============================================
+---- ===========-=================================-
 ALTER PROCEDURE [dbo].[usp_BillingRequestValidate_Select] 
 	 @DateFrom		DATE,
 	 @DateTo		DATE
@@ -29,8 +33,8 @@ DECLARE @MessageValidate2 NVARCHAR(100) = N'ยอด บ.ส. และยอ�
 DECLARE @MessageValidate3 NVARCHAR(100) = N'ยอดโอนเงิน ไม่เท่ากับ (ยอด บ.ส. + ยอด NPL)'; 
 DECLARE @MessageValidate4 NVARCHAR(100) = N'ยอดวางบิลเป็น ไม่เท่ากับ (ยอดโอนเงิน - ยอด NPL)';  
 ---- ================================
---DECLARE @DateFrom	DATE = '2025-10-15';
---DECLARE @DateTo		DATE = '2025-10-17';
+--DECLARE @DateFrom	DATE = '2025-11-20';
+--DECLARE @DateTo		DATE = '2025-11-21';
 
 IF @DateTo IS NOT NULL SET @DateTo = DATEADD(DAY,1,@DateTo);
 
@@ -43,7 +47,7 @@ SELECT
 	,g.ClaimHeaderGroupTypeId
 	,g.InsuranceCompanyName
 	,g.ClaimHeaderGroupCode
-	,SUM(g.TotalAmount)		BillingAmount
+	,SUM(g.TotalAmount)		BillingAmount 
 INTO #TmpLoop	
 FROM
 	(SELECT	i.InsuranceCompanyId
@@ -58,11 +62,15 @@ FROM
 				,i.CreatedDate
 				,f.ClaimHeaderGroupTypeId
 				,i.InsuranceCompanyName
-				,i.TotalAmount
+				,i.TotalAmount - ISNULL(brrd.CoverAmount,0) TotalAmount
 				,i.ClaimHeaderGroupCode
 		FROM	dbo.ClaimHeaderGroupImport AS i
 				INNER JOIN dbo.ClaimHeaderGroupImportFile AS f
 					ON i.ClaimGroupImportFileId = f.ClaimHeaderGroupImportFileId
+				LEFT JOIN [dbo].ClaimHeaderGroupImportDetail cgid
+					ON i.ClaimHeaderGroupImportId = cgid.ClaimHeaderGroupImportId
+				LEFT JOIN [dbo].BillingRequestResultDetail brrd
+					ON cgid.ClaimHeaderGroupImportDetailId = brrd.ClaimHeaderGroupImportDetailId
 		WHERE	f.IsActive = 1
 			AND		i.IsActive = 1
 			AND		i.ClaimHeaderGroupImportStatusId = 2
@@ -87,6 +95,7 @@ SELECT
 	,ISNULL(colPH.TotalAmount, 0)	TransferAmount
 	,ISNULL(nplds.NPLAmount, 0)		NPLAmount 
 	,pa.ClaimOnLineCode
+	,pa.ClaimCode
 INTO #Tmp2
 FROM #TmpLoop t 
 	LEFT JOIN (
@@ -94,7 +103,8 @@ FROM #TmpLoop t
 		SELECT
 			cgi.ClaimHeaderGroup_id			Code
 			,cv.PaySS_Total					PaySS_Total
-			,ch.Code						ClaimOnLineCode 
+			,ch.ClaimOnLineCode				ClaimOnLineCode
+			,cv.Code						ClaimCode
 		FROM  SSS.dbo.DB_ClaimHeaderGroupItem cgi  
 			LEFT JOIN sss.dbo.DB_ClaimHeader ch
 				ON cgi.ClaimHeader_id = ch.Code
@@ -107,7 +117,8 @@ FROM #TmpLoop t
 		SELECT	
 			chgPA.Code						Code
 			,chPA.PaySS_Total				PaySS_Total
-			,chPA.Code						ClaimOnLineCode
+			,chPA.ClaimOnLineCode			ClaimOnLineCode
+			,chpa.Code						ClaimCode
 		FROM [SSSPA].[dbo].[DB_ClaimHeaderGroupItem] hPA
 			LEFT JOIN SSSPA.dbo.DB_ClaimHeaderGroup chgPA
 				ON hPA.ClaimHeaderGroup_id = chgPA.Code
@@ -120,7 +131,8 @@ FROM #TmpLoop t
 		SELECT 
 			cg.ClaimCompensateGroupCode		Code
 			,cc.CompensateRemain			PaySS_Total
-			,cc.ClaimHeaderCode				ClaimOnLineCode
+			,NULL							ClaimOnLineCode
+			,cc.ClaimCompensateCode			ClaimCode
 		FROM [SSS].[dbo].[ClaimCompensateGroup] cg
 			LEFT JOIN
 				(
@@ -167,9 +179,15 @@ FROM #TmpLoop t
  2 TransferAmount = (Amount + NPLAmount)
  3 BillingAmount = (TransferAmount - NPLAmount)
 */
-
+ 
 SELECT 
-	*
+	ClaimHeaderGroupCode
+	,ClaimHeaderGroupTypeId
+	,BillingAmount
+	,TransferAmount
+	,NPLAmount
+	,Amount
+	,ClaimCode	ClaimOnLineCode
 	,CASE
 		WHEN (Amount <> BillingAmount)		THEN @MessageValidate1
 		WHEN ((Amount + BillingAmount) = 0)	THEN @MessageValidate2
