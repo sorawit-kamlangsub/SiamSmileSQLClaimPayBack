@@ -1,8 +1,8 @@
 USE [ClaimPayBack]
 GO
 
-DECLARE @BillingRequestGroupCode NVARCHAR(50) = 'BQGPA39B6812001'
-,@NewBillingDate			DATE			= '2025-12-03'
+DECLARE @BillingRequestGroupCode NVARCHAR(50) = 'BQGHM04B6812001'
+,@NewBillingDate			DATE			= '2025-12-17'
 ,@UpdatedByUserId			INT				= 6772
 
 DECLARE @D2							DATETIME2	= SYSDATETIME();
@@ -34,26 +34,31 @@ FROM dbo.ClaimHeaderGroupImport h
 WHERE bg.BillingRequestGroupCode = @BillingRequestGroupCode
 
 --SELECT *
-DELETE be
-FROM dbo.BillingExport AS be
-WHERE be.BillingRequestGroupCode = @BillingRequestGroupCode;
+--UPDATE be
+--	SET be.IsActive = 0
+--FROM dbo.BillingExport AS be
+--WHERE be.BillingRequestGroupCode = @BillingRequestGroupCode; -- <= None IsActive
 
 --SELECT *
-DELETE bg
+UPDATE bg
+	SET bg.IsActive = 0
 FROM dbo.BillingRequestGroup AS bg
 WHERE bg.BillingRequestGroupCode = @BillingRequestGroupCode;
 
 --SELECT *
-DELETE bi
+Update bi
+	SET bi.IsActive = 0
 FROM dbo.BillingRequestItem AS bi
 WHERE bi.BillingRequestGroupId = @BillingRequestGroupId;
 
 --SELECT *
-DELETE cover
-FROM dbo.BillingRequestGroupXResultDetail AS cover
-WHERE cover.BillingRequestGroupId = @BillingRequestGroupId;
+--UPDATE cover
+--	SET cover,IsActive = 0
+--FROM dbo.BillingRequestGroupXResultDetail AS cover
+--WHERE cover.BillingRequestGroupId = @BillingRequestGroupId; -- <= None IsActive
 
 --SELECT *
-DELETE gc
+UPDATE gc
+	SET gc.IsActive = 0
 FROM dbo.ClaimHeaderGroupImportCancel AS gc
 WHERE gc.ClaimHeaderGroupImportId = @ClaimHeaderGroupImportId;
