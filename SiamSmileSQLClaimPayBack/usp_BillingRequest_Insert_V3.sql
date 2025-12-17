@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Insert_V3]    Script Date: 30/10/2568 16:59:23 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Insert_V3]    Script Date: 17/12/2568 11:10:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -207,8 +207,6 @@ WHILE ( @intFlag <= @max )
         SET @intFlag = @intFlag + 1;
     END;
 ---------------------------------------------
-
-SELECT * FROM @TmpInput
 
 IF OBJECT_ID('tempdb..#TmpLoop') IS NOT NULL  DROP TABLE #TmpLoop;	
 
