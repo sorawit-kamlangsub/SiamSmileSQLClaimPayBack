@@ -1,10 +1,11 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequestGroup_Select]    Script Date: 13/11/2568 11:43:13 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequestGroup_Select]    Script Date: 17/12/2568 13:31:55 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+
 
 
 -- =============================================
@@ -17,6 +18,7 @@ GO
 --				2025-09-19 16:21 Krekpon Dokkamklang เพิ่ม paremeter การรับข้อมูลในการกรอง
 --				2025-10-21 09:21 Sorawit Kamlangsub เพิ่ม OPTION (RECOMPILE)
 --				2025-11-12 15:42 Sorawit Kamlangsub เพิ่ม Left join SFTPConfigProduct และ ปรับเงื่อนไข IsSftp
+--				2025-12-16 16:27 Krekpon Dokkamklang เพิ่มการดึงข้อมูลของเคลมเบ็ดเตล็ด
 -- Description:	
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_BillingRequestGroup_Select]
@@ -48,7 +50,8 @@ IF @SearchDetail		IS NULL    SET @SearchDetail    = '';
 	
 	SELECT	g.BillingRequestGroupId										
 			,g.BillingRequestGroupCode									
-			,cgt.ClaimHeaderGroupTypeName								
+			--,cgt.ClaimHeaderGroupTypeName
+			,ISNULL(bexcm.ProductTypeName,cgt.ClaimHeaderGroupTypeName)				AS ClaimHeaderGroupTypeName
 			,g.InsuranceCompanyId	 			AS InsuranceCompanyId
 			,o.OrganizeCode						AS OrganizeCode 
 			,g.InsuranceCompanyName				AS InsuranceCompanyName		 
@@ -106,6 +109,18 @@ IF @SearchDetail		IS NULL    SET @SearchDetail    = '';
 			) p
 				ON p.ProductTypeId = g.ClaimHeaderGroupTypeId
 					AND p.InsuranceCompanyCode = o.OrganizeCode
+			LEFT JOIN (
+				SELECT be.ClaimHeaderGroupCode
+					   ,be.BillingRequestGroupCode
+					   ,cm.ProductTypeId
+					   ,pt.ProductTypeName
+				FROM dbo.BillingExport be
+					LEFT JOIN [ClaimMiscellaneous].[misc].[ClaimMisc] cm
+						ON be.ClaimHeaderGroupCode = cm.ClaimHeaderGroupCode
+					LEFT JOIN [ClaimMiscellaneous].[misc].[ProductType] pt
+						ON cm.ProductTypeId = pt.ProductTypeId
+			) bexcm
+			ON g.BillingRequestGroupCode = bexcm.BillingRequestGroupCode
 
 	WHERE	(g.InsuranceCompanyId = @InsurunceCompanyId OR @InsurunceCompanyId IS NULL)
 	AND		(cg.BillingDate = @BillingDate OR @BillingDate IS NULL)
@@ -113,7 +128,16 @@ IF @SearchDetail		IS NULL    SET @SearchDetail    = '';
 	AND		g.IsActive = 1
 	AND		(g.BillingRequestGroupCode LIKE '%'+ ISNULL(@SearchDetail, '') +'%')
 	AND		(ct.Code = @ClaimType OR @ClaimType IS NULL)
-	AND		(g.ClaimHeaderGroupTypeId = @ClaimHeaderGroupTypeId OR @ClaimHeaderGroupTypeId IS NULL)
+	AND (
+		 (
+		  @ClaimHeaderGroupTypeId > 5 
+		  AND bexcm.ProductTypeId = @ClaimHeaderGroupTypeId
+		
+		 )
+		 OR (
+		  g.ClaimHeaderGroupTypeId = @ClaimHeaderGroupTypeId OR @ClaimHeaderGroupTypeId IS NULL
+		 )
+		)
 
 	ORDER BY 
 			CASE WHEN @OrderType IS NULL    AND @SortField IS NULL        THEN g.BillingRequestGroupId END ASC
