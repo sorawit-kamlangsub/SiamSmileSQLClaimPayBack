@@ -19,10 +19,10 @@ GO
 -- Description:
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_BillingRequest_Insert_V3]
-		@CreatedByUserId	INT	
-		,@BillingDateTo		DATE
-		,@CreatedDateFrom	DATE
-		,@CreatedDateTo		DATE
+		@CreatedByUserId	INT	 
+		,@BillingDateTo		DATE 
+		,@CreatedDateFrom	DATE 
+		,@CreatedDateTo		DATE 
 
 AS
 BEGIN
@@ -76,6 +76,7 @@ GROUP BY	g.InsuranceCompanyId
 			,g.InsuranceCompanyName;
 
 DECLARE @TmpResult TABLE (IsResult BIT, Result VARCHAR(100), Msg NVARCHAR(MAX));
+DECLARE @TmpInput TABLE (RwId INT,ClaimTypeCode VARCHAR(20),ProductTypeId INT,ProductTypeShortName VARCHAR(20));
 
 --WHILE Loop---------------------------------
 DECLARE @max INT;
@@ -106,20 +107,75 @@ WHILE ( @intFlag <= @max )
         FROM	#TmpLoop
 		WHERE	rwId = @intFlag;
 
-		IF (@ClaimHeaderGroupTypeId = 3)
+		IF (@ClaimHeaderGroupTypeId = 6)
 			BEGIN
-				INSERT INTO @TmpResult ( IsResult, Result, Msg)
-				EXECUTE [dbo].[usp_BillingRequest_ClaimMisc_Insert] 
-									@GroupTypeId
-									,@ClaimTypeCode
-									,@InsuranceCompanyId
-									,@CreatedByUserId
-									,@BillingDate 
-									,@ClaimHeaderGroupTypeId
-									,@InsuranceCompanyName
-									,@BillingDateTo
-									,@CreatedDateFrom
-									,@CreatedDateTo
+				
+				DECLARE @maxInput INT;
+				DECLARE @inputFlag INT;
+
+				INSERT INTO @TmpInput(RwId,ClaimTypeCode,ProductTypeId,ProductTypeShortName)
+				SELECT	ROW_NUMBER() OVER(ORDER BY (cm.ProductTypeShortName) ASC ) AS rwId
+						,i.ClaimTypeCode		
+						,cm.ProductTypeId
+						,cm.ProductTypeShortName
+				FROM	dbo.ClaimHeaderGroupImport AS i
+						INNER JOIN dbo.ClaimHeaderGroupImportFile AS f
+							ON i.ClaimGroupImportFileId = f.ClaimHeaderGroupImportFileId
+						INNER JOIN #TmpLoop lp
+							ON lp.InsuranceCompanyId = i.InsuranceCompanyId
+						LEFT JOIN 
+						(
+							SELECT
+								cm.ClaimHeaderGroupCode
+								,cm.ProductTypeId
+								,pt.ProductTypeShortName
+							FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
+								LEFT JOIN [ClaimMiscellaneous].[misc].[ProductType] pt
+									ON pt.ProductTypeId = cm.ProductTypeId
+							WHERE cm.IsActive = 1
+						) cm
+							ON cm.ClaimHeaderGroupCode = i.ClaimHeaderGroupCode
+				WHERE	f.IsActive = 1
+				AND		i.IsActive = 1
+				AND		i.ClaimHeaderGroupImportStatusId = 2
+				AND		i.BillingRequestGroupId IS NULL
+				AND		i.BillingDate <= @BillingDateTo		
+				GROUP BY cm.ProductTypeId,cm.ProductTypeShortName,i.ClaimTypeCode
+
+				SELECT	@maxInput = MAX(RwId)
+				FROM	@TmpInput;
+
+				SET @inputFlag = 1;
+				WHILE ( @inputFlag <= @maxInput )
+					BEGIN
+						
+						DECLARE @ProductTypeId		  INT;
+						DECLARE @ProductTypeShortName VARCHAR(20);
+
+						SELECT 
+							@ProductTypeId = ProductTypeId
+							,@ProductTypeShortName = ProductTypeShortName
+						FROM @TmpInput
+
+						SET @inputFlag = @inputFlag + 1;
+
+					INSERT INTO @TmpResult ( IsResult, Result, Msg)
+					EXECUTE [dbo].[usp_BillingRequest_ClaimMisc_Insert] 
+										@GroupTypeId
+										,@ClaimTypeCode
+										,@InsuranceCompanyId
+										,@CreatedByUserId
+										,@BillingDate 
+										,@ClaimHeaderGroupTypeId
+										,@InsuranceCompanyName
+										,@BillingDateTo
+										,@CreatedDateFrom
+										,@CreatedDateTo
+										,@ProductTypeShortName
+										,@ProductTypeId				
+
+					END
+				
 			END
 		ELSE
 			BEGIN
@@ -151,6 +207,8 @@ WHILE ( @intFlag <= @max )
         SET @intFlag = @intFlag + 1;
     END;
 ---------------------------------------------
+
+SELECT * FROM @TmpInput
 
 IF OBJECT_ID('tempdb..#TmpLoop') IS NOT NULL  DROP TABLE #TmpLoop;	
 
