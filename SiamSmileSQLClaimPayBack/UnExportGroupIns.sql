@@ -53,7 +53,7 @@ WHERE bi.BillingRequestGroupId = @BillingRequestGroupId;
 
 --SELECT *
 --UPDATE cover
---	SET cover,IsActive = 0
+--	SET cover.IsActive = 0
 --FROM dbo.BillingRequestGroupXResultDetail AS cover
 --WHERE cover.BillingRequestGroupId = @BillingRequestGroupId; -- <= None IsActive
 
