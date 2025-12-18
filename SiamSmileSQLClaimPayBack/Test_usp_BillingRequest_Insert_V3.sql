@@ -21,9 +21,9 @@ GO
 --ALTER PROCEDURE [dbo].[usp_BillingRequest_Insert_V3]
 DECLARE
 		@CreatedByUserId	INT	 = 1
-		,@BillingDateTo		DATE = '2025-12-16'
-		,@CreatedDateFrom	DATE = '2025-12-16'
-		,@CreatedDateTo		DATE = '2025-12-16'
+		,@BillingDateTo		DATE = '2025-12-18'
+		,@CreatedDateFrom	DATE = '2025-12-17'
+		,@CreatedDateTo		DATE = '2025-12-17'
 
 --AS
 --BEGIN
@@ -147,16 +147,17 @@ WHILE ( @intFlag <= @max )
 				FROM	@TmpInput;
 
 				SET @inputFlag = 1;
+				DECLARE @ProductTypeId		  INT;
+				DECLARE @ProductTypeShortName VARCHAR(20);
+
 				WHILE ( @inputFlag <= @maxInput )
 					BEGIN
-						
-						DECLARE @ProductTypeId		  INT;
-						DECLARE @ProductTypeShortName VARCHAR(20);
 
 						SELECT 
 							@ProductTypeId = ProductTypeId
 							,@ProductTypeShortName = ProductTypeShortName
 						FROM @TmpInput
+						WHERE RwId = @inputFlag
 
 						SET @inputFlag = @inputFlag + 1;
 
@@ -175,7 +176,7 @@ WHILE ( @intFlag <= @max )
 					--					,@ProductTypeShortName
 					--					,@ProductTypeId				
 
-						PRINT @inputFlag
+						PRINT @ProductTypeId
 					END
 				
 			END

@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Insert_V3]    Script Date: 17/12/2568 11:10:52 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Insert_V3]    Script Date: 17/12/2568 16:58:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -146,16 +146,17 @@ WHILE ( @intFlag <= @max )
 				FROM	@TmpInput;
 
 				SET @inputFlag = 1;
+				DECLARE @ProductTypeId		  INT;
+				DECLARE @ProductTypeShortName VARCHAR(20);
+
 				WHILE ( @inputFlag <= @maxInput )
 					BEGIN
-						
-						DECLARE @ProductTypeId		  INT;
-						DECLARE @ProductTypeShortName VARCHAR(20);
 
 						SELECT 
 							@ProductTypeId = ProductTypeId
 							,@ProductTypeShortName = ProductTypeShortName
 						FROM @TmpInput
+						WHERE RwId = @inputFlag
 
 						SET @inputFlag = @inputFlag + 1;
 
