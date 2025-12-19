@@ -87,6 +87,12 @@
           <AssociatedConnUserName>devdba</AssociatedConnUserName>
           <FullPath>Select_Find_All_Ismile_Doc_And_Claim.sql</FullPath>
         </FileNode>
+        <FileNode Name="Select_Find_Doc_ClaimMisc.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
+          <AssociatedConnUserName>devdba</AssociatedConnUserName>
+          <FullPath>Select_Find_Doc_ClaimMisc.sql</FullPath>
+        </FileNode>
         <FileNode Name="Select_Not_Exists_In_ClaimHeaderGroupImport.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
           <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
