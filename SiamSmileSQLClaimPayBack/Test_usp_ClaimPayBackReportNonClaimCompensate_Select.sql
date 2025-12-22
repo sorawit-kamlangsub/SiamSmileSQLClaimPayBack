@@ -38,7 +38,7 @@ GO
 --ALTER PROCEDURE [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]
 DECLARE
 	-- Add the parameters for the stored procedure here
-	 @DateFrom			DATE =	'2025-12-1'
+	 @DateFrom			DATE =	'2025-12-19'
 	,@DateTo			DATE =	'2025-12-22'
 	,@InsuranceId		INT =	NULL
 	,@ProductGroupId	INT =	NULL
@@ -50,7 +50,7 @@ DECLARE
 --	-- interfering with SELECT statements.
 --	SET NOCOUNT ON;
 
- DECLARE @TmpClaimPayBack TABLE (
+DECLARE @TmpClaimPayBack TABLE (
 	 ClaimGroupCodeFromCPBD NVARCHAR(150),
 	 ClaimGroupType NVARCHAR(100),
 	 ItemCount		 INT,
@@ -60,8 +60,7 @@ DECLARE
 	 COL			 NVARCHAR(150),
 	 CreatedDate	 DATETIME,
 	 CreatedByUser NVARCHAR(150),
-	 HospitalCode VARCHAR(20),
-	 ClaimGroupTypeId INT
+	 HospitalCode VARCHAR(20)
      )
 
 	SELECT 
@@ -94,8 +93,7 @@ DECLARE
 	  COL,
 	  CreatedDate,
 	  CreatedByUser,
-	  HospitalCode,
-	  ClaimGroupTypeId
+	  HospitalCode
       )
  SELECT   
      cpbd.ClaimGroupCode						AS ClaimGroupCode,
@@ -107,8 +105,7 @@ DECLARE
 	 cpbd.ClaimOnLineCode						AS COL,
 	 cpb.CreatedDate							AS CreatedDate,
 	 pu.PersonName								AS CreatedByUser,
-	 cpbd.HospitalCode							AS HospitalCode,
-	 cpb.ClaimGroupTypeId
+	 cpbd.HospitalCode							AS HospitalCode
  FROM  ClaimPayBack cpb
 	 LEFT JOIN ClaimPayBackDetail cpbd
 		ON cpb.ClaimPayBackId = cpbd.ClaimPayBackId
@@ -306,5 +303,5 @@ FROM @TmpClaimPayBack TmpCPB
 		ON sssadr.Province_id = sssmp.Code
 
 IF OBJECT_ID('tempdb..#TmpPersonUser') IS NOT NULL DROP TABLE #TmpPersonUser;
-IF OBJECT_ID('tempdb..@TmpClaimPayBack') IS NOT NULL  DELETE FROM @TmpClaimPayBack;  
+IF OBJECT_ID('tempdb..@TmpClaimPayBack') IS NOT NULL  DELETE FROM @TmpClaimPayBack;    
 --END
