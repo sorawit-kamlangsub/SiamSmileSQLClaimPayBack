@@ -38,8 +38,8 @@ GO
 --ALTER PROCEDURE [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]
 DECLARE
 	-- Add the parameters for the stored procedure here
-	 @DateFrom			DATE =	'2025-12-4'
-	,@DateTo			DATE =	'2025-12-4'
+	 @DateFrom			DATE =	'2025-12-1'
+	,@DateTo			DATE =	'2025-12-22'
 	,@InsuranceId		INT =	NULL
 	,@ProductGroupId	INT =	NULL
 	,@ClaimGroupTypeId	INT =	7
@@ -60,7 +60,8 @@ DECLARE
 	 COL			 NVARCHAR(150),
 	 CreatedDate	 DATETIME,
 	 CreatedByUser NVARCHAR(150),
-	 HospitalCode VARCHAR(20)
+	 HospitalCode VARCHAR(20),
+	 ClaimGroupTypeId INT
      )
 
 	SELECT 
@@ -93,7 +94,8 @@ DECLARE
 	  COL,
 	  CreatedDate,
 	  CreatedByUser,
-	  HospitalCode
+	  HospitalCode,
+	  ClaimGroupTypeId
       )
  SELECT   
      cpbd.ClaimGroupCode						AS ClaimGroupCode,
@@ -105,7 +107,8 @@ DECLARE
 	 cpbd.ClaimOnLineCode						AS COL,
 	 cpb.CreatedDate							AS CreatedDate,
 	 pu.PersonName								AS CreatedByUser,
-	 cpbd.HospitalCode							AS HospitalCode
+	 cpbd.HospitalCode							AS HospitalCode,
+	 cpb.ClaimGroupTypeId
  FROM  ClaimPayBack cpb
 	 LEFT JOIN ClaimPayBackDetail cpbd
 		ON cpb.ClaimPayBackId = cpbd.ClaimPayBackId
@@ -126,7 +129,11 @@ DECLARE
     SELECT		icu.InsuranceCompany_Name									InsuranceCompany_Name
 				,dab.BranchDetail											Branch
 				,IIF(@ClaimGroupTypeId IN( 4,6,7),sssmtc.Detail,NULL)		Hospital
-				,TmpCPB.ProductGroupDetailName								ProductGroupDetailName
+				,CASE 
+					WHEN @ClaimGroupTypeId IN (2,4,6) THEN TmpCPB.ProductGroupDetailName
+					WHEN @ClaimGroupTypeId = 7		  THEN icu.ProductTypeName
+					ELSE NULL
+				END															ProductGroupDetailName
 				,TmpCPB.ClaimGroupType										ClaimGroupType
 				,TmpCPB.ClaimGroupCodeFromCPBD								ClaimGroupCode
 				,TmpCPB.ItemCount											ItemCount
@@ -177,7 +184,7 @@ FROM @TmpClaimPayBack TmpCPB
 				,NULL											BankAccountNo
 				,NULL											BankName
 				,NULL											PhoneNo
-			
+				,NULL											ProductTypeName
 			FROM sss.dbo.DB_ClaimHeaderGroup chg
 			LEFT JOIN SSS.dbo.MT_ClaimAdmitType cat
 				ON chg.ClaimAdmitType_id = cat.Code
@@ -203,7 +210,7 @@ FROM @TmpClaimPayBack TmpCPB
 				,NULL											BankAccountNo
 				,NULL											BankName
 				,NULL											PhoneNo
-			
+				,NULL											ProductTypeName
 			FROM SSSPA.dbo.DB_ClaimHeaderGroup pachg
 			LEFT JOIN SSSPA.dbo.SM_Code smc
 				ON pachg.ClaimTypeGroup_id = smc.Code
@@ -229,6 +236,7 @@ FROM @TmpClaimPayBack TmpCPB
 				,miscacc.BankAccountNo		BankAccountNo
 				,miscacc.BankName			BankName
 				,ce.ContactPersonPhoneNo	PhoneNo
+				,pd.ProductTypeName
 				
 			FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
 			LEFT JOIN [ClaimMiscellaneous].[misc].[Hospital] h
@@ -273,6 +281,15 @@ FROM @TmpClaimPayBack TmpCPB
 				ON cm.ClaimMiscId = miscacc.ClaimMiscId
 			LEFT JOIN [ClaimMiscellaneous].[misc].[ClaimEvent] ce
 				ON cm.ClaimEventId = ce.ClaimEventId
+			LEFT JOIN 
+			(
+				SELECT 
+					ProductTypeId
+					,ProductTypeName
+				FROM [ClaimMiscellaneous].[misc].[ProductType] 
+				WHERE IsActive = 1
+			) pd
+				ON pd.ProductTypeId = cm.ProductTypeId
 		) icu
 		ON TmpCPB.ClaimGroupCodeFromCPBD = icu.Code
 	LEFT JOIN [DataCenterV1].[Address].Branch dab
