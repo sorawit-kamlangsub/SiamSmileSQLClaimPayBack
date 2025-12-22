@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]    Script Date: 12/22/2025 9:30:26 AM ******/
+/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]    Script Date: 12/22/2025 10:05:14 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -68,8 +68,7 @@ DECLARE @TmpClaimPayBack TABLE (
 	 COL			 NVARCHAR(150),
 	 CreatedDate	 DATETIME,
 	 CreatedByUser NVARCHAR(150),
-	 HospitalCode VARCHAR(20),
-	 ClaimGroupTypeId INT
+	 HospitalCode VARCHAR(20)
      )
 
 	SELECT 
@@ -102,8 +101,7 @@ DECLARE @TmpClaimPayBack TABLE (
 	  COL,
 	  CreatedDate,
 	  CreatedByUser,
-	  HospitalCode,
-	  ClaimGroupTypeId
+	  HospitalCode
       )
  SELECT   
      cpbd.ClaimGroupCode						AS ClaimGroupCode,
@@ -115,8 +113,7 @@ DECLARE @TmpClaimPayBack TABLE (
 	 cpbd.ClaimOnLineCode						AS COL,
 	 cpb.CreatedDate							AS CreatedDate,
 	 pu.PersonName								AS CreatedByUser,
-	 cpbd.HospitalCode							AS HospitalCode,
-	 cpb.ClaimGroupTypeId
+	 cpbd.HospitalCode							AS HospitalCode
  FROM  ClaimPayBack cpb
 	 LEFT JOIN ClaimPayBackDetail cpbd
 		ON cpb.ClaimPayBackId = cpbd.ClaimPayBackId
