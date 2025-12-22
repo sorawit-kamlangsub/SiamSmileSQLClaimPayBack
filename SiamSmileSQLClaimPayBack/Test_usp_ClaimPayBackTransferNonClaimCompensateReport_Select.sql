@@ -122,7 +122,11 @@ DECLARE @TmpClaimPayBack TABLE (
 SELECT 			icu.InsuranceCompany_Name														InsuranceCompany_Name
 				,dab.BranchDetail																Branch
 				,IIF(@ClaimGroupTypeId IN (4,7),ssicu.Detail,NULL)								Hospital
-				,tmpCpbd.ProductGroupDetailName													ProductGroupDetailName
+				,CASE 
+					WHEN @ClaimGroupTypeId IN (2,4,6) THEN tmpCpbd.ProductGroupDetailName
+					WHEN @ClaimGroupTypeId = 7		  THEN icu.ProductTypeName
+					ELSE NULL
+				END																				ProductGroupDetailName				
 				,tmpCpbd.ClaimGroupType															ClaimGroupType
 				,tmpCpbd.ClaimGroupCodeFromCPBD													ClaimGroupCode
 				,tmpCpbd.ItemCount																ItemCount
@@ -174,7 +178,7 @@ FROM	@TmpClaimPayBack tmpCpbd
 				,NULL												BankAccountNo
 				,NULL												BankName
 				,NULL												PhoneNo
-			
+				,NULL												ProductTypeName
 			FROM sss.dbo.DB_ClaimHeaderGroup chg
 			LEFT JOIN SSS.dbo.MT_ClaimAdmitType cat
 				ON chg.ClaimAdmitType_id = cat.Code
@@ -199,7 +203,7 @@ FROM	@TmpClaimPayBack tmpCpbd
 				,NULL											BankAccountNo
 				,NULL											BankName
 				,NULL											PhoneNo
-			
+				,NULL											ProductTypeName
 			FROM SSSPA.dbo.DB_ClaimHeaderGroup pachg
 			LEFT JOIN SSSPA.dbo.SM_Code smc
 				ON pachg.ClaimTypeGroup_id = smc.Code
@@ -225,7 +229,7 @@ FROM	@TmpClaimPayBack tmpCpbd
 				,miscacc.BankAccountNo		BankAccountNo
 				,miscacc.BankName			BankName
 				,ce.ContactPersonPhoneNo	PhoneNo
-
+				,pd.ProductTypeName
 			FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
 			LEFT JOIN [ClaimMiscellaneous].[misc].[Hospital] h
 				ON h.HospitalId = cm.HospitalId 
@@ -266,6 +270,15 @@ FROM	@TmpClaimPayBack tmpCpbd
 				ON cm.ClaimMiscId = miscacc.ClaimMiscId
 			LEFT JOIN [ClaimMiscellaneous].[misc].[ClaimEvent] ce
 				ON cm.ClaimEventId = ce.ClaimEventId
+			LEFT JOIN 
+			(
+				SELECT 
+					ProductTypeId
+					,ProductTypeName
+				FROM [ClaimMiscellaneous].[misc].[ProductType] 
+				WHERE IsActive = 1
+			) pd
+				ON pd.ProductTypeId = cm.ProductTypeId
 	) icu
 		ON tmpCpbd.ClaimGroupCodeFromCPBD = icu.Code
 	LEFT JOIN SSS.dbo.MT_Company ssicu
