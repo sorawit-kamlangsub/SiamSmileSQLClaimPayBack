@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]    Script Date: 11/12/2568 16:57:24 ******/
+/****** Object:  StoredProcedure [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]    Script Date: 23/12/2568 10:31:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -41,7 +41,7 @@ BEGIN
 
 --======= for test =======
 --DECLARE @ProductGroupId			INT 			= 11;
---DECLARE @ProductTypeId			INT 			= 7;
+--DECLARE @ProductTypeId			INT 			= 10;
 --DECLARE @InsuranceId			INT				= NULL;
 --DECLARE @ClaimGroupTypeId		INT				= NULL;
 --DECLARE @BranchId				INT				= NULL;
@@ -498,7 +498,7 @@ ELSE IF @pProductGroupId IN (4,11) AND @pClaimGroupTypeId = 7
 				,1															ClaimHeaderCode
 				,b.tempcode													BranchCode
 				,ISNULL(e.EmployeeCode, '00000')							CreatedByCode
-				,cm.CreatedDate												CreatedDate
+				,cm.ApproveDate												CreatedDate
 				,cm.InsuranceCompanyCode									InsuranceCompanyCode
 				,cm.InsuranceCompanyName									InsuranceCompanyName 
 				,cm.ProductGroupId											ProductGroupId
@@ -557,9 +557,7 @@ ELSE IF @pProductGroupId IN (4,11) AND @pClaimGroupTypeId = 7
 				LEFT JOIN dbo.ClaimPayBack cp
 					ON cd.ClaimPayBackId = cp.ClaimPayBackId
 				WHERE x.IsActive = 1
-					AND cp.ClaimGroupTypeId = @pClaimGroupTypeId
-					AND cd.ProductGroupId = @pProductGroupId
-					AND x.ClaimCode = cm.ClaimMiscNo
+					AND cm.ClaimHeaderGroupCode = cd.ClaimGroupCode
 			)
 
 		INSERT INTO #Tmplst
