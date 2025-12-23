@@ -1,6 +1,6 @@
 USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_GetDocumentIdDocStorage_Select]    Script Date: 2/12/2568 13:51:28 ******/
+/****** Object:  StoredProcedure [dbo].[usp_GetDocumentIdDocStorage_Select]    Script Date: 12/22/2025 11:49:10 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -23,8 +23,8 @@ BEGIN
 	SELECT 
 		CASE 
 			WHEN doc.TbType = 'ClaimMisc' THEN cm.ClaimMiscNo
-			WHEN doc.TbType = 'ClaimOnline' AND doc.DocumentSubTypeId = 339 THEN cm.ApplicationCode
-			WHEN doc.TbType = 'ClaimOnline' AND doc.DocumentSubTypeId <> 339 THEN doc.DocumentCode
+			WHEN doc.TbType = 'ClaimOnlineAppCode' AND doc.DocumentSubTypeId = 339 THEN ISNULL(cm.ApplicationCode,'-')
+			WHEN doc.TbType = 'ClaimOnlineDocCode' AND doc.DocumentSubTypeId = 339 THEN doc.DocumentCode
 		END MainIndex
 		,cm.ClaimHeaderGroupCode
 		,doc.DocumentId
@@ -52,10 +52,23 @@ BEGIN
 					,DocumentId
 					,DocumentCode
 					,DocumentSubTypeId
-					,'ClaimOnline'			TbType
+					,'ClaimOnlineAppCode'			TbType
 				FROM [ClaimMiscellaneous].[misc].[DocumentClaimOnLine]
 				WHERE IsActive = 1
 				AND DocumentSubTypeId <> 340
+
+				UNION ALL 
+
+				SELECT 
+					ClaimMiscId
+					,DocumentId
+					,DocumentCode
+					,DocumentSubTypeId
+					,'ClaimOnlineDocCode'			TbType
+				FROM [ClaimMiscellaneous].[misc].[DocumentClaimOnLine]
+				WHERE IsActive = 1
+				AND DocumentSubTypeId <> 340
+
 		) doc
 			ON doc.ClaimMiscId = cm.ClaimMiscId
 	WHERE cm.IsActive = 1
