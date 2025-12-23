@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]    Script Date: 23/12/2568 10:31:13 ******/
+/****** Object:  StoredProcedure [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]    Script Date: 23/12/2568 10:38:16 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -615,21 +615,6 @@ BEGIN
 			,x.ClaimHeaderCode 
 END
 
---เคลมเบ็ดเตล็ด (ClaimMisc)
-IF @pClaimGroupTypeId = 7
-BEGIN
-
-		INSERT INTO #TmpDoc(ClaimHeaderGroupCode,ClaimHeaderCode)
-		SELECT DISTINCT
-			tmp.ClaimHeaderGroupCode
-			,tmp.ClaimHeaderCode
-		FROM [ClaimMiscellaneous].[misc].[DocumentClaimOnLine] doc
-		INNER JOIN @TmpClaimMisc tmp
-			ON tmp.ClaimMiscId = doc.ClaimMiscId
-		WHERE doc.IsActive = 1
-
-END
-
 /*Set Page*/
 IF @pIndexStart		IS NULL	SET @pIndexStart = 0;
 IF @pPageSize		IS NULL	SET @pPageSize	 = 10;
@@ -648,8 +633,8 @@ SELECT g.ClaimHeaderGroupCode									ClaimHeaderGroup_id
 		,oIns.OrganizeId										InsuranceCompanyId
 		,d.InsuranceCompanyName									InsuranceCompany	 
 		,COUNT(g.ClaimHeaderGroupCode) OVER ()					TotalCount
-		--,IIF(g.ItemCount = doc.docCount ,1,0)					DocumentCount	 
-		,1														DocumentCount
+		,IIF(g.ItemCount = doc.docCount ,1,0)					DocumentCount	 
+		--,1														DocumentCount
 		,g.TransferAmount										TransferAmount
 		,d.ProductTypeDetail									ProductTypeDetail
 FROM
