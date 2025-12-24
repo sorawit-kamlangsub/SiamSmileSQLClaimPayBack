@@ -40,6 +40,8 @@ GO
 -- Description:	Fix ClaiMisc ProductGroupDetailName 
 -- Update date: 2025-12-24 10.52 06588 Krekpon.D Mind
 -- Description:	ปรับเงื่อนไขการแสดงข้อมูลเคลมออนไลน์ไม่ให้แสดง ธนาคาร,ชื่อบัญชี,เลขที่
+-- Update date: 2025-12-24 17.07 Sorawit.k
+-- Description:	ปรับเงื่อนไขการแสดงข้อมูลเคลมเบ็ดเตล็ดให้แสดง ธนาคาร,ชื่อบัญชี,เลขที่ เฉพาะ ยิ้มแฉ่ง
 -- =============================================
 --ALTER PROCEDURE [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]
 --	-- Add the parameters for the stored procedure here
@@ -152,23 +154,23 @@ DECLARE @TmpClaimPayBack TABLE (
 				,IIF(@ClaimGroupTypeId IN (2,4,6,7) ,sssmp.Detail,NULL)		Province
 				,IIF(@ClaimGroupTypeId IN (2,4,6,7) ,icu.CustomerName,NULL)	CustomerName
 				,CASE 
-					WHEN @ClaimGroupTypeId IN (4,6)		THEN sssmtb.Detail
-					WHEN @ClaimGroupTypeId = 7			THEN icu.BankName
+					WHEN @ClaimGroupTypeId IN (4,6)							THEN sssmtb.Detail
+					WHEN @ClaimGroupTypeId = 7 AND icu.ProductTypeId = 38	THEN icu.BankName
 					ELSE NULL
 				END												BankName
 				,CASE 
-					WHEN @ClaimGroupTypeId IN (4,6)		THEN sssmtc.BankAccountName
-					WHEN @ClaimGroupTypeId  = 7			THEN icu.BankAccountName
+					WHEN @ClaimGroupTypeId IN (4,6)							THEN sssmtc.BankAccountName
+					WHEN @ClaimGroupTypeId  = 7	AND icu.ProductTypeId = 38	THEN icu.BankAccountName
 					ELSE NULL
 				END												BankAccountName
 				,CASE 
-					WHEN @ClaimGroupTypeId IN (4,6)		THEN REPLACE(sssmtc.BankAccountNo,'-','')
-					WHEN @ClaimGroupTypeId  = 7			THEN icu.BankAccountNo
+					WHEN @ClaimGroupTypeId IN (4,6)							THEN REPLACE(sssmtc.BankAccountNo,'-','')
+					WHEN @ClaimGroupTypeId  = 7	AND icu.ProductTypeId = 38	THEN icu.BankAccountNo
 					ELSE NULL
 				END												BankAccountNo
 				,CASE 
-					WHEN @ClaimGroupTypeId IN (4,6)		THEN NULL
-					WHEN @ClaimGroupTypeId  = 7			THEN icu.PhoneNo
+					WHEN @ClaimGroupTypeId IN (4,6)							THEN NULL
+					WHEN @ClaimGroupTypeId  = 7 AND icu.ProductTypeId = 38	THEN icu.PhoneNo
 					ELSE NULL																	
 				END												PhoneNo
 				,TmpCPB.CreatedDate								CreatedDate
@@ -193,6 +195,7 @@ FROM @TmpClaimPayBack TmpCPB
 				,NULL											BankName
 				,NULL											PhoneNo
 				,NULL											ProductTypeName
+				,NULL											ProductTypeId
 			FROM sss.dbo.DB_ClaimHeaderGroup chg
 			LEFT JOIN SSS.dbo.MT_ClaimAdmitType cat
 				ON chg.ClaimAdmitType_id = cat.Code
@@ -219,6 +222,7 @@ FROM @TmpClaimPayBack TmpCPB
 				,NULL											BankName
 				,NULL											PhoneNo
 				,NULL											ProductTypeName
+				,NULL											ProductTypeId
 			FROM SSSPA.dbo.DB_ClaimHeaderGroup pachg
 			LEFT JOIN SSSPA.dbo.SM_Code smc
 				ON pachg.ClaimTypeGroup_id = smc.Code
@@ -245,7 +249,7 @@ FROM @TmpClaimPayBack TmpCPB
 				,miscacc.BankName			BankName
 				,ce.ContactPersonPhoneNo	PhoneNo
 				,pd.ProductTypeName
-				
+				,pd.ProductTypeId
 			FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
 			LEFT JOIN [ClaimMiscellaneous].[misc].[Hospital] h
 				ON h.HospitalId = cm.HospitalId 
