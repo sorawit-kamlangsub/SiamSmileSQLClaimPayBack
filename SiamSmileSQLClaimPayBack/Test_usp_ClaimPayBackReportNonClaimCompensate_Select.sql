@@ -1,10 +1,12 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]    Script Date: 29/10/2568 14:05:28 ******/
+/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]    Script Date: 24/12/2568 17:00:59 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+
+
 
 -- =============================================
 -- Author:		06588 Krekpon Dokkamklang Mind
@@ -34,21 +36,30 @@ GO
 -- Update date: 2025-12-11 09.00 Mr.Bunchuai Chaiket (08498)
 -- Description:	ปรับการแสดงผล (SELECT ข้อมูลเพิ่ม) จากระบบ ClaimMisc
 -- Description:	Add province
+-- Update date: 2025-12-22 9:35 Sorawit.K 
+-- Description:	Fix ClaiMisc ProductGroupDetailName 
+-- Update date: 2025-12-24 10.52 06588 Krekpon.D Mind
+-- Description:	ปรับเงื่อนไขการแสดงข้อมูลเคลมออนไลน์ไม่ให้แสดง ธนาคาร,ชื่อบัญชี,เลขที่
 -- =============================================
 --ALTER PROCEDURE [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]
-DECLARE
-	-- Add the parameters for the stored procedure here
-	 @DateFrom			DATE =	'2025-12-19'
-	,@DateTo			DATE =	'2025-12-22'
-	,@InsuranceId		INT =	NULL
-	,@ProductGroupId	INT =	NULL
-	,@ClaimGroupTypeId	INT =	7
+--	-- Add the parameters for the stored procedure here
+--	 @DateFrom			DATE =	NULL
+--	,@DateTo			DATE =	NULL
+--	,@InsuranceId		INT =	NULL
+--	,@ProductGroupId	INT =	NULL
+--	,@ClaimGroupTypeId	INT =	NULL
 
 --AS
 --BEGIN
---	-- SET NOCOUNT ON added to prevent extra result sets from
---	-- interfering with SELECT statements.
---	SET NOCOUNT ON;
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	--SET NOCOUNT ON;
+DECLARE
+	 @DateFrom			DATE =	'2025-12-23'
+	,@DateTo			DATE =	'2025-12-24'
+	,@InsuranceId		INT =	NULL
+	,@ProductGroupId	INT =	NULL
+	,@ClaimGroupTypeId	INT =	7;
 
 DECLARE @TmpClaimPayBack TABLE (
 	 ClaimGroupCodeFromCPBD NVARCHAR(150),
@@ -141,22 +152,22 @@ DECLARE @TmpClaimPayBack TABLE (
 				,IIF(@ClaimGroupTypeId IN (2,4,6,7) ,sssmp.Detail,NULL)		Province
 				,IIF(@ClaimGroupTypeId IN (2,4,6,7) ,icu.CustomerName,NULL)	CustomerName
 				,CASE 
-					WHEN @ClaimGroupTypeId IN (2,4,6) THEN sssmtb.Detail
-					WHEN @ClaimGroupTypeId = 7		  THEN icu.BankName
+					WHEN @ClaimGroupTypeId IN (4,6)		THEN sssmtb.Detail
+					WHEN @ClaimGroupTypeId = 7			THEN icu.BankName
 					ELSE NULL
 				END												BankName
 				,CASE 
-					WHEN @ClaimGroupTypeId IN (2,4,6)	THEN sssmtc.BankAccountName
+					WHEN @ClaimGroupTypeId IN (4,6)		THEN sssmtc.BankAccountName
 					WHEN @ClaimGroupTypeId  = 7			THEN icu.BankAccountName
 					ELSE NULL
 				END												BankAccountName
 				,CASE 
-					WHEN @ClaimGroupTypeId IN (2,4,6)	THEN REPLACE(sssmtc.BankAccountNo,'-','')
+					WHEN @ClaimGroupTypeId IN (4,6)		THEN REPLACE(sssmtc.BankAccountNo,'-','')
 					WHEN @ClaimGroupTypeId  = 7			THEN icu.BankAccountNo
 					ELSE NULL
 				END												BankAccountNo
 				,CASE 
-					WHEN @ClaimGroupTypeId IN (2,4,6)	THEN NULL
+					WHEN @ClaimGroupTypeId IN (4,6)		THEN NULL
 					WHEN @ClaimGroupTypeId  = 7			THEN icu.PhoneNo
 					ELSE NULL																	
 				END												PhoneNo
@@ -303,5 +314,5 @@ FROM @TmpClaimPayBack TmpCPB
 		ON sssadr.Province_id = sssmp.Code
 
 IF OBJECT_ID('tempdb..#TmpPersonUser') IS NOT NULL DROP TABLE #TmpPersonUser;
-IF OBJECT_ID('tempdb..@TmpClaimPayBack') IS NOT NULL  DELETE FROM @TmpClaimPayBack;    
+IF OBJECT_ID('tempdb..@TmpClaimPayBack') IS NOT NULL  DELETE FROM @TmpClaimPayBack;  
 --END
