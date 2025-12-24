@@ -1,10 +1,11 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]    Script Date: 12/22/2025 10:05:14 AM ******/
+/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]    Script Date: 24/12/2568 17:00:59 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+
 
 
 -- =============================================
@@ -37,6 +38,8 @@ GO
 -- Description:	Add province
 -- Update date: 2025-12-22 9:35 Sorawit.K 
 -- Description:	Fix ClaiMisc ProductGroupDetailName 
+-- Update date: 2025-12-24 10.52 06588 Krekpon.D Mind
+-- Description:	ปรับเงื่อนไขการแสดงข้อมูลเคลมออนไลน์ไม่ให้แสดง ธนาคาร,ชื่อบัญชี,เลขที่
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]
 	-- Add the parameters for the stored procedure here
@@ -149,22 +152,22 @@ DECLARE @TmpClaimPayBack TABLE (
 				,IIF(@ClaimGroupTypeId IN (2,4,6,7) ,sssmp.Detail,NULL)		Province
 				,IIF(@ClaimGroupTypeId IN (2,4,6,7) ,icu.CustomerName,NULL)	CustomerName
 				,CASE 
-					WHEN @ClaimGroupTypeId IN (2,4,6) THEN sssmtb.Detail
-					WHEN @ClaimGroupTypeId = 7		  THEN icu.BankName
+					WHEN @ClaimGroupTypeId IN (4,6)		THEN sssmtb.Detail
+					WHEN @ClaimGroupTypeId = 7			THEN icu.BankName
 					ELSE NULL
 				END												BankName
 				,CASE 
-					WHEN @ClaimGroupTypeId IN (2,4,6)	THEN sssmtc.BankAccountName
+					WHEN @ClaimGroupTypeId IN (4,6)		THEN sssmtc.BankAccountName
 					WHEN @ClaimGroupTypeId  = 7			THEN icu.BankAccountName
 					ELSE NULL
 				END												BankAccountName
 				,CASE 
-					WHEN @ClaimGroupTypeId IN (2,4,6)	THEN REPLACE(sssmtc.BankAccountNo,'-','')
+					WHEN @ClaimGroupTypeId IN (4,6)		THEN REPLACE(sssmtc.BankAccountNo,'-','')
 					WHEN @ClaimGroupTypeId  = 7			THEN icu.BankAccountNo
 					ELSE NULL
 				END												BankAccountNo
 				,CASE 
-					WHEN @ClaimGroupTypeId IN (2,4,6)	THEN NULL
+					WHEN @ClaimGroupTypeId IN (4,6)		THEN NULL
 					WHEN @ClaimGroupTypeId  = 7			THEN icu.PhoneNo
 					ELSE NULL																	
 				END												PhoneNo
