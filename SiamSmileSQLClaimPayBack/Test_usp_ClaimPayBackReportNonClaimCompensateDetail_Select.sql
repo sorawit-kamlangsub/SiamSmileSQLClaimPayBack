@@ -12,6 +12,8 @@ GO
 -- Description: ข้อมูลรายละเอียดการโอนเงินของเคลมเสียชีวิต ทุพพลภาพ
 -- Update date: 2025-09-05 10:52 Krekpon.D
 -- Description: ปรับการ join ข้อมูลและ where ข้อมูลด้วย BeneficiaryId
+-- Update date: 2025-12-24 16:37 Sorawit.k
+-- Description: Add ClaimMisc @ClaimGroupTypeId = 7
 -- =============================================
 --ALTER PROCEDURE [dbo].[usp_ClaimPayBackReportNonClaimCompensateDetail_Select] 
 --	-- Add the parameters for the stored procedure here
@@ -34,6 +36,7 @@ GO
 	,@InsuranceId		INT = NULL
 	,@ProductGroupId	INT = NULL	
 	,@ClaimGroupTypeId	INT = 7;
+
 	--DECLARE @Value NVARCHAR(Max) = NULL
 	--DECLARE @IntVal INT = NULL
 	--DECLARE @DeciVal Decimal = NULL
