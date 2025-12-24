@@ -365,6 +365,7 @@ FROM @TmpClaimPayBack TmpCPB
 			,bank.BankName
 			,tfc.TransferCauseName
 			,cmpd.Remark
+			,cm.ProductTypeId
 		FROM [ClaimMiscellaneous].[misc].[ClaimMiscPaymentHeader] cmph
 			INNER JOIN [ClaimMiscellaneous].[misc].[ClaimMiscPayment] cmpd
 				ON cmpd.ClaimMiscPaymentHeaderId = cmph.ClaimMiscPaymentHeaderId
@@ -401,10 +402,14 @@ FROM @TmpClaimPayBack TmpCPB
 			
 		WHERE cmph.IsActive = 1
 			AND cmpd.PremiumSourceStatusId = 5
-			AND cmpd.IsActive = 1			
+			AND cmpd.IsActive = 1	
+			AND cm.IsActive = 1
 			AND @_ClaimGroupTypeId = 7
 	) cptMisc
 		ON cptMisc.ClaimMiscId = icu.HeaderId	
+
+	WHERE @_ClaimGroupTypeId = 6 
+	OR ( cptMisc.ProductTypeId = 38 AND @_ClaimGroupTypeId = 7)
 
 	ORDER BY icu.ClaimCode
 
