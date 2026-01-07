@@ -1,10 +1,11 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Sub01_Insert_V2]    Script Date: 16/12/2568 15:53:06 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Sub01_Insert_V2]    Script Date: 7/1/2569 8:56:11 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+
 
 -- =============================================
 -- Author:		Thayart Churlek
@@ -25,6 +26,8 @@ GO
 	Update date: 2025-11-17 12:17 Sorawit Kamlangsub
 				เพิ่ม #TmpX2
 				แก้ไขบั๊กการเรียงข้อมูลตาม บ.ส.
+	Update date: 2026-01-07 15:33 Sorawit Kamlangsub
+				เพื่ม usp_GenerateCodeV2 สำหรับ บ.ประกันไม่มี SFTP
 */	
 -- Description:	<Description,,>
 -- =============================================
@@ -106,14 +109,14 @@ IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 	AND i.ClaimHeaderGroupImportStatusId = 2
 	AND i.BillingRequestGroupId IS NULL
 	AND i.InsuranceCompanyId = @pInsuranceCompanyId
-	AND (i.ClaimTypeCode = @ClaimTypeCode OR @ClaimTypeCode IS NULL)
+	AND i.ClaimTypeCode = @ClaimTypeCode
 	AND	i.CreatedDate >	@CreatedDateFrom
 	AND	i.CreatedDate <=  @CreatedDateTo
 	AND f.ClaimHeaderGroupTypeId = @ClaimHeaderGroupTypeId
 	AND 
 	(
 		(
-			@pGroupTypeId = 1 AND f.ClaimHeaderGroupTypeId IN (2,4,5,6)
+			@pGroupTypeId = 1 AND f.ClaimHeaderGroupTypeId IN (2,4,5)
 		)
 		OR	
 		(
@@ -275,6 +278,12 @@ BEGIN
 	DECLARE @D_MM						VARCHAR(2)
 	DECLARE @D_RunningFrom				INT
 	DECLARE @D_RunningTo				INT
+
+	DECLARE @G_Total					INT			= 1;
+	DECLARE @G_YY						VARCHAR(2)
+	DECLARE @G_MM						VARCHAR(2)
+	DECLARE @G_RunningFrom				INT
+	DECLARE @G_RunningTo				INT
 	
 	DECLARE @Offset INT = 0;
 	DECLARE @BatchSize INT = @D_Total;
@@ -285,6 +294,7 @@ BEGIN
 	BEGIN 
 		SET @TotalRows = @D_Total;
 		SET @BatchSize = 20;
+		SET @G_RunningLenght = 4;
 	END
 	
 /* Generate Code */
@@ -324,10 +334,22 @@ BEGIN
 		DECLARE @BillingRequestGroupId INT = NULL;
 
 /* Generate Code */
-		EXECUTE dbo.usp_GenerateCode 
-				 @G_TT
-				,@G_RunningLenght
-				,@BillingRequestGroupCode OUTPUT;
+
+		IF @IsSFTP = 0
+		BEGIN 
+			EXECUTE dbo.usp_GenerateCodeV2 
+					 @G_TT
+					,@G_RunningLenght
+					,@BillingRequestGroupCode OUTPUT;
+
+		END
+		ELSE
+		BEGIN
+			EXECUTE dbo.usp_GenerateCode 
+					 @G_TT
+					,@G_RunningLenght
+					,@BillingRequestGroupCode OUTPUT;
+		END
 
 /* Insert BillingRequestGroup*/
 			INSERT INTO dbo.BillingRequestGroup
