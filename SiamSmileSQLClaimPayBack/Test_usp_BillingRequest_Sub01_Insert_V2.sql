@@ -21,16 +21,16 @@ GO
 -- =============================================
 --ALTER PROCEDURE [dbo].[usp_BillingRequest_Sub01_Insert_V2]
 DECLARE
-		@GroupTypeId				INT				= 2
-		,@ClaimTypeCode				VARCHAR(20)		= '2000'
+		@GroupTypeId				INT				= 1
+		,@ClaimTypeCode				VARCHAR(20)		= '1000'
 		,@InsuranceCompanyId		INT				= 27
 		,@CreatedByUserId			INT				= 6772
-		,@BillingDate				DATE			= '2025-11-24'
-		,@ClaimHeaderGroupTypeId	INT				= 3
+		,@BillingDate				DATE			= '2026-01-07'
+		,@ClaimHeaderGroupTypeId	INT				= 2
 		,@InsuranceCompanyName		NVARCHAR(300)	= 'บริษัท บางกอกสหประกันภัย จำกัด (มหาชน)'
-		,@NewBillingDate			DATE			= '2025-11-24'
-		,@CreatedDateFrom			DATE			= '2025-11-24'
-		,@CreatedDateTo				DATE			= '2025-11-24'
+		,@NewBillingDate			DATE			= '2026-01-07'
+		,@CreatedDateFrom			DATE			= '2026-01-07'
+		,@CreatedDateTo				DATE			= '2026-01-07'
 		;
 
 --AS
@@ -256,6 +256,12 @@ BEGIN
 	DECLARE @D_MM						VARCHAR(2)
 	DECLARE @D_RunningFrom				INT
 	DECLARE @D_RunningTo				INT
+
+	DECLARE @G_Total					INT			= 1;
+	DECLARE @G_YY						VARCHAR(2)
+	DECLARE @G_MM						VARCHAR(2)
+	DECLARE @G_RunningFrom				INT
+	DECLARE @G_RunningTo				INT
 	
 	DECLARE @Offset INT = 0;
 	DECLARE @BatchSize INT = @D_Total;
@@ -266,6 +272,7 @@ BEGIN
 	BEGIN 
 		SET @TotalRows = @D_Total;
 		SET @BatchSize = 20;
+		SET @G_RunningLenght = 4;
 	END
 	
 /* Generate Code */
@@ -287,7 +294,7 @@ BEGIN
 	-----------------------------------
 	BEGIN TRY
 		Begin TRANSACTION
-
+	
 	WHILE @Offset < @TotalRows
 	BEGIN
 		DECLARE @ItemCount		INT = NULL;
@@ -305,10 +312,22 @@ BEGIN
 		DECLARE @BillingRequestGroupId INT = NULL;
 
 /* Generate Code */
-		--EXECUTE dbo.usp_GenerateCode 
-		--		 @G_TT
-		--		,@G_RunningLenght
-		--		,@BillingRequestGroupCode OUTPUT;
+
+		IF @IsSFTP = 0
+		BEGIN 
+			EXECUTE dbo.usp_GenerateCodeV2 
+					 @G_TT
+					,@G_RunningLenght
+					,@BillingRequestGroupCode OUTPUT;
+
+		END
+		ELSE
+		BEGIN
+			EXECUTE dbo.usp_GenerateCode 
+					 @G_TT
+					,@G_RunningLenght
+					,@BillingRequestGroupCode OUTPUT;
+		END
 
 /* Insert BillingRequestGroup*/
 			--INSERT INTO dbo.BillingRequestGroup
@@ -544,7 +563,7 @@ BEGIN
 	BEGIN CATCH
 	
 		SET @IsResult	= 0;
-		SET @Msg		= 'บันทึก ไม่สำเร็จ';
+		SET @Msg		= 'บันทึก ไม่สำเร็จ ' + ERROR_MESSAGE();
 	
 		IF @@Trancount > 0 ROLLBACK;
 	END CATCH

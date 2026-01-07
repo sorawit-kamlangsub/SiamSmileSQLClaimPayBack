@@ -21,9 +21,9 @@ GO
 --ALTER PROCEDURE [dbo].[usp_BillingRequest_Insert_V3]
 DECLARE
 		@CreatedByUserId	INT	 = 1
-		,@BillingDateTo		DATE = '2025-12-18'
-		,@CreatedDateFrom	DATE = '2025-12-17'
-		,@CreatedDateTo		DATE = '2025-12-17'
+		,@BillingDateTo		DATE = '2026-01-07'
+		,@CreatedDateFrom	DATE = '2026-01-07'
+		,@CreatedDateTo		DATE = '2026-01-07'
 
 --AS
 --BEGIN
@@ -83,6 +83,9 @@ DECLARE @TmpInput TABLE (RwId INT,ClaimTypeCode VARCHAR(100),ProductTypeId INT,P
 DECLARE @max INT;
 
 SELECT	@max = MAX(rwId)
+FROM	#TmpLoop;
+
+SELECT	*
 FROM	#TmpLoop;
 
 IF (@max IS NULL) SET @max = 0;
