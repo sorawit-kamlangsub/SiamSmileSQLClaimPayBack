@@ -272,7 +272,7 @@ BEGIN
 	BEGIN 
 		SET @TotalRows = @D_Total;
 		SET @BatchSize = 20;
-		SET @G_RunningLenght = 4;
+		SET @G_RunningLenght = 5;
 	END
 	
 /* Generate Code */
@@ -312,9 +312,10 @@ BEGIN
 		DECLARE @BillingRequestGroupId INT = NULL;
 
 /* Generate Code */
-
+		SELECT @IsSFTP IsSFTP
 		IF @IsSFTP = 0
 		BEGIN 
+			
 			EXECUTE dbo.usp_GenerateCodeV2 
 					 @G_TT
 					,@G_RunningLenght
