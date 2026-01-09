@@ -20,8 +20,10 @@ GO
 --				ขั้นตอนการ UNION เปลี่ยน ClaimCode to ClaimOnLineCode
 -- Update date	2025-12-17 16:30
 --				เพิ่ม UNION SELECT ระบบ ClaimMisc
+-- Update date	2026-01-09 13:50 Sorawit Kamlangsub
+--				เพิ่ม ยอดNPL(CPB),ยอดรับชำระ(CPB)
 -- Description:	store สำหรับ Validate รายการ Generate group Import บ.ส. 
----- ===========-=================================-
+---- ============================================
 ALTER PROCEDURE [dbo].[usp_BillingRequestValidate_Select] 
 	 @DateFrom		DATE,
 	 @DateTo		DATE
@@ -35,8 +37,8 @@ DECLARE @MessageValidate2 NVARCHAR(100) = N'ยอด บ.ส. และยอ�
 DECLARE @MessageValidate3 NVARCHAR(100) = N'ยอดโอนเงิน ไม่เท่ากับ (ยอด บ.ส. + ยอด NPL)'; 
 DECLARE @MessageValidate4 NVARCHAR(100) = N'ยอดวางบิลเป็น ไม่เท่ากับ (ยอดโอนเงิน - ยอด NPL)';  
 ---- ================================
---DECLARE @DateFrom	DATE = '2025-12-01';
---DECLARE @DateTo		DATE = '2025-12-18';
+--DECLARE @DateFrom	DATE = '2026-01-07';
+--DECLARE @DateTo		DATE = '2026-01-09';
 
 IF @DateTo IS NOT NULL SET @DateTo = DATEADD(DAY,1,@DateTo);
 
@@ -97,6 +99,8 @@ SELECT
 	,ISNULL(t.BillingAmount, 0)		BillingAmount
 	,ISNULL(colPH.TotalAmount, 0)	TransferAmount
 	,ISNULL(nplds.NPLAmount, 0)		NPLAmount 
+	,ISNULL(cpbnpl.CoverAmount, 0)	CPBNPLAmount
+	,cpbnpl.IsManualNPL
 	,pa.ClaimOnLineCode
 	,pa.ClaimCode
 INTO #Tmp2
@@ -188,10 +192,48 @@ FROM #TmpLoop t
 			GROUP BY ClaimOnLineId
 	)nplds
 		ON nplds.ClaimOnLineId = colPH.ClaimOnLineId
+	LEFT JOIN
+		(
+			SELECT 
+				hid.ClaimHeaderGroupCode
+				,brdl.CoverAmount
+				,brdl.IsManualNPL
+			FROM dbo.ClaimHeaderGroupImportDetail hid
+			LEFT JOIN 
+				(
+					SELECT
+						ClaimCode
+						,BillingRequestResultDetailId
+					FROM dbo.BillingRequestResultDetail brd
+					WHERE IsActive = 1
+				) brd
+				ON brd.ClaimCode = hid.ClaimCode
+				LEFT JOIN (
+					SELECT
+						BillingRequestResultDetailId,
+						CoverAmount,
+						IsManualNPL
+					FROM (
+						SELECT
+							BillingRequestResultDetailId,
+							CoverAmount,
+							IsManualNPL,
+							ROW_NUMBER() OVER (
+								PARTITION BY BillingRequestResultDetailId
+								ORDER BY CreatedDate DESC
+							) AS rn
+						FROM dbo.BillingRequestResultDetailLog
+						WHERE IsActive = 1
+					) x
+					WHERE rn = 1
+				) brdl
+				ON brdl.BillingRequestResultDetailId = brd.BillingRequestResultDetailId
+		) cpbnpl
+		ON cpbnpl.ClaimHeaderGroupCode = t.ClaimHeaderGroupCode
 
 
 -- Validate condition 
--- [1] Amount = BillingAmount
+-- [1] Amount = (BillingAmount + CPBNPLAmount + CPBNotNPLAmount)
 -- [2] TransferAmount = (Amount + NPLAmount)
 -- [3] BillingAmount = (TransferAmount - NPLAmount) 
  
@@ -202,11 +244,11 @@ SELECT
 	,TransferAmount
 	,NPLAmount
 	,Amount
-	,NULL		CPBNPLAmount
-	,NULL		CPBNotNPLAmount
+	,IIF(IsManualNPL = 1,CPBNPLAmount,0.00) CPBNPLAmount
+	,IIF(IsManualNPL = 0,CPBNPLAmount,0.00)	CPBNotNPLAmount
 	,ClaimCode	ClaimOnLineCode
 	,CASE
-		WHEN (Amount <> BillingAmount)		THEN @MessageValidate1
+		WHEN (Amount <> (BillingAmount + IIF(IsManualNPL = 1,CPBNPLAmount,0.00) + IIF(IsManualNPL = 0,CPBNPLAmount,0.00)))		THEN @MessageValidate1
 		WHEN ((Amount + BillingAmount) = 0)	THEN @MessageValidate2
 		WHEN TransferAmount > 0	THEN 
 			CASE 
@@ -226,9 +268,9 @@ IF OBJECT_ID('tempdb..#Tmp2') IS NOT NULL  DROP TABLE #Tmp2;
 --, @BillingAmount				DECIMAL(16,2)
 --, @TransferAmount				DECIMAL(16,2)
 --, @NPLAmount					DECIMAL(16,2)
+--, @CPBNPLAmount				DECIMAL(16,2)
+--, @CPBNotNPLAmount			DECIMAL(16,2)
 --, @ClaimOnLineCode				NVARCHAR(50) 
---, @CPBNPLAmount					DECIMAL(16,2)
---, @CPBNotNPLAmount				DECIMAL(16,2)
 --, @IsValidate					NVARCHAR(50) ;
 
 --SELECT 
@@ -239,7 +281,7 @@ IF OBJECT_ID('tempdb..#Tmp2') IS NOT NULL  DROP TABLE #Tmp2;
 --	, @TransferAmount			TransferAmount
 --	, @NPLAmount				NPLAmount
 --	, @ClaimOnLineCode			ClaimOnLineCode
---	, @CPBNPLAmount				CPBNPLAmount
+--	, @CPBNPLAmount				CPBNPLAmount	
 --	, @CPBNotNPLAmount			CPBNotNPLAmount
 --	, @IsValidate				IsValidate
 
