@@ -14,9 +14,9 @@ GO
 -- Description:	store สำหรับ Validate รายการ Generate group Import บ.ส. 
 ---- =============================================
 --ALTER PROCEDURE [dbo].[usp_BillingRequestValidate_Select] 
-DECLARE
-	 @DateFrom		DATE = '2025-10-15',
-	 @DateTo		DATE = '2025-10-16'
+--DECLARE
+--	 @DateFrom		DATE = '2025-10-15',
+--	 @DateTo		DATE = '2025-10-16'
 --AS
 --BEGIN
 	
@@ -27,8 +27,8 @@ DECLARE @MessageValidate2 NVARCHAR(100) = N'ยอด บ.ส. และยอ�
 DECLARE @MessageValidate3 NVARCHAR(100) = N'ยอดโอนเงิน ไม่เท่ากับ (ยอด บ.ส. + ยอด NPL)'; 
 DECLARE @MessageValidate4 NVARCHAR(100) = N'ยอดวางบิลเป็น ไม่เท่ากับ (ยอดโอนเงิน - ยอด NPL)';  
 -- ================================
---DECLARE @DateFrom	DATE = '2025-10-15';
---DECLARE @DateTo		DATE = '2025-10-15';
+DECLARE @DateFrom	DATE = '2026-01-07';
+DECLARE @DateTo		DATE = '2026-01-09';
 
 IF @DateTo IS NOT NULL SET @DateTo = DATEADD(DAY,1,@DateTo);
 
@@ -41,7 +41,7 @@ SELECT
 	,g.ClaimHeaderGroupTypeId
 	,g.InsuranceCompanyName
 	,g.ClaimHeaderGroupCode
-	,SUM(g.TotalAmount)		BillingAmount
+	,SUM(g.TotalAmount)		BillingAmount 
 INTO #TmpLoop	
 FROM
 	(SELECT	i.InsuranceCompanyId
@@ -50,23 +50,28 @@ FROM
 						WHEN f.ClaimHeaderGroupTypeId = 3 THEN 2
 						WHEN f.ClaimHeaderGroupTypeId = 4 THEN 1
 						WHEN f.ClaimHeaderGroupTypeId = 5 THEN 1
+						WHEN f.ClaimHeaderGroupTypeId = 6 THEN 1
 					ELSE NULL
 					END	GroupTypeId
 				,i.ClaimTypeCode
 				,i.CreatedDate
 				,f.ClaimHeaderGroupTypeId
 				,i.InsuranceCompanyName
-				,i.TotalAmount
+				,i.TotalAmount - ISNULL(brrd.CoverAmount,0) TotalAmount
 				,i.ClaimHeaderGroupCode
-		FROM	dbo.ClaimHeaderGroupImport AS i
+		FROM	dbo.ClaimHeaderGroupImport AS i	
 				INNER JOIN dbo.ClaimHeaderGroupImportFile AS f
 					ON i.ClaimGroupImportFileId = f.ClaimHeaderGroupImportFileId
+				LEFT JOIN [dbo].ClaimHeaderGroupImportDetail cgid
+					ON i.ClaimHeaderGroupImportId = cgid.ClaimHeaderGroupImportId
+				LEFT JOIN [dbo].BillingRequestResultDetail brrd
+					ON cgid.ClaimHeaderGroupImportDetailId = brrd.ClaimHeaderGroupImportDetailId
 		WHERE	f.IsActive = 1
-			AND		i.IsActive = 1
-			AND		i.ClaimHeaderGroupImportStatusId = 2
-			AND		i.BillingRequestGroupId IS NULL
-			AND		i.CreatedDate >	@DateFrom
-			AND		i.CreatedDate <=  @DateTo
+			AND i.IsActive = 1
+			AND i.ClaimHeaderGroupImportStatusId = 2
+			AND i.BillingRequestGroupId IS NULL
+			AND i.CreatedDate >	@DateFrom
+			AND i.CreatedDate <=  @DateTo
 	) AS g
 WHERE	g.GroupTypeId IS NOT NULL
 GROUP BY	g.InsuranceCompanyId
@@ -80,10 +85,14 @@ GROUP BY	g.InsuranceCompanyId
 SELECT 
 	t.ClaimHeaderGroupCode 
 	,t.ClaimHeaderGroupTypeId					
-	,pa.PaySS_Total  				Amount 
+	,ISNULL(pa.PaySS_Total, 0)	 	Amount 
 	,ISNULL(t.BillingAmount, 0)		BillingAmount
 	,ISNULL(colPH.TotalAmount, 0)	TransferAmount
 	,ISNULL(nplds.NPLAmount, 0)		NPLAmount 
+	,ISNULL(cpbnpl.CoverAmount, 0)	CPBNPLAmount
+	,cpbnpl.IsManualNPL
+	,pa.ClaimOnLineCode
+	,pa.ClaimCode
 INTO #Tmp2
 FROM #TmpLoop t 
 	LEFT JOIN (
@@ -91,11 +100,12 @@ FROM #TmpLoop t
 		SELECT
 			cgi.ClaimHeaderGroup_id			Code
 			,cv.PaySS_Total					PaySS_Total
-			,ch.ClaimOnLineCode				ClaimOnLineCode 
-		FROM  SSS.dbo.DB_ClaimHeaderGroupItem cgi  
-			LEFT JOIN sss.dbo.DB_ClaimHeader ch
+			,ch.ClaimOnLineCode				ClaimOnLineCode
+			,cv.Code						ClaimCode
+		FROM  [SSS].[dbo].[DB_ClaimHeaderGroupItem] cgi  
+			LEFT JOIN [sss].[dbo].[DB_ClaimHeader] ch
 				ON cgi.ClaimHeader_id = ch.Code
-			LEFT JOIN sss.dbo.DB_ClaimVoucher cv
+			LEFT JOIN [sss].[dbo].[DB_ClaimVoucher] cv
 				ON cgi.ClaimHeader_id = cv.Code 
 
 		UNION
@@ -105,38 +115,52 @@ FROM #TmpLoop t
 			chgPA.Code						Code
 			,chPA.PaySS_Total				PaySS_Total
 			,chPA.ClaimOnLineCode			ClaimOnLineCode
+			,chpa.Code						ClaimCode
 		FROM [SSSPA].[dbo].[DB_ClaimHeaderGroupItem] hPA
-			LEFT JOIN SSSPA.dbo.DB_ClaimHeaderGroup chgPA
+			LEFT JOIN [SSSPA].[dbo].[DB_ClaimHeaderGroup] chgPA
 				ON hPA.ClaimHeaderGroup_id = chgPA.Code
-			LEFT JOIN SSSPA.dbo.DB_ClaimHeader chPA
+			LEFT JOIN [SSSPA].[dbo].[DB_ClaimHeader] chPA
 				ON hPA.ClaimHeader_id = chPA.Code 
 
 		UNION
 
-		--ClaimCompensate------
+		-- ClaimCompensate
 		SELECT 
 			cg.ClaimCompensateGroupCode		Code
 			,cc.CompensateRemain			PaySS_Total
-			,cc.ClaimHeaderCode				ClaimOnLineCode
+			,NULL							ClaimOnLineCode
+			,cc.ClaimCompensateCode			ClaimCode
 		FROM [SSS].[dbo].[ClaimCompensateGroup] cg
 			LEFT JOIN
 				(
 					SELECT * 
-					FROM SSS.dbo.ClaimCompensate
+					FROM [SSS].[dbo].[ClaimCompensate]
 					WHERE IsActive = 1
 				)cc
 				ON cg.ClaimCompensateGroupId = cc.ClaimCompensateGroupId
+
+		UNION
+
+		-- claim misc
+		SELECT 
+			cm.ClaimHeaderGroupCode			Code
+			,cm.PayAmount					PaySS_Total
+			,cm.ClaimOnLineCode				ClaimOnLineCode
+			,cm.ClaimMiscNo					ClaimCode
+		FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
+		WHERE cm.IsActive = 1
 	)pa
 		ON t.ClaimHeaderGroupCode = pa.Code
 	LEFT JOIN [SSSPA].[dbo].[DB_ClaimHeader] hdPA
 		ON t.ClaimHeaderGroupCode = hdPA.Code
 	LEFT JOIN
 		(
+			-- ยอดโอน
 			SELECT
 				co.ClaimOnLineCode 
 				,cg.ClaimOnLineId
 				,SUM(cg.TotalAmount)	TotalAmount
-			FROM ClaimOnlineV2.dbo.ClaimOnline co
+			FROM [ClaimOnlineV2].[dbo].[ClaimOnline] co
 				LEFT JOIN ClaimOnlineV2.dbo.ClaimPayGroup cg
 					ON cg.ClaimOnLineId = co.ClaimOnLineId
 			WHERE co.IsActive = 1  
@@ -146,29 +170,76 @@ FROM #TmpLoop t
 		) colPH
 		ON colPH.ClaimOnLineCode = pa.ClaimOnLineCode
 	LEFT JOIN (
-		SELECT 
-			ClaimOnLineId
-			,SUM(npld.Amount)	NPLAmount
-		FROM ClaimOnlineV2.dbo.NPLHeader nplh
-			INNER JOIN ClaimOnlineV2.dbo.NPLDetail npld
-				ON nplh.NPLHeaderId = npld.NPLHeaderId
-		WHERE nplh.IsActive = 1
-			AND npld.IsActive = 1
-		GROUP BY ClaimOnLineId
+			-- NPL
+			SELECT 
+				ClaimOnLineId
+				,SUM(npld.Amount)	NPLAmount
+			FROM [ClaimOnlineV2].[dbo].[NPLHeader] nplh
+				INNER JOIN ClaimOnlineV2.dbo.NPLDetail npld
+					ON nplh.NPLHeaderId = npld.NPLHeaderId
+			WHERE nplh.IsActive = 1
+				AND npld.IsActive = 1
+			GROUP BY ClaimOnLineId
 	)nplds
 		ON nplds.ClaimOnLineId = colPH.ClaimOnLineId
+	LEFT JOIN
+		(
+			SELECT 
+				hid.ClaimHeaderGroupCode
+				,brdl.CoverAmount
+				,brdl.IsManualNPL
+			FROM dbo.ClaimHeaderGroupImportDetail hid
+			LEFT JOIN 
+				(
+					SELECT
+						ClaimCode
+						,BillingRequestResultDetailId
+					FROM dbo.BillingRequestResultDetail brd
+					WHERE IsActive = 1
+				) brd
+				ON brd.ClaimCode = hid.ClaimCode
+				LEFT JOIN (
+					SELECT
+						BillingRequestResultDetailId,
+						CoverAmount,
+						IsManualNPL
+					FROM (
+						SELECT
+							BillingRequestResultDetailId,
+							CoverAmount,
+							IsManualNPL,
+							ROW_NUMBER() OVER (
+								PARTITION BY BillingRequestResultDetailId
+								ORDER BY CreatedDate DESC
+							) AS rn
+						FROM dbo.BillingRequestResultDetailLog
+						WHERE IsActive = 1
+					) x
+					WHERE rn = 1
+				) brdl
+				ON brdl.BillingRequestResultDetailId = brd.BillingRequestResultDetailId
+		) cpbnpl
+		ON cpbnpl.ClaimHeaderGroupCode = t.ClaimHeaderGroupCode
 
--- =============================================================
-/*
- 1 Amount = BillingAmount
- 2 TransferAmount = (Amount + NPLAmount)
- 3 BillingAmount = (TransferAmount - NPLAmount)
-*/
 
+-- Validate condition 
+-- [1] Amount = (BillingAmount + CPBNPLAmount + CPBNotNPLAmount)
+-- [2] TransferAmount = (Amount + NPLAmount)
+-- [3] BillingAmount = (TransferAmount - NPLAmount) 
+ 
 SELECT 
-	*
+	ClaimHeaderGroupCode
+	,ClaimHeaderGroupTypeId
+	,BillingAmount
+	,TransferAmount
+	,NPLAmount
+	,Amount
+	,IIF(IsManualNPL = 1,CPBNPLAmount,0.00) CPBNPLAmount
+	,IIF(IsManualNPL = 0,CPBNPLAmount,0.00)	CPBNotNPLAmount
+	,ClaimCode	ClaimOnLineCode
 	,CASE
-		WHEN (Amount <> BillingAmount)		THEN @MessageValidate1
+		--WHEN (Amount <> BillingAmount)		THEN @MessageValidate1
+		WHEN (Amount <> (BillingAmount + IIF(IsManualNPL = 1,CPBNPLAmount,0.00) + IIF(IsManualNPL = 0,CPBNPLAmount,0.00)))		THEN @MessageValidate1
 		WHEN ((Amount + BillingAmount) = 0)	THEN @MessageValidate2
 		WHEN TransferAmount > 0	THEN 
 			CASE 
@@ -177,19 +248,21 @@ SELECT
 			ELSE NULL END  
 		ELSE NULL END  IsValidate
 FROM #Tmp2 
-WHERE ClaimHeaderGroupCode = 'SEHN-222-68100002-0'
 	
 
 IF OBJECT_ID('tempdb..#TmpLoop') IS NOT NULL  DROP TABLE #TmpLoop;	
-IF OBJECT_ID('tempdb..#Tmp2') IS NOT NULL  DROP TABLE #Tmp2;	
+IF OBJECT_ID('tempdb..#Tmp2') IS NOT NULL  DROP TABLE #Tmp2;		
 
---DECLARE @ClaimHeaderGroupCode NVARCHAR(50)
---, @ClaimHeaderGroupTypeId INT
---, @Amount DECIMAL(16,2)
---, @BillingAmount DECIMAL(16,2)
---, @TransferAmount DECIMAL(16,2)
---, @NPLAmount DECIMAL(16,2)
---, @IsValidate NVARCHAR(50) ;
+--DECLARE @ClaimHeaderGroupCode	NVARCHAR(50)
+--, @ClaimHeaderGroupTypeId		INT
+--, @Amount						DECIMAL(16,2)
+--, @BillingAmount				DECIMAL(16,2)
+--, @TransferAmount				DECIMAL(16,2)
+--, @NPLAmount					DECIMAL(16,2)
+--, @CPBNPLAmount				DECIMAL(16,2)
+--, @CPBNotNPLAmount			DECIMAL(16,2)
+--, @ClaimOnLineCode				NVARCHAR(50) 
+--, @IsValidate					NVARCHAR(50) ;
 
 --SELECT 
 --	@ClaimHeaderGroupCode		ClaimHeaderGroupCode
@@ -198,6 +271,9 @@ IF OBJECT_ID('tempdb..#Tmp2') IS NOT NULL  DROP TABLE #Tmp2;
 --	, @BillingAmount			BillingAmount
 --	, @TransferAmount			TransferAmount
 --	, @NPLAmount				NPLAmount
+--	, @ClaimOnLineCode			ClaimOnLineCode
+--	, @CPBNPLAmount				CPBNPLAmount	
+--	, @CPBNotNPLAmount			CPBNotNPLAmount
 --	, @IsValidate				IsValidate
 
 --END;
