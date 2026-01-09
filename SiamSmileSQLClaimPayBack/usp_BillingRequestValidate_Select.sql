@@ -202,6 +202,8 @@ SELECT
 	,TransferAmount
 	,NPLAmount
 	,Amount
+	,0			CPBNPLAmount
+	,0			CPBNotNPLAmount
 	,ClaimCode	ClaimOnLineCode
 	,CASE
 		WHEN (Amount <> BillingAmount)		THEN @MessageValidate1
@@ -225,6 +227,8 @@ IF OBJECT_ID('tempdb..#Tmp2') IS NOT NULL  DROP TABLE #Tmp2;
 --, @TransferAmount				DECIMAL(16,2)
 --, @NPLAmount					DECIMAL(16,2)
 --, @ClaimOnLineCode				NVARCHAR(50) 
+--, @CPBNPLAmount					DECIMAL(16,2)
+--, @CPBNotNPLAmount				DECIMAL(16,2)
 --, @IsValidate					NVARCHAR(50) ;
 
 --SELECT 
@@ -235,6 +239,8 @@ IF OBJECT_ID('tempdb..#Tmp2') IS NOT NULL  DROP TABLE #Tmp2;
 --	, @TransferAmount			TransferAmount
 --	, @NPLAmount				NPLAmount
 --	, @ClaimOnLineCode			ClaimOnLineCode
+--	, @CPBNPLAmount				CPBNPLAmount
+--	, @CPBNotNPLAmount			CPBNotNPLAmount
 --	, @IsValidate				IsValidate
 
 END;
