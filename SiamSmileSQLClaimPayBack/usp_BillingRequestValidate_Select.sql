@@ -202,8 +202,8 @@ SELECT
 	,TransferAmount
 	,NPLAmount
 	,Amount
-	,0			CPBNPLAmount
-	,0			CPBNotNPLAmount
+	,NULL		CPBNPLAmount
+	,NULL		CPBNotNPLAmount
 	,ClaimCode	ClaimOnLineCode
 	,CASE
 		WHEN (Amount <> BillingAmount)		THEN @MessageValidate1
