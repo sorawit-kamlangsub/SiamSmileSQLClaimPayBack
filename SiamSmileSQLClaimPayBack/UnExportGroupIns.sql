@@ -1,7 +1,7 @@
 USE [ClaimPayBack]
 GO
 
-DECLARE @BillingRequestGroupCode NVARCHAR(50) = 'BQGPH05H6900004'
+DECLARE @BillingRequestGroupCode NVARCHAR(50) = 'BQGPH05H6900011'
 ,@NewBillingDate			DATE			= '2026-01-12'
 ,@UpdatedByUserId			INT				= 6772
 
