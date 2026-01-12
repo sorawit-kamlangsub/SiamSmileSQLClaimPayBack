@@ -94,7 +94,7 @@ SELECT c.ClaimPayBackXClaimId
 FROM dbo.ClaimPayBackXClaim c
 	INNER JOIN dbo.ClaimPayBackDetail d
 		ON c.ClaimPayBackDetailId = d.ClaimPayBackDetailId
-	INNER JOIN [ClaimMiscellaneous].[misc].ClaimMisc cm
+	LEFT JOIN [ClaimMiscellaneous].[misc].ClaimMisc cm
 		on c.ClaimCode = cm.ClaimMiscNo
 WHERE (c.ClaimPayBackDetailId = @ClaimPayBackDetailId)
 AND (c.IsActive = 1)
