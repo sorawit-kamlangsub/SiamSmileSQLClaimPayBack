@@ -1,6 +1,6 @@
-USE [ClaimPayBack]
+﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_GenerateCodeV2]    Script Date: 8/1/2569 8:51:40 ******/
+/****** Object:  StoredProcedure [dbo].[usp_GenerateCodeV2]    Script Date: 1/12/2026 9:58:24 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -9,7 +9,7 @@ GO
 -- =============================================
 -- Author:		Bunchuai Chaiket
 -- Create date:	2026-01-06 12:00
--- Description:	Function ����Ѻ Run �Ţ��� BQG ����ѷ��Сѹ�������� SFTP ������ѭ�Ҩӹǹ�Ţ Run �����§�ͧ͢������͹
+-- Description:	Function สำหรับ Run เลขที่ BQG บริษัทประกันที่ไม่มี SFTP เพื่อแก้ปัญหาจำนวนเลข Run ไม่เพียงพอของแต่ละเดือน
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_GenerateCodeV2]
 	-- Add the parameters for the stored procedure here
@@ -30,7 +30,7 @@ BEGIN
 --	Declare @Result			varchar(20)
 	
 	----Set Running Lenght----------------------
---	SET @RunningLenght = 8 -- 8 ˹��� Running
+--	SET @RunningLenght = 8 -- 8 หน่วย Running
 	--------------------------------------------
 
 	--SET CurrentDate
@@ -67,8 +67,7 @@ BEGIN
 	DECLARE @TrCCId	INT = (	SELECT	TransactionCodeControl_ID
 							FROM	dbo.TransactionCodeControl
 							WHERE	(TransactionCodeControlType_ID = @TrCodeControlTypeID) 
-							AND		(Year = @YearText)
-							AND		(Month = @MonthText));
+							AND		(Year = @YearText));
 
 
 	DECLARE @Tmp TABLE (nextId	INT)
@@ -78,7 +77,7 @@ BEGIN
  			INSERT INTO dbo.TransactionCodeControl WITH(TABLOCKX)
 			( TransactionCodeControlType_ID,TransactionCode,Year,Month,Running)
 			OUTPUT Inserted.Running INTO @Tmp
-			SELECT	@TrCodeControlTypeID,@TransactionCodeControlTypeDetail,@YearText,@MonthText,1;   
+			SELECT	@TrCodeControlTypeID,@TransactionCodeControlTypeDetail,@YearText,NULL,1;   
 
 		END	
 	ELSE
