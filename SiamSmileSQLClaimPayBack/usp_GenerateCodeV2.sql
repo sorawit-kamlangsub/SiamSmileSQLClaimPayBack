@@ -64,10 +64,11 @@ BEGIN
 			SET @TrCodeControlTypeID = SCOPE_IDENTITY();
 		END
 
-	DECLARE @TrCCId	INT = (	SELECT	TransactionCodeControl_ID
+	DECLARE @TrCCId	INT = (	SELECT	TOP 1 TransactionCodeControl_ID
 							FROM	dbo.TransactionCodeControl
-							WHERE	(TransactionCodeControlType_ID = @TrCodeControlTypeID) 
-							AND		(Year = @YearText));
+							WHERE	TransactionCodeControlType_ID = @TrCodeControlTypeID
+							AND		Year = @YearText 
+							ORDER BY TransactionCodeControl_ID DESC );
 
 
 	DECLARE @Tmp TABLE (nextId	INT)
