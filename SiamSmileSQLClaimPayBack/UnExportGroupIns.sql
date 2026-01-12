@@ -1,8 +1,8 @@
 USE [ClaimPayBack]
 GO
 
-DECLARE @BillingRequestGroupCode NVARCHAR(50) = 'BQGPH05H69010001'
-,@NewBillingDate			DATE			= '2026-01-07'
+DECLARE @BillingRequestGroupCode NVARCHAR(50) = 'BQGPH05H6900004'
+,@NewBillingDate			DATE			= '2026-01-12'
 ,@UpdatedByUserId			INT				= 6772
 
 DECLARE @D2							DATETIME2	= SYSDATETIME();
@@ -17,6 +17,7 @@ UPDATE	m
 	,BillingRequestGroupId					= NULL
 	,m.UpdatedDate							= @D2
 	,m.UpdatedByUserId						= @UserId
+	,m.CreatedDate							= @D2
 	,m.BillingDate							= @NewBillingDate
 FROM dbo.ClaimHeaderGroupImport m
 	INNER JOIN dbo.BillingRequestGroup bg

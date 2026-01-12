@@ -64,7 +64,7 @@ BEGIN
 			SET @TrCodeControlTypeID = SCOPE_IDENTITY();
 		END
 
-	DECLARE @TrCCId	INT = (	SELECT	TOP 1 TransactionCodeControl_ID
+	DECLARE @TrCCId	INT = (	SELECT	TOP(1) TransactionCodeControl_ID
 							FROM	dbo.TransactionCodeControl
 							WHERE	TransactionCodeControlType_ID = @TrCodeControlTypeID
 							AND		Year = @YearText 
