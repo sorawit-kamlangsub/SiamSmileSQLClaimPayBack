@@ -78,7 +78,7 @@ BEGIN
  			INSERT INTO dbo.TransactionCodeControl WITH(TABLOCKX)
 			( TransactionCodeControlType_ID,TransactionCode,Year,Month,Running)
 			OUTPUT Inserted.Running INTO @Tmp
-			SELECT	@TrCodeControlTypeID,@TransactionCodeControlTypeDetail,@YearText,NULL,1;   
+			SELECT	@TrCodeControlTypeID,@TransactionCodeControlTypeDetail,@YearText,'00',1;   
 
 		END	
 	ELSE
