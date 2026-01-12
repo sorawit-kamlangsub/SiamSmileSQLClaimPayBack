@@ -21,16 +21,16 @@ GO
 -- =============================================
 --ALTER PROCEDURE [dbo].[usp_BillingRequest_Sub01_Insert_V2]
 DECLARE
-		@GroupTypeId				INT				= 1
+		@GroupTypeId				INT				= 2
 		,@ClaimTypeCode				VARCHAR(20)		= '1000'
 		,@InsuranceCompanyId		INT				= 27
 		,@CreatedByUserId			INT				= 6772
-		,@BillingDate				DATE			= '2026-01-07'
-		,@ClaimHeaderGroupTypeId	INT				= 2
+		,@BillingDate				DATE			= '2026-01-12'
+		,@ClaimHeaderGroupTypeId	INT				= 1
 		,@InsuranceCompanyName		NVARCHAR(300)	= 'บริษัท บางกอกสหประกันภัย จำกัด (มหาชน)'
-		,@NewBillingDate			DATE			= '2026-01-07'
-		,@CreatedDateFrom			DATE			= '2026-01-07'
-		,@CreatedDateTo				DATE			= '2026-01-07'
+		,@NewBillingDate			DATE			= '2026-01-12'
+		,@CreatedDateFrom			DATE			= '2026-01-12'
+		,@CreatedDateTo				DATE			= '2026-01-12'
 		;
 
 --AS

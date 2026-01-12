@@ -21,9 +21,9 @@ GO
 --ALTER PROCEDURE [dbo].[usp_BillingRequest_Insert_V3]
 DECLARE
 		@CreatedByUserId	INT	 = 1
-		,@BillingDateTo		DATE = '2026-01-07'
-		,@CreatedDateFrom	DATE = '2026-01-07'
-		,@CreatedDateTo		DATE = '2026-01-07'
+		,@BillingDateTo		DATE = '2026-01-12'
+		,@CreatedDateFrom	DATE = '2026-01-12'
+		,@CreatedDateTo		DATE = '2026-01-12'
 
 --AS
 --BEGIN
