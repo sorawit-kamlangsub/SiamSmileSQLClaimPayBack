@@ -50,7 +50,7 @@ GO
 	,@ProductGroupId	INT = 11
 	,@ClaimGroupTypeId	INT = 7;
 -- ===============================================
-
+	
 	SELECT 
 		pu.User_ID
 		,e.EmployeeCode
