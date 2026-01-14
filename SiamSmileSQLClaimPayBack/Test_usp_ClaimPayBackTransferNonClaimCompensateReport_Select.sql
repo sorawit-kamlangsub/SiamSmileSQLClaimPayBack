@@ -1,42 +1,55 @@
-USE [ClaimPayBack]
+﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackTransferNonClaimCompensateReport_Select]    Script Date: 14/10/2568 16:42:27 ******/
+/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackTransferNonClaimCompensateReport_Select]    Script Date: 14/1/2569 9:47:06 ******/
 --SET ANSI_NULLS ON
 --GO
 --SET QUOTED_IDENTIFIER ON
 --GO
 
 
+
+
+
 -- =============================================
 -- Author:		06588 Krekpon Dokkamklang Mind
 -- Create date: 2024-06-21
--- Description:	????????????????????
+-- Description:	รายงานหลังส่งการเงิน
 -- Update date: 2024-07-01 06588 Krekpon.D Mind 
--- Description:	??????????????????????? ????????????????
+-- Description:	เปลี่ยนโค้ดการทำงานใหม่ ให้ทำงานเร็วขึ้น
 -- Update date: 2025-08-15 06588 Krekpon.D Mind 
--- Description:	????????????????? ClaimGroupTypeId =  6
+-- Description:	เพิ่มข้อมูลสำหรับ ClaimGroupTypeId =  6
 -- Update date: 2025-08-18 06588 Krekpon.D Mind 
 -- Description:	remove where product
 -- Update date: 2025-08-20 16:26 06588 Krekpon.D Mind 
--- Description:	??????? join ??????
+-- Description:	ปรับการ join ข้อมูล
 -- Update date: 2025-10-29 14:31 Sorawit Kamlangsub
 -- Update date: 2025-12-09 10.20 Mr.Bunchuai Chaiket (08498)
--- Description:	????????????? (SELECT ???????????) ??????? ClaimMisc
+-- Description:	ปรับการแสดงผล (SELECT ข้อมูลเพิ่ม) จากระบบ ClaimMisc
 -- Description:	Add UNION ClaimMisc
+-- Update date: 2025-12-24 10.52 06588 Krekpon.D Mind
+-- Description:	ปรับเงื่อนไขการแสดงข้อมูลเคลมออนไลน์ไม่ให้แสดง ธนาคาร,ชื่อบัญชี,เลขที่
+-- Update date: 2026-01-08 10.14 06588 Krekpon.D Mind
+-- Description:	ปรับเงื่อนไขการแสดงข้อมูลเคลม MISC ที่เป็น productIdType 38 ให้แสดง ธนาคาร,ชื่อบัญชี,เลขที่
 -- =============================================
 --ALTER PROCEDURE [dbo].[usp_ClaimPayBackTransferNonClaimCompensateReport_Select]
-DECLARE
-	-- Add the parameters for the stored procedure here
-	 @DateFrom			DATE = '2025-12-19'
-	,@DateTo			DATE = '2025-12-22'
-	,@InsuranceId		INT = NULL
-	,@ProductGroupId	INT = NULL
-	,@ClaimGroupTypeId	INT = 7
+--	 @DateFrom			DATE 
+--	,@DateTo			DATE 
+--	,@InsuranceId		INT = NULL
+--	,@ProductGroupId	INT = NULL
+--	,@ClaimGroupTypeId	INT = NULL
 --AS
 --BEGIN
 
 --	SET NOCOUNT ON;
     -- Insert statements for procedure here
+-- ===============================================
+	DECLARE
+	@DateFrom			DATE = '2026-01-01'
+	,@DateTo			DATE = '2026-01-14'
+	,@InsuranceId		INT = NULL
+	,@ProductGroupId	INT = 11
+	,@ClaimGroupTypeId	INT = 7;
+-- ===============================================
 
 	SELECT 
 		pu.User_ID
@@ -57,7 +70,7 @@ DECLARE
 	CREATE INDEX IX_TmpPersonUser_User_ID ON #TmpPersonUser(User_ID);
 	CREATE INDEX IX_TmpPersonUser_Code ON #TmpPersonUser(EmployeeCode);
 
---?????? Table ????????????? ClaimPayBack
+--ประกาศ Table เก็บข้อมูลจาก ClaimPayBack
 DECLARE @TmpClaimPayBack TABLE (
 	 ClaimGroupCodeFromCPBD		NVARCHAR(150),
 	 ClaimGroupType				NVARCHAR(100),
@@ -71,7 +84,7 @@ DECLARE @TmpClaimPayBack TABLE (
 	 CreatedDate				DATETIME,
 	 CreatedByUser				NVARCHAR(150)
      )
- -- ????????????? temp ?????? JOIN ?????????? Base ????
+ -- เอาข้อมูลลงใน temp แล้วไป JOIN ต่อกับฝั่ง Base อื่น
  INSERT INTO @TmpClaimPayBack(
       ClaimGroupCodeFromCPBD,
 	  ClaimGroupType,
@@ -137,23 +150,23 @@ SELECT 			icu.InsuranceCompany_Name														InsuranceCompany_Name
 				,IIF(@ClaimGroupTypeId IN (4,7),sssmp.Detail, NULL)								Province
 				,IIF(@ClaimGroupTypeId IN (2,4,6,7) ,icu.CustomerName, NULL)					CustomerName
 				,CASE 
-					WHEN @ClaimGroupTypeId IN (2,4,6) THEN sssmtb.Detail
-					WHEN @ClaimGroupTypeId = 7		  THEN icu.BankName
+					WHEN @ClaimGroupTypeId IN (4,6)									THEN sssmtb.Detail
+					WHEN @ClaimGroupTypeId = 7  AND icu.ProductTypeId = 38			THEN icu.BankName
 					ELSE NULL
 				END													BankName
 				,CASE 
-					WHEN @ClaimGroupTypeId IN (2,4,6)	THEN ssicu.BankAccountName
-					WHEN @ClaimGroupTypeId  = 7			THEN icu.BankAccountName
+					WHEN @ClaimGroupTypeId IN (4,6)								THEN ssicu.BankAccountName
+					WHEN @ClaimGroupTypeId  = 7	 AND icu.ProductTypeId = 38		THEN icu.BankAccountName
 					ELSE NULL
 				END													BankAccountName
 				,CASE 
-					WHEN @ClaimGroupTypeId IN (2,4,6)	THEN REPLACE(ssicu.BankAccountNo,'-','')
-					WHEN @ClaimGroupTypeId  = 7			THEN icu.BankAccountNo
+					WHEN @ClaimGroupTypeId IN (4,6)								THEN REPLACE(ssicu.BankAccountNo,'-','')
+					WHEN @ClaimGroupTypeId  = 7	 AND icu.ProductTypeId = 38		THEN icu.BankAccountNo
 					ELSE NULL
 				END													BankAccountNo
 				,CASE 
-					WHEN @ClaimGroupTypeId IN (2,4,6)	THEN NULL
-					WHEN @ClaimGroupTypeId  = 7			THEN icu.PhoneNo
+					WHEN @ClaimGroupTypeId IN (4,6)								THEN NULL
+					WHEN @ClaimGroupTypeId  = 7	AND icu.ProductTypeId = 38		THEN icu.PhoneNo
 					ELSE NULL
 				END													PhoneNo
 				,tmpCpbd.CreatedDate								SendDate
@@ -179,6 +192,7 @@ FROM	@TmpClaimPayBack tmpCpbd
 				,NULL												BankName
 				,NULL												PhoneNo
 				,NULL												ProductTypeName
+				,NULL												ProductTypeId
 			FROM sss.dbo.DB_ClaimHeaderGroup chg
 			LEFT JOIN SSS.dbo.MT_ClaimAdmitType cat
 				ON chg.ClaimAdmitType_id = cat.Code
@@ -204,6 +218,7 @@ FROM	@TmpClaimPayBack tmpCpbd
 				,NULL											BankName
 				,NULL											PhoneNo
 				,NULL											ProductTypeName
+				,NULL											ProductTypeId
 			FROM SSSPA.dbo.DB_ClaimHeaderGroup pachg
 			LEFT JOIN SSSPA.dbo.SM_Code smc
 				ON pachg.ClaimTypeGroup_id = smc.Code
@@ -230,6 +245,7 @@ FROM	@TmpClaimPayBack tmpCpbd
 				,miscacc.BankName			BankName
 				,ce.ContactPersonPhoneNo	PhoneNo
 				,pd.ProductTypeName
+				,pd.ProductTypeId
 			FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
 			LEFT JOIN [ClaimMiscellaneous].[misc].[Hospital] h
 				ON h.HospitalId = cm.HospitalId 
@@ -297,4 +313,4 @@ FROM	@TmpClaimPayBack tmpCpbd
 IF OBJECT_ID('tempdb..#TmpPersonUser') IS NOT NULL DROP TABLE #TmpPersonUser;
 IF OBJECT_ID('tempdb..@TmpClaimPayBack') IS NOT NULL  DELETE FROM @TmpClaimPayBack;
 
---END
+--END;
