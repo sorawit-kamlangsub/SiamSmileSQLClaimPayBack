@@ -36,19 +36,6 @@
 		(2,2, N'PH'),
 		(3,3, N'PA'),
 		(4,4, N'Motor');
-
-	SELECT
-	*
-	FROM
-	(
-			SELECT
-				* 
-			FROM #TmpProductClaimMisc
-			UNION ALL
-			SELECT
-				*
-			FROM @ProductGroupTB
-	) rs
 	
 	SELECT 
 		pu.User_ID
