@@ -57,9 +57,9 @@ DECLARE @S3Bucket NVARCHAR(255) = 'p-isc-ss-1-bucketdata'
 				LEFT JOIN SSSPA.dbo.DB_CustomerDetail AS ctd
 					ON h.CustomerDetail_id = ctd.Code
 				LEFT JOIN SSSPA.dbo.DB_Customer AS cus
-					ON ctd.Application_id = cus.App_id AND cus.Status_id <> '3090' --äÁèãªèÂ¡àÅÔ¡¡ÃÁ¸ÃÃÁì
+					ON ctd.Application_id = cus.App_id AND cus.Status_id <> '3090' 
 				LEFT JOIN SSSPA.dbo.DB_CustomerPolicy  AS ctp
-					ON cus.App_id  = ctp.App_id AND PolicyType_id = '9601' --à»ç¹àÅ¢¡ÃÁ¸ÃÃÁì »¡µÔ
+					ON cus.App_id  = ctp.App_id AND PolicyType_id = '9601' 
 
 			UNION
 
@@ -95,8 +95,7 @@ DECLARE @S3Bucket NVARCHAR(255) = 'p-isc-ss-1-bucketdata'
 	WHERE td.ClaimHeaderCodeInDB IN
 	(
 
-		'CL6811000148'
-
+		'CL6901000047'
 	)
 
 	ORDER BY ProductGroup 
