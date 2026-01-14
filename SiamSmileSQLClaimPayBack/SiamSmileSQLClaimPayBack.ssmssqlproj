@@ -147,6 +147,18 @@
           <AssociatedConnUserName>devdba</AssociatedConnUserName>
           <FullPath>Test_usp_ClaimPayBackTransferNonClaimCompensateReport_Select.sql</FullPath>
         </FileNode>
+        <FileNode Name="Test_usp_ClaimPayBackTransferNonClaimCompensateReport_SelectSubICU.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
+          <AssociatedConnUserName>devdba</AssociatedConnUserName>
+          <FullPath>Test_usp_ClaimPayBackTransferNonClaimCompensateReport_SelectSubICU.sql</FullPath>
+        </FileNode>
+        <FileNode Name="Test_usp_ClaimPayBackTransferNonClaimCompensateReport_SelectSubTmpClaimPayBack.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
+          <AssociatedConnUserName>devdba</AssociatedConnUserName>
+          <FullPath>Test_usp_ClaimPayBackTransferNonClaimCompensateReport_SelectSubTmpClaimPayBack.sql</FullPath>
+        </FileNode>
         <FileNode Name="UnExportGroupIns.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
           <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
@@ -158,6 +170,12 @@
           <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
           <AssociatedConnUserName>devdba</AssociatedConnUserName>
           <FullPath>Update_Attachment_S3Key_Random_Unique_TempTables.sql</FullPath>
+        </FileNode>
+        <FileNode Name="UpdateProductGroupId.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
+          <AssociatedConnUserName>devdba</AssociatedConnUserName>
+          <FullPath>UpdateProductGroupId.sql</FullPath>
         </FileNode>
         <FileNode Name="usp_BillingClaimMiscExport_Select.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
