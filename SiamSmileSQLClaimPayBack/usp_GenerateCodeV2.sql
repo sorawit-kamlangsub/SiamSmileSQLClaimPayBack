@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_GenerateCodeV2]    Script Date: 1/12/2026 9:58:24 AM ******/
+/****** Object:  StoredProcedure [dbo].[usp_GenerateCodeV2]    Script Date: 14/1/2569 9:21:41 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -68,6 +68,7 @@ BEGIN
 							FROM	dbo.TransactionCodeControl
 							WHERE	TransactionCodeControlType_ID = @TrCodeControlTypeID
 							AND		Year = @YearText 
+							AND		Month = '00'
 							ORDER BY TransactionCodeControl_ID DESC );
 
 
