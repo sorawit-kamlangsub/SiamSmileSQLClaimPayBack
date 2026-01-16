@@ -21,9 +21,9 @@ GO
 --ALTER PROCEDURE [dbo].[usp_BillingRequest_Insert_V3]
 DECLARE
 		@CreatedByUserId	INT	 = 1
-		,@BillingDateTo		DATE = '2026-01-12'
-		,@CreatedDateFrom	DATE = '2026-01-12'
-		,@CreatedDateTo		DATE = '2026-01-12'
+		,@BillingDateTo		DATE = '2026-01-16'
+		,@CreatedDateFrom	DATE = '2026-01-16'
+		,@CreatedDateTo		DATE = '2026-01-16'
 
 --AS
 --BEGIN
@@ -36,6 +36,7 @@ DECLARE @Msg		NVARCHAR(500)= '';
 
 IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 
+IF @CreatedDateTo IS NOT NULL SET @CreatedDateTo = DATEADD(DAY,1,@CreatedDateTo);
 
 SELECT g.InsuranceCompanyId
       ,g.GroupTypeId
@@ -66,7 +67,8 @@ FROM
 			AND		i.IsActive = 1
 			AND		i.ClaimHeaderGroupImportStatusId = 2
 			AND		i.BillingRequestGroupId IS NULL
-			AND		i.BillingDate <= @BillingDateTo
+			AND		i.CreatedDate >	@CreatedDateFrom
+			AND		i.CreatedDate <=  @CreatedDateTo
 		) AS g
 WHERE	g.GroupTypeId IS NOT NULL	
 GROUP BY	g.InsuranceCompanyId
@@ -164,6 +166,50 @@ WHILE ( @intFlag <= @max )
 
 						SET @inputFlag = @inputFlag + 1;
 
+						PRINT '@GroupTypeId INT = ' + ISNULL(CAST(@GroupTypeId AS varchar(10)), 'NULL');
+						PRINT ',@ClaimTypeCode VARCHAR(20) = ' + 
+							  CASE WHEN @ClaimTypeCode IS NULL 
+								   THEN 'NULL' 
+								   ELSE '''' + CAST(@ClaimTypeCode AS varchar(20)) + '''' END;
+
+						PRINT ',@InsuranceCompanyId INT = ' + ISNULL(CAST(@InsuranceCompanyId AS varchar(10)), 'NULL');
+						PRINT ',@CreatedByUserId INT = ' + ISNULL(CAST(@CreatedByUserId AS varchar(10)), 'NULL');
+
+						PRINT ',@BillingDate DATE = ' + 
+							  CASE WHEN @BillingDate IS NULL 
+								   THEN 'NULL' 
+								   ELSE '''' + CONVERT(varchar(10), @BillingDate, 120) + '''' END;
+
+						PRINT ',@ClaimHeaderGroupTypeId INT = ' + ISNULL(CAST(@ClaimHeaderGroupTypeId AS varchar(10)), 'NULL');
+
+						PRINT ',@InsuranceCompanyName NVARCHAR(300) = ' + 
+							  CASE WHEN @InsuranceCompanyName IS NULL 
+								   THEN 'NULL' 
+								   ELSE 'N''' + @InsuranceCompanyName + '''' END;
+
+						PRINT ',@NewBillingDate DATE = ' + 
+							  CASE WHEN @BillingDateTo IS NULL 
+								   THEN 'NULL' 
+								   ELSE '''' + CONVERT(varchar(10), @BillingDateTo, 120) + '''' END;
+
+						PRINT ',@CreatedDateFrom DATE = ' + 
+							  CASE WHEN @CreatedDateFrom IS NULL 
+								   THEN 'NULL' 
+								   ELSE '''' + CONVERT(varchar(10), @CreatedDateFrom, 120) + '''' END;
+
+						PRINT ',@CreatedDateTo DATE = ' + 
+							  CASE WHEN @CreatedDateTo IS NULL 
+								   THEN 'NULL' 
+								   ELSE '''' + CONVERT(varchar(10), @CreatedDateTo, 120) + '''' END;
+
+						PRINT ',@ProductTypeShortName VARCHAR(20) = ' + 
+							  CASE WHEN @ProductTypeShortName IS NULL 
+								   THEN 'NULL' 
+								   ELSE '''' + CAST(@ProductTypeShortName AS varchar(20)) + '''' END;
+
+						PRINT ',@ProductTypeId INT = ' + ISNULL(CAST(@ProductTypeId AS varchar(10)), 'NULL');
+
+
 					--INSERT INTO @TmpResult ( IsResult, Result, Msg)
 					--EXECUTE [dbo].[usp_BillingRequest_ClaimMisc_Insert] 
 					--					@GroupTypeId
@@ -178,13 +224,57 @@ WHILE ( @intFlag <= @max )
 					--					,@CreatedDateTo
 					--					,@ProductTypeShortName
 					--					,@ProductTypeId				
-
-						PRINT @ProductTypeId
+	
 					END
 				
 			END
 		ELSE
 			BEGIN
+
+			PRINT '@GroupTypeId INT = ' + ISNULL(CAST(@GroupTypeId AS varchar(10)), 'NULL');
+			PRINT ',@ClaimTypeCode VARCHAR(20) = ' + 
+				  CASE WHEN @ClaimTypeCode IS NULL 
+					   THEN 'NULL' 
+					   ELSE '''' + CAST(@ClaimTypeCode AS varchar(20)) + '''' END;
+
+			PRINT ',@InsuranceCompanyId INT = ' + ISNULL(CAST(@InsuranceCompanyId AS varchar(10)), 'NULL');
+			PRINT ',@CreatedByUserId INT = ' + ISNULL(CAST(@CreatedByUserId AS varchar(10)), 'NULL');
+
+			PRINT ',@BillingDate DATE = ' + 
+				  CASE WHEN @BillingDate IS NULL 
+					   THEN 'NULL' 
+					   ELSE '''' + CONVERT(varchar(10), @BillingDate, 120) + '''' END;
+
+			PRINT ',@ClaimHeaderGroupTypeId INT = ' + ISNULL(CAST(@ClaimHeaderGroupTypeId AS varchar(10)), 'NULL');
+
+			PRINT ',@InsuranceCompanyName NVARCHAR(300) = ' + 
+				  CASE WHEN @InsuranceCompanyName IS NULL 
+					   THEN 'NULL' 
+					   ELSE 'N''' + @InsuranceCompanyName + '''' END;
+
+			PRINT ',@NewBillingDate DATE = ' + 
+				  CASE WHEN @BillingDateTo IS NULL 
+					   THEN 'NULL' 
+					   ELSE '''' + CONVERT(varchar(10), @BillingDateTo, 120) + '''' END;
+
+			PRINT ',@CreatedDateFrom DATE = ' + 
+				  CASE WHEN @CreatedDateFrom IS NULL 
+					   THEN 'NULL' 
+					   ELSE '''' + CONVERT(varchar(10), @CreatedDateFrom, 120) + '''' END;
+
+			PRINT ',@CreatedDateTo DATE = ' + 
+				  CASE WHEN @CreatedDateTo IS NULL 
+					   THEN 'NULL' 
+					   ELSE '''' + CONVERT(varchar(10), @CreatedDateTo, 120) + '''' END;
+
+			PRINT ',@ProductTypeShortName VARCHAR(20) = ' + 
+				  CASE WHEN @ProductTypeShortName IS NULL 
+					   THEN 'NULL' 
+					   ELSE '''' + CAST(@ProductTypeShortName AS varchar(20)) + '''' END;
+
+			PRINT ',@ProductTypeId INT = ' + ISNULL(CAST(@ProductTypeId AS varchar(10)), 'NULL');
+
+
 				--INSERT INTO @TmpResult ( IsResult, Result, Msg)
 
 		/* Original
@@ -208,7 +298,7 @@ WHILE ( @intFlag <= @max )
 				--					,@BillingDateTo
 				--					,@CreatedDateFrom
 				--					,@CreatedDateTo
-				PRINT ''
+
 			END;
 		------------------------------
         SET @intFlag = @intFlag + 1;
@@ -245,7 +335,7 @@ BEGIN
 END	
 ELSE
 BEGIN
-	SET @Result = 'Failure';
+	SET @Result = 'Failure' + ERROR_MESSAGE();
 END;	
 
 SELECT @IsResult IsResult
