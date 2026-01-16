@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Insert_V3]    Script Date: 17/12/2568 16:58:52 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Insert_V3]    Script Date: 16/1/2569 10:45:15 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -35,6 +35,7 @@ DECLARE @Msg		NVARCHAR(500)= '';
 
 IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 
+IF @CreatedDateTo IS NOT NULL SET @CreatedDateTo = DATEADD(DAY,1,@CreatedDateTo);
 
 SELECT g.InsuranceCompanyId
       ,g.GroupTypeId
@@ -65,7 +66,8 @@ FROM
 			AND		i.IsActive = 1
 			AND		i.ClaimHeaderGroupImportStatusId = 2
 			AND		i.BillingRequestGroupId IS NULL
-			AND		i.BillingDate <= @BillingDateTo
+			AND		i.CreatedDate >	@CreatedDateFrom
+			AND		i.CreatedDate <=  @CreatedDateTo
 		) AS g
 WHERE	g.GroupTypeId IS NOT NULL	
 GROUP BY	g.InsuranceCompanyId
