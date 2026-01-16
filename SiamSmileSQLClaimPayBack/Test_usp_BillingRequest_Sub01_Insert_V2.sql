@@ -21,16 +21,16 @@ GO
 -- =============================================
 --ALTER PROCEDURE [dbo].[usp_BillingRequest_Sub01_Insert_V2]
 DECLARE
-		@GroupTypeId				INT				= 2
-		,@ClaimTypeCode				VARCHAR(20)		= '1000'
-		,@InsuranceCompanyId		INT				= 27
-		,@CreatedByUserId			INT				= 6772
-		,@BillingDate				DATE			= '2026-01-12'
-		,@ClaimHeaderGroupTypeId	INT				= 1
-		,@InsuranceCompanyName		NVARCHAR(300)	= 'บริษัท บางกอกสหประกันภัย จำกัด (มหาชน)'
-		,@NewBillingDate			DATE			= '2026-01-12'
-		,@CreatedDateFrom			DATE			= '2026-01-12'
-		,@CreatedDateTo				DATE			= '2026-01-12'
+@GroupTypeId INT = 1
+,@ClaimTypeCode VARCHAR(20) = '1000'
+,@InsuranceCompanyId INT = 27
+,@CreatedByUserId INT = 1
+,@BillingDate DATE = '2026-01-07'
+,@ClaimHeaderGroupTypeId INT = 2
+,@InsuranceCompanyName NVARCHAR(300) = N'บริษัท บางกอกสหประกันภัย จำกัด (มหาชน)'
+,@NewBillingDate DATE = '2026-01-16'
+,@CreatedDateFrom DATE = '2026-01-01'
+,@CreatedDateTo DATE = '2026-01-17'
 		;
 
 --AS
@@ -272,7 +272,7 @@ BEGIN
 	BEGIN 
 		SET @TotalRows = @D_Total;
 		SET @BatchSize = 20;
-		SET @G_RunningLenght = 5;
+		--SET @G_RunningLenght = 5;
 	END
 	
 /* Generate Code */
@@ -312,23 +312,28 @@ BEGIN
 		DECLARE @BillingRequestGroupId INT = NULL;
 
 /* Generate Code */
-		SELECT @IsSFTP IsSFTP
-		IF @IsSFTP = 0
-		BEGIN 
+		--SELECT @IsSFTP IsSFTP
+		--IF @IsSFTP = 0
+		--BEGIN 
 			
-			EXECUTE dbo.usp_GenerateCodeV2 
-					 @G_TT
-					,@G_RunningLenght
-					,@BillingRequestGroupCode OUTPUT;
+		--	EXECUTE dbo.usp_GenerateCodeV2 
+		--			 @G_TT
+		--			,@G_RunningLenght
+		--			,@BillingRequestGroupCode OUTPUT;
 
-		END
-		ELSE
-		BEGIN
+		--END
+		--ELSE
+		--BEGIN
+		--	EXECUTE dbo.usp_GenerateCode 
+		--			 @G_TT
+		--			,@G_RunningLenght
+		--			,@BillingRequestGroupCode OUTPUT;
+		--END
+
 			EXECUTE dbo.usp_GenerateCode 
 					 @G_TT
 					,@G_RunningLenght
 					,@BillingRequestGroupCode OUTPUT;
-		END
 
 /* Insert BillingRequestGroup*/
 			--INSERT INTO dbo.BillingRequestGroup
