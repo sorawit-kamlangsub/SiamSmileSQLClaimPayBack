@@ -18,7 +18,7 @@ GO
 -- =============================================
 --ALTER PROCEDURE [Claim].[usp_ClaimPayBackDetail_InsertV4]
 DECLARE
-	@ClaimGroupCodeList		NVARCHAR(MAX) = 'CHCMO88868120009'
+	@ClaimGroupCodeList		NVARCHAR(MAX) = 'CHCMO52168120003,CHTAO88868120017,VRFAO88869010005'
 	  , @ProductGroupId			INT = 11
 	  , @ClaimGroupTypeId		INT = 7
 	  , @CreatedByUserId		INT = 1
@@ -402,7 +402,7 @@ DECLARE
                                 )
                                 SELECT @ClaimGroupTypeId	ClaimGroupTypeId
                                         , BranchId			BranchId
-                                        , 1					gId
+                                        , ROW_NUMBER() OVER(ORDER BY BranchId asc )	gId -- 1	gId
                                         , SUM(Amount)		sumPremium
                                         ,1
                                 FROM @TmpD
@@ -875,6 +875,8 @@ DECLARE
 		SELECT @g_Total = MAX(gId) 
 
 		FROM @TmpGroup;
+
+		SELECT * FROM @TmpGroup;
 	
 		EXECUTE [dbo].[usp_GenerateCode_FromTo] 
 		   @g_TransactionCodeControlTypeDetail
@@ -894,6 +896,9 @@ DECLARE
 		DECLARE @h_lenght	INT = 6
 		SELECT @h_Total = MAX(hId)
 		FROM @TmpH
+
+		SELECT * FROM @TmpH
+
 	
 		EXECUTE [dbo].[usp_GenerateCode_FromTo] 
 		   @h_TransactionCodeControlTypeDetail
