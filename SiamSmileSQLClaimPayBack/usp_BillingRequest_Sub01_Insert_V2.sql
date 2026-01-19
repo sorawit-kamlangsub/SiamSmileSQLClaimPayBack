@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Sub01_Insert_V2]    Script Date: 16/1/2569 11:02:48 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Sub01_Insert_V2]    Script Date: 1/19/2026 8:22:30 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -294,7 +294,7 @@ BEGIN
 	BEGIN 
 		SET @TotalRows = @D_Total;
 		SET @BatchSize = 20;
-		--SET @G_RunningLenght = 5;
+		SET @G_RunningLenght = 5;
 	END
 	
 /* Generate Code */
@@ -334,28 +334,27 @@ BEGIN
 		DECLARE @BillingRequestGroupId INT = NULL;
 
 /* Generate Code */
-		--SELECT @IsSFTP IsSFTP
-		--IF @IsSFTP = 0
-		--BEGIN 
+		IF @IsSFTP = 0
+		BEGIN 
 			
-		--	EXECUTE dbo.usp_GenerateCodeV2 
-		--			 @G_TT
-		--			,@G_RunningLenght
-		--			,@BillingRequestGroupCode OUTPUT;
+			EXECUTE dbo.usp_GenerateCodeV2 
+					 @G_TT
+					,@G_RunningLenght
+					,@BillingRequestGroupCode OUTPUT;
 
-		--END
-		--ELSE
-		--BEGIN
-		--	EXECUTE dbo.usp_GenerateCode 
-		--			 @G_TT
-		--			,@G_RunningLenght
-		--			,@BillingRequestGroupCode OUTPUT;
-		--END
-
+		END
+		ELSE
+		BEGIN
 			EXECUTE dbo.usp_GenerateCode 
 					 @G_TT
 					,@G_RunningLenght
 					,@BillingRequestGroupCode OUTPUT;
+		END
+
+			--EXECUTE dbo.usp_GenerateCode 
+			--		 @G_TT
+			--		,@G_RunningLenght
+			--		,@BillingRequestGroupCode OUTPUT;
 
 /* Insert BillingRequestGroup*/
 			INSERT INTO dbo.BillingRequestGroup
@@ -392,7 +391,7 @@ BEGIN
 					,@ClaimTypeCode						ClaimTypeCode
 					,@BillindDueDate					BillindDueDate
 					,@ClaimHeaderGroupTypeId			ClaimHeaderGroupTypeId
-					,@InsuranceCompanyName	
+					,@InsuranceCompanyName				InsuranceCompanyName
 				
 			SET @BillingRequestGroupId = SCOPE_IDENTITY();				
 			
@@ -429,10 +428,10 @@ BEGIN
 			--SELECT *
 			UPDATE	m 
 				SET m.ClaimHeaderGroupImportStatusId	= 3
-				,m.BillingRequestGroupId			= @BillingRequestGroupId
-				,m.UpdatedDate						= @D2
-				,m.UpdatedByUserId					= @UserId
-				,m.BillingDate						= @NewBillingDate
+				,m.BillingRequestGroupId				= @BillingRequestGroupId
+				,m.UpdatedDate							= @D2
+				,m.UpdatedByUserId						= @UserId
+				,m.BillingDate							= @NewBillingDate
 			FROM dbo.ClaimHeaderGroupImport m
 				INNER JOIN #Tmplst u
 					ON m.ClaimHeaderGroupImportId = u.ClaimHeaderGroupImportId
@@ -499,7 +498,7 @@ BEGIN
 					,BillingBankId
 					,BankAccountNumber)
 			SELECT 
-				@NewBillingDate
+				@NewBillingDate								BillingDate
 				,g.BillingDueDate
 				,c.CreatedByBranchId BranchCode
 				,br.BranchDetail Branch
@@ -606,7 +605,6 @@ IF OBJECT_ID('tempdb..#TmpCover') IS NOT NULL  DROP TABLE #TmpCover;
 IF OBJECT_ID('tempdb..#Tmplst') IS NOT NULL  DROP TABLE #Tmplst;
 IF OBJECT_ID('tempdb..#TmpDt_') IS NOT NULL  DROP TABLE #TmpDt_;
 IF OBJECT_ID('tempdb..#TmpX2') IS NOT NULL  DROP TABLE #TmpX2;
-
 
 IF (@IsResult = 1) 
 	BEGIN	
