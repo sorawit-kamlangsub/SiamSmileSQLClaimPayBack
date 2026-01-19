@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequestValidate_Select]    Script Date: 9/1/2569 10:21:07 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequestValidate_Select]    Script Date: 19/1/2569 14:53:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -202,12 +202,12 @@ FROM #TmpLoop t
 			LEFT JOIN 
 				(
 					SELECT
-						ClaimCode
+						ClaimHeaderGroupImportDetailId
 						,BillingRequestResultDetailId
 					FROM dbo.BillingRequestResultDetail brd
 					WHERE IsActive = 1
 				) brd
-				ON brd.ClaimCode = hid.ClaimCode
+				ON brd.ClaimHeaderGroupImportDetailId = hid.ClaimHeaderGroupImportDetailId
 				LEFT JOIN (
 					SELECT
 						BillingRequestResultDetailId,
