@@ -1,8 +1,8 @@
 USE [ClaimPayBack]
 GO
 
-DECLARE @BillingRequestGroupCode NVARCHAR(50) = 'BQGPH19H6901002'
-,@NewBillingDate			DATE			= '2026-01-21'
+DECLARE @BillingRequestGroupCode NVARCHAR(50) = 'BQGPH39B6900015'
+,@NewBillingDate			DATE			= '2026-01-19'
 ,@UpdatedByUserId			INT				= 6772
 
 DECLARE @D2							DATETIME2	= SYSDATETIME();
