@@ -31,18 +31,18 @@ GO
 --	SET NOCOUNT ON;
 
 DECLARE
-		@GroupTypeId				INT				= 3
-		,@ClaimTypeCode				VARCHAR(20)		= '2000'
-		,@InsuranceCompanyId		INT				= 18
-		,@CreatedByUserId			INT				= 6772
-		,@BillingDate				DATE			= '2025-12-16'
-		,@ClaimHeaderGroupTypeId	INT				= 6
-		,@InsuranceCompanyName		NVARCHAR(300)	= 'บริษัท ชับบ์สามัคคีประกันภัย จำกัด (มหาชน)'
-		,@NewBillingDate			DATE			= '2025-12-16'
-		,@CreatedDateFrom			DATE			= '2025-12-16'
-		,@CreatedDateTo				DATE			= '2025-12-16'
-		,@ProductTypeShortName		VARCHAR(20)		= 'SP'
-		,@ProductTypeId				INT				= 32	
+@GroupTypeId INT = 1
+,@ClaimTypeCode VARCHAR(20) = '1000'
+,@InsuranceCompanyId INT = 17
+,@CreatedByUserId INT = 1
+,@BillingDate DATE = '2026-01-21'
+,@ClaimHeaderGroupTypeId INT = 4
+,@InsuranceCompanyName NVARCHAR(300) = N'บริษัท อาคเนย์ประกันภัย จำกัด(มหาชน)'
+,@NewBillingDate DATE = '2026-01-19'
+,@CreatedDateFrom DATE = '2026-01-19'
+,@CreatedDateTo DATE = '2026-01-20'
+,@ProductTypeShortName VARCHAR(20) = NULL
+,@ProductTypeId INT = NULL
 		;
 
 

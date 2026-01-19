@@ -23,14 +23,16 @@ GO
 DECLARE
 @GroupTypeId INT = 1
 ,@ClaimTypeCode VARCHAR(20) = '1000'
-,@InsuranceCompanyId INT = 27
+,@InsuranceCompanyId INT = 17
 ,@CreatedByUserId INT = 1
-,@BillingDate DATE = '2026-01-07'
-,@ClaimHeaderGroupTypeId INT = 2
-,@InsuranceCompanyName NVARCHAR(300) = N'บริษัท บางกอกสหประกันภัย จำกัด (มหาชน)'
-,@NewBillingDate DATE = '2026-01-16'
-,@CreatedDateFrom DATE = '2026-01-01'
-,@CreatedDateTo DATE = '2026-01-17'
+,@BillingDate DATE = '2026-01-21'
+,@ClaimHeaderGroupTypeId INT = 4
+,@InsuranceCompanyName NVARCHAR(300) = N'บริษัท อาคเนย์ประกันภัย จำกัด(มหาชน)'
+,@NewBillingDate DATE = '2026-01-19'
+,@CreatedDateFrom DATE = '2026-01-19'
+,@CreatedDateTo DATE = '2026-01-20'
+,@ProductTypeShortName VARCHAR(20) = NULL
+,@ProductTypeId INT = NULL
 		;
 
 --AS
@@ -170,6 +172,8 @@ FROM #TmpX d;
 			ON d.ClaimCode = c.ClaimCode
 	ORDER BY
 		d.P1, d.P2, d.P3, d.P4;
+
+	SELECT * FROM #TmpDetail
 
 IF (@IsResult = 1)
 BEGIN
