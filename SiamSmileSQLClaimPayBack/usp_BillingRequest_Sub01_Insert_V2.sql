@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Sub01_Insert_V2]    Script Date: 1/19/2026 8:22:30 PM ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Sub01_Insert_V2]    Script Date: 20/1/2569 14:15:05 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -28,6 +28,8 @@ GO
 				แก้ไขบั๊กการเรียงข้อมูลตาม บ.ส.
 	Update date: 2026-01-07 15:33 Sorawit Kamlangsub
 				เพื่ม usp_GenerateCodeV2 สำหรับ บ.ประกันไม่มี SFTP
+	Update date: 2026-01-20 14:16 Sorawit Kamlangsub
+				เพื่ม เงื่อนไข @ClaimHeaderGroupTypeId IN (2,4) ใน tmpCover
 */	
 -- Description:	<Description,,>
 -- =============================================
@@ -155,10 +157,15 @@ IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 		)cs
 			ON d.ClaimCode = cs.ClaimHeaderCode
 		INNER JOIN #TmpX x
-			ON d.ClaimCode = x.ClaimCode
+			ON d.ClaimHeaderGroupImportDetailId = x.ClaimHeaderGroupImportDetailId
 	WHERE h.IsActive = 1
 		AND	d.IsActive = 1
-		AND	cs.ClaimCompensateCode IS NULL;
+		AND	
+		(
+			@ClaimHeaderGroupTypeId IN (2,4)
+			OR
+			@ClaimHeaderGroupTypeId NOT IN (2,4) AND cs.ClaimCompensateCode IS NULL
+		);
 
 /*SetUp Sort*/
 SELECT 
