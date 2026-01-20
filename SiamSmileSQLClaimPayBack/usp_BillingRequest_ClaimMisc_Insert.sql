@@ -199,16 +199,7 @@ BEGIN
 
 	SELECT 
 		@InsuranceCompanyCode = o.OrganizeCode 
-		,@IsSFTP =
-			CASE 
-				WHEN sfd.SFTPConfigId IS NOT NULL THEN 
-					CASE 
-						WHEN p.IsSFTP = 1 THEN 1
-						WHEN p.IsSFTP = 0 THEN 0
-					ELSE 1
-				END
-			ELSE 0
-		END
+		,@IsSFTP = 0
 	FROM DataCenterV1.Organize.Organize o
 			LEFT JOIN (
 				SELECT
