@@ -1,6 +1,6 @@
-USE [ClaimPayBack]
+﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_ClaimMisc_Insert]    Script Date: 16/12/2568 15:42:45 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_ClaimMisc_Insert]    Script Date: 20/1/2569 14:34:02 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -37,7 +37,7 @@ BEGIN
 --		,@CreatedByUserId			INT				= 6772
 --		,@BillingDate				DATE			= '2025-12-16'
 --		,@ClaimHeaderGroupTypeId	INT				= 6
---		,@InsuranceCompanyName		NVARCHAR(300)	= '����ѷ �Ѻ�����Ѥ�ջ�Сѹ��� �ӡѴ (��Ҫ�)'
+--		,@InsuranceCompanyName		NVARCHAR(300)	= 'บริษัท ชับบ์สามัคคีประกันภัย จำกัด (มหาชน)'
 --		,@NewBillingDate			DATE			= '2025-12-16'
 --		,@CreatedDateFrom			DATE			= '2025-12-16'
 --		,@CreatedDateTo				DATE			= '2025-12-16'
@@ -50,7 +50,7 @@ DECLARE @IsResult	BIT			 = 1;
 DECLARE @Result		VARCHAR(100) = '';
 DECLARE @Msg		NVARCHAR(500)= '';
 
-IF (@IsResult = 0) SET @Msg = N'�Դ��ҹ';
+IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 
 DECLARE @productShortName VARCHAR(20)			= @ProductTypeShortName;
 DECLARE @productId VARCHAR(20)					= @ProductTypeId;
@@ -64,7 +64,7 @@ DECLARE @Date					DATE = @D2;
 
 DECLARE	@BillindDueDate			DATE;
 DECLARE @DaysToAdd				INT				= 15;
-DECLARE @TransactionDetail		NVARCHAR(500)	= N'Generate Group �������';
+DECLARE @TransactionDetail		NVARCHAR(500)	= N'Generate Group เสร็จสิ้น';
 
 IF @CreatedDateTo IS NOT NULL SET @CreatedDateTo = DATEADD(DAY,1,@CreatedDateTo);
 
@@ -77,7 +77,7 @@ SET @BillindDueDate = DATEADD(	DAY
 									END
 								,@NewBillingDate);
 
-IF (@IsResult = 0) SET @Msg = N'�Դ��ҹ';
+IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 
 /*SetUp Tmplst*/
 	SELECT	
@@ -267,16 +267,31 @@ BEGIN
 	BEGIN 
 		SET @TotalRows = @D_Total;
 		SET @BatchSize = 20;
+		SET @G_RunningLenght = 5;
 	END
 	
 /* Generate Code */
-		EXECUTE dbo.usp_GenerateCode_FromTo 
-				 @D_TT
-				,@D_Total
-				,@D_YY OUTPUT
-				,@D_MM OUTPUT
-				,@D_RunningFrom OUTPUT
-				,@D_RunningTo OUTPUT
+		IF @IsSFTP = 0
+		BEGIN 
+			
+			EXECUTE dbo.usp_GenerateCodeV2 
+					 @G_TT
+					,@G_RunningLenght
+					,@BillingRequestGroupCode OUTPUT;
+
+		END
+		ELSE
+		BEGIN
+			EXECUTE dbo.usp_GenerateCode 
+					 @G_TT
+					,@G_RunningLenght
+					,@BillingRequestGroupCode OUTPUT;
+		END
+
+			--EXECUTE dbo.usp_GenerateCode 
+			--		 @G_TT
+			--		,@G_RunningLenght
+			--		,@BillingRequestGroupCode OUTPUT;
 
 			SELECT	
 				CONCAT(@D_TT, @D_YY, @D_MM, dbo.func_ConvertIntToString((@D_RunningFrom + rwId - 1), @D_Lenght))	BillingRequestItemCode
@@ -539,14 +554,14 @@ BEGIN
 	END
 		
 		SET @IsResult	= 1;
-		SET @Msg		= '�ѹ�֡ �����';
+		SET @Msg		= 'บันทึก สำเร็จ';
 	
 		COMMIT TRANSACTION
 	END TRY
 	BEGIN CATCH
 	
 		SET @IsResult	= 0;
-		SET @Msg		= '�ѹ�֡ ��������';
+		SET @Msg		= 'บันทึก ไม่สำเร็จ';
 	
 		IF @@Trancount > 0 ROLLBACK;
 	END CATCH
