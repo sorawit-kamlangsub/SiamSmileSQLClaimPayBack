@@ -21,16 +21,16 @@ GO
 -- =============================================
 --ALTER PROCEDURE [dbo].[usp_BillingRequest_Sub01_Insert_V2]
 DECLARE
-@GroupTypeId INT = 1
+@GroupTypeId INT = 2
 ,@ClaimTypeCode VARCHAR(20) = '1000'
-,@InsuranceCompanyId INT = 17
+,@InsuranceCompanyId INT = 389190
 ,@CreatedByUserId INT = 1
 ,@BillingDate DATE = '2026-01-21'
-,@ClaimHeaderGroupTypeId INT = 2
-,@InsuranceCompanyName NVARCHAR(300) = N'บริษัท อาคเนย์ประกันภัย จำกัด(มหาชน)'
+,@ClaimHeaderGroupTypeId INT = 3
+,@InsuranceCompanyName NVARCHAR(300) = N'บริษัท เออร์โกประกันภัย (ประเทศไทย) จำกัด (มหาชน)'
 ,@NewBillingDate DATE = '2026-01-19'
 ,@CreatedDateFrom DATE = '2026-01-19'
-,@CreatedDateTo DATE = '2026-01-20'
+,@CreatedDateTo DATE = '2026-01-19'
 ,@ProductTypeShortName VARCHAR(20) = NULL
 ,@ProductTypeId INT = NULL
 		;
@@ -135,10 +135,15 @@ IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 		)cs
 			ON d.ClaimCode = cs.ClaimHeaderCode
 		INNER JOIN #TmpX x
-			ON d.ClaimCode = x.ClaimCode
+			ON d.ClaimHeaderGroupImportDetailId = x.ClaimHeaderGroupImportDetailId
 	WHERE h.IsActive = 1
 		AND	d.IsActive = 1
-		AND	cs.ClaimCompensateCode IS NULL;
+		AND	
+		(
+			@ClaimHeaderGroupTypeId IN (2,4)
+			OR
+			@ClaimHeaderGroupTypeId NOT IN (2,4) AND cs.ClaimCompensateCode IS NULL
+		);
 
 /*SetUp Sort*/
 SELECT 
