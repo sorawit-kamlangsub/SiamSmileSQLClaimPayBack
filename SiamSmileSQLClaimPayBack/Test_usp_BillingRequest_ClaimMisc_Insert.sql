@@ -31,18 +31,19 @@ GO
 --	SET NOCOUNT ON;
 
 DECLARE
-@GroupTypeId INT = 1
-,@ClaimTypeCode VARCHAR(20) = '1000'
-,@InsuranceCompanyId INT = 17
+------
+@GroupTypeId INT = 3
+,@ClaimTypeCode VARCHAR(20) = '2000'
+,@InsuranceCompanyId INT = 389190
 ,@CreatedByUserId INT = 1
-,@BillingDate DATE = '2026-01-21'
-,@ClaimHeaderGroupTypeId INT = 4
-,@InsuranceCompanyName NVARCHAR(300) = N'บริษัท อาคเนย์ประกันภัย จำกัด(มหาชน)'
-,@NewBillingDate DATE = '2026-01-19'
-,@CreatedDateFrom DATE = '2026-01-19'
-,@CreatedDateTo DATE = '2026-01-20'
-,@ProductTypeShortName VARCHAR(20) = NULL
-,@ProductTypeId INT = NULL
+,@BillingDate DATE = '2026-01-20'
+,@ClaimHeaderGroupTypeId INT = 6
+,@InsuranceCompanyName NVARCHAR(300) = N'บริษัท เออร์โกประกันภัย (ประเทศไทย) จำกัด (มหาชน)'
+,@NewBillingDate DATE = '2026-01-20'
+,@CreatedDateFrom DATE = '2026-01-20'
+,@CreatedDateTo DATE = '2026-01-21'
+,@ProductTypeShortName VARCHAR(20) = 'YC'
+,@ProductTypeId INT = 38
 		;
 
 
@@ -267,6 +268,7 @@ BEGIN
 	BEGIN 
 		SET @TotalRows = @D_Total;
 		SET @BatchSize = 20;
+		SET @G_RunningLenght = 5;
 	END
 	
 /* Generate Code */
@@ -306,10 +308,27 @@ BEGIN
 		DECLARE @BillingRequestGroupId INT = NULL;
 
 /* Generate Code */
-		EXECUTE dbo.usp_GenerateCode 
-				 @G_TT
-				,@G_RunningLenght
-				,@BillingRequestGroupCode OUTPUT;
+		IF @IsSFTP = 0
+		BEGIN 
+			
+			EXECUTE dbo.usp_GenerateCodeV2 
+					 @G_TT
+					,@G_RunningLenght
+					,@BillingRequestGroupCode OUTPUT;
+
+		END
+		ELSE
+		BEGIN
+			EXECUTE dbo.usp_GenerateCode 
+					 @G_TT
+					,@G_RunningLenght
+					,@BillingRequestGroupCode OUTPUT;
+		END
+
+			--EXECUTE dbo.usp_GenerateCode 
+			--		 @G_TT
+			--		,@G_RunningLenght
+			--		,@BillingRequestGroupCode OUTPUT;
 
 /* Insert BillingRequestGroup*/
 			--INSERT INTO dbo.BillingRequestGroup
