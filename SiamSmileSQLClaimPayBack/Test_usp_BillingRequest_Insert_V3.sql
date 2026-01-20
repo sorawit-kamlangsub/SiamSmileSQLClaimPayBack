@@ -1,4 +1,4 @@
-USE [ClaimPayBack]
+﻿USE [ClaimPayBack]
 GO
 /****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Insert_V3]    Script Date: 30/10/2568 16:59:23 ******/
 SET ANSI_NULLS ON
@@ -34,7 +34,7 @@ DECLARE @IsResult	BIT			 = 1;
 DECLARE @Result		VARCHAR(100) = '';
 DECLARE @Msg		NVARCHAR(500)= '';
 
-IF (@IsResult = 0) SET @Msg = N'�Դ��ҹ';
+IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 
 IF @CreatedDateTo IS NOT NULL SET @CreatedDateTo = DATEADD(DAY,1,@CreatedDateTo);
 
@@ -313,7 +313,7 @@ IF OBJECT_ID('tempdb..#TmpLoop') IS NOT NULL  DROP TABLE #TmpLoop;
 IF (@max = 0)
 	BEGIN
 		SET @IsResult	= 0;
-		SET @Msg		= N'��辺��¡��';
+		SET @Msg		= N'ไม่พบรายการ';
 	END
 ELSE
 	BEGIN
@@ -324,8 +324,8 @@ ELSE
 		WHERE	IsResult = 1
 
 		SET @IsResult	= 1;
-		SET @Msg		= CONCAT(	'�ѹ�֡ ����� '
-									,'(�ӹǹ: ', @SuccessCount, '/', @max,' ) '
+		SET @Msg		= CONCAT(	'บันทึก สำเร็จ '
+									,'(จำนวน: ', @SuccessCount, '/', @max,' ) '
 								);
 	END;
 
