@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImport_Select]    Script Date: 10/11/2568 16:57:17 ******/
+/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImport_Select]    Script Date: 20/1/2569 13:34:40 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -26,6 +26,8 @@ GO
 --					Add Union All ClaimCompenstate
 -- Update date:2025-11-10 17:20 Sorawit Kamlangsub
 --					แก้ไข AND cs.ClaimCompensateCode IS NULL ให้อยู่ใน Sub Query Left Join
+-- Update date:2026-01-20 13:28 Sorawit Kamlangsub
+--					แก้ไข hi.ClaimHeaderGroupImportStatusId = 2 OR hi.ClaimHeaderGroupImportStatusId = 4 เป็น hi.ClaimHeaderGroupImportStatusId IN (2,3,4)
 -- Description:	Ui3-2
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimHeaderGroupImport_Select]
@@ -54,8 +56,8 @@ BEGIN
 	      ,hi.ClaimHeaderGroupCode
 	      ,hi.ItemCount
 		  ,CASE 
-			WHEN hi.ClaimHeaderGroupImportStatusId = 2 OR hi.ClaimHeaderGroupImportStatusId = 4 THEN hi.TotalAmount - ISNULL(rd.CoverAmount,0) 
-			WHEN cc.countClaim > 1 OR hi.ClaimHeaderGroupImportStatusId = 3 THEN hi.TotalAmount - ISNULL(bi.CoverAmount,0) 
+			WHEN hi.ClaimHeaderGroupImportStatusId IN (2,3,4) THEN hi.TotalAmount - ISNULL(rd.CoverAmount,0) 
+			WHEN cc.countClaim > 1 OR hi.ClaimHeaderGroupImportStatusId = 3 THEN hi.TotalAmount - ISNULL(bi.CoverAmount,0)
 		   ELSE hi.TotalAmount END AS TotalAmount
 	      ,hi.CreatedDate AS BillingDate
 	      ,his.ClaimHeaderGroupImportStatusId
