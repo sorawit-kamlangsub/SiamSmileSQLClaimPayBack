@@ -26,7 +26,7 @@ DECLARE
 ,@InsuranceCompanyId INT = 17
 ,@CreatedByUserId INT = 1
 ,@BillingDate DATE = '2026-01-21'
-,@ClaimHeaderGroupTypeId INT = 4
+,@ClaimHeaderGroupTypeId INT = 2
 ,@InsuranceCompanyName NVARCHAR(300) = N'บริษัท อาคเนย์ประกันภัย จำกัด(มหาชน)'
 ,@NewBillingDate DATE = '2026-01-19'
 ,@CreatedDateFrom DATE = '2026-01-19'
@@ -334,10 +334,10 @@ BEGIN
 		--			,@BillingRequestGroupCode OUTPUT;
 		--END
 
-			EXECUTE dbo.usp_GenerateCode 
-					 @G_TT
-					,@G_RunningLenght
-					,@BillingRequestGroupCode OUTPUT;
+			--EXECUTE dbo.usp_GenerateCode 
+			--		 @G_TT
+			--		,@G_RunningLenght
+			--		,@BillingRequestGroupCode OUTPUT;
 
 /* Insert BillingRequestGroup*/
 			--INSERT INTO dbo.BillingRequestGroup
@@ -553,13 +553,13 @@ BEGIN
 			--      ,[IsActive]
 			--      ,[CreatedByUserId]
 			--      ,[CreatedDate])
-			SELECT 
-				i.ClaimHeaderGroupImportId	ClaimHeaderGroupImportId
-				,@TransactionDetail			CancelDetail
-				,1							IsActive
-				,@UserId					CreatedByUserId
-				,@D2						CreatedDate
-			FROM #Tmplst i;
+			--SELECT 
+			--	i.ClaimHeaderGroupImportId	ClaimHeaderGroupImportId
+			--	,@TransactionDetail			CancelDetail
+			--	,1							IsActive
+			--	,@UserId					CreatedByUserId
+			--	,@D2						CreatedDate
+			--FROM #Tmplst i;
  /* Move to next batch */
 		SET @Offset = @Offset + @BatchSize;
 
