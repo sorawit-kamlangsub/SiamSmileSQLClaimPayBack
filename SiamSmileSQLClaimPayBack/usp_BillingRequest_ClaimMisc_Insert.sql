@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_ClaimMisc_Insert]    Script Date: 20/1/2569 14:34:02 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_ClaimMisc_Insert]    Script Date: 20/1/2569 17:10:15 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -199,7 +199,16 @@ BEGIN
 
 	SELECT 
 		@InsuranceCompanyCode = o.OrganizeCode 
-		,@IsSFTP = 0
+		,@IsSFTP =
+			CASE 
+				WHEN sfd.SFTPConfigId IS NOT NULL THEN 
+					CASE 
+						WHEN p.IsSFTP = 1 THEN 1
+						WHEN p.IsSFTP = 0 THEN 0
+					ELSE 1
+				END
+			ELSE 0
+		END
 	FROM DataCenterV1.Organize.Organize o
 			LEFT JOIN (
 				SELECT
@@ -262,27 +271,13 @@ BEGIN
 	END
 	
 /* Generate Code */
-		IF @IsSFTP = 0
-		BEGIN 
-			
-			EXECUTE dbo.usp_GenerateCodeV2 
-					 @G_TT
-					,@G_RunningLenght
-					,@BillingRequestGroupCode OUTPUT;
-
-		END
-		ELSE
-		BEGIN
-			EXECUTE dbo.usp_GenerateCode 
-					 @G_TT
-					,@G_RunningLenght
-					,@BillingRequestGroupCode OUTPUT;
-		END
-
-			--EXECUTE dbo.usp_GenerateCode 
-			--		 @G_TT
-			--		,@G_RunningLenght
-			--		,@BillingRequestGroupCode OUTPUT;
+		EXECUTE dbo.usp_GenerateCode_FromTo 
+				 @D_TT
+				,@D_Total
+				,@D_YY OUTPUT
+				,@D_MM OUTPUT
+				,@D_RunningFrom OUTPUT
+				,@D_RunningTo OUTPUT
 
 			SELECT	
 				CONCAT(@D_TT, @D_YY, @D_MM, dbo.func_ConvertIntToString((@D_RunningFrom + rwId - 1), @D_Lenght))	BillingRequestItemCode
@@ -312,10 +307,27 @@ BEGIN
 		DECLARE @BillingRequestGroupId INT = NULL;
 
 /* Generate Code */
-		EXECUTE dbo.usp_GenerateCode 
-				 @G_TT
-				,@G_RunningLenght
-				,@BillingRequestGroupCode OUTPUT;
+		IF @IsSFTP = 0
+		BEGIN 
+			
+			EXECUTE dbo.usp_GenerateCodeV2 
+					 @G_TT
+					,@G_RunningLenght
+					,@BillingRequestGroupCode OUTPUT;
+
+		END
+		ELSE
+		BEGIN
+			EXECUTE dbo.usp_GenerateCode 
+					 @G_TT
+					,@G_RunningLenght
+					,@BillingRequestGroupCode OUTPUT;
+		END
+
+			--EXECUTE dbo.usp_GenerateCode 
+			--		 @G_TT
+			--		,@G_RunningLenght
+			--		,@BillingRequestGroupCode OUTPUT;
 
 /* Insert BillingRequestGroup*/
 			INSERT INTO dbo.BillingRequestGroup
