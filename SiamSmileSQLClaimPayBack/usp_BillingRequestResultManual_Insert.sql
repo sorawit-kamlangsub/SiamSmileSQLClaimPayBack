@@ -1,4 +1,4 @@
-USE [ClaimPayBack]
+ÔªøUSE [ClaimPayBack]
 GO
 /****** Object:  StoredProcedure [dbo].[usp_BillingRequestResultManual_Insert]    Script Date: 21/1/2569 14:51:48 ******/
 SET ANSI_NULLS ON
@@ -8,9 +8,10 @@ GO
 -- =============================================
 -- Author:		Siriphong Narkphung
 -- Create date: 2022-12-14
--- UpdatedDate: /*20230901 1212 bell ‡æ‘Ë¡‡ß◊ËÕπ‰¢ validate*/
--- UpdatedDate: /*20230913 1708 bell ‡æ‘Ë¡‡ß◊ËÕπ‰¢ validate ‰¡Ë„ÀÈ‡°‘π¬Õ¥*/
--- UpdatedDate: /*20230920 1543 Chanadol ‡æ‘Ë¡ type*/
+-- UpdatedDate: /*20230901 1212 bell ‡πÄ‡∏û‡∏¥‡πà‡∏°‡πÄ‡∏á‡∏∑‡πà‡∏≠‡∏ô‡πÑ‡∏Ç validate*/
+-- UpdatedDate: /*20230913 1708 bell ‡πÄ‡∏û‡∏¥‡πà‡∏°‡πÄ‡∏á‡∏∑‡πà‡∏≠‡∏ô‡πÑ‡∏Ç validate ‡πÑ‡∏°‡πà‡πÉ‡∏´‡πâ‡πÄ‡∏Å‡∏¥‡∏ô‡∏¢‡∏≠‡∏î*/
+-- UpdatedDate: /*20230920 1543 Chanadol ‡πÄ‡∏û‡∏¥‡πà‡∏° type*/
+-- UpdateDate:  20260121 Sorawit.k ‡πÅ‡∏Å‡πâ validate ‡∏Å‡∏£‡∏∏‡∏ì‡∏≤‡∏ï‡∏£‡∏ß‡∏à‡∏™‡∏≠‡∏ö‡∏¢‡∏≠‡∏î‡πÄ‡∏á‡∏¥‡∏ô IF @CoverAmount >= (@a_Total - @a_Receive) => IF @CoverAmount >= @a_Total
 -- Description:	<Description,,>
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_BillingRequestResultManual_Insert]
@@ -50,7 +51,7 @@ BEGIN
 			IF (@ClaimHeaderGroupImportDetailId IS NULL OR @CreatedByUserId IS NULL OR @CoverAmount IS NULL)
 				BEGIN
 					SET @IsResult = 0;
-					SET @Msg = N'°√ÿ≥“°√Õ°¢ÈÕ¡Ÿ≈„ÀÈ§√∫∂È«π';
+					SET @Msg = N'‡∏Å‡∏£‡∏∏‡∏ì‡∏≤‡∏Å‡∏£‡∏≠‡∏Å‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏•‡πÉ‡∏´‡πâ‡∏Ñ‡∏£‡∏ö‡∏ñ‡πâ‡∏ß‡∏ô';
 				END
 		END
 	
@@ -90,12 +91,12 @@ BEGIN
 			IF @ClaimCode IS NULL
 				BEGIN
 					SET @IsResult = 0;
-					SET @Msg = N'¬—ß‰¡Ë¡’√“¬°“√ Claim Import';
+					SET @Msg = N'‡∏¢‡∏±‡∏á‡πÑ‡∏°‡πà‡∏°‡∏µ‡∏£‡∏≤‡∏¢‡∏Å‡∏≤‡∏£ Claim Import';
 				END
 			ELSE IF (@BillingRequestGroupId IS NOT NULL)
 				BEGIN
 					SET @IsResult = 0;
-					SET @Msg = N'¡’°“√ BillingRequestGroup ·≈È«';
+					SET @Msg = N'‡∏°‡∏µ‡∏Å‡∏≤‡∏£ BillingRequestGroup ‡πÅ‡∏•‡πâ‡∏ß';
 				END
 		END;
 	---------------------------------------------------------------------------
@@ -118,24 +119,24 @@ BEGIN
 	---------------------------------------------------------------------------
 	IF(@IsResult = 1)
 		BEGIN
-			IF(@chkBilling IS NULL)--∂È“ BillingRequestResultDetailId ‰¡Ë¡’ „ÀÈ Insert ¢ÈÕ¡Ÿ≈ 
+			IF(@chkBilling IS NULL)--‡∏ñ‡πâ‡∏≤ BillingRequestResultDetailId ‡πÑ‡∏°‡πà‡∏°‡∏µ ‡πÉ‡∏´‡πâ Insert ‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏• 
 				BEGIN
-					SET @IsUpdate = 0;--‰¡ËÕ—æ‡¥∑
-					SET @Msg = N'Insert ¢ÈÕ¡Ÿ≈';
+					SET @IsUpdate = 0;--‡πÑ‡∏°‡πà‡∏≠‡∏±‡∏û‡πÄ‡∏î‡∏ó
+					SET @Msg = N'Insert ‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏•';
 				END
 			ELSE
 				BEGIN
-					IF(@IsManual = 0)--‡™Á§¢ÈÕ¡Ÿ≈∑’Ë¡’Õ¬ŸË∂È“‡ªÁπ°“√π”‡¢È“¢ÈÕ¡Ÿ≈√’‡§≈¡∑’Ë‰¡Ë„™Ë Manual ®–‰¡Ë “¡“√∂·°È‰¢¢ÈÕ¡Ÿ≈‰¥È
+					IF(@IsManual = 0)--‡πÄ‡∏ä‡πá‡∏Ñ‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏•‡∏ó‡∏µ‡πà‡∏°‡∏µ‡∏≠‡∏¢‡∏π‡πà‡∏ñ‡πâ‡∏≤‡πÄ‡∏õ‡πá‡∏ô‡∏Å‡∏≤‡∏£‡∏ô‡∏≥‡πÄ‡∏Ç‡πâ‡∏≤‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏•‡∏£‡∏µ‡πÄ‡∏Ñ‡∏•‡∏°‡∏ó‡∏µ‡πà‡πÑ‡∏°‡πà‡πÉ‡∏ä‡πà Manual ‡∏à‡∏∞‡πÑ‡∏°‡πà‡∏™‡∏≤‡∏°‡∏≤‡∏£‡∏ñ‡πÅ‡∏Å‡πâ‡πÑ‡∏Ç‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏•‡πÑ‡∏î‡πâ
 						BEGIN
 							SET @IsResult = 0;
-							SET @Msg = N'ÀÈ“¡·°È‰¢';
+							SET @Msg = N'‡∏´‡πâ‡∏≤‡∏°‡πÅ‡∏Å‡πâ‡πÑ‡∏Ç';
 						END
 					ELSE 
 						BEGIN
-							IF (@Count > 0)--‡™Á§¢ÈÕ¡Ÿ≈ BillingRequestGroupXResultDetail ∂È“¡’¢ÈÕ¡Ÿ≈®–‰¡Ë “¡“√∂ Update ‰¥È‡π◊ËÕß®“°¢ÈÕ¡Ÿ≈π’È∂Ÿ° Ëß‰ª·≈È«
+							IF (@Count > 0)--‡πÄ‡∏ä‡πá‡∏Ñ‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏• BillingRequestGroupXResultDetail ‡∏ñ‡πâ‡∏≤‡∏°‡∏µ‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏•‡∏à‡∏∞‡πÑ‡∏°‡πà‡∏™‡∏≤‡∏°‡∏≤‡∏£‡∏ñ Update ‡πÑ‡∏î‡πâ‡πÄ‡∏ô‡∏∑‡πà‡∏≠‡∏á‡∏à‡∏≤‡∏Å‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏•‡∏ô‡∏µ‡πâ‡∏ñ‡∏π‡∏Å‡∏™‡πà‡∏á‡πÑ‡∏õ‡πÅ‡∏•‡πâ‡∏ß
 								BEGIN
 									SET @IsResult = 0;
-									SET @Msg = N'ÀÈ“¡ Update';
+									SET @Msg = N'‡∏´‡πâ‡∏≤‡∏° Update';
 								END
 							ELSE 
 								BEGIN
@@ -146,7 +147,7 @@ BEGIN
 											IF(@ChkCoverAmount = @CoverAmount)
 												BEGIN
 													SET @IsResult = 0;
-													SET @Msg = N'¢ÈÕ¡Ÿ≈∑’Ë·°È‰¢µÈÕß‰¡Ëµ√ß°—∫§Ë“‡¥‘¡'
+													SET @Msg = N'‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏•‡∏ó‡∏µ‡πà‡πÅ‡∏Å‡πâ‡πÑ‡∏Ç‡∏ï‡πâ‡∏≠‡∏á‡πÑ‡∏°‡πà‡∏ï‡∏£‡∏á‡∏Å‡∏±‡∏ö‡∏Ñ‡πà‡∏≤‡πÄ‡∏î‡∏¥‡∏°'
 												END
 										END
 								END
@@ -156,7 +157,7 @@ BEGIN
 		END;
 
 
---/*20230901 1212 bell ‡æ‘Ë¡‡ß◊ËÕπ‰¢ validate*/
+--/*20230901 1212 bell ‡πÄ‡∏û‡∏¥‡πà‡∏°‡πÄ‡∏á‡∏∑‡πà‡∏≠‡∏ô‡πÑ‡∏Ç validate*/
 --IF @IsResult = 1
 --	BEGIN
 --		DECLARE @CountChkResult INT;
@@ -173,11 +174,11 @@ BEGIN
 --		IF @CountChkResult <> 0
 --			BEGIN
 --				SET @IsResult = 0;
---				SET @Msg = N'√“¬°“√π’È ¡’º≈µÕ∫°≈—∫®“° ftp ·≈È«'
+--				SET @Msg = N'‡∏£‡∏≤‡∏¢‡∏Å‡∏≤‡∏£‡∏ô‡∏µ‡πâ ‡∏°‡∏µ‡∏ú‡∏•‡∏ï‡∏≠‡∏ö‡∏Å‡∏•‡∏±‡∏ö‡∏à‡∏≤‡∏Å ftp ‡πÅ‡∏•‡πâ‡∏ß'
 --			END
 --	END
 
-/*20230913 1708 bell ‡æ‘Ë¡‡ß◊ËÕπ‰¢ validate ‰¡Ë„ÀÈ‡°‘π¬Õ¥*/
+/*20230913 1708 bell ‡πÄ‡∏û‡∏¥‡πà‡∏°‡πÄ‡∏á‡∏∑‡πà‡∏≠‡∏ô‡πÑ‡∏Ç validate ‡πÑ‡∏°‡πà‡πÉ‡∏´‡πâ‡πÄ‡∏Å‡∏¥‡∏ô‡∏¢‡∏≠‡∏î*/
 IF @IsResult = 1
 	BEGIN
     
@@ -201,24 +202,24 @@ IF @IsResult = 1
 		IF @a_Receive IS NULL SET @a_Receive = 0;
 		IF @a_Total IS NULL SET @a_Total = 0;
 
-		IF @CoverAmount >= (@a_Total - @a_Receive)
+		IF @CoverAmount >= @a_Total
 			BEGIN
 				SET @IsResult = 0;
-				SET @Msg = N'°√ÿ≥“µ√«® Õ∫¬Õ¥‡ß‘π'
+				SET @Msg = N'‡∏Å‡∏£‡∏∏‡∏ì‡∏≤‡∏ï‡∏£‡∏ß‡∏à‡∏™‡∏≠‡∏ö‡∏¢‡∏≠‡∏î‡πÄ‡∏á‡∏¥‡∏ô'
 			END
 
 	END
 
 
-		--¡’°“√∫—π∑÷°‡¢È“¡“·≈È«À√◊Õ¬—ß ?
-			--‰¡Ë¡’  Insert ‡¢È“µ“¡ª°µ‘
-			--¡’ 
+		--‡∏°‡∏µ‡∏Å‡∏≤‡∏£‡∏ö‡∏±‡∏ô‡∏ó‡∏∂‡∏Å‡πÄ‡∏Ç‡πâ‡∏≤‡∏°‡∏≤‡πÅ‡∏•‡πâ‡∏ß‡∏´‡∏£‡∏∑‡∏≠‡∏¢‡∏±‡∏á ?
+			--‡πÑ‡∏°‡πà‡∏°‡∏µ  Insert ‡πÄ‡∏Ç‡πâ‡∏≤‡∏ï‡∏≤‡∏°‡∏õ‡∏Å‡∏ï‡∏¥
+			--‡∏°‡∏µ 
 				--CheckHeader .IsManual ?
-					-- IsManual = 0 ÀÈ“¡·°È‰¢
+					-- IsManual = 0 ‡∏´‡πâ‡∏≤‡∏°‡πÅ‡∏Å‡πâ‡πÑ‡∏Ç
 					-- IsManual = 1
 						--IsCalculate ?
 							--IsCalculate = 0 Update
-							--IsCalculate = 1 ÀÈ“¡ Update
+							--IsCalculate = 1 ‡∏´‡πâ‡∏≤‡∏° Update
 
 
 		IF @IsResult = 1			
@@ -358,14 +359,14 @@ IF @IsResult = 1
 						END;
 
 					SET @IsResult = 1;			  					
-					SET @Msg = N'∫—π∑÷°  ”‡√Á®';	 						
+					SET @Msg = N'‡∏ö‡∏±‡∏ô‡∏ó‡∏∂‡∏Å ‡∏™‡∏≥‡πÄ‡∏£‡πá‡∏à';	 						
 												  					
 					COMMIT TRANSACTION			  					
 				END TRY							  					
 				BEGIN CATCH						  					
 												  					
 					SET @IsResult = 0;			  					
-					SET @Msg = N'∫—π∑÷° ‰¡Ë ”‡√Á®';						
+					SET @Msg = N'‡∏ö‡∏±‡∏ô‡∏ó‡∏∂‡∏Å ‡πÑ‡∏°‡πà‡∏™‡∏≥‡πÄ‡∏£‡πá‡∏à';						
 												  					
 					IF @@TRANCOUNT > 0 ROLLBACK	  					
 				END CATCH											
