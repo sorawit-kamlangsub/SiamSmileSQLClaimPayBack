@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_ClaimMisc_Insert]    Script Date: 20/1/2569 17:10:15 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_ClaimMisc_Insert]    Script Date: 21/1/2569 8:40:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -150,7 +150,12 @@ IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 			ON d.ClaimCode = x.ClaimCode
 	WHERE h.IsActive = 1
 		AND	d.IsActive = 1
-		AND	cs.ClaimCompensateCode IS NULL;
+		AND	
+		(
+			@ClaimHeaderGroupTypeId IN (2,4)
+			OR
+			@ClaimHeaderGroupTypeId NOT IN (2,4) AND cs.ClaimCompensateCode IS NULL
+		);
 
 /*SetUp Sort*/
 SELECT 
