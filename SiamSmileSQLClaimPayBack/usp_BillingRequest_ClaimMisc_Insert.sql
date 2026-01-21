@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_ClaimMisc_Insert]    Script Date: 21/1/2569 8:40:36 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_ClaimMisc_Insert]    Script Date: 21/1/2569 15:04:24 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -272,7 +272,7 @@ BEGIN
 	BEGIN 
 		SET @TotalRows = @D_Total;
 		SET @BatchSize = 20;
-		SET @G_RunningLenght = 5;
+		--SET @G_RunningLenght = 5;
 	END
 	
 /* Generate Code */
@@ -312,27 +312,27 @@ BEGIN
 		DECLARE @BillingRequestGroupId INT = NULL;
 
 /* Generate Code */
-		IF @IsSFTP = 0
-		BEGIN 
+		--IF @IsSFTP = 0
+		--BEGIN 
 			
-			EXECUTE dbo.usp_GenerateCodeV2 
-					 @G_TT
-					,@G_RunningLenght
-					,@BillingRequestGroupCode OUTPUT;
+		--	EXECUTE dbo.usp_GenerateCodeV2 
+		--			 @G_TT
+		--			,@G_RunningLenght
+		--			,@BillingRequestGroupCode OUTPUT;
 
-		END
-		ELSE
-		BEGIN
+		--END
+		--ELSE
+		--BEGIN
+		--	EXECUTE dbo.usp_GenerateCode 
+		--			 @G_TT
+		--			,@G_RunningLenght
+		--			,@BillingRequestGroupCode OUTPUT;
+		--END
+
 			EXECUTE dbo.usp_GenerateCode 
 					 @G_TT
 					,@G_RunningLenght
 					,@BillingRequestGroupCode OUTPUT;
-		END
-
-			--EXECUTE dbo.usp_GenerateCode 
-			--		 @G_TT
-			--		,@G_RunningLenght
-			--		,@BillingRequestGroupCode OUTPUT;
 
 /* Insert BillingRequestGroup*/
 			INSERT INTO dbo.BillingRequestGroup
