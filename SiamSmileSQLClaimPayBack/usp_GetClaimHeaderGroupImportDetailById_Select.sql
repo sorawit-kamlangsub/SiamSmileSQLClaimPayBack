@@ -12,6 +12,7 @@ GO
 -- Update date: 2022-12-22 App Field URLOpenClaimLink , App Field URLOpenApplicationLink
 -- Update date: Kittisak.Ph 20230703
 -- Update date: 2023-09-21 chanadol add column IsManualNPL
+-- Update date: Sorawit.k 20260121 add ClaimMisc
 -- Description:	
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_GetClaimHeaderGroupImportDetailById_Select]
@@ -28,12 +29,15 @@ DECLARE @pId INT = @ClaimHeaderGroupImportDetailId
 
 DECLARE @UrlPH NVARCHAR(255) = 'http://uat.siamsmile.co.th:9101/' --prod --https://sssph.siamsmile.co.th/
 DECLARE @UrlPA NVARCHAR(255) = 'http://uat.siamsmile.co.th:9102/' --prod --https://ssspa.siamsmile.co.th/
+DECLARE @UrlClaimMisc NVARCHAR(255) = 'https://uatclaimmisc.siamsmile.co.th/' --prod https://claimmisc.siamsmile.co.th/
 
 DECLARE @URLLinkClaimPH NVARCHAR(MAX)		= CONCAT(@UrlPH,'Modules/Claim/frmClaimApproveOverview.aspx?clm=')
 DECLARE @URLLinkApplicationPH NVARCHAR(MAX) = CONCAT(@UrlPH,'Modules/PH/frmPHDetail.aspx?app=')
 
 DECLARE @URLLinkClaimPA NVARCHAR(MAX)		= CONCAT(@UrlPA,'Modules/Claim/frmClaimPA_New.aspx?clm=')
 DECLARE @URLLinkApplicationPA NVARCHAR(MAX) = CONCAT(@UrlPA,'Modules/PA/frmApplicationDetail.aspx?app=')
+
+DECLARE @URLLinkApplicationClaimMisc NVARCHAR(MAX) = CONCAT(@UrlClaimMisc,'claimdetailhomeandhouse?id=')
 
 SELECT d.ClaimHeaderGroupImportDetailId
       ,d.ClaimHeaderGroupImportId
@@ -43,7 +47,7 @@ SELECT d.ClaimHeaderGroupImportDetailId
       ,d.IdentityCard
       ,d.CustName
       ,d.DateHappen
-      ,d.Pay
+      ,CASE WHEN f.ClaimHeaderGroupTypeId = 6 THEN h.TotalAmount ELSE d.Pay END AS Pay
       ,d.HospitalId
       ,d.HospitalName
       ,d.DateIn
@@ -60,11 +64,11 @@ SELECT d.ClaimHeaderGroupImportDetailId
       ,d.ICD10
       ,d.IPDCount
       ,d.ICUCount
-      ,d.Net
+      ,CASE WHEN f.ClaimHeaderGroupTypeId = 6 THEN h.TotalAmount ELSE d.Net END AS Net
       ,d.Compensate_Include
-      ,d.Pay_Total
+      ,CASE WHEN f.ClaimHeaderGroupTypeId = 6 THEN h.TotalAmount ELSE d.Pay_Total END AS Pay_Total 
       ,d.DiscountSS
-      ,d.PaySS_Total
+      ,CASE WHEN f.ClaimHeaderGroupTypeId = 6 THEN h.TotalAmount ELSE d.PaySS_Total END PaySS_Total --· ¥ßø‘≈¥Ïπ’È„πÀπÈ“ ∫—π∑÷°¬Õ¥‡ß‘π∫√‘…—∑ª√–°—π 
       ,d.PolicyNo
       ,d.SchoolName
       ,d.CustomerDetailCode
@@ -74,7 +78,7 @@ SELECT d.ClaimHeaderGroupImportDetailId
       ,d.Orgen
       ,d.Amount_Compensate_in
       ,d.Amount_Compensate_out
-      ,d.Amount_Pay
+      ,CASE WHEN f.ClaimHeaderGroupTypeId = 6 THEN h.TotalAmount ELSE d.Amount_Pay END AS Amount_Pay
       ,d.Amount_Dead
       ,d.Remark
 
@@ -87,12 +91,14 @@ SELECT d.ClaimHeaderGroupImportDetailId
 	  ,CASE--Folk add 2022-12-23 --Sun add ClaimHeaderGroupTypeId 4,5 2023-01-04
 		WHEN f.ClaimHeaderGroupTypeId IN (2,4,5) THEN CONCAT(@URLLinkClaimPH,dbo.uFnStringToBase64 (d.ClaimCode))
 		WHEN f.ClaimHeaderGroupTypeId = 3 THEN CONCAT(@URLLinkClaimPA,dbo.uFnStringToBase64 (d.ClaimCode))
+		WHEN f.ClaimHeaderGroupTypeId = 6 THEN CONCAT(@URLLinkApplicationClaimMisc,cm.ClaimMiscId)
 		ELSE ''
 		END AS URLOpenClaimLink
 
 	  ,CASE--Folk add 2022-12-23
 		WHEN f.ClaimHeaderGroupTypeId IN (2) THEN CONCAT(@URLLinkApplicationPH,dbo.uFnStringToBase64 (d.ClaimCode))
 		WHEN f.ClaimHeaderGroupTypeId = 3 THEN CONCAT(@URLLinkApplicationPA,dbo.uFnStringToBase64 (d.ClaimCode))
+		WHEN f.ClaimHeaderGroupTypeId = 6 THEN CONCAT(@URLLinkApplicationClaimMisc,cm.ClaimMiscId)
 		ELSE ''
 	   END AS URLOpenApplicationLink
 	  ,ccnpl.ClaimHeaderGroupImportDetailId		IsManualNPL  --update 2023-09-21 chanadol
@@ -148,6 +154,8 @@ FROM dbo.ClaimHeaderGroupImportDetail d
 		ON d.ClaimHeaderGroupImportId = g.ClaimHeaderGroupImportId
 	LEFT JOIN dbo.ClaimHeaderGroupImportFile f
 		ON g.ClaimGroupImportFileId = f.ClaimHeaderGroupImportFileId
+	LEFT JOIN [ClaimMiscellaneous].[misc].[ClaimMisc] cm
+		ON cm.ClaimHeaderGroupCode = h.ClaimHeaderGroupCode
 	-----------------------------------------------------------------
 WHERE d.ClaimHeaderGroupImportDetailId = @pId
 
