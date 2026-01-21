@@ -24,9 +24,9 @@ GO
 --ALTER PROCEDURE [dbo].[usp_ClaimHeaderGroupImport_Select]
 	-- Add the parameters for the stored procedure here
 	DECLARE
-	@BillingDateFrom					DATE = '2025-09-01'
-	,@BillingDateTo						DATE = '2025-09-29'
-	,@ClaimHeaderGroupImportStatusId	INT
+	@BillingDateFrom					DATE = '2026-01-21'
+	,@BillingDateTo						DATE = '2026-01-21'
+	,@ClaimHeaderGroupImportStatusId	INT = 2
 	,@IndexStart						INT = NULL           
 	,@PageSize							INT = NULL             
 	,@SortField							NVARCHAR(MAX)  = NULL 
@@ -48,8 +48,8 @@ GO
 	      ,hi.ClaimHeaderGroupCode
 	      ,hi.ItemCount
 		  ,CASE 
-			WHEN hi.ClaimHeaderGroupImportStatusId = 2 OR hi.ClaimHeaderGroupImportStatusId = 4 THEN hi.TotalAmount - ISNULL(rd.CoverAmount,0) 
-			WHEN cc.countClaim > 1 OR hi.ClaimHeaderGroupImportStatusId = 3 THEN hi.TotalAmount - ISNULL(bi.CoverAmount,0) 
+			WHEN hi.ClaimHeaderGroupImportStatusId IN (2,3,4) THEN hi.TotalAmount - ISNULL(rd.CoverAmount,0) 
+			WHEN cc.countClaim > 1 OR hi.ClaimHeaderGroupImportStatusId = 3 THEN hi.TotalAmount - ISNULL(bi.CoverAmount,0)
 		   ELSE hi.TotalAmount END AS TotalAmount
 	      ,hi.CreatedDate AS BillingDate
 	      ,his.ClaimHeaderGroupImportStatusId
@@ -58,7 +58,7 @@ GO
 		  ,hi.InsuranceCompanyName AS InsuranceCompany 
 	      ,hi.BillingRequestGroupId	
 		  ,COUNT(hi.ClaimHeaderGroupImportId) OVER ( ) TotalCount
-		  ,b.Detail AS BranchName
+		  ,b.Detail	AS BranchName
 	FROM dbo.ClaimHeaderGroupImport hi
 		LEFT JOIN ClaimHeaderGroupImportStatus his
 			ON hi.ClaimHeaderGroupImportStatusId = his.ClaimHeaderGroupImportStatusId
@@ -75,10 +75,10 @@ GO
 								,cs.ClaimHeaderCode
 							FROM SSS.dbo.ClaimCompensate cs
 							WHERE cs.IsActive = 1	
+							AND cs.ClaimCompensateCode IS NULL
 						)cs
 						ON d.ClaimCode = cs.ClaimHeaderCode
 				WHERE d.IsActive = 1 
-				AND cs.ClaimCompensateCode IS NULL
 				AND bi.IsActive = 1
 				GROUP BY d.ClaimHeaderGroupImportId
 			)bi
@@ -95,11 +95,11 @@ GO
 							SELECT cs.ClaimCompensateCode
 								,cs.ClaimHeaderCode
 							FROM SSS.dbo.ClaimCompensate cs
-							WHERE cs.IsActive = 1	
+							WHERE cs.IsActive = 1
+							AND cs.ClaimCompensateCode IS NULL
 						)cs
 						ON d.ClaimCode = cs.ClaimHeaderCode
 				WHERE d.IsActive = 1
-				AND cs.ClaimCompensateCode IS NULL
 				AND rd.IsActive = 1
 				GROUP BY d.ClaimHeaderGroupImportId
 			)rd
@@ -131,11 +131,36 @@ GO
 				SELECT 	 g.Code											ClaimHeaderGroup_id
 						,g.Branch_id									Branch_id
 				 FROM SSSPA.dbo.DB_ClaimHeaderGroup g WITH(NOLOCK)
+
+			UNION ALL
+
+			SELECT 
+				cg.ClaimCompensateGroupCode								ClaimHeaderGroup_id
+				,bh.tempcode											Branch_id
+			FROM [sss].[dbo].[ClaimCompensateGroup] cg
+				LEFT JOIN [DataCenterV1].[Employee].[Employee] e
+					ON e.EmployeeCode = cg.CreatedByCode
+				LEFT JOIN [DataCenterV1].[Employee].[EmployeeTeam] et
+					ON et.EmployeeTeam_ID = e.EmployeeTeam_ID
+				LEFT JOIN [DataCenterV1].[Address].[Branch] bh
+					ON bh.Branch_ID = et.Branch_ID
+
+			UNION ALL
+			
+			SELECT 
+				cm.ClaimHeaderGroupCode	ClaimHeaderGroup_id
+				,bh.tempcode			Branch_id
+			FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
+				LEFT JOIN [DataCenterV1].[Address].[Branch] bh
+					ON bh.Branch_ID = cm.BranchId
+
 			) u
 		) x
 		ON x.ClaimHeaderGroup_id = hi.ClaimHeaderGroupCode
 		LEFT JOIN sss.dbo.MT_Branch b
 			ON x.Branch_id = b.Code
+		LEFT JOIN [DataCenterV1].[Address].[Branch] cb
+			ON cb.tempcode = b.Code
 	WHERE 
 	(
 		(@ClaimHeaderGroupImportStatusId = 4)
@@ -144,11 +169,14 @@ GO
 	AND hi.IsActive = 1
 	AND (hi.ClaimHeaderGroupImportStatusId = @ClaimHeaderGroupImportStatusId OR @ClaimHeaderGroupImportStatusId IS NULL)
 	AND (hi.ClaimHeaderGroupCode LIKE '%'+@SearchDetail+'%' OR @SearchDetail IS NULL)
-	AND (x.Branch_id = @BranchId OR @BranchId IS NULL)	
+	AND (cb.Branch_ID = @BranchId OR @BranchId IS NULL)
+	
 	ORDER BY 
 		 CASE WHEN @OrderType IS NULL    AND @SortField IS NULL        THEN hi.ClaimHeaderGroupImportId END ASC
 		 --,CASE WHEN @OrderType = 'ASC'    AND @SortField ='Detail'    THEN Detail END ASC
 		 --,CASE WHEN @OrderType = 'DESC'    AND @SortField ='Detail'    THEN Detail END DESC
 	
 	OFFSET @IndexStart ROWS FETCH NEXT @PageSize ROWS ONLY
+
+
 --END;
