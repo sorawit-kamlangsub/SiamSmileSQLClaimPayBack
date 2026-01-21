@@ -1,6 +1,6 @@
 USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequestItem_Select]    Script Date: 18/11/2568 9:06:06 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequestItem_Select]    Script Date: 21/1/2569 18:27:06 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -75,7 +75,7 @@ BEGIN
 			,c.Compensate_Include							
 			--,c.Pay_Total - ISNULL(rrd.CoverAmount,0)	Pay_Total --Folk Update 2023-01-05	
 			--,c.Pay_Total - ISNULL(b.CoverAmount,0)	Pay_Total --Chanadol Update 2023-08-31
-			,ISNULL(c.PaySS_Total,0)- ISNULL(b.CoverAmount,0) Pay_Total --Chanadol  Update 2024-01-26
+			,CASE WHEN f.ClaimHeaderGroupTypeId = 6 THEN ISNULL(i.TotalAmount,0)- ISNULL(b.CoverAmount,0) ELSE ISNULL(c.PaySS_Total,0)- ISNULL(b.CoverAmount,0) END Pay_Total --Chanadol  Update 2024-01-26
 			,c.DiscountSS
 			,c.PaySS_Total
 											
@@ -142,7 +142,7 @@ BEGIN
 
 	ORDER BY 
 			CASE WHEN @OrderType IS NULL    AND @SortField IS NULL        THEN BillingRequestItemId END ASC
-			,CASE WHEN @OrderType = 'ASC'    AND @SortField ='ClaimHeaderGroupCode'    THEN c.ClaimHeaderGroupCode END ASC
+			--,CASE WHEN @OrderType = 'ASC'    AND @SortField ='ClaimHeaderGroupCode'    THEN c.ClaimHeaderGroupCode END ASC
 			--,CASE WHEN @OrderType = 'DESC'    AND @SortField ='Detail'    THEN Detail END DESC
 	
 	OFFSET @IndexStart ROWS FETCH NEXT @PageSize ROWS ONLY
