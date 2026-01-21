@@ -89,6 +89,7 @@ IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 		,f.ClaimHeaderGroupTypeId
 		,cm.ProductTypeId
 		,ROW_NUMBER() OVER(ORDER BY ClaimHeaderGroupImportId ASC) rwId
+		,i.TotalAmount
 	INTO #Tmplst
 	FROM dbo.ClaimHeaderGroupImport i
 		INNER JOIN dbo.ClaimHeaderGroupImportFile f
@@ -123,6 +124,7 @@ IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 		,d.ClaimCode
 		,d.PaySS_Total
 		,d.ClaimHeaderGroupCode
+		,lst.TotalAmount
 	INTO #TmpX
 	FROM dbo.ClaimHeaderGroupImportDetail d
 		INNER JOIN #Tmplst lst
@@ -178,9 +180,9 @@ FROM #TmpX d;
 		d.ClaimHeaderGroupImportDetailId
 		,d.ClaimHeaderGroupImportId
 		,d.ClaimCode
-		,d.PaySS_Total							 PaySS_Total
+		,d.TotalAmount							 PaySS_Total
 		,ISNULL(c.SumCover,0)					 SumCover
-		,(d.PaySS_Total - ISNULL(c.SumCover,0))  TotalAmount
+		,(d.TotalAmount - ISNULL(c.SumCover,0))  TotalAmount
 		,ROW_NUMBER() OVER (ORDER BY d.P1, d.P2, d.P3, d.P4) AS rwId
 		,d.ClaimHeaderGroupCode
 	INTO #TmpDetail
