@@ -27,6 +27,12 @@
           <AssociatedConnUserName>devdba</AssociatedConnUserName>
           <FullPath>CheckClaimMisc.sql</FullPath>
         </FileNode>
+        <FileNode Name="CPBCheckISCSmileDoc.sql">
+          <AssociatedConnectionMoniker />
+          <AssociatedConnSrvName />
+          <AssociatedConnUserName />
+          <FullPath>CPBCheckISCSmileDoc.sql</FullPath>
+        </FileNode>
         <FileNode Name="Create_usp_ClaimHeaderGroupImportIsValidated_Select.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
           <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
