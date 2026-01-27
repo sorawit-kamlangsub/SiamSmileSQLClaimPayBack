@@ -1,6 +1,6 @@
-USE [ClaimPayBack]
+﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackTransferMonitor_Select]    Script Date: 27/1/2569 16:21:16 ******/
+
 --SET ANSI_NULLS ON
 --GO
 --SET QUOTED_IDENTIFIER ON
@@ -45,6 +45,9 @@ GO
 	SET @CreatedDateTo = DATEADD(DAY,1,@CreatedDateTo)
 
     -- Insert statements for procedure here
+
+	--ClaimPayBackTransferStatusId มีค่าเทียบเท่ากับ OutOfPocketStatusId
+
 	SELECT t.ClaimPayBackTransferId
       ,t.ClaimPayBackTransferCode
       ,t.ClaimGroupTypeId
@@ -53,7 +56,7 @@ GO
       ,t.TransferAmount
       ,t.TransferDate
       ,t.ClaimPayBackTransferStatusId
-	  ,sts.ClaimPayBackTransferStatus
+	  ,ops.OutOfPocketStatusName
       ,t.IsActive
       ,t.CreatedByUserId
       ,t.CreatedDate
@@ -61,8 +64,8 @@ GO
       ,t.UpdatedDate
 	  ,COUNT(t.ClaimPayBackTransferId) OVER ( ) AS TotalCount
 	FROM dbo.ClaimPayBackTransfer t
-		LEFT JOIN dbo.ClaimPayBackTransferStatus sts
-			ON t.ClaimPayBackTransferStatusId = sts.ClaimPayBackTransferStatusId
+		LEFT JOIN dbo.ClaimPayBackOutOfPocketStatus ops
+			ON t.ClaimPayBackTransferStatusId = ops.OutOfPocketStatusId
 		LEFT JOIN dbo.ClaimGroupType cg_t
 			ON t.ClaimGroupTypeId = cg_t.ClaimGroupTypeId
 
@@ -77,8 +80,8 @@ GO
 		,CASE WHEN @l_OrderType = 'ASC' AND @l_SortField = 'Amount' THEN t.Amount END ASC 
 	    ,CASE WHEN @l_OrderType = 'DESC' AND @l_SortField = 'Amount' THEN t.Amount END DESC 
 	
-		,CASE WHEN @l_OrderType = 'ASC' AND @l_SortField = 'ClaimPayBackTransferStatus' THEN sts.ClaimPayBackTransferStatus END ASC 
-	    ,CASE WHEN @l_OrderType = 'DESC' AND @l_SortField = 'ClaimPayBackTransferStatus' THEN sts.ClaimPayBackTransferStatus END DESC 
+		,CASE WHEN @l_OrderType = 'ASC' AND @l_SortField = 'ClaimPayBackTransferStatus' THEN ops.OutOfPocketStatusName END ASC 
+	    ,CASE WHEN @l_OrderType = 'DESC' AND @l_SortField = 'ClaimPayBackTransferStatus' THEN ops.OutOfPocketStatusName END DESC 
 	
 	
 		,CASE WHEN @l_OrderType = 'ASC' AND @l_SortField = 'TransferDate' THEN t.TransferDate END ASC 
