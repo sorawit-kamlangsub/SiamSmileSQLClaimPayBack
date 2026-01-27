@@ -8,6 +8,7 @@ GO
 -- =============================================
 -- Author:		Krekpon Mind 06588
 -- Create date: 2024-08-13 09:06
+-- Update date: 2026-01-27 16:51 Sorawit.k Change Left join ClaimPayBackTransferStatus to ClaimPayBackOutOfPocketStatus 
 -- Description:	ClaimPayBackTransferMonitor Select
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimPayBackTransferMonitor_Select]
@@ -52,7 +53,7 @@ BEGIN
       ,t.TransferAmount
       ,t.TransferDate
       ,t.ClaimPayBackTransferStatusId
-	  ,sts.ClaimPayBackTransferStatus
+	  ,ops.OutOfPocketStatusName
       ,t.IsActive
       ,t.CreatedByUserId
       ,t.CreatedDate
@@ -60,8 +61,8 @@ BEGIN
       ,t.UpdatedDate
 	  ,COUNT(t.ClaimPayBackTransferId) OVER ( ) AS TotalCount
 	FROM dbo.ClaimPayBackTransfer t
-		LEFT JOIN dbo.ClaimPayBackTransferStatus sts
-			ON t.ClaimPayBackTransferStatusId = sts.ClaimPayBackTransferStatusId
+		LEFT JOIN dbo.ClaimPayBackOutOfPocketStatus ops
+			ON t.ClaimPayBackTransferStatusId = ops.OutOfPocketStatusId
 		LEFT JOIN dbo.ClaimGroupType cg_t
 			ON t.ClaimGroupTypeId = cg_t.ClaimGroupTypeId
 
@@ -76,8 +77,8 @@ BEGIN
 		,CASE WHEN @l_OrderType = 'ASC' AND @l_SortField = 'Amount' THEN t.Amount END ASC 
 	    ,CASE WHEN @l_OrderType = 'DESC' AND @l_SortField = 'Amount' THEN t.Amount END DESC 
 	
-		,CASE WHEN @l_OrderType = 'ASC' AND @l_SortField = 'ClaimPayBackTransferStatus' THEN sts.ClaimPayBackTransferStatus END ASC 
-	    ,CASE WHEN @l_OrderType = 'DESC' AND @l_SortField = 'ClaimPayBackTransferStatus' THEN sts.ClaimPayBackTransferStatus END DESC 
+		,CASE WHEN @l_OrderType = 'ASC' AND @l_SortField = 'ClaimPayBackTransferStatus' THEN ops.OutOfPocketStatusName END ASC 
+	    ,CASE WHEN @l_OrderType = 'DESC' AND @l_SortField = 'ClaimPayBackTransferStatus' THEN ops.OutOfPocketStatusName END DESC 
 	
 	
 		,CASE WHEN @l_OrderType = 'ASC' AND @l_SortField = 'TransferDate' THEN t.TransferDate END ASC 
