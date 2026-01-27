@@ -53,7 +53,7 @@ BEGIN
       ,t.TransferAmount
       ,t.TransferDate
       ,t.ClaimPayBackTransferStatusId
-	  ,ops.OutOfPocketStatusName
+	  ,ops.OutOfPocketStatusName	ClaimPayBackTransferStatus
       ,t.IsActive
       ,t.CreatedByUserId
       ,t.CreatedDate
