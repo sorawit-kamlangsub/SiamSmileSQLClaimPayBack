@@ -53,7 +53,7 @@ BEGIN
       ,t.TransferAmount
       ,t.TransferDate
       ,t.ClaimPayBackTransferStatusId
-	  ,ops.OutOfPocketStatusName	ClaimPayBackTransferStatus
+	  ,sts.ClaimPayBackTransferStatus
       ,t.IsActive
       ,t.CreatedByUserId
       ,t.CreatedDate
@@ -61,8 +61,8 @@ BEGIN
       ,t.UpdatedDate
 	  ,COUNT(t.ClaimPayBackTransferId) OVER ( ) AS TotalCount
 	FROM dbo.ClaimPayBackTransfer t
-		LEFT JOIN dbo.ClaimPayBackOutOfPocketStatus ops
-			ON t.ClaimPayBackTransferStatusId = ops.OutOfPocketStatusId
+		LEFT JOIN dbo.ClaimPayBackTransferStatus sts
+			ON t.ClaimPayBackTransferStatusId = sts.ClaimPayBackTransferStatusId
 		LEFT JOIN dbo.ClaimGroupType cg_t
 			ON t.ClaimGroupTypeId = cg_t.ClaimGroupTypeId
 
@@ -77,8 +77,8 @@ BEGIN
 		,CASE WHEN @l_OrderType = 'ASC' AND @l_SortField = 'Amount' THEN t.Amount END ASC 
 	    ,CASE WHEN @l_OrderType = 'DESC' AND @l_SortField = 'Amount' THEN t.Amount END DESC 
 	
-		,CASE WHEN @l_OrderType = 'ASC' AND @l_SortField = 'ClaimPayBackTransferStatus' THEN ops.OutOfPocketStatusName END ASC 
-	    ,CASE WHEN @l_OrderType = 'DESC' AND @l_SortField = 'ClaimPayBackTransferStatus' THEN ops.OutOfPocketStatusName END DESC 
+		,CASE WHEN @l_OrderType = 'ASC' AND @l_SortField = 'ClaimPayBackTransferStatus' THEN sts.ClaimPayBackTransferStatus END ASC 
+	    ,CASE WHEN @l_OrderType = 'DESC' AND @l_SortField = 'ClaimPayBackTransferStatus' THEN sts.ClaimPayBackTransferStatus END DESC 
 	
 	
 		,CASE WHEN @l_OrderType = 'ASC' AND @l_SortField = 'TransferDate' THEN t.TransferDate END ASC 
