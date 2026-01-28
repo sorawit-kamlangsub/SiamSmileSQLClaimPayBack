@@ -62,11 +62,14 @@ GO
 			FROM dbo.ClaimPayBackDetail cd
 			INNER JOIN dbo.ClaimPayBack c
 				ON cd.ClaimPayBackId = c.ClaimPayBackId
-			LEFT JOIN dbo.ClaimPayBackTransfer cpt
+			INNER JOIN dbo.ClaimPayBackTransfer cpt
 				ON cpt.ClaimPayBackTransferId = c.ClaimPayBackTransferId
 			INNER JOIN #Tmplst tl
 				ON tl.Element = c.ClaimPayBackTransferId
-			WHERE cd.IsActive = 1				
+			WHERE cd.IsActive = 1	
+			AND c.IsActive = 1
+			AND cpt.IsActive = 1
+			AND cpt.OutOfPocketStatus IS NULL
 
 			SELECT 
 					ROW_NUMBER() OVER(ORDER BY (ClaimPayBackTransferId) asc ) AS rwId
@@ -121,12 +124,18 @@ GO
 			FROM @TmpGroupTotal
 
 			SELECT 
-				ROW_NUMBER() OVER (ORDER BY ClaimPayBackTransferId ASC) rwId
-				,COUNT(ClaimPayBackTransferId) ItemCount
+				ROW_NUMBER() OVER (ORDER BY ClaimPayBackTransferId ASC) AS rwId
 				,ClaimPayBackTransferId
-			INTO #TmpGroupTotalRunItemCount
-			FROM @TmpGroupTotal
-			GROUP BY ClaimPayBackTransferId
+				,SumAmountTotal
+				,COUNT(*) OVER (
+					PARTITION BY 
+						CASE 
+							WHEN IsNoneLimit = 1 THEN SumAmountTotal
+							ELSE SumAmount
+						END
+				) AS ItemCount
+			INTO #TmpItemCount
+			FROM #TmpGroup
 
 			DECLARE @TT          VARCHAR(6) = 'OCG'
 				  , @Total		 INT 
@@ -147,13 +156,6 @@ GO
 	
 			-- สร้าง ClaimPayBackSubGroup และเก็บ ClaimPayBackSubGroupId ที่สร้างขึ้นใหม่
 			DECLARE @GeneratedIds TABLE (ClaimPayBackSubGroupId INT)
-
-			--SELECT * FROM #TmpD
-			--SELECT * FROM #TmpGroup
-			--SELECT * FROM #TmpGroupTotalRunNo
-			--SELECT * FROM #TmpSubGroupDetail
-			SELECT * FROM @TmpGroupTotal
-			SELECT * FROM #TmpGroupTotalRunItemCount
 
 			-----------------------------------
 			BEGIN TRY
@@ -181,8 +183,8 @@ GO
 					, t.SumAmountTotal
 					, 
 						(
-							SELECT ItemCount
-							FROM #TmpGroupTotalRunItemCount tg
+							SELECT TOP 1 ItemCount
+							FROM #TmpItemCount tg
 							WHERE tg.ClaimPayBackTransferId = t.ClaimPayBackTransferId
 						)	ItemCount
 					, t.ClaimPayBackTransferId
@@ -211,7 +213,7 @@ GO
 			BEGIN CATCH
 	
 				SET @IsResult   = 0;
-				SET @Msg        = 'บันทึก ไม่สำเร็จ';
+				SET @Msg        = 'บันทึก ไม่สำเร็จ' + ERROR_MESSAGE();
 	
 				IF (@@Trancount > 0) ROLLBACK;
 			END CATCH
@@ -220,9 +222,9 @@ GO
 		IF OBJECT_ID('tempdb..#TmpD') IS NOT NULL  DROP TABLE #TmpD;
 		IF OBJECT_ID('tempdb..#Tmplst') IS NOT NULL  DROP TABLE #Tmplst;
 		IF OBJECT_ID('tempdb..#TmpGroup') IS NOT NULL  DROP TABLE #TmpGroup;
+		IF OBJECT_ID('tempdb..#TmpItemCount') IS NOT NULL  DROP TABLE #TmpItemCount;
 		IF OBJECT_ID('tempdb..#TmpSubGroupDetail') IS NOT NULL  DROP TABLE #TmpSubGroupDetail;
 		IF OBJECT_ID('tempdb..#TmpGroupTotalRunNo') IS NOT NULL  DROP TABLE #TmpGroupTotalRunNo;
-		IF OBJECT_ID('tempdb..#TmpGroupTotalRunItemCount') IS NOT NULL  DROP TABLE #TmpGroupTotalRunItemCount;
 	
 	END;
 	
