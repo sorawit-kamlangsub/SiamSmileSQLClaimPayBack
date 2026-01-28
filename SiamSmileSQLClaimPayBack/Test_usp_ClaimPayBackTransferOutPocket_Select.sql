@@ -59,6 +59,8 @@ GO
       ,t.CreatedDate
       ,t.UpdatedByUserId
       ,t.UpdatedDate
+	  ,CASE WHEN t.Amount > 2000000 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END IsCheck 
+	  ,CASE WHEN t.Amount > 2000000 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END IsGroup 
 	  ,COUNT(t.ClaimPayBackTransferId) OVER ( ) AS TotalCount
 	FROM dbo.ClaimPayBackTransfer t
 		LEFT JOIN dbo.ClaimPayBackOutOfPocketStatus ops
