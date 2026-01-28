@@ -15,7 +15,7 @@ GO
 	DECLARE
 	@CreatedDateFrom							DATE = '2026-01-20'
 	,@CreatedDateTo								DATE = '2026-01-27'
-	,@ClaimPayBackTransferStatusId				INT = 2
+	,@ClaimPayBackTransferStatusId				INT = 3
 	,@ClaimGroupType							INT = NULL
 
 	,@IndexStart								INT = NULL 
@@ -70,6 +70,7 @@ GO
 	AND (t.ClaimPayBackTransferStatusId = @ClaimPayBackTransferStatusId OR @ClaimPayBackTransferStatusId IS NULL)
 	AND (t.IsActive = 1)
 	AND (t.ClaimGroupTypeId = @ClaimGroupType OR @ClaimGroupType IS NULL)
+	AND t.OutOfPocketStatus = 3
 	ORDER BY CASE WHEN @l_OrderType IS NULL AND @l_SortField IS NULL THEN t.ClaimPayBackTransferId END ASC 
 		,CASE WHEN @l_OrderType = 'ASC' AND @l_SortField = 'ClaimPayBackTransferCode' THEN t.ClaimPayBackTransferId END ASC 
 	    ,CASE WHEN @l_OrderType = 'DESC' AND @l_SortField = 'ClaimPayBackTransferCode' THEN t.ClaimPayBackTransferId END DESC 
@@ -87,4 +88,4 @@ GO
 		,CASE WHEN @l_OrderType = 'ASC' AND @l_SortField = 'CreatedDate' THEN t.TransferDate END ASC 
 	    ,CASE WHEN @l_OrderType = 'DESC' AND @l_SortField = 'CreatedDate' THEN t.TransferDate END DESC 
 OFFSET @l_IndexStart ROWS FETCH NEXT @l_PageSize ROWS ONLY;
---ENDs
+--END
