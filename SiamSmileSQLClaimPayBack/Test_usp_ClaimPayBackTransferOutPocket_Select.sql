@@ -54,6 +54,7 @@ GO
       ,t.TransferDate
       ,t.ClaimPayBackTransferStatusId
 	  ,ops.OutOfPocketStatusName
+	  ,t.OutOfPocketStatus				OutOfPocketStatus
       ,t.IsActive
       ,t.CreatedByUserId
       ,t.CreatedDate
