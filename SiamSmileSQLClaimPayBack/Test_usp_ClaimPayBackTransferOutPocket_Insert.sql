@@ -79,8 +79,7 @@ GO
 			GROUP BY ClaimPayBackId,ClaimPayBackTransferId;
 
 			SELECT
-				ROW_NUMBER() OVER (ORDER BY ClaimPayBackTransferId ASC) AS rwId,
-				
+				ROW_NUMBER() OVER (ORDER BY ClaimPayBackTransferId ASC) AS rwId,				
 				ClaimPayBackTransferId,
 				SumAmount,                                  
 				SUM(SumAmount) OVER (
@@ -114,6 +113,21 @@ GO
 			GROUP BY ClaimPayBackTransferId,SumAmount,IsNoneLimit
 			HAVING IsNoneLimit = 0; 
 
+			SELECT 
+				ROW_NUMBER() OVER (ORDER BY ClaimPayBackTransferId ASC) AS rwId
+				,ClaimPayBackTransferId
+				,SumAmountTotal
+			INTO #TmpGroupTotalRunNo
+			FROM @TmpGroupTotal
+
+			SELECT 
+				ROW_NUMBER() OVER (ORDER BY ClaimPayBackTransferId ASC) rwId
+				,COUNT(ClaimPayBackTransferId) ItemCount
+				,ClaimPayBackTransferId
+			INTO #TmpGroupTotalRunItemCount
+			FROM @TmpGroupTotal
+			GROUP BY ClaimPayBackTransferId
+
 			DECLARE @TT          VARCHAR(6) = 'OCG'
 				  , @Total		 INT 
 				  , @YY          VARCHAR(2)
@@ -121,23 +135,25 @@ GO
 				  , @RunningFrom INT
 				  , @RunningTo   INT;
 
-			SELECT @Total = MAX(rwId) FROM #TmpGroup;
+			SELECT @Total = MAX(rwId) FROM #TmpGroupTotalRunNo;
 
-			--EXECUTE dbo.usp_GenerateCode_FromTo @TT -- varchar(6)
-			--							   , @Total -- int
-			--							   , @YY OUTPUT -- varchar(2)
-			--							   , @MM OUTPUT -- varchar(2)
-			--							   , @RunningFrom OUTPUT -- int
-			--							   , @RunningTo OUTPUT -- int
+			EXECUTE dbo.usp_GenerateCode_FromTo @TT -- varchar(6)
+										   , @Total -- int
+										   , @YY OUTPUT -- varchar(2)
+										   , @MM OUTPUT -- varchar(2)
+										   , @RunningFrom OUTPUT -- int
+										   , @RunningTo OUTPUT -- int
 
 	
 			-- สร้าง ClaimPayBackSubGroup และเก็บ ClaimPayBackSubGroupId ที่สร้างขึ้นใหม่
-			DECLARE @GeneratedIds TABLE (ClaimPayBackSubGroupId INT, HospitalCode VARCHAR(20))
+			DECLARE @GeneratedIds TABLE (ClaimPayBackSubGroupId INT)
 
-			SELECT * FROM #TmpD
-			SELECT * FROM #TmpGroup
+			--SELECT * FROM #TmpD
+			--SELECT * FROM #TmpGroup
+			--SELECT * FROM #TmpGroupTotalRunNo
+			--SELECT * FROM #TmpSubGroupDetail
 			SELECT * FROM @TmpGroupTotal
-			SELECT * FROM #TmpSubGroupDetail
+			SELECT * FROM #TmpGroupTotalRunItemCount
 
 			-----------------------------------
 			BEGIN TRY
@@ -160,16 +176,22 @@ GO
 				--	, ContactEmail
 				--)
 				--OUTPUT INSERTED.ClaimPayBackSubGroupId, INSERTED.HospitalCode INTO @GeneratedIds (ClaimPayBackSubGroupId, HospitalCode)
-				--SELECT CONCAT(@TT,@YY,@MM ,FORMAT(@RunningFrom + rwId - 1,'000000')) ClaimPayBackSubGroupCode
-				--	, SumAmount
-				--	, 0							ItemCount
-				--	, ClaimPayBackTransferId
-				--	, 1							IsActive						 
-				--	, @CreatedDate				CreatedDate
-				--	, @CreatedByUserId			CreatedByUserId
-				--	, @CreatedDate				UpdatedDate
-				--	, @CreatedByUserId			UpdatedByUserId
-				--FROM #TmpGroup
+				SELECT 
+					CONCAT(@TT,@YY,@MM ,FORMAT(@RunningFrom + t.rwId - 1,'000000')) ClaimPayBackSubGroupCode
+					, t.SumAmountTotal
+					, 
+						(
+							SELECT ItemCount
+							FROM #TmpGroupTotalRunItemCount tg
+							WHERE tg.ClaimPayBackTransferId = t.ClaimPayBackTransferId
+						)	ItemCount
+					, t.ClaimPayBackTransferId
+					, 1							IsActive						 
+					, @CreatedDate				CreatedDate
+					, @CreatedByUserId			CreatedByUserId
+					, @CreatedDate				UpdatedDate
+					, @CreatedByUserId			UpdatedByUserId
+				FROM #TmpGroupTotalRunNo t
 
 				-- อัปเดต ClaimPayBackDetail ด้วย ClaimPayBackSubGroupId
 				--SELECT *
@@ -196,9 +218,11 @@ GO
 			-----------------------------------
 
 		IF OBJECT_ID('tempdb..#TmpD') IS NOT NULL  DROP TABLE #TmpD;
-		IF OBJECT_ID('tempdb..#TmpGroup') IS NOT NULL  DROP TABLE #TmpGroup;
 		IF OBJECT_ID('tempdb..#Tmplst') IS NOT NULL  DROP TABLE #Tmplst;
+		IF OBJECT_ID('tempdb..#TmpGroup') IS NOT NULL  DROP TABLE #TmpGroup;
 		IF OBJECT_ID('tempdb..#TmpSubGroupDetail') IS NOT NULL  DROP TABLE #TmpSubGroupDetail;
+		IF OBJECT_ID('tempdb..#TmpGroupTotalRunNo') IS NOT NULL  DROP TABLE #TmpGroupTotalRunNo;
+		IF OBJECT_ID('tempdb..#TmpGroupTotalRunItemCount') IS NOT NULL  DROP TABLE #TmpGroupTotalRunItemCount;
 	
 	END;
 	
