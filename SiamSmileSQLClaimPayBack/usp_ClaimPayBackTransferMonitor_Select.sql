@@ -70,6 +70,7 @@ BEGIN
 	AND (t.ClaimPayBackTransferStatusId = @ClaimPayBackTransferStatusId OR @ClaimPayBackTransferStatusId IS NULL)
 	AND (t.IsActive = 1)
 	AND (t.ClaimGroupTypeId = @ClaimGroupType OR @ClaimGroupType IS NULL)
+	AND t.OutOfPocketStatus = 3
 	ORDER BY CASE WHEN @l_OrderType IS NULL AND @l_SortField IS NULL THEN t.ClaimPayBackTransferId END ASC 
 		,CASE WHEN @l_OrderType = 'ASC' AND @l_SortField = 'ClaimPayBackTransferCode' THEN t.ClaimPayBackTransferId END ASC 
 	    ,CASE WHEN @l_OrderType = 'DESC' AND @l_SortField = 'ClaimPayBackTransferCode' THEN t.ClaimPayBackTransferId END DESC 
