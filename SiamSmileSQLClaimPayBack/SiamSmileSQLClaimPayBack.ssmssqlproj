@@ -171,6 +171,12 @@
           <AssociatedConnUserName>devdba</AssociatedConnUserName>
           <FullPath>Test_usp_ClaimPayBackTransferNonClaimCompensateReport_SelectSubTmpClaimPayBack.sql</FullPath>
         </FileNode>
+        <FileNode Name="Test_usp_ClaimPayBackTransferOutPocket_Select.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
+          <AssociatedConnUserName>devdba</AssociatedConnUserName>
+          <FullPath>Test_usp_ClaimPayBackTransferOutPocket_Select.sql</FullPath>
+        </FileNode>
         <FileNode Name="Test_usp_GetClaimHeaderGroupImportDetailById_Select.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
           <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
@@ -290,6 +296,12 @@
           <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
           <AssociatedConnUserName>devdba</AssociatedConnUserName>
           <FullPath>usp_ClaimPayBackTransferMonitor_Select.sql</FullPath>
+        </FileNode>
+        <FileNode Name="usp_ClaimPayBackTransferOutPocket_Select.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
+          <AssociatedConnUserName>devdba</AssociatedConnUserName>
+          <FullPath>usp_ClaimPayBackTransferOutPocket_Select.sql</FullPath>
         </FileNode>
         <FileNode Name="usp_GenerateCodeV2.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
