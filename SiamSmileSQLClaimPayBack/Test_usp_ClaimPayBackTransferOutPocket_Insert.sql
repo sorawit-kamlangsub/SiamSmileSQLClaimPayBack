@@ -195,6 +195,13 @@ GO
 					, @CreatedByUserId			UpdatedByUserId
 				FROM #TmpGroupTotalRunNo t
 
+SELECT 
+
+ ''	TransactionDetail
+ ,0	TransactionDetailId
+
+FROM #TmpSubGroupDetail
+
 				-- อัปเดต ClaimPayBackDetail ด้วย ClaimPayBackSubGroupId
 				--SELECT *
 				--UPDATE CPBD
