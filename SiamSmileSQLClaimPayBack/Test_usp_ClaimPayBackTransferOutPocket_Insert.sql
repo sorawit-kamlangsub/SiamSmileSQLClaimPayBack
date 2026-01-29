@@ -40,6 +40,7 @@ GO
 	DECLARE @ClaimPayBackSubGroupCount	INT = 0;
 	DECLARE @ClaimGroupTypeId			INT;
 	DECLARE @OutOfPocketAmountLimit		DECIMAL(16,2);
+	
 	SELECT @OutOfPocketAmountLimit = ValueNumber FROM dbo.ProgramConfig WHERE ParameterName = 'OutOfPocketAmountLimit'
 
 	SELECT DISTINCT Element
@@ -155,7 +156,7 @@ GO
 
 	
 			-- สร้าง ClaimPayBackSubGroup และเก็บ ClaimPayBackSubGroupId ที่สร้างขึ้นใหม่
-			DECLARE @GeneratedIds TABLE (ClaimPayBackSubGroupId INT)
+			DECLARE @GeneratedIds TABLE (ClaimPayBackSubGroupId INT,ClaimPayBackTransferId INT)
 
 			-----------------------------------
 			BEGIN TRY
@@ -177,7 +178,7 @@ GO
 				--	, UpdatedByUserId
 				--	, ContactEmail
 				--)
-				--OUTPUT INSERTED.ClaimPayBackSubGroupId, INSERTED.HospitalCode INTO @GeneratedIds (ClaimPayBackSubGroupId, HospitalCode)
+				--OUTPUT INSERTED.ClaimPayBackSubGroupId, INSERTED.ClaimPayBackTransferId INTO @GeneratedIds (ClaimPayBackSubGroupId, ClaimPayBackTransferId)
 				SELECT 
 					CONCAT(@TT,@YY,@MM ,FORMAT(@RunningFrom + t.rwId - 1,'000000')) ClaimPayBackSubGroupCode
 					, t.SumAmountTotal
@@ -195,22 +196,41 @@ GO
 					, @CreatedByUserId			UpdatedByUserId
 				FROM #TmpGroupTotalRunNo t
 
-SELECT 
-
- ''	TransactionDetail
- ,0	TransactionDetailId
-
-FROM #TmpSubGroupDetail
+				--INSERT INTO dbo.ClaimPayBackSubGroupDetail
+				--(
+				--	ClaimPayBackId
+				--	,Amount
+				--	,ClaimPayBackSubGroupId
+				--	,IsActive
+				--	,CreatedByUserId
+				--	,CreatedDate
+				--	,UpdatedByUserId
+				--	,UpdatedDate
+				--)
+				SELECT 
+				 d.ClaimPayBackId
+				 ,d.SumAmount
+				 ,g.ClaimPayBackSubGroupId
+				 ,1							IsActive
+				 , @CreatedByUserId			CreatedByUserId
+				 , @CreatedDate				CreatedDate
+				 , @CreatedByUserId			UpdatedByUserId
+				 , @CreatedDate				UpdatedDate
+				FROM #TmpSubGroupDetail d
+				LEFT JOIN @GeneratedIds g
+					ON g.ClaimPayBackTransferId = d.ClaimPayBackTransferId
 
 				-- อัปเดต ClaimPayBackDetail ด้วย ClaimPayBackSubGroupId
-				--SELECT *
+				SELECT *
 				--UPDATE CPBD
 				--SET CPBD.ClaimPayBackSubGroupId = GID.ClaimPayBackSubGroupId
 				--	, CPBD.UpdatedDate = @CreatedDate
 				--	, CPBD.UpdatedByUserId = @CreatedByUserId
-				--FROM dbo.ClaimPayBackDetail CPBD
-				--INNER JOIN #TmpD TD 
-				--	ON CPBD.ClaimPayBackDetailId = TD.ClaimPayBackDetailId
+				FROM dbo.ClaimPayBackDetail CPBD
+				INNER JOIN #TmpD TD 
+					ON CPBD.ClaimPayBackDetailId = TD.ClaimPayBackDetailId
+				LEFT JOIN @GeneratedIds g
+					ON g.ClaimPayBackTransferId = TD.ClaimPayBackTransferId
 	
 				SET @IsResult   = 1;
 				SET @Msg        = 'บันทึก สำเร็จ';
