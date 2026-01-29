@@ -28,7 +28,7 @@ GO
 --	SET NOCOUNT ON;
 
 	-- For Test
-	DECLARE @ClaimPayBackTransferId NVARCHAR(MAX) = '2924,2925'
+	DECLARE @ClaimPayBackTransferId NVARCHAR(MAX) = 4149;--'2924,2925'
 	DECLARE @CreatedByUserId INT = 1
 
 	-- Add the parameters for the stored procedure here
@@ -70,7 +70,7 @@ GO
 			WHERE cd.IsActive = 1	
 			AND c.IsActive = 1
 			AND cpt.IsActive = 1
-			AND cpt.OutOfPocketStatus IS NULL
+			--AND cpt.OutOfPocketStatus IS NULL
 
 			SELECT 
 					ROW_NUMBER() OVER(ORDER BY (ClaimPayBackTransferId) asc ) AS rwId
