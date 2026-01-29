@@ -30,6 +30,8 @@ GO
 				เพื่ม usp_GenerateCodeV2 สำหรับ บ.ประกันไม่มี SFTP
 	Update date: 2026-01-20 14:16 Sorawit Kamlangsub
 				เพื่ม เงื่อนไข @ClaimHeaderGroupTypeId IN (2,4) ใน tmpCover
+	Update date: 2026-01-28 17:00 Sorawit kamlangsub
+				เปลี่ยนเลขรัน BQG 5 หลัก
 */	
 -- Description:	<Description,,>
 -- =============================================

@@ -10,6 +10,8 @@ GO
 -- =============================================
 -- Author:		Sorawit Kamlangsub
 -- Create date: 2025-12-16  15:43
+-- Update date: Sorawit Kamlangsub 2026-01-29 17:00
+--				เปลี่ยนเลขรัน BQG 5 หลัก
 -- Description:
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_BillingRequest_ClaimMisc_Insert]
