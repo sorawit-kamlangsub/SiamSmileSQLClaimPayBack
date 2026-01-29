@@ -105,11 +105,23 @@
           <AssociatedConnUserName>devdba</AssociatedConnUserName>
           <FullPath>Select_Not_Exists_In_ClaimHeaderGroupImport.sql</FullPath>
         </FileNode>
+        <FileNode Name="SelectClaimMiscToClaimPayBackCreate.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
+          <AssociatedConnUserName>devdba</AssociatedConnUserName>
+          <FullPath>SelectClaimMiscToClaimPayBackCreate.sql</FullPath>
+        </FileNode>
         <FileNode Name="SelectColumnName.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
           <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
           <AssociatedConnUserName>devdba</AssociatedConnUserName>
           <FullPath>SelectColumnName.sql</FullPath>
+        </FileNode>
+        <FileNode Name="SelectDocStorageMainIndexFromClaimMisc.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
+          <AssociatedConnUserName>devdba</AssociatedConnUserName>
+          <FullPath>SelectDocStorageMainIndexFromClaimMisc.sql</FullPath>
         </FileNode>
         <FileNode Name="Test_CheckDoc_usp_TmpClaimHeaderGroupImport_Validate_V2.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
