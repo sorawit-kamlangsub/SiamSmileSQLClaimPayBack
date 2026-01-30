@@ -268,7 +268,7 @@ FROM @TmpClaimPayBack TmpCPB
 								-- ClaimMisc
 								SELECT 
 									cm.ClaimHeaderGroupCode		Code
-									,cm.InsuranceCompanyName		InsuranceCompany_Name
+									,cm.InsuranceCompanyName	InsuranceCompany_Name
 									,cxa.ClaimAdmitType			ClaimAdmitType
 									,h.HospitalCode				Hospital
 									,u.EmployeeCode				ApprovedUserFromSSS
@@ -300,23 +300,6 @@ FROM @TmpClaimPayBack TmpCPB
 									GROUP BY x.ClaimMiscId
 								) cxa
 									ON cxa.ClaimMiscId = cm.ClaimMiscId
-								LEFT JOIN(
-									SELECT 
-										ch.ClaimMiscId
-										,cp.BankAccountName
-										,cp.BankAccountNo
-										,cp.BankName
-									FROM [ClaimMiscellaneous].[misc].[ClaimMiscPaymentHeader] ch
-										LEFT JOIN [ClaimMiscellaneous].[misc].[ClaimMiscPayment] cp
-											ON ch.ClaimMiscPaymentHeaderId = cp.ClaimMiscPaymentHeaderId
-									WHERE ch.IsActive = 1
-										AND cp.IsActive = 1
-									GROUP BY ch.ClaimMiscId
-										,cp.BankAccountName
-										,cp.BankAccountNo
-										,cp.BankName
-								)miscacc
-									ON cm.ClaimMiscId = miscacc.ClaimMiscId
 								LEFT JOIN [ClaimMiscellaneous].[misc].[ClaimEvent] ce
 									ON cm.ClaimEventId = ce.ClaimEventId
 								LEFT JOIN 
@@ -390,61 +373,73 @@ FROM @TmpClaimPayBack TmpCPB
 		ON cptOnline.ClaimCode = icu.ClaimCode
 
 	LEFT JOIN (
-		SELECT 
-			cmph.ClaimMiscId
-			,cmpd.PaymentDate	TransferDate
-			,cmpd.Amount
-			,pmt.PaymentTypeName
-			,be.TitleDetail
-			,be.FirstName
-			,be.LastName
-			,be.RelationDetail
-			,be.BankAccountName
-			,be.BankAccountNo
-			,cm.ClaimMiscStatusId
-			,bank.BankName
-			,tfc.TransferCauseName
-			,cmpd.Remark
-			,cm.ProductTypeId
-		FROM [ClaimMiscellaneous].[misc].[ClaimMiscPaymentHeader] cmph
-			INNER JOIN [ClaimMiscellaneous].[misc].[ClaimMiscPayment] cmpd
-				ON cmpd.ClaimMiscPaymentHeaderId = cmph.ClaimMiscPaymentHeaderId
-			LEFT JOIN 
-				(
-					SELECT
-						PaymentTypeId
-						,PaymentTypeName
-					FROM [ClaimMiscellaneous].[misc].[PaymentType]
-					WHERE IsActive = 1
-				) pmt
-				ON pmt.PaymentTypeId = cmph.PaymentTypeId
-			INNER JOIN
-			(
+		SELECT *
+		FROM
+		(
+		SELECT *
+		FROM (
+			SELECT
+				cm.ClaimMiscId,
+				cptMisc.TransferDate,
+				cptMisc.Amount,
+				cptMisc.PaymentTypeName,
+				cptMisc.TitleDetail,
+				cptMisc.FirstName,
+				cptMisc.LastName,
+				cptMisc.RelationDetail,
+				cptMisc.BankAccountName,
+				cptMisc.BankAccountNo,
+				cptMisc.ClaimMiscStatusId,
+				cptMisc.BankName,
+				cptMisc.TransferCauseName,
+				cptMisc.Remark,
+				cptMisc.ProductTypeId,
+				ROW_NUMBER() OVER (
+					PARTITION BY cm.ClaimMiscId, cptMisc.PaymentTypeName
+					ORDER BY cptMisc.TransferDate DESC
+				) AS rn
+			FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
+			LEFT JOIN (
 				SELECT
-					ClaimMiscId
-					,BankAccountName
-					,BankAccountNo
-					,TitleDetail
-					,FirstName
-					,LastName
-					,RelationDetail
-					,BankId
-				FROM [ClaimMiscellaneous].[misc].[Beneficiary]
-				WHERE IsActive = 1
-			) be
-				ON be.ClaimMiscId = cmph.ClaimMiscId
-			INNER JOIN [ClaimMiscellaneous].[misc].[ClaimMisc] cm
-				ON cm.ClaimMiscId = cmph.ClaimMiscId
-			LEFT JOIN [ClaimMiscellaneous].[ext].[Bank] bank
-				ON be.BankId = bank.BankId
-			LEFT JOIN [ClaimMiscellaneous].[misc].[TransferCause] tfc
-				ON tfc.TransferCauseId = cmpd.TransferCauseId
-			
-		WHERE cmph.IsActive = 1
-			AND cmpd.PremiumSourceStatusId = 5
-			AND cmpd.IsActive = 1	
-			AND cm.IsActive = 1
-			AND @_ClaimGroupTypeId = 7
+					cmph.ClaimMiscId,
+					cmpd.PaymentDate AS TransferDate,
+					cmpd.Amount,
+					pmt.PaymentTypeName,
+					be.TitleDetail,
+					be.FirstName,
+					be.LastName,
+					be.RelationDetail,
+					be.BankAccountName,
+					be.BankAccountNo,
+					cm2.ClaimMiscStatusId,
+					bank.BankName,
+					tfc.TransferCauseName,
+					cmpd.Remark,
+					cm2.ProductTypeId
+				FROM [ClaimMiscellaneous].[misc].[ClaimMiscPaymentHeader] cmph
+				INNER JOIN [ClaimMiscellaneous].[misc].[ClaimMiscPayment] cmpd
+					ON cmpd.ClaimMiscPaymentHeaderId = cmph.ClaimMiscPaymentHeaderId
+					AND cmpd.IsActive = 1
+					AND cmpd.PremiumSourceStatusId = 5
+				LEFT JOIN [ClaimMiscellaneous].[misc].[PaymentType] pmt
+					ON pmt.PaymentTypeId = cmph.PaymentTypeId
+					AND pmt.IsActive = 1
+				INNER JOIN [ClaimMiscellaneous].[misc].[Beneficiary] be
+					ON be.ClaimMiscId = cmph.ClaimMiscId
+					AND be.IsActive = 1
+				INNER JOIN [ClaimMiscellaneous].[misc].[ClaimMisc] cm2
+					ON cm2.ClaimMiscId = cmph.ClaimMiscId
+					AND cm2.IsActive = 1
+				LEFT JOIN [ClaimMiscellaneous].[ext].[Bank] bank
+					ON be.BankId = bank.BankId
+				LEFT JOIN [ClaimMiscellaneous].[misc].[TransferCause] tfc
+					ON tfc.TransferCauseId = cmpd.TransferCauseId
+				WHERE cmph.IsActive = 1
+			) cptMisc
+				ON cptMisc.ClaimMiscId = cm.ClaimMiscId
+		) x
+		WHERE x.rn = 1
+		) rs
 	) cptMisc
 		ON cptMisc.ClaimMiscId = icu.HeaderId	
 
@@ -454,7 +449,6 @@ FROM @TmpClaimPayBack TmpCPB
 	ORDER BY icu.ClaimCode
 
 IF OBJECT_ID('tempdb..#TmpPersonUser') IS NOT NULL DROP TABLE #TmpPersonUser;
-IF OBJECT_ID('tempdb..@TmpClaimPayBack') IS NOT NULL  DELETE FROM @TmpClaimPayBack;
 IF OBJECT_ID('tempdb..#InsuranceType') IS NOT NULL  DROP TABLE #InsuranceType;
 --END
 
