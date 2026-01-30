@@ -12,7 +12,7 @@ GO
 -- Update date: 
 -- Description:	Group CPT โอนเงินสำรองจ่าย
 -- =============================================
-CREATE PROCEDURE [dbo].[usp_ClaimPayBackTransferOutPocket_Insert]
+ALTER PROCEDURE [dbo].[usp_ClaimPayBackTransferOutPocket_Insert]
 -- Add the parameters for the stored procedure here
 	@ClaimPayBackTransferId		INT
 	,@CreatedByUserId			INT
@@ -112,26 +112,74 @@ BEGIN
 			GROUP BY ClaimPayBackTransferId,SumAmount,IsNoneLimit
 			HAVING IsNoneLimit = 0; 
 
-			SELECT 
-				ROW_NUMBER() OVER (ORDER BY ClaimPayBackTransferId ASC) AS rwId
+			SELECT
+				ROW_NUMBER() OVER (ORDER BY ClaimPayBackTransferId) AS rn
 				,ClaimPayBackTransferId
 				,SumAmountTotal
-			INTO #TmpGroupTotalRunNo
-			FROM @TmpGroupTotal
+			INTO #Src
+			FROM @TmpGroupTotal;
+
+			DECLARE @SumResult TABLE (
+				ClaimPayBackTransferId INT,
+				SumAmountTotal DECIMAL(18,2),
+				GroupNo INT
+			);
+
+			DECLARE 
+				@i INT = 1,
+				@max INT,
+				@runningSum DECIMAL(18,2) = 0,
+				@groupNo INT = 1,
+				@amount DECIMAL(18,2),
+				@ClaimPayBackTransferId2 INT;
+
+			SELECT @max = MAX(rn) FROM #Src;
+
+			WHILE @i <= @max
+			BEGIN
+				SELECT 
+					@amount = SumAmountTotal,
+					@ClaimPayBackTransferId2   = ClaimPayBackTransferId
+				FROM #Src
+				WHERE rn = @i;
+
+				IF @runningSum + @amount > 5000
+				BEGIN
+					SET @groupNo = @groupNo + 1;
+					SET @runningSum = 0;
+				END
+
+				SET @runningSum = @runningSum + @amount;
+
+				INSERT INTO @SumResult
+				VALUES (@ClaimPayBackTransferId2, @amount, @groupNo);
+
+				SET @i = @i + 1;
+			END
+
+			SELECT
+				ClaimPayBackTransferId,
+				GroupNo,
+				SUM(SumAmountTotal) AS SumAmountTotal
+			INTO #TmpSumResult
+			FROM @SumResult
+			GROUP BY ClaimPayBackTransferId, GroupNo
+			ORDER BY GroupNo;			
 
 			SELECT 
 				ROW_NUMBER() OVER (ORDER BY ClaimPayBackTransferId ASC) AS rwId
 				,ClaimPayBackTransferId
 				,SumAmountTotal
-				,COUNT(*) OVER (
-					PARTITION BY 
-						CASE 
-							WHEN IsNoneLimit = 1 THEN SumAmountTotal
-							ELSE SumAmount
-						END
-				) AS ItemCount
+				,GroupNo
+			INTO #TmpGroupTotalRunNo
+			FROM #TmpSumResult
+
+			SELECT ClaimPayBackTransferId
+				,COUNT(GroupNo) AS ItemCount
+				,GroupNo
 			INTO #TmpItemCount
-			FROM #TmpGroup
+			FROM @SumResult
+			GROUP BY ClaimPayBackTransferId, GroupNo
 
 			DECLARE @TT          VARCHAR(6) = 'OCG'
 				  , @Total		 INT 
@@ -148,7 +196,6 @@ BEGIN
 										   , @MM OUTPUT -- varchar(2)
 										   , @RunningFrom OUTPUT -- int
 										   , @RunningTo OUTPUT -- int
-
 	
 			-- สร้าง ClaimPayBackSubGroup และเก็บ ClaimPayBackSubGroupId ที่สร้างขึ้นใหม่
 			DECLARE @GeneratedIds TABLE (ClaimPayBackSubGroupId INT,ClaimPayBackTransferId INT)
