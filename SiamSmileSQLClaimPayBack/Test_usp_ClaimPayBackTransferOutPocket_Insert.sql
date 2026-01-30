@@ -219,7 +219,7 @@ GO
 				-- อัปเดต ClaimPayBackDetail ด้วย ClaimPayBackSubGroupId
 				SELECT *
 				--UPDATE CPBD
-				--SET CPBD.ClaimPayBackSubGroupId = GID.ClaimPayBackSubGroupId
+				--SET CPBD.ClaimPayBackSubGroupId = g.ClaimPayBackSubGroupId
 				--	, CPBD.UpdatedDate = @CreatedDate
 				--	, CPBD.UpdatedByUserId = @CreatedByUserId
 				FROM dbo.ClaimPayBackDetail CPBD
