@@ -194,6 +194,7 @@ GO
 					, @CreatedByUserId			CreatedByUserId
 					, @CreatedDate				UpdatedDate
 					, @CreatedByUserId			UpdatedByUserId
+					, NULL						ContactEmail
 				FROM #TmpGroupTotalRunNo t
 
 				--INSERT INTO dbo.ClaimPayBackSubGroupDetail
