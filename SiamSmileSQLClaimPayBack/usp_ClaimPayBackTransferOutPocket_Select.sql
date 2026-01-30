@@ -71,8 +71,7 @@ BEGIN
       ,t.UpdatedByUserId
       ,t.UpdatedDate
 	  ,CASE WHEN t.Amount > @OutOfPocketAmountLimit THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END IsCheck 
-	  ,IIF(cpbsg.ClaimPayBackTransferId = t.ClaimPayBackTransferId , 1 ,0)												IsGroup
-	  --,CASE WHEN cpbsg. > @OutOfPocketAmountLimit THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END IsGroup 
+	  ,IIF(cpbsg.ClaimPayBackTransferId = t.ClaimPayBackTransferId , 1 ,0)						IsGroup
 	  ,COUNT(t.ClaimPayBackTransferId) OVER ( ) AS TotalCount
 	FROM dbo.ClaimPayBackTransfer t
 		LEFT JOIN dbo.ClaimPayBackOutOfPocketStatus ops
@@ -87,7 +86,8 @@ BEGIN
 			GROUP BY cpbsg.ClaimPayBackTransferId
 		) cpbsg
 			ON t.ClaimPayBackTransferId = cpbsg.ClaimPayBackTransferId
-	WHERE (t.CreatedDate >= @CreatedDateFrom AND t.CreatedDate < @CreatedDateTo)
+	WHERE t.ClaimPayBackTransferStatusId = 2 
+	AND (t.CreatedDate >= @CreatedDateFrom AND t.CreatedDate < @CreatedDateTo)
 	AND (t.OutOfPocketStatus = @OutOfPocketStatusId OR @OutOfPocketStatusId IS NULL)
 	AND (t.IsActive = 1)
 	AND (t.ClaimGroupTypeId = @ClaimGroupType OR @ClaimGroupType IS NULL)
