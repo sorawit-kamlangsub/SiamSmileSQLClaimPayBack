@@ -65,7 +65,7 @@ GO
 			WHERE cd.IsActive = 1	
 			AND c.IsActive = 1
 			AND cpt.IsActive = 1
-			--AND cpt.OutOfPocketStatus IS NULL
+			AND cpt.OutOfPocketStatus = 2
 
 			SELECT 
 					ROW_NUMBER() OVER(ORDER BY (ClaimPayBackTransferId) asc ) AS rwId
