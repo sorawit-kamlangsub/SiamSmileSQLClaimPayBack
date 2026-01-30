@@ -143,7 +143,7 @@ BEGIN
 				FROM #Src
 				WHERE rn = @i;
 
-				IF @runningSum + @amount > 5000
+				IF @runningSum + @amount > @OutOfPocketAmountLimit
 				BEGIN
 					SET @groupNo = @groupNo + 1;
 					SET @runningSum = 0;
