@@ -28,7 +28,7 @@ GO
 --	SET NOCOUNT ON;
 
 	-- For Test
-	DECLARE @ClaimPayBackTransferId NVARCHAR(MAX) = 4149;--'2924,2925'
+	DECLARE @ClaimPayBackTransferId NVARCHAR(MAX) = '4149';--'2924,2925'
 	DECLARE @CreatedByUserId INT = 1
 
 	-- Add the parameters for the stored procedure here
