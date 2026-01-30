@@ -23,7 +23,7 @@ GO
 --	SET NOCOUNT ON;
 
 	-- For Test
-	DECLARE @ClaimPayBackTransferId NVARCHAR(MAX) = '4141,4148';--'4141,4148' 4147
+	DECLARE @ClaimPayBackTransferId NVARCHAR(MAX) = '4147';--'4141,4148' 4147
 	DECLARE @CreatedByUserId INT = 1
 
 	-- Add the parameters for the stored procedure here
@@ -112,81 +112,75 @@ GO
 			GROUP BY ClaimPayBackTransferId,SumAmount,IsNoneLimit
 			HAVING IsNoneLimit = 0; 
 
-SELECT
-    ROW_NUMBER() OVER (ORDER BY ClaimPayBackTransferId) AS rn
-    ,ClaimPayBackTransferId
-    ,SumAmountTotal
-INTO #Src
-FROM @TmpGroupTotal;
+			SELECT
+				ROW_NUMBER() OVER (ORDER BY ClaimPayBackTransferId) AS rn
+				,ClaimPayBackTransferId
+				,SumAmountTotal
+			INTO #Src
+			FROM @TmpGroupTotal;
 
--- ตารางผลลัพธ์
-DECLARE @SumResult TABLE (
-    ClaimPayBackTransferId INT,
-    SumAmountTotal DECIMAL(18,2),
-    GroupNo INT
-);
+			-- ตารางผลลัพธ์
+			DECLARE @SumResult TABLE (
+				ClaimPayBackTransferId INT,
+				SumAmountTotal DECIMAL(18,2),
+				GroupNo INT
+			);
 
-DECLARE 
-    @i INT = 1,
-    @max INT,
-    @runningSum DECIMAL(18,2) = 0,
-    @groupNo INT = 1,
-    @amount DECIMAL(18,2),
-    @ClaimPayBackTransferId2 INT;
+			DECLARE 
+				@i INT = 1,
+				@max INT,
+				@runningSum DECIMAL(18,2) = 0,
+				@groupNo INT = 1,
+				@amount DECIMAL(18,2),
+				@ClaimPayBackTransferId2 INT;
 
-SELECT @max = MAX(rn) FROM #Src;
+			SELECT @max = MAX(rn) FROM #Src;
 
-WHILE @i <= @max
-BEGIN
-    SELECT 
-        @amount = SumAmountTotal,
-        @ClaimPayBackTransferId2   = ClaimPayBackTransferId
-    FROM #Src
-    WHERE rn = @i;
+			WHILE @i <= @max
+			BEGIN
+				SELECT 
+					@amount = SumAmountTotal,
+					@ClaimPayBackTransferId2   = ClaimPayBackTransferId
+				FROM #Src
+				WHERE rn = @i;
 
-    IF @runningSum + @amount > 5000
-    BEGIN
-        SET @groupNo = @groupNo + 1;
-        SET @runningSum = 0;
-    END
+				IF @runningSum + @amount > 5000
+				BEGIN
+					SET @groupNo = @groupNo + 1;
+					SET @runningSum = 0;
+				END
 
-    SET @runningSum = @runningSum + @amount;
+				SET @runningSum = @runningSum + @amount;
 
-    INSERT INTO @SumResult
-    VALUES (@ClaimPayBackTransferId2, @amount, @groupNo);
+				INSERT INTO @SumResult
+				VALUES (@ClaimPayBackTransferId2, @amount, @groupNo);
 
-    SET @i = @i + 1;
-END
+				SET @i = @i + 1;
+			END
 
-SELECT
-    ClaimPayBackTransferId,
-    GroupNo,
-    SUM(SumAmountTotal) AS SumAmountTotal
-INTO #TmpSumResult
-FROM @SumResult
-GROUP BY ClaimPayBackTransferId, GroupNo
-ORDER BY GroupNo;
+			SELECT
+				ClaimPayBackTransferId,
+				GroupNo,
+				SUM(SumAmountTotal) AS SumAmountTotal
+			INTO #TmpSumResult
+			FROM @SumResult
+			GROUP BY ClaimPayBackTransferId, GroupNo
+			ORDER BY GroupNo;			
 
 			SELECT 
 				ROW_NUMBER() OVER (ORDER BY ClaimPayBackTransferId ASC) AS rwId
 				,ClaimPayBackTransferId
 				,SumAmountTotal
+				,GroupNo
 			INTO #TmpGroupTotalRunNo
 			FROM #TmpSumResult
 
-			SELECT 
-				ROW_NUMBER() OVER (ORDER BY ClaimPayBackTransferId ASC) AS rwId
-				,ClaimPayBackTransferId
-				,SumAmountTotal
-				,COUNT(*) OVER (
-					PARTITION BY 
-						CASE 
-							WHEN IsNoneLimit = 1 THEN SumAmountTotal
-							ELSE SumAmount
-						END
-				) AS ItemCount
+			SELECT ClaimPayBackTransferId
+				,COUNT(GroupNo) AS ItemCount
+				,GroupNo
 			INTO #TmpItemCount
-			FROM #TmpGroup
+			FROM @SumResult
+			GROUP BY ClaimPayBackTransferId, GroupNo
 
 			DECLARE @TT          VARCHAR(6) = 'OCG'
 				  , @Total		 INT 
@@ -232,12 +226,7 @@ ORDER BY GroupNo;
 				SELECT 
 					CONCAT(@TT,@YY,@MM ,FORMAT(@RunningFrom + t.rwId - 1,'000000')) ClaimPayBackSubGroupCode
 					, t.SumAmountTotal
-					, 
-						(
-							SELECT TOP 1 ItemCount
-							FROM #TmpItemCount tg
-							WHERE tg.ClaimPayBackTransferId = t.ClaimPayBackTransferId
-						)	ItemCount
+					, ic.ItemCount				ItemCount
 					, NULL						HospitalCode
 					, NULL						HospitalName
 					, t.ClaimPayBackTransferId
@@ -248,6 +237,13 @@ ORDER BY GroupNo;
 					, @CreatedByUserId			UpdatedByUserId
 					, NULL						ContactEmail
 				FROM #TmpGroupTotalRunNo t
+					INNER JOIN 
+					(
+						SELECT GroupNo, ItemCount AS ItemCount
+						FROM #TmpItemCount
+						GROUP BY GroupNo, ItemCount
+					) ic 
+						ON ic.GroupNo = t.GroupNo
 
 				--INSERT INTO dbo.ClaimPayBackSubGroupDetail
 				--(
