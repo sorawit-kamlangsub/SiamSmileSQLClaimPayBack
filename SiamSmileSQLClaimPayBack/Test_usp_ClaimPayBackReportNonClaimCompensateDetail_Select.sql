@@ -395,7 +395,7 @@ FROM @TmpClaimPayBack TmpCPB
 				cptMisc.Remark,
 				cptMisc.ProductTypeId,
 				ROW_NUMBER() OVER (
-					PARTITION BY cm.ClaimMiscId, cptMisc.PaymentTypeName
+					PARTITION BY cm.ClaimMiscId, cptMisc.PaymentTypeName,cptMisc.RelationDetail
 					ORDER BY cptMisc.TransferDate DESC
 				) AS rn
 			FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
