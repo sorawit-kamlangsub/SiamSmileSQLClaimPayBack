@@ -183,6 +183,8 @@ GO
 							FROM #TmpItemCount tg
 							WHERE tg.ClaimPayBackTransferId = t.ClaimPayBackTransferId
 						)	ItemCount
+					, NULL						HospitalCode
+					, NULL						HospitalName
 					, t.ClaimPayBackTransferId
 					, 1							IsActive						 
 					, @CreatedDate				CreatedDate
