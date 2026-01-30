@@ -1,10 +1,12 @@
 USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackReportNonClaimCompensateDetail_Select]    Script Date: 24/12/2568 11:15:34 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+
+--SET ANSI_NULLS ON
+--GO
+--SET QUOTED_IDENTIFIER ON
+--GO
+
+
 
 -- =============================================
 -- Author:		Krekpon.D
@@ -14,6 +16,10 @@ GO
 -- Description: ปรับการ join ข้อมูลและ where ข้อมูลด้วย BeneficiaryId
 -- Update date: 2025-12-24 16:37 Sorawit.k
 -- Description: Add ClaimMisc @ClaimGroupTypeId = 7
+-- Update date: 2026-01-14 14:35 Krekpon.D
+-- Description: ปรับข้อมูลตาม ProductType ใน dropdown
+-- Update date: 2026-01-21 11:55 Krekpon.D
+-- Description: ดึงข้อมูลของผู้เอาประกัน และ COL
 -- =============================================
 --ALTER PROCEDURE [dbo].[usp_ClaimPayBackReportNonClaimCompensateDetail_Select] 
 --	-- Add the parameters for the stored procedure here
@@ -24,17 +30,13 @@ GO
 --	,@ClaimGroupTypeId	INT = NULL
 --AS
 --BEGIN
-	-- SET NOCOUNT ON added to prevent extra result sets from
-	-- interfering with SELECT statements.
-	--SET NOCOUNT ON;
-
-    -- Insert statements for procedure here
+--	SET NOCOUNT ON;
 
 	DECLARE 
-	 @DateFrom			DATE = '2025-11-01'
-	,@DateTo			DATE = '2025-12-24'
+	 @DateFrom			DATE = '2026-01-29'
+	,@DateTo			DATE = '2026-01-29'
 	,@InsuranceId		INT = NULL
-	,@ProductGroupId	INT = NULL	
+	,@ProductGroupId	INT = 11	
 	,@ClaimGroupTypeId	INT = 7;
 
 	--DECLARE @Value NVARCHAR(Max) = NULL
@@ -88,6 +90,28 @@ GO
 	 CreatedByUser NVARCHAR(150),
 	 HospitalCode VARCHAR(20)
      )
+
+	 
+-- สร้าง temp table
+CREATE TABLE #InsuranceType (
+    ProductGroup_ID INT,
+    ProductGroupDetail NVARCHAR(100),
+    IsActive bit
+);
+
+INSERT INTO #InsuranceType (ProductGroup_ID, ProductGroupDetail, IsActive)
+VALUES
+    (1, N'รอข้อมูล',0),
+    (2, N'PH',0),
+    (3, N'PA',0),
+    (4, N'Motor',0),
+    (5, N'PL',0),
+    (6, N'House',0),
+    (7, N'PA อื่นๆ',1),
+    (8, N'ประกันเดินทาง',0),
+    (9, N'เบ็ดเตล็ด',0),
+    (10, N'CriticalIllness',0),
+    (11, N'Miscellaneous',0);
  -- เอาข้อมูลลงใน temp แล้วไป JOIN ต่อกับฝั่ง Base อื่น
  INSERT INTO @TmpClaimPayBack(
       ClaimGroupCodeFromCPBD,
@@ -111,11 +135,27 @@ GO
 		ON cpb.ClaimPayBackId = cpbd.ClaimPayBackId
 	 LEFT JOIN [DataCenterV1].[Product].ProductGroup dppg
 		ON cpbd.ProductGroupId = dppg.ProductGroup_ID
+	INNER JOIN #InsuranceType it
+		ON dppg.ProductGroup_ID = it.ProductGroup_ID
 WHERE   cpb.ClaimGroupTypeId = @ClaimGroupTypeId
 	AND cpb.IsActive = 1 
 	AND cpbd.IsActive = 1
 	AND ((cpb.CreatedDate >= @DateFrom) AND (cpb.CreatedDate < DATEADD(Day,1,@DateTo)))
-    AND (cpbd.ProductGroupId = @ProductGroupId OR @ProductGroupId IS NULL)
+    AND (
+			(	
+				@ProductGroupId <> 11
+					AND
+				cpbd.ProductGroupId = @ProductGroupId OR @ProductGroupId IS NULL
+			)
+			OR
+			(
+				@ProductGroupId = 11
+				AND
+				(
+					@ProductGroupId IS NOT NULL	AND it.ProductGroup_ID = 7
+				)
+			) 
+		)
 	AND (cpbd.InsuranceCompanyId = @InsuranceId OR @InsuranceId IS NULL)
 
 	--SELECT เอาไปใช้งาน
@@ -128,8 +168,8 @@ WHERE   cpb.ClaimGroupTypeId = @ClaimGroupTypeId
 				END ProductGroupDetailName,
 				TmpCPB.ClaimGroupCodeFromCPBD AS ClaimGroupCode,
 				icu.ClaimCode AS ClaimNo ,
-				IIF(@_ClaimGroupTypeId IN (6) , TmpCPB.COL,NULL) AS COL,
-				IIF(@_ClaimGroupTypeId IN (6) ,icu.CustomerName,NULL) AS CustomerName, 
+				IIF(@_ClaimGroupTypeId IN (6,7) , TmpCPB.COL,NULL) AS COL,
+				IIF(@_ClaimGroupTypeId IN (6,7) ,icu.CustomerName,NULL) AS CustomerName, 
 				CASE 
 					WHEN @_ClaimGroupTypeId IN (2,4,6) THEN CONCAT(cptOnline.TitleDetail,cptOnline.FirstName,' ',cptOnline.LastName)
 					WHEN @_ClaimGroupTypeId = 7		  THEN CONCAT(cptMisc.TitleDetail,cptMisc.FirstName,' ',cptMisc.LastName)
@@ -415,4 +455,8 @@ FROM @TmpClaimPayBack TmpCPB
 
 IF OBJECT_ID('tempdb..#TmpPersonUser') IS NOT NULL DROP TABLE #TmpPersonUser;
 IF OBJECT_ID('tempdb..@TmpClaimPayBack') IS NOT NULL  DELETE FROM @TmpClaimPayBack;
+IF OBJECT_ID('tempdb..#InsuranceType') IS NOT NULL  DROP TABLE #InsuranceType;
 --END
+
+
+
