@@ -5,11 +5,6 @@ GO
 --GO
 --SET QUOTED_IDENTIFIER ON
 --GO
---/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackTransferOutPocket_Insert]    Script Date: 10/25/2023 9:30:52 AM ******/
---SET ANSI_NULLS ON
---GO
---SET QUOTED_IDENTIFIER ON
---GO
 
 -- =============================================
 -- Author:		Sorawit.k 08719
