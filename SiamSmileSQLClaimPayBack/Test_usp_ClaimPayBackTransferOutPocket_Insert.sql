@@ -119,7 +119,6 @@ GO
 			INTO #Src
 			FROM @TmpGroupTotal;
 
-			-- ตารางผลลัพธ์
 			DECLARE @SumResult TABLE (
 				ClaimPayBackTransferId INT,
 				SumAmountTotal DECIMAL(18,2),
