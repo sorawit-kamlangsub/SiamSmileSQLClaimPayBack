@@ -177,59 +177,57 @@ GO
 										   , @RunningFrom OUTPUT -- int
 										   , @RunningTo OUTPUT -- int
 
-	
-			-- สร้าง ClaimPayBackSubGroup และเก็บ ClaimPayBackSubGroupId ที่สร้างขึ้นใหม่
-			DECLARE @GeneratedIds TABLE (ClaimPayBackSubGroupId INT,ClaimPayBackTransferId INT)
-
 			-----------------------------------
 			BEGIN TRY
 				BEGIN TRANSACTION
 	
-
-				--INSERT INTO dbo.ClaimPayBackSubGroup
-				--(
-				--	ClaimPayBackSubGroupCode
-				--	, Amount
-				--	, ItemCount
-				--	, HospitalCode
-				--	, HospitalName
-				--	, ClaimPayBackTransferId
-				--	, IsActive
-				--	, CreatedDate
-				--	, CreatedByUserId
-				--	, UpdatedDate
-				--	, UpdatedByUserId
-				--	, ContactEmail
-				--)
-				--OUTPUT INSERTED.ClaimPayBackSubGroupId, INSERTED.ClaimPayBackTransferId INTO @GeneratedIds (ClaimPayBackSubGroupId, ClaimPayBackTransferId)
-				SELECT 
-					CONCAT(@TT,@YY,@MM ,FORMAT(@RunningFrom + t.rwId - 1,'000000')) ClaimPayBackSubGroupCode
-					, t.SumAmountTotal
-					, ic.ItemCount				ItemCount
-					, NULL						HospitalCode
-					, NULL						HospitalName
-					, t.ClaimPayBackTransferId
-					, 1							IsActive						 
-					, @CreatedDate				CreatedDate
-					, @CreatedByUserId			CreatedByUserId
-					, @CreatedDate				UpdatedDate
-					, @CreatedByUserId			UpdatedByUserId
-					, NULL						ContactEmail
-				FROM #TmpGroupTotalRunNo t
-					INNER JOIN 
-					(
-						SELECT GroupNo, ItemCount AS ItemCount
-						FROM #TmpItemCount
-						GROUP BY GroupNo, ItemCount
-					) ic 
-						ON ic.GroupNo = t.GroupNo
-
 				DECLARE @OffsetGNo INT = 1,
 						@TotalGroupNoCount INT;
 				SELECT @TotalGroupNoCount = COUNT(DISTINCT GroupNo) FROM @SumResult;
 
 				WHILE @OffsetGNo <= @TotalGroupNoCount
 					BEGIN 				
+
+						DECLARE @GeneratedIds TABLE (ClaimPayBackSubGroupId INT,ClaimPayBackTransferId INT)
+						
+						--INSERT INTO dbo.ClaimPayBackSubGroup
+						--(
+						--	ClaimPayBackSubGroupCode
+						--	, Amount
+						--	, ItemCount
+						--	, HospitalCode
+						--	, HospitalName
+						--	, ClaimPayBackTransferId
+						--	, IsActive
+						--	, CreatedDate
+						--	, CreatedByUserId
+						--	, UpdatedDate
+						--	, UpdatedByUserId
+						--	, ContactEmail
+						--)
+						--OUTPUT INSERTED.ClaimPayBackSubGroupId, INSERTED.ClaimPayBackTransferId INTO @GeneratedIds (ClaimPayBackSubGroupId, ClaimPayBackTransferId)
+						SELECT 
+							CONCAT(@TT,@YY,@MM ,FORMAT(@RunningFrom + t.rwId - 1,'000000')) ClaimPayBackSubGroupCode
+							, t.SumAmountTotal
+							, ic.ItemCount				ItemCount
+							, NULL						HospitalCode
+							, NULL						HospitalName
+							, t.ClaimPayBackTransferId
+							, 1							IsActive						 
+							, @CreatedDate				CreatedDate
+							, @CreatedByUserId			CreatedByUserId
+							, @CreatedDate				UpdatedDate
+							, @CreatedByUserId			UpdatedByUserId
+							, NULL						ContactEmail
+						FROM #TmpGroupTotalRunNo t
+							INNER JOIN 
+							(
+								SELECT GroupNo, ItemCount AS ItemCount
+								FROM #TmpItemCount
+								GROUP BY GroupNo, ItemCount
+							) ic 
+								ON ic.GroupNo = t.GroupNo	
+						WHERE ic.GroupNo = @OffsetGNo
 						
 						--INSERT INTO dbo.ClaimPayBackSubGroupDetail
 						--(
