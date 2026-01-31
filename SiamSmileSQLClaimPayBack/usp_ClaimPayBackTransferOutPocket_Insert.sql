@@ -188,7 +188,8 @@ BEGIN
 				WHILE @OffsetGNo <= @TotalGroupNoCount
 					BEGIN 				
 
-						DECLARE @GeneratedIds TABLE (ClaimPayBackSubGroupId INT,ClaimPayBackTransferId INT)
+						DECLARE @ClaimPayBackSubGroupId INT;
+						DECLARE @GeneratedIds TABLE (ClaimPayBackSubGroupId INT)
 						
 						INSERT INTO dbo.ClaimPayBackSubGroup
 						(
@@ -205,7 +206,7 @@ BEGIN
 							, UpdatedByUserId
 							, ContactEmail
 						)
-						OUTPUT INSERTED.ClaimPayBackSubGroupId, INSERTED.ClaimPayBackTransferId INTO @GeneratedIds (ClaimPayBackSubGroupId, ClaimPayBackTransferId)
+						OUTPUT INSERTED.ClaimPayBackSubGroupId INTO @GeneratedIds (ClaimPayBackSubGroupId)
 						SELECT 
 							CONCAT(@TT,@YY,@MM ,FORMAT(@RunningFrom + t.rwId - 1,'000000')) ClaimPayBackSubGroupCode
 							, t.SumAmountTotal
@@ -228,6 +229,8 @@ BEGIN
 							) ic 
 								ON ic.GroupNo = t.GroupNo	
 						WHERE ic.GroupNo = @OffsetGNo
+
+						SELECT @ClaimPayBackSubGroupId = ClaimPayBackSubGroupId FROM @GeneratedIds
 						
 						INSERT INTO dbo.ClaimPayBackSubGroupDetail
 						(
@@ -243,7 +246,7 @@ BEGIN
 						SELECT 
 						 s.ClaimPayBackId
 						 ,d.SumAmount
-						 ,g.ClaimPayBackSubGroupId
+						 ,@ClaimPayBackSubGroupId
 						 ,1							IsActive
 						 , @CreatedByUserId			CreatedByUserId
 						 , @CreatedDate				CreatedDate
@@ -251,9 +254,7 @@ BEGIN
 						 , @CreatedDate				UpdatedDate
 						FROM #TmpSubGroupDetail d
 						INNER JOIN @SumResult s
-							ON s.ClaimPayBackId = d.ClaimPayBackId
-						LEFT JOIN @GeneratedIds g
-							ON g.ClaimPayBackTransferId = d.ClaimPayBackTransferId		
+							ON s.ClaimPayBackId = d.ClaimPayBackId	
 						WHERE s.GroupNo = @OffsetGNo
 
 						SET @OffsetGNo = @OffsetGNo + 1;
@@ -262,15 +263,12 @@ BEGIN
 				-- ÍÑ»à´µ ClaimPayBackDetail ´éÇÂ ClaimPayBackSubGroupId
 				--SELECT *
 				UPDATE CPBD
-				SET CPBD.ClaimPayBackSubGroupId = g.ClaimPayBackSubGroupId
+				SET CPBD.ClaimPayBackSubGroupId = @ClaimPayBackSubGroupId
 					, CPBD.UpdatedDate = @CreatedDate
 					, CPBD.UpdatedByUserId = @CreatedByUserId
 				FROM dbo.ClaimPayBackDetail CPBD
 				INNER JOIN #TmpD TD 
 					ON CPBD.ClaimPayBackDetailId = TD.ClaimPayBackDetailId
-				LEFT JOIN @GeneratedIds g
-					ON g.ClaimPayBackTransferId = TD.ClaimPayBackTransferId
-
 
 				INSERT INTO dbo.ClaimPayBackTransferTransaction
 				(
