@@ -13,7 +13,7 @@ GO
 -- Description:	Group CPT โอนเงินสำรองจ่าย
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimPayBackTransferOutPocket_Insert]
--- Add the parameters for the stored procedure here
+ --Add the parameters for the stored procedure here
 	@ClaimPayBackTransferId		INT
 	,@CreatedByUserId			INT
 AS
@@ -23,7 +23,7 @@ BEGIN
 	SET NOCOUNT ON;
 
 	-- For Test
-	--DECLARE @ClaimPayBackTransferId NVARCHAR(MAX) = '4149';--'2924,2925'
+	--DECLARE @ClaimPayBackTransferId NVARCHAR(MAX) = '4147';--'4141,4148' 4147
 	--DECLARE @CreatedByUserId INT = 1
 
 	-- Add the parameters for the stored procedure here
@@ -35,7 +35,9 @@ BEGIN
 	DECLARE @ClaimPayBackSubGroupCount	INT = 0;
 	DECLARE @ClaimGroupTypeId			INT;
 	DECLARE @OutOfPocketAmountLimit		DECIMAL(16,2);
+	DECLARE @TransactionDetail			NVARCHAR(500)	= ''; 
 	
+	SELECT @TransactionDetail = OutOfPocketStatusName FROM dbo.ClaimPayBackOutOfPocketStatus WHERE OutOfPocketStatusId = 2;
 	SELECT @OutOfPocketAmountLimit = ValueNumber FROM dbo.ProgramConfig WHERE ParameterName = 'OutOfPocketAmountLimit'
 
 	SELECT DISTINCT Element
@@ -81,46 +83,22 @@ BEGIN
 				ROW_NUMBER() OVER (ORDER BY ClaimPayBackTransferId ASC) AS rwId,				
 				ClaimPayBackTransferId,
 				SumAmount,                                  
-				SUM(SumAmount) OVER (
-					PARTITION BY ClaimPayBackTransferId
-				) AS SumAmountTotal  ,
-				CASE
-					WHEN SUM(SumAmount) OVER (
-						PARTITION BY ClaimPayBackTransferId
-					) < @OutOfPocketAmountLimit THEN 1
-					ELSE 0
-				END AS IsNoneLimit
+				ClaimPayBackId
 			INTO #TmpGroup
 			FROM #TmpSubGroupDetail
 			ORDER BY ClaimPayBackTransferId; 
-
-			DECLARE @TmpGroupTotal TABLE (ClaimPayBackTransferId INT,SumAmountTotal DECIMAL(16,0))
-
-			INSERT INTO @TmpGroupTotal(ClaimPayBackTransferId,SumAmountTotal)
-			SELECT 
-				ClaimPayBackTransferId
-				, SumAmountTotal	
-			FROM #TmpGroup
-			GROUP BY ClaimPayBackTransferId,SumAmountTotal,IsNoneLimit
-			HAVING IsNoneLimit = 1; 
-
-			INSERT INTO @TmpGroupTotal(ClaimPayBackTransferId,SumAmountTotal)
-			SELECT 
-				ClaimPayBackTransferId
-				, SumAmount	
-			FROM #TmpGroup
-			GROUP BY ClaimPayBackTransferId,SumAmount,IsNoneLimit
-			HAVING IsNoneLimit = 0; 
-
+			
 			SELECT
 				ROW_NUMBER() OVER (ORDER BY ClaimPayBackTransferId) AS rn
 				,ClaimPayBackTransferId
-				,SumAmountTotal
+				,SumAmount
+				,ClaimPayBackId
 			INTO #Src
-			FROM @TmpGroupTotal;
+			FROM #TmpGroup;
 
 			DECLARE @SumResult TABLE (
 				ClaimPayBackTransferId INT,
+				ClaimPayBackId INT,
 				SumAmountTotal DECIMAL(18,2),
 				GroupNo INT
 			);
@@ -131,15 +109,17 @@ BEGIN
 				@runningSum DECIMAL(18,2) = 0,
 				@groupNo INT = 1,
 				@amount DECIMAL(18,2),
-				@ClaimPayBackTransferId2 INT;
+				@ClaimPayBackTransferId2 INT,
+				@ClaimPayBackId INT;
 
 			SELECT @max = MAX(rn) FROM #Src;
 
 			WHILE @i <= @max
 			BEGIN
 				SELECT 
-					@amount = SumAmountTotal,
-					@ClaimPayBackTransferId2   = ClaimPayBackTransferId
+					@amount = SumAmount
+					,@ClaimPayBackTransferId2   = ClaimPayBackTransferId
+					,@ClaimPayBackId = ClaimPayBackId
 				FROM #Src
 				WHERE rn = @i;
 
@@ -152,7 +132,7 @@ BEGIN
 				SET @runningSum = @runningSum + @amount;
 
 				INSERT INTO @SumResult
-				VALUES (@ClaimPayBackTransferId2, @amount, @groupNo);
+				VALUES (@ClaimPayBackTransferId2,@ClaimPayBackId, @amount, @groupNo);
 
 				SET @i = @i + 1;
 			END
@@ -196,6 +176,7 @@ BEGIN
 										   , @MM OUTPUT -- varchar(2)
 										   , @RunningFrom OUTPUT -- int
 										   , @RunningTo OUTPUT -- int
+
 	
 			-- สร้าง ClaimPayBackSubGroup และเก็บ ClaimPayBackSubGroupId ที่สร้างขึ้นใหม่
 			DECLARE @GeneratedIds TABLE (ClaimPayBackSubGroupId INT,ClaimPayBackTransferId INT)
@@ -224,12 +205,7 @@ BEGIN
 				SELECT 
 					CONCAT(@TT,@YY,@MM ,FORMAT(@RunningFrom + t.rwId - 1,'000000')) ClaimPayBackSubGroupCode
 					, t.SumAmountTotal
-					, 
-						(
-							SELECT TOP 1 ItemCount
-							FROM #TmpItemCount tg
-							WHERE tg.ClaimPayBackTransferId = t.ClaimPayBackTransferId
-						)	ItemCount
+					, ic.ItemCount				ItemCount
 					, NULL						HospitalCode
 					, NULL						HospitalName
 					, t.ClaimPayBackTransferId
@@ -240,30 +216,50 @@ BEGIN
 					, @CreatedByUserId			UpdatedByUserId
 					, NULL						ContactEmail
 				FROM #TmpGroupTotalRunNo t
+					INNER JOIN 
+					(
+						SELECT GroupNo, ItemCount AS ItemCount
+						FROM #TmpItemCount
+						GROUP BY GroupNo, ItemCount
+					) ic 
+						ON ic.GroupNo = t.GroupNo
 
-				INSERT INTO dbo.ClaimPayBackSubGroupDetail
-				(
-					ClaimPayBackId
-					,Amount
-					,ClaimPayBackSubGroupId
-					,IsActive
-					,CreatedByUserId
-					,CreatedDate
-					,UpdatedByUserId
-					,UpdatedDate
-				)
-				SELECT 
-				 d.ClaimPayBackId
-				 ,d.SumAmount
-				 ,g.ClaimPayBackSubGroupId
-				 ,1							IsActive
-				 , @CreatedByUserId			CreatedByUserId
-				 , @CreatedDate				CreatedDate
-				 , @CreatedByUserId			UpdatedByUserId
-				 , @CreatedDate				UpdatedDate
-				FROM #TmpSubGroupDetail d
-				LEFT JOIN @GeneratedIds g
-					ON g.ClaimPayBackTransferId = d.ClaimPayBackTransferId
+				DECLARE @OffsetGNo INT = 1,
+						@TotalGroupNoCount INT;
+				SELECT @TotalGroupNoCount = COUNT(DISTINCT GroupNo) FROM @SumResult;
+
+				WHILE @OffsetGNo <= @TotalGroupNoCount
+					BEGIN 				
+						
+						INSERT INTO dbo.ClaimPayBackSubGroupDetail
+						(
+							ClaimPayBackId
+							,Amount
+							,ClaimPayBackSubGroupId
+							,IsActive
+							,CreatedByUserId
+							,CreatedDate
+							,UpdatedByUserId
+							,UpdatedDate
+						)
+						SELECT 
+						 s.ClaimPayBackId
+						 ,d.SumAmount
+						 ,g.ClaimPayBackSubGroupId
+						 ,1							IsActive
+						 , @CreatedByUserId			CreatedByUserId
+						 , @CreatedDate				CreatedDate
+						 , @CreatedByUserId			UpdatedByUserId
+						 , @CreatedDate				UpdatedDate
+						FROM #TmpSubGroupDetail d
+						INNER JOIN @SumResult s
+							ON s.ClaimPayBackId = d.ClaimPayBackId
+						LEFT JOIN @GeneratedIds g
+							ON g.ClaimPayBackTransferId = d.ClaimPayBackTransferId		
+						WHERE s.GroupNo = @OffsetGNo
+
+						SET @OffsetGNo = @OffsetGNo + 1;
+					END
 
 				-- อัปเดต ClaimPayBackDetail ด้วย ClaimPayBackSubGroupId
 				--SELECT *
@@ -276,6 +272,25 @@ BEGIN
 					ON CPBD.ClaimPayBackDetailId = TD.ClaimPayBackDetailId
 				LEFT JOIN @GeneratedIds g
 					ON g.ClaimPayBackTransferId = TD.ClaimPayBackTransferId
+
+
+				INSERT INTO dbo.ClaimPayBackTransferTransaction
+				(
+					TransactionDetail
+					,TransactionDetailId
+					,ClaimPayBackTransferId
+					,IsActive
+					,CreatedByUserId
+					,CreatedDate
+				)
+				SELECT DISTINCT
+				 @TransactionDetail			TransactionDetail
+				 ,2							TransactionDetailId
+				 ,ClaimPayBackTransferId	ClaimPayBackTransferId
+				 ,1							IsActive
+				 ,@CreatedByUserId			CreatedByUserId
+				 ,@CreatedDate				CreatedDate
+				FROM #TmpGroupTotalRunNo
 	
 				SET @IsResult   = 1;
 				SET @Msg        = 'บันทึก สำเร็จ';
@@ -291,9 +306,11 @@ BEGIN
 			END CATCH
 			-----------------------------------
 
+		IF OBJECT_ID('tempdb..#Src') IS NOT NULL  DROP TABLE #Src;
 		IF OBJECT_ID('tempdb..#TmpD') IS NOT NULL  DROP TABLE #TmpD;
 		IF OBJECT_ID('tempdb..#Tmplst') IS NOT NULL  DROP TABLE #Tmplst;
 		IF OBJECT_ID('tempdb..#TmpGroup') IS NOT NULL  DROP TABLE #TmpGroup;
+		IF OBJECT_ID('tempdb..#TmpSumResult') IS NOT NULL  DROP TABLE #TmpSumResult;
 		IF OBJECT_ID('tempdb..#TmpItemCount') IS NOT NULL  DROP TABLE #TmpItemCount;
 		IF OBJECT_ID('tempdb..#TmpSubGroupDetail') IS NOT NULL  DROP TABLE #TmpSubGroupDetail;
 		IF OBJECT_ID('tempdb..#TmpGroupTotalRunNo') IS NOT NULL  DROP TABLE #TmpGroupTotalRunNo;
