@@ -14,7 +14,7 @@ GO
 -- =============================================
 --ALTER PROCEDURE [dbo].[usp_ClaimPayBackTransferOutPocket_Insert]
 -- Add the parameters for the stored procedure here
-	--@ClaimPayBackTransferId		INT
+	--@ClaimPayBackTransferId		NVARCHAR(MAX)
 	--,@CreatedByUserId			INT
 --AS
 --BEGIN
