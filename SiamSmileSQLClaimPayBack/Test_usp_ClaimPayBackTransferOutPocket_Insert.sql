@@ -283,7 +283,7 @@ GO
 				--	,CreatedByUserId
 				--	,CreatedDate
 				--)
-				SELECT
+				SELECT DISTINCT
 				 @TransactionDetail			TransactionDetail
 				 ,2							TransactionDetailId
 				 ,ClaimPayBackTransferId	ClaimPayBackTransferId
