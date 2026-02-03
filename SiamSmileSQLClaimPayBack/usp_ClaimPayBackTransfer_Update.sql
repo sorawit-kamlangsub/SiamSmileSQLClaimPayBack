@@ -124,11 +124,14 @@ BEGIN
 
 		--Update ClaimPayBackTransfer TransferAmount,TransferDate,Status
 		UPDATE dbo.ClaimPayBackTransfer
-			SET TransferAmount = @TransferAmount
-				,TransferDate= @TransferDate
-				,ClaimPayBackTransferStatusId = @ClaimPayBackTransferStatusId
+			SET TransferAmount = IIF(ClaimGroupTypeId = 4,NULL,@TransferAmount)
+				,TransferDate= IIF(ClaimGroupTypeId = 4,NULL,@TransferDate)
+				,ClaimPayBackTransferStatusId = IIF(ClaimGroupTypeId = 4,2,@ClaimPayBackTransferStatusId)
 				,UpdatedByUserId = @UpdatedByUserId
 				,UpdatedDate = @D
+				,OutOfPocketStatus = IIF(ClaimGroupTypeId = 4,3,NULL)
+				,OutOfPocketAmount = IIF(ClaimGroupTypeId = 4,@TransferAmount,NULL)
+				,OutOfPocketDate = IIF(ClaimGroupTypeId = 4,@TransferDate,NULL)
 		FROM dbo.ClaimPayBackTransfer
 		WHERE ClaimPayBackTransferId = @ClaimBayBackTransferId;
 
