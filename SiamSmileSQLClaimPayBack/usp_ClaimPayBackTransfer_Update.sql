@@ -17,7 +17,7 @@ GO
 -- Description:	ClaimPayBackTransfer Update
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimPayBackTransfer_Update] 
-	-- Add the parameters for the stored procedure here
+	 -- Add the parameters for the stored procedure here
 	 @ClaimBayBackTransferId		INT
 	,@TransferAmount				DECIMAL(16,2)
 	,@TransferDate					DATETIME
@@ -129,9 +129,10 @@ BEGIN
 				,ClaimPayBackTransferStatusId = IIF(ClaimGroupTypeId = 4,2,@ClaimPayBackTransferStatusId)
 				,UpdatedByUserId = @UpdatedByUserId
 				,UpdatedDate = @D
-				,OutOfPocketStatus = IIF(ClaimGroupTypeId = 4,3,NULL)
-				,OutOfPocketAmount = IIF(ClaimGroupTypeId = 4,@TransferAmount,NULL)
-				,OutOfPocketDate = IIF(ClaimGroupTypeId = 4,@TransferDate,NULL)
+				,OutOfPocketStatus = 3
+				,OutOfPocketAmount = @TransferAmount
+				,OutOfPocketDate = @TransferDate
+				,OutOfPocketByUserId = @UpdatedByUserId
 		FROM dbo.ClaimPayBackTransfer
 		WHERE ClaimPayBackTransferId = @ClaimBayBackTransferId;
 
@@ -162,6 +163,7 @@ BEGIN
 				SET BillingTransferDate = @TransferDate
 					,UpdatedByUserId = @UpdatedByUserId
 					,UpdatedDate = @D 
+					,IsPayTransfer = 1
 				WHERE ClaimPayBackTransferId = @ClaimBayBackTransferId;
 			END
 
@@ -208,7 +210,3 @@ WHERE ClaimPayBackTransferId=@ClaimBayBackTransferId AND cpd.IsActive=1 AND cpx.
 
    
 END
-
-
-
-
