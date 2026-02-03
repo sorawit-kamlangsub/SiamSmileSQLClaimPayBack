@@ -13,8 +13,8 @@ GO
 --ALTER PROCEDURE [dbo].[usp_ClaimPayBackTransferOutPocket_Select]
 	-- Add the parameters for the stored procedure here
 	DECLARE
-	@CreatedDateFrom							DATE = '2026-01-20'
-	,@CreatedDateTo								DATE = '2026-01-27'
+	@CreatedDateFrom							DATE = '2026-02-01'
+	,@CreatedDateTo								DATE = '2026-02-03'
 	,@OutOfPocketStatusId						INT = 2
 	,@ClaimGroupType							INT = NULL
 
@@ -34,15 +34,17 @@ GO
 	 DECLARE @l_PageSize INT				= @PageSize;
 	 DECLARE @l_SortField NVARCHAR(MAX)		= @SortField;
 	 DECLARE @l_OrderType NVARCHAR(MAX)		= @OrderType;
-	 DECLARE @l_SearchDetail NVARCHAR(MAX)	= @SearchDetail;	
+	 DECLARE @l_SearchDetail NVARCHAR(MAX)	= @SearchDetail;
+	 DECLARE @OutOfPocketAmountLimit  DECIMAL(16,2);
 	 
 	 ----------------------------------------------------------------------------
 	 IF @l_IndexStart IS NULL SET @l_IndexStart = 0;
-	 IF @l_PageSize IS NULL  SET @l_PageSize = 10;
+	 IF @l_PageSize IS NULL  SET @l_PageSize = 20;
 	 IF @l_SearchDetail IS NULL SET @l_SearchDetail = '';
 	----------------------------------------------------------------------------
 
 	SET @CreatedDateTo = DATEADD(DAY,1,@CreatedDateTo)
+	SELECT @OutOfPocketAmountLimit = ValueNumber FROM dbo.ProgramConfig WHERE ParameterName = 'OutOfPocketAmountLimit'
 
     -- Insert statements for procedure here
 	SELECT t.ClaimPayBackTransferId
@@ -60,19 +62,27 @@ GO
       ,t.CreatedDate
       ,t.UpdatedByUserId
       ,t.UpdatedDate
-	  ,CASE WHEN t.Amount > 2000000 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END IsCheck 
-	  ,CASE WHEN t.Amount > 2000000 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END IsGroup 
+	  ,CASE WHEN t.Amount > @OutOfPocketAmountLimit THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END IsCheck 
+	  ,IIF(cpbsg.ClaimPayBackTransferId = t.ClaimPayBackTransferId , 1 ,0)						IsGroup
 	  ,COUNT(t.ClaimPayBackTransferId) OVER ( ) AS TotalCount
 	FROM dbo.ClaimPayBackTransfer t
 		LEFT JOIN dbo.ClaimPayBackOutOfPocketStatus ops
 			ON t.OutOfPocketStatus = ops.OutOfPocketStatusId
 		LEFT JOIN dbo.ClaimGroupType cg_t
 			ON t.ClaimGroupTypeId = cg_t.ClaimGroupTypeId
-
+		LEFT JOIN 
+		(
+			SELECT cpbsg.ClaimPayBackTransferId
+			FROM dbo.ClaimPayBackSubGroup cpbsg
+			WHERE cpbsg.IsActive = 1
+			GROUP BY cpbsg.ClaimPayBackTransferId
+		) cpbsg
+			ON t.ClaimPayBackTransferId = cpbsg.ClaimPayBackTransferId
 	WHERE (t.CreatedDate >= @CreatedDateFrom AND t.CreatedDate < @CreatedDateTo)
 	AND (t.OutOfPocketStatus = @OutOfPocketStatusId OR @OutOfPocketStatusId IS NULL)
 	AND (t.IsActive = 1)
-	AND (t.ClaimGroupTypeId = @ClaimGroupType OR @ClaimGroupType IS NULL)
+	AND (t.ClaimGroupTypeId = @ClaimGroupType OR @ClaimGroupType IS NULL) 
+
 	ORDER BY CASE WHEN @l_OrderType IS NULL AND @l_SortField IS NULL THEN t.ClaimPayBackTransferId END ASC 
 		,CASE WHEN @l_OrderType = 'ASC' AND @l_SortField = 'ClaimPayBackTransferCode' THEN t.ClaimPayBackTransferId END ASC 
 	    ,CASE WHEN @l_OrderType = 'DESC' AND @l_SortField = 'ClaimPayBackTransferCode' THEN t.ClaimPayBackTransferId END DESC 

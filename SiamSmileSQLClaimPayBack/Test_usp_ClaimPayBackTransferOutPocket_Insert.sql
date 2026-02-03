@@ -23,7 +23,7 @@ GO
 --	SET NOCOUNT ON;
 
 	-- For Test
-	DECLARE @ClaimPayBackTransferId NVARCHAR(MAX) = '4147';--'4141,4148' 4147
+	DECLARE @ClaimPayBackTransferId NVARCHAR(MAX) = '4163';--'4141,4148' 4147
 	DECLARE @CreatedByUserId INT = 1
 
 	-- Add the parameters for the stored procedure here
@@ -246,7 +246,7 @@ GO
 						SELECT 
 						 s.ClaimPayBackId
 						 ,d.SumAmount
-						 ,@ClaimPayBackSubGroupId
+						 ,@ClaimPayBackSubGroupId	ClaimPayBackSubGroupId
 						 ,1							IsActive
 						 , @CreatedByUserId			CreatedByUserId
 						 , @CreatedDate				CreatedDate
