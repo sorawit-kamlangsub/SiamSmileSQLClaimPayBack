@@ -1,6 +1,6 @@
 USE [ClaimPayBack]
 GO
-
+/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackTransferOutPocket_Insert]    Script Date: 3/2/2569 9:20:20 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -10,6 +10,8 @@ GO
 -- Author:		Sorawit.k 08719
 -- Create date: 20260128
 -- Update date: 
+-- Update date: 2026-02-02 13:26 Bunchuai Chaiket
+--				เพิ่ม TransactionType ใน ClaimPayBackSubGroup กำหนด เป็น 2 = สำรองเงิน
 -- Description:	Group CPT โอนเงินสำรองจ่าย
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimPayBackTransferOutPocket_Insert]
@@ -36,6 +38,7 @@ BEGIN
 	DECLARE @ClaimGroupTypeId			INT;
 	DECLARE @OutOfPocketAmountLimit		DECIMAL(16,2);
 	DECLARE @TransactionDetail			NVARCHAR(500)	= ''; 
+	DECLARE @TransactionType			INT = 2;
 	
 	SELECT @TransactionDetail = OutOfPocketStatusName FROM dbo.ClaimPayBackOutOfPocketStatus WHERE OutOfPocketStatusId = 2;
 	SELECT @OutOfPocketAmountLimit = ValueNumber FROM dbo.ProgramConfig WHERE ParameterName = 'OutOfPocketAmountLimit'
@@ -205,6 +208,7 @@ BEGIN
 							, UpdatedDate
 							, UpdatedByUserId
 							, ContactEmail
+							, TransactionType
 						)
 						OUTPUT INSERTED.ClaimPayBackSubGroupId INTO @GeneratedIds (ClaimPayBackSubGroupId)
 						SELECT 
@@ -220,6 +224,7 @@ BEGIN
 							, @CreatedDate				UpdatedDate
 							, @CreatedByUserId			UpdatedByUserId
 							, NULL						ContactEmail
+							, @TransactionType			TransactionType
 						FROM #TmpGroupTotalRunNo t
 							INNER JOIN 
 							(
@@ -246,7 +251,7 @@ BEGIN
 						SELECT 
 						 s.ClaimPayBackId
 						 ,d.SumAmount
-						 ,@ClaimPayBackSubGroupId
+						 ,@ClaimPayBackSubGroupId	ClaimPayBackSubGroupId
 						 ,1							IsActive
 						 , @CreatedByUserId			CreatedByUserId
 						 , @CreatedDate				CreatedDate
