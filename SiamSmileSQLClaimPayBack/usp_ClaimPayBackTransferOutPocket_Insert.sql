@@ -25,7 +25,7 @@ BEGIN
 	SET NOCOUNT ON;
 
 	-- For Test
-	--DECLARE @ClaimPayBackTransferId NVARCHAR(MAX) = '4171,4172';--'4166,4168' 4165
+	--DECLARE @ClaimPayBackTransferId NVARCHAR(MAX) = '4176,4175,4174';--'4166,4168' 4165
 	--DECLARE @CreatedByUserId INT = 1
 
 	-- Add the parameters for the stored procedure here
@@ -164,7 +164,7 @@ BEGIN
 			FROM @SumResult
 			GROUP BY ClaimPayBackTransferId, GroupNo
 
-			DECLARE @TT          VARCHAR(6) = 'OCG'
+			DECLARE @TT          VARCHAR(6) = 'CPB'
 				  , @Total		 INT 
 				  , @YY          VARCHAR(2)
 				  , @MM          VARCHAR(2)
@@ -229,22 +229,20 @@ BEGIN
 							OUTPUT INSERTED.ClaimPayBackSubGroupId INTO @GeneratedIds (ClaimPayBackSubGroupId)
 							SELECT 
 								CONCAT(@TT,@YY,@MM ,FORMAT(@RunningFrom,'000000')) ClaimPayBackSubGroupCode
-								,SUM(t.SumAmountTotal) OVER (PARTITION BY t.GroupNo) AS SumAmountTotal
-								,(
-										SELECT COUNT(*)
-										FROM @SumResult src
-									) AS ItemCount
-								, NULL                      AS HospitalCode
-								, NULL                      AS HospitalName
-								, t.ClaimPayBackTransferId
-								, 1                         AS IsActive                         
-								, @CreatedDate              AS CreatedDate
-								, @CreatedByUserId          AS CreatedByUserId
-								, @CreatedDate              AS UpdatedDate
-								, @CreatedByUserId          AS UpdatedByUserId
-								, NULL                      AS ContactEmail
+								,SUM(t.SumAmountTotal)		SumAmountTotal
+								,COUNT(*)					ItemCount
+								, NULL                      HospitalCode
+								, NULL                      HospitalName
+								, NULL						ClaimPayBackTransferId
+								, 1                         IsActive                         
+								, @CreatedDate              CreatedDate
+								, @CreatedByUserId          CreatedByUserId
+								, @CreatedDate              UpdatedDate
+								, @CreatedByUserId          UpdatedByUserId
+								, NULL                      ContactEmail
 								, @TransactionType			TransactionType
-							FROM #TmpGroupTotalRunNo t;
+							FROM #TmpGroupTotalRunNo t
+							GROUP BY t.GroupNo;
 
 						END
 						ELSE 
@@ -294,12 +292,15 @@ BEGIN
 							WHERE ic.GroupNo = @OffsetGNo
 
 						END
+
+						SELECT @ClaimPayBackSubGroupId = ClaimPayBackSubGroupId FROM @GeneratedIds
 						
 						INSERT INTO dbo.ClaimPayBackSubGroupDetail
 						(
 							ClaimPayBackId
 							,Amount
 							,ClaimPayBackSubGroupId
+							,ClaimPayBackTransferId
 							,IsActive
 							,CreatedByUserId
 							,CreatedDate
@@ -310,6 +311,7 @@ BEGIN
 						 s.ClaimPayBackId
 						 ,d.SumAmount
 						 ,@ClaimPayBackSubGroupId	ClaimPayBackSubGroupId
+						 ,s.ClaimPayBackTransferId	ClaimPayBackTransferId
 						 ,1							IsActive
 						 , @CreatedByUserId			CreatedByUserId
 						 , @CreatedDate				CreatedDate
