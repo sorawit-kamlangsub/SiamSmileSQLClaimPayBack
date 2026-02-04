@@ -18,25 +18,34 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
---DECLARE @ClaimPayBackTransferId INT = 4168;
+	--DECLARE @ClaimPayBackTransferId INT = 4176;
 
-	SELECT DISTINCT
-		cpbsg.ClaimPayBackSubGroupId  
+	DECLARE @ClaimPayBackSubGroupId INT;
+	SELECT @ClaimPayBackSubGroupId = ClaimPayBackSubGroupId FROM [dbo].ClaimPayBackSubGroupDetail WHERE ClaimPayBackTransferId = @ClaimPayBackTransferId
+
+	SELECT
+		cpbsgd.ClaimPayBackSubGroupId  
 		,cpbsg.ClaimPayBackSubGroupCode
 		,cpbt.ClaimPayBackTransferCode
 		,cpbt.ClaimPayBackTransferStatusId
 		,cgt.ClaimGroupType
 		,cpbt.TransferDate
 		,cpbt.Amount
-	FROM [dbo].ClaimPayBackTransfer cpbt
+		,cpbsgd.ClaimPayBackTransferId
+		,IIF(cpbsgd.ClaimPayBackTransferId = @ClaimPayBackTransferId,CAST(1 AS BIT),CAST(0 AS BIT)) IsThisCpbt
+	FROM [dbo].ClaimPayBackSubGroupDetail cpbsgd
 		LEFT JOIN (
-			SELECT 
-			cpbsgs.ClaimPayBackSubGroupId
-			,cpbsgs.ClaimPayBackTransferId
-			FROM ClaimPayBackSubGroupDetail cpbsgs
-			WHERE cpbsgs.IsActive = 1
-		) cpbsgd
-			ON cpbt.ClaimPayBackTransferId = cpbsgd.ClaimPayBackTransferId
+				SELECT
+					ClaimPayBackTransferCode
+					,ClaimPayBackTransferId
+					,ClaimPayBackTransferStatusId
+					,ClaimGroupTypeId
+					,TransferDate
+					,Amount
+				FROM [dbo].ClaimPayBackTransfer 	
+				WHERE IsActive = 1
+			) cpbt
+				ON cpbt.ClaimPayBackTransferId = cpbsgd.ClaimPayBackTransferId
 		LEFT JOIN (
 			SELECT
 				ClaimPayBackSubGroupId
@@ -54,7 +63,15 @@ BEGIN
 			WHERE cgt.IsActive = 1
 		)cgt
 			ON cgt.ClaimGroupTypeId = cpbt.ClaimGroupTypeId
-	WHERE cpbt.ClaimPayBackTransferId = @ClaimPayBackTransferId
-			AND cpbt.IsActive = 1
+	WHERE cpbsgd.ClaimPayBackSubGroupId = @ClaimPayBackSubGroupId
+	GROUP BY cpbsgd.ClaimPayBackSubGroupId
+			,cpbsg.ClaimPayBackSubGroupCode
+			,cpbsgd.ClaimPayBackTransferId
+			,cpbt.ClaimPayBackTransferStatusId
+			,cgt.ClaimGroupType
+			,cpbt.TransferDate
+			,cpbt.ClaimPayBackTransferCode
+			,cpbt.Amount
+	ORDER BY IsThisCpbt DESC
 
 END;
