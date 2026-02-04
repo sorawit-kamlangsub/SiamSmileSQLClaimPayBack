@@ -1,6 +1,6 @@
 USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackSubGroupDetailByTransferId_Select]    Script Date: 4/2/2569 15:11:49 ******/
+/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackSubGroupDetailByTransferId_Select]    Script Date: 4/2/2569 15:08:53 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -32,13 +32,20 @@ BEGIN
 		LEFT JOIN (
 			SELECT 
 			cpbsgs.ClaimPayBackSubGroupId
-			,cpbsgs.ClaimPayBackSubGroupCode
 			,cpbsgs.ClaimPayBackTransferId
-			,cpbsgs.Amount
-			FROM ClaimPayBackSubGroup cpbsgs
+			FROM ClaimPayBackSubGroupDetail cpbsgs
 			WHERE cpbsgs.IsActive = 1
+		) cpbsgd
+			ON cpbt.ClaimPayBackTransferId = cpbsgd.ClaimPayBackTransferId
+		LEFT JOIN (
+			SELECT
+				ClaimPayBackSubGroupId
+				,ClaimPayBackSubGroupCode
+				,Amount
+			FROM dbo.ClaimPayBackSubGroup
+			WHERE IsActive = 1
 		) cpbsg
-			ON cpbt.ClaimPayBackTransferId = cpbsg.ClaimPayBackTransferId
+			ON cpbsg.ClaimPayBackSubGroupId = cpbsgd.ClaimPayBackSubGroupId
 		LEFT JOIN (
 			SELECT 
 			cgt.ClaimGroupTypeId
