@@ -23,7 +23,7 @@ GO
 --	SET NOCOUNT ON;
 
 	-- For Test
-	DECLARE @ClaimPayBackTransferId NVARCHAR(MAX) = '4168';--'4141,4148' 4147
+	DECLARE @ClaimPayBackTransferId NVARCHAR(MAX) = '4166,4168';--'4141,4148' 4147
 	DECLARE @CreatedByUserId INT = 1
 
 	-- Add the parameters for the stored procedure here
@@ -114,8 +114,6 @@ GO
 
 			SELECT @max = MAX(rn) FROM #Src;
 
-			SELECT * FROM #TmpSubGroupDetail
-
 			WHILE @i <= @max
 			BEGIN
 				SELECT 
@@ -191,7 +189,7 @@ GO
 					BEGIN 				
 
 						DECLARE @ClaimPayBackSubGroupId INT;
-						DECLARE @GeneratedIds TABLE (ClaimPayBackSubGroupId INT)
+						DECLARE @GeneratedIds TABLE (ClaimPayBackSubGroupId INT)					
 						
 						--INSERT INTO dbo.ClaimPayBackSubGroup
 						--(
@@ -225,14 +223,14 @@ GO
 						FROM #TmpGroupTotalRunNo t
 							INNER JOIN 
 							(
-								SELECT GroupNo, ItemCount AS ItemCount
+								SELECT 
+									GroupNo 
+									,MAX(ItemCount) ItemCount
 								FROM #TmpItemCount
-								GROUP BY GroupNo, ItemCount
+								GROUP BY GroupNo
 							) ic 
 								ON ic.GroupNo = t.GroupNo	
 						WHERE ic.GroupNo = @OffsetGNo
-
-						SELECT @ClaimPayBackSubGroupId = ClaimPayBackSubGroupId FROM @GeneratedIds
 						
 						--INSERT INTO dbo.ClaimPayBackSubGroupDetail
 						--(
