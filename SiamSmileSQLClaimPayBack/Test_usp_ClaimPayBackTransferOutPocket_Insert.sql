@@ -10,12 +10,14 @@ GO
 -- Author:		Sorawit.k 08719
 -- Create date: 20260128
 -- Update date: 
+-- Update date: 2026-02-02 13:26 Bunchuai Chaiket
+--				เพิ่ม TransactionType ใน ClaimPayBackSubGroup กำหนด เป็น 2 = สำรองเงิน
 -- Description:	Group CPT โอนเงินสำรองจ่าย
 -- =============================================
 --ALTER PROCEDURE [dbo].[usp_ClaimPayBackTransferOutPocket_Insert]
--- Add the parameters for the stored procedure here
-	--@ClaimPayBackTransferId		NVARCHAR(MAX)
-	--,@CreatedByUserId			INT
+-- --Add the parameters for the stored procedure here
+--	@ClaimPayBackTransferId		NVARCHAR(MAX)
+--	,@CreatedByUserId			INT
 --AS
 --BEGIN
 --	-- SET NOCOUNT ON added to prevent extra result sets from
@@ -36,6 +38,7 @@ GO
 	DECLARE @ClaimGroupTypeId			INT;
 	DECLARE @OutOfPocketAmountLimit		DECIMAL(16,2);
 	DECLARE @TransactionDetail			NVARCHAR(500)	= ''; 
+	DECLARE @TransactionType			INT = 2;
 	
 	SELECT @TransactionDetail = OutOfPocketStatusName FROM dbo.ClaimPayBackOutOfPocketStatus WHERE OutOfPocketStatusId = 2;
 	SELECT @OutOfPocketAmountLimit = ValueNumber FROM dbo.ProgramConfig WHERE ParameterName = 'OutOfPocketAmountLimit'
@@ -221,6 +224,7 @@ GO
 							--	, UpdatedDate
 							--	, UpdatedByUserId
 							--	, ContactEmail
+							--	, TransactionType
 							--)
 							--OUTPUT INSERTED.ClaimPayBackSubGroupId INTO @GeneratedIds (ClaimPayBackSubGroupId)
 							SELECT 
@@ -239,6 +243,7 @@ GO
 								, @CreatedDate              AS UpdatedDate
 								, @CreatedByUserId          AS UpdatedByUserId
 								, NULL                      AS ContactEmail
+								, @TransactionType			TransactionType
 							FROM #TmpGroupTotalRunNo t;
 
 						END
@@ -259,6 +264,7 @@ GO
 							--	, UpdatedDate
 							--	, UpdatedByUserId
 							--	, ContactEmail
+							--	, TransactionType
 							--)
 							--OUTPUT INSERTED.ClaimPayBackSubGroupId INTO @GeneratedIds (ClaimPayBackSubGroupId)
 							SELECT 
@@ -274,6 +280,7 @@ GO
 								, @CreatedDate				UpdatedDate
 								, @CreatedByUserId			UpdatedByUserId
 								, NULL						ContactEmail
+								, @TransactionType			TransactionType
 							FROM #TmpGroupTotalRunNo t
 								INNER JOIN 
 								(
@@ -337,7 +344,7 @@ GO
 				--)
 				SELECT DISTINCT
 				 @TransactionDetail			TransactionDetail
-				 ,2							TransactionDetailId
+				 ,@TransactionType			TransactionDetailId
 				 ,ClaimPayBackTransferId	ClaimPayBackTransferId
 				 ,1							IsActive
 				 ,@CreatedByUserId			CreatedByUserId
