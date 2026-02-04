@@ -20,7 +20,7 @@ BEGIN
 
 --DECLARE @ClaimPayBackTransferId INT = 4168;
 
-	SELECT
+	SELECT DISTINCT
 		cpbsg.ClaimPayBackSubGroupId  
 		,cpbsg.ClaimPayBackSubGroupCode
 		,cpbt.ClaimPayBackTransferCode
