@@ -228,9 +228,11 @@ BEGIN
 						FROM #TmpGroupTotalRunNo t
 							INNER JOIN 
 							(
-								SELECT GroupNo, ItemCount AS ItemCount
+								SELECT 
+									GroupNo 
+									,MAX(ItemCount) ItemCount
 								FROM #TmpItemCount
-								GROUP BY GroupNo, ItemCount
+								GROUP BY GroupNo
 							) ic 
 								ON ic.GroupNo = t.GroupNo	
 						WHERE ic.GroupNo = @OffsetGNo
