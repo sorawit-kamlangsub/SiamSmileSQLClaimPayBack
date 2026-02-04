@@ -27,7 +27,7 @@ BEGIN
 		,cpbt.ClaimPayBackTransferStatusId
 		,cgt.ClaimGroupType
 		,cpbt.TransferDate
-		,cpbsg.Amount
+		,cpbt.Amount
 	FROM [dbo].ClaimPayBackTransfer cpbt
 		LEFT JOIN (
 			SELECT 
