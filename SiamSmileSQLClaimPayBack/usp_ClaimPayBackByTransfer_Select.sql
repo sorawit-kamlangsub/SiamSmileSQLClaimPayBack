@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackByTransfer_Select]    Script Date: 14/10/2568 14:04:19 ******/
+
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -9,6 +9,7 @@ GO
 -- =============================================
 -- Author:		Prattana  Phiwkaew
 -- Create date: 2021-10-07 10:03
+-- Update date: 2026-02-06 16:11 Sorawit Kamlangsub
 -- Description:	<Description,,>
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimPayBackByTransfer_Select]
@@ -60,7 +61,8 @@ SELECT b.ClaimPayBackId
       ,b.UpdatedDate 
 	  ,t.CreatedDate					TransferCreatedDate
 	  ,t.UpdatedDate					TransferUpdatedDate
-	   ,COUNT(b.ClaimPayBackId) OVER ( ) AS TotalCount
+	  ,COUNT(b.ClaimPayBackId) OVER ( ) AS TotalCount
+	  ,cpbsgd.ClaimPayBackSubGroupId
 FROM dbo.ClaimPayBack b
 	LEFT JOIN dbo.ClaimPayBackTransfer t
 		ON b.ClaimPayBackTransferId = t.ClaimPayBackTransferId
@@ -72,6 +74,8 @@ FROM dbo.ClaimPayBack b
 		ON b.BranchId = brh.Branch_ID
 	LEFT JOIN DataCenterV1.Person.vw_PersonUser pu
 		ON b.CreatedByUserId = pu.UserId
+	LEFT JOIN ClaimPayBackSubGroupDetail cpbsgd
+		ON cpbsgd.ClaimPayBackId = b.ClaimPayBackId
 WHERE (b.ClaimPayBackTransferId = @ClaimPayBackTransferId)
 AND (b.IsActive = 1)
 
