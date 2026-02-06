@@ -35,12 +35,10 @@ BEGIN
 	);
 
 	DECLARE @IsLimitAmount BIT = 0;
-	DECLARE @OutOfPocketAmountLimit  DECIMAL(16,2);
-	DECLARE @ResultOutOfPocketAmountLimit  DECIMAL(16,2);
-	SELECT @OutOfPocketAmountLimit = ValueNumber FROM dbo.ProgramConfig WHERE ParameterName = 'OutOfPocketAmountLimit'
-	SELECT @ResultOutOfPocketAmountLimit = SUM(Amount) FROM ClaimPayBackSubGroupDetail WHERE ClaimPayBackTransferId = @ClaimPayBackTransferId 
+	DECLARE @ResultOutOfPocketAmountLimit  INT;
+	SELECT @ResultOutOfPocketAmountLimit = COUNT(DISTINCT ClaimPayBackSubGroupId) FROM ClaimPayBackSubGroupDetail WHERE ClaimPayBackTransferId = @ClaimPayBackTransferId 
 
-	IF @ResultOutOfPocketAmountLimit > @OutOfPocketAmountLimit
+	IF @ResultOutOfPocketAmountLimit > 1
 	BEGIN
 		SET @IsLimitAmount = 1;
 	END
