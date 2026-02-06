@@ -1,6 +1,6 @@
-USE [ClaimPayBack]
+﻿USE [ClaimPayBack]
 GO
-
+/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackSubGroupDetailByTransferId_Select]    Script Date: 6/2/2569 13:43:56 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -8,7 +8,7 @@ GO
 -- =============================================
 -- Author:		Krekpon.D
 -- Create date: 2026-01-31 11:14
--- Description:	��Ң����Ũҡ CPBT ���� ClaimPayBackSubGroupDetail
+-- Description:	เอาข้อมูลจาก CPBT มาหา ClaimPayBackSubGroupDetail
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimPayBackSubGroupDetailByTransferId_Select] 
 	 --Add the parameters for the stored procedure here
@@ -18,7 +18,7 @@ BEGIN
 	SET NOCOUNT ON;
 
 	--TEST
-	--DECLARE @ClaimPayBackTransferId INT = 4180;
+	--DECLARE @ClaimPayBackTransferId INT = 4185;
 	--END Test
 
 	DECLARE @Tmp TABLE
@@ -92,6 +92,7 @@ BEGIN
 						,Amount
 					FROM dbo.ClaimPayBackSubGroup
 					WHERE IsActive = 1
+						AND TransactionType = 2
 				) cpbsg
 					ON cpbsg.ClaimPayBackSubGroupId = cpbsgd.ClaimPayBackSubGroupId
 				LEFT JOIN (
@@ -155,6 +156,7 @@ BEGIN
 						,Amount
 					FROM dbo.ClaimPayBackSubGroup
 					WHERE IsActive = 1
+						AND TransactionType = 2
 				) cpbsg
 					ON cpbsg.ClaimPayBackTransferId = cpbt.ClaimPayBackTransferId
 			WHERE cpbt.ClaimPayBackTransferId = @ClaimPayBackTransferId
