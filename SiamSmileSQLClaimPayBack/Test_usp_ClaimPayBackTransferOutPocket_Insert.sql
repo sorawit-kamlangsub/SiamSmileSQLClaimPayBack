@@ -325,16 +325,6 @@ GO
 						SET @OffsetGNo = @OffsetGNo + 1;
 					END
 
-				-- อัปเดต ClaimPayBackDetail ด้วย ClaimPayBackSubGroupId
-				SELECT *
-				--UPDATE CPBD
-				--SET CPBD.ClaimPayBackSubGroupId = @ClaimPayBackSubGroupId
-				--	, CPBD.UpdatedDate = @CreatedDate
-				--	, CPBD.UpdatedByUserId = @CreatedByUserId
-				FROM dbo.ClaimPayBackDetail CPBD
-				INNER JOIN #TmpD TD 
-					ON CPBD.ClaimPayBackDetailId = TD.ClaimPayBackDetailId
-
 				--INSERT INTO dbo.ClaimPayBackTransferTransaction
 				--(
 				--	TransactionDetail
