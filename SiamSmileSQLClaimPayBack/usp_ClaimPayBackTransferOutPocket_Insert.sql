@@ -1,4 +1,4 @@
-USE [ClaimPayBack]
+ï»¿USE [ClaimPayBack]
 GO
 
 SET ANSI_NULLS ON
@@ -11,8 +11,8 @@ GO
 -- Create date: 20260128
 -- Update date: 
 -- Update date: 2026-02-02 13:26 Bunchuai Chaiket
---				à¾ÔèÁ TransactionType ã¹ ClaimPayBackSubGroup ¡ÓË¹´ à»ç¹ 2 = ÊÓÃÍ§à§Ô¹
--- Description:	Group CPT âÍ¹à§Ô¹ÊÓÃÍ§¨èÒÂ
+--				à¹€à¸žà¸´à¹ˆà¸¡ TransactionType à¹ƒà¸™ ClaimPayBackSubGroup à¸à¸³à¸«à¸™à¸” à¹€à¸›à¹‡à¸™ 2 = à¸ªà¸³à¸£à¸­à¸‡à¹€à¸‡à¸´à¸™
+-- Description:	Group CPT à¹‚à¸­à¸™à¹€à¸‡à¸´à¸™à¸ªà¸³à¸£à¸­à¸‡à¸ˆà¹ˆà¸²à¸¢
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimPayBackTransferOutPocket_Insert]
  --Add the parameters for the stored procedure here
@@ -325,16 +325,6 @@ BEGIN
 						SET @OffsetGNo = @OffsetGNo + 1;
 					END
 
-				-- ÍÑ»à´µ ClaimPayBackDetail ´éÇÂ ClaimPayBackSubGroupId
-				--SELECT *
-				UPDATE CPBD
-				SET CPBD.ClaimPayBackSubGroupId = @ClaimPayBackSubGroupId
-					, CPBD.UpdatedDate = @CreatedDate
-					, CPBD.UpdatedByUserId = @CreatedByUserId
-				FROM dbo.ClaimPayBackDetail CPBD
-				INNER JOIN #TmpD TD 
-					ON CPBD.ClaimPayBackDetailId = TD.ClaimPayBackDetailId
-
 				INSERT INTO dbo.ClaimPayBackTransferTransaction
 				(
 					TransactionDetail
@@ -354,14 +344,14 @@ BEGIN
 				FROM #TmpGroupTotalRunNo
 	
 				SET @IsResult   = 1;
-				SET @Msg        = 'ºÑ¹·Ö¡ ÊÓàÃç¨';
+				SET @Msg        = 'à¸šà¸±à¸™à¸—à¸¶à¸ à¸ªà¸³à¹€à¸£à¹‡à¸ˆ';
 	
 				COMMIT TRANSACTION
 			END TRY
 			BEGIN CATCH
 	
 				SET @IsResult   = 0;
-				SET @Msg        = 'ºÑ¹·Ö¡ äÁèÊÓàÃç¨' + ERROR_MESSAGE();
+				SET @Msg        = 'à¸šà¸±à¸™à¸—à¸¶à¸ à¹„à¸¡à¹ˆà¸ªà¸³à¹€à¸£à¹‡à¸ˆ' + ERROR_MESSAGE();
 	
 				IF (@@Trancount > 0) ROLLBACK;
 			END CATCH
