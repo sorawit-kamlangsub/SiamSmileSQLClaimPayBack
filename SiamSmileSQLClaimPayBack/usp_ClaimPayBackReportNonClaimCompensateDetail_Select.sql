@@ -1,4 +1,4 @@
-USE [ClaimPayBack]
+ÔªøUSE [ClaimPayBack]
 GO
 
 SET ANSI_NULLS ON
@@ -7,20 +7,21 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 
+
 -- =============================================
 -- Author:		Krekpon.D
 -- Create date: 2025-08-22 11.06
--- Description: ¢ÈÕ¡Ÿ≈√“¬≈–‡Õ’¬¥°“√‚Õπ‡ß‘π¢Õß‡§≈¡‡ ’¬™’«‘µ ∑ÿææ≈¿“æ
+-- Description: ‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏•‡∏£‡∏≤‡∏¢‡∏•‡∏∞‡πÄ‡∏≠‡∏µ‡∏¢‡∏î‡∏Å‡∏≤‡∏£‡πÇ‡∏≠‡∏ô‡πÄ‡∏á‡∏¥‡∏ô‡∏Ç‡∏≠‡∏á‡πÄ‡∏Ñ‡∏•‡∏°‡πÄ‡∏™‡∏µ‡∏¢‡∏ä‡∏µ‡∏ß‡∏¥‡∏ï ‡∏ó‡∏∏‡∏û‡∏û‡∏•‡∏†‡∏≤‡∏û
 -- Update date: 2025-09-05 10:52 Krekpon.D
--- Description: ª√—∫°“√ join ¢ÈÕ¡Ÿ≈·≈– where ¢ÈÕ¡Ÿ≈¥È«¬ BeneficiaryId
+-- Description: ‡∏õ‡∏£‡∏±‡∏ö‡∏Å‡∏≤‡∏£ join ‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏•‡πÅ‡∏•‡∏∞ where ‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏•‡∏î‡πâ‡∏ß‡∏¢ BeneficiaryId
 -- Update date: 2025-12-24 16:37 Sorawit.k
 -- Description: Add ClaimMisc @ClaimGroupTypeId = 7
 -- Update date: 2026-01-14 14:35 Krekpon.D
--- Description: ª√—∫¢ÈÕ¡Ÿ≈µ“¡ ProductType „π dropdown
+-- Description: ‡∏õ‡∏£‡∏±‡∏ö‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏•‡∏ï‡∏≤‡∏° ProductType ‡πÉ‡∏ô dropdown
 -- Update date: 2026-01-21 11:55 Krekpon.D
--- Description: ¥÷ß¢ÈÕ¡Ÿ≈¢ÕßºŸÈ‡Õ“ª√–°—π ·≈– COL
+-- Description: ‡∏î‡∏∂‡∏á‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏•‡∏Ç‡∏≠‡∏á‡∏ú‡∏π‡πâ‡πÄ‡∏≠‡∏≤‡∏õ‡∏£‡∏∞‡∏Å‡∏±‡∏ô ‡πÅ‡∏•‡∏∞ COL
 -- Update date: 2026-01-30 16:40 Sorawit.k
--- Description: ·°È‰¢ cptMisc ‡æ‘Ë¡ rn payment type ·≈– relationDetail
+-- Description: ‡πÅ‡∏Å‡πâ‡πÑ‡∏Ç cptMisc ‡πÄ‡∏û‡∏¥‡πà‡∏° rn payment type ‡πÅ‡∏•‡∏∞ relationDetail
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimPayBackReportNonClaimCompensateDetail_Select] 
 	-- Add the parameters for the stored procedure here
@@ -93,7 +94,7 @@ BEGIN
      )
 
 	 
---  √È“ß temp table
+-- ‡∏™‡∏£‡πâ‡∏≤‡∏á temp table
 CREATE TABLE #InsuranceType (
     ProductGroup_ID INT,
     ProductGroupDetail NVARCHAR(100),
@@ -102,18 +103,18 @@ CREATE TABLE #InsuranceType (
 
 INSERT INTO #InsuranceType (ProductGroup_ID, ProductGroupDetail, IsActive)
 VALUES
-    (1, N'√Õ¢ÈÕ¡Ÿ≈',0),
+    (1, N'‡∏£‡∏≠‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏•',0),
     (2, N'PH',0),
     (3, N'PA',0),
     (4, N'Motor',0),
     (5, N'PL',0),
     (6, N'House',0),
-    (7, N'PA Õ◊ËπÊ',1),
-    (8, N'ª√–°—π‡¥‘π∑“ß',0),
-    (9, N'‡∫Á¥‡µ≈Á¥',0),
+    (7, N'PA ‡∏≠‡∏∑‡πà‡∏ô‡πÜ',1),
+    (8, N'‡∏õ‡∏£‡∏∞‡∏Å‡∏±‡∏ô‡πÄ‡∏î‡∏¥‡∏ô‡∏ó‡∏≤‡∏á',0),
+    (9, N'‡πÄ‡∏ö‡πá‡∏î‡πÄ‡∏ï‡∏•‡πá‡∏î',0),
     (10, N'CriticalIllness',0),
     (11, N'Miscellaneous',0);
- -- ‡Õ“¢ÈÕ¡Ÿ≈≈ß„π temp ·≈È«‰ª JOIN µËÕ°—∫Ω—Ëß Base Õ◊Ëπ
+ -- ‡πÄ‡∏≠‡∏≤‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏•‡∏•‡∏á‡πÉ‡∏ô temp ‡πÅ‡∏•‡πâ‡∏ß‡πÑ‡∏õ JOIN ‡∏ï‡πà‡∏≠‡∏Å‡∏±‡∏ö‡∏ù‡∏±‡πà‡∏á Base ‡∏≠‡∏∑‡πà‡∏ô
  INSERT INTO @TmpClaimPayBack(
       ClaimGroupCodeFromCPBD,
       Amount,
@@ -159,7 +160,7 @@ WHERE   cpb.ClaimGroupTypeId = @ClaimGroupTypeId
 		)
 	AND (cpbd.InsuranceCompanyId = @InsuranceId OR @InsuranceId IS NULL)
 
-	--SELECT ‡Õ“‰ª„™Èß“π
+	--SELECT ‡πÄ‡∏≠‡∏≤‡πÑ‡∏õ‡πÉ‡∏ä‡πâ‡∏á‡∏≤‡∏ô
     SELECT		icu.InsuranceCompany_Name AS InsuranceCompany_Name,
 				dab.BranchDetail AS Branch,
 				CASE 
@@ -207,7 +208,7 @@ WHERE   cpb.ClaimGroupTypeId = @ClaimGroupTypeId
 					ELSE NULL
 				END TransferDate,
 				CASE 
-					WHEN @_ClaimGroupTypeId IN (2,4,6) THEN IIF(cptOnline.TransferCauseName IS NOT NULL,'‚Õπ‡æ‘Ë¡', 'ª°µ‘')
+					WHEN @_ClaimGroupTypeId IN (2,4,6) THEN IIF(cptOnline.TransferCauseName IS NOT NULL,'‡πÇ‡∏≠‡∏ô‡πÄ‡∏û‡∏¥‡πà‡∏°', '‡∏õ‡∏Å‡∏ï‡∏¥')
 					WHEN @_ClaimGroupTypeId = 7		  THEN cptMisc.PaymentTypeName
 					ELSE NULL
 				END ExtraTransfer,
@@ -396,7 +397,7 @@ FROM @TmpClaimPayBack TmpCPB
 				cptMisc.Remark,
 				cptMisc.ProductTypeId,
 				ROW_NUMBER() OVER (
-					PARTITION BY cm.ClaimMiscId, cptMisc.PaymentTypeName,cptMisc.RelationDetail
+					PARTITION BY cm.ClaimMiscId, cptMisc.PaymentTypeName, cptMisc.RelationDetail
 					ORDER BY cptMisc.TransferDate DESC
 				) AS rn
 			FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
@@ -418,24 +419,23 @@ FROM @TmpClaimPayBack TmpCPB
 					cmpd.Remark,
 					cm2.ProductTypeId
 				FROM [ClaimMiscellaneous].[misc].[ClaimMiscPaymentHeader] cmph
+				INNER JOIN [ClaimMiscellaneous].[misc].[Beneficiary] be
+					ON be.ClaimMiscId = cmph.ClaimMiscId
+					AND be.IsActive = 1
 				INNER JOIN [ClaimMiscellaneous].[misc].[ClaimMiscPayment] cmpd
-					ON cmpd.ClaimMiscPaymentHeaderId = cmph.ClaimMiscPaymentHeaderId
+					ON be.BankAccountNo = cmpd.BankAccountNo
 					AND cmpd.IsActive = 1
 					AND cmpd.PremiumSourceStatusId = 5
 				LEFT JOIN [ClaimMiscellaneous].[misc].[PaymentType] pmt
 					ON pmt.PaymentTypeId = cmph.PaymentTypeId
 					AND pmt.IsActive = 1
-				INNER JOIN [ClaimMiscellaneous].[misc].[Beneficiary] be
-					ON be.ClaimMiscId = cmph.ClaimMiscId
-					AND be.IsActive = 1
 				INNER JOIN [ClaimMiscellaneous].[misc].[ClaimMisc] cm2
 					ON cm2.ClaimMiscId = cmph.ClaimMiscId
 					AND cm2.IsActive = 1
 				LEFT JOIN [ClaimMiscellaneous].[ext].[Bank] bank
-					ON be.BankId = bank.BankId
+					ON cmpd.BankId = bank.BankId
 				LEFT JOIN [ClaimMiscellaneous].[misc].[TransferCause] tfc
 					ON tfc.TransferCauseId = cmpd.TransferCauseId
-				WHERE cmph.IsActive = 1
 			) cptMisc
 				ON cptMisc.ClaimMiscId = cm.ClaimMiscId
 		) x
@@ -451,4 +451,4 @@ FROM @TmpClaimPayBack TmpCPB
 
 IF OBJECT_ID('tempdb..#TmpPersonUser') IS NOT NULL DROP TABLE #TmpPersonUser;
 IF OBJECT_ID('tempdb..#InsuranceType') IS NOT NULL  DROP TABLE #InsuranceType;
-END
+END;
