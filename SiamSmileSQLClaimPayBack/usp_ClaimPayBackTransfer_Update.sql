@@ -215,7 +215,7 @@ BEGIN
 
 		UPDATE dbo.ClaimPayBackTransfer
 			SET OutOfPocketStatus = @OutOfPocketStatusId
-				,ClaimPayBackTransferStatusId = @ClaimPayBackTransferStatusId
+				,ClaimPayBackTransferStatusId = IIF(ClaimGroupTypeId = 4,2,@ClaimPayBackTransferStatusId)
 		FROM dbo.ClaimPayBackTransfer
 		WHERE ClaimPayBackTransferId = @ClaimBayBackTransferId;		
 
