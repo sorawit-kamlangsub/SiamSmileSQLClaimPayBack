@@ -189,11 +189,19 @@ BEGIN
 				WHEN SUM(CASE WHEN IsPayTransfer = 1 THEN 1 ELSE 0 END) = COUNT(*) THEN 1
 				ELSE 0
 			END
-		FROM ClaimPayBackSubGroup
-		WHERE IsActive = 1
-			AND TransactionType = 2
-			AND ClaimPayBackTransferId = @ClaimBayBackTransferId
-			AND ClaimPayBackSubGroupId <> @ClaimPayBackSubGroupId;
+		FROM ClaimPayBackSubGroup sub
+		LEFT JOIN 
+		(
+			SELECT 
+				ClaimPayBackSubGroupId
+				,ClaimPayBackTransferId
+			FROM dbo.ClaimPayBackSubGroupDetail
+			WHERE IsActive = 1
+		) subD
+			ON subD.ClaimPayBackSubGroupId = sub.ClaimPayBackSubGroupId
+		WHERE sub.IsActive = 1
+			AND sub.TransactionType = 2
+			AND (sub.ClaimPayBackTransferId = @ClaimBayBackTransferId OR subD.ClaimPayBackTransferId = @ClaimBayBackTransferId);
 	
 		IF @IsAllIsPayTransfer = 1
 		BEGIN
