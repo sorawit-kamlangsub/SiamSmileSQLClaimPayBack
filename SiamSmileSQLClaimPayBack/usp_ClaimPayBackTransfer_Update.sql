@@ -139,34 +139,6 @@ BEGIN
 		FROM dbo.ClaimPayBackTransfer
 		WHERE ClaimPayBackTransferId = @ClaimBayBackTransferId;
 
-		DECLARE @IsAllIsPayTransfer BIT = 0;
-		DECLARE @OutOfPocketStatusId INT;
-		SELECT @IsAllIsPayTransfer =
-			CASE 
-				WHEN SUM(CASE WHEN IsPayTransfer = 1 THEN 1 ELSE 0 END) = COUNT(*) THEN 1
-				ELSE 0
-			END
-		FROM ClaimPayBackSubGroup
-		WHERE IsActive = 1
-			AND TransactionType = 2
-			AND ClaimPayBackTransferId = @ClaimBayBackTransferId
-			AND ClaimPayBackSubGroupId <> @ClaimPayBackSubGroupId;
-	
-		IF @IsAllIsPayTransfer = 1
-		BEGIN
-			SET @OutOfPocketStatusId = 3
-		END
-		ELSE
-		BEGIN
-			SET @OutOfPocketStatusId = 6
-			SET @ClaimPayBackTransferStatusId = 4
-		END
-
-		UPDATE dbo.ClaimPayBackTransfer
-			SET OutOfPocketStatus = @OutOfPocketStatusId
-		FROM dbo.ClaimPayBackTransfer
-		WHERE ClaimPayBackTransferId = @ClaimBayBackTransferId;
-
 		--Update Status ClaimPayBack
 		UPDATE dbo.ClaimPayBack
 			SET ClaimPayBackStatusId = @ClaimPayBackStatusId
@@ -209,7 +181,35 @@ BEGIN
 			AND sg.IsActive = 1
 			AND sd.ClaimPayBackTransferId = @ClaimBayBackTransferId
 			AND sg.ClaimPayBackSubGroupId = @ClaimPayBackSubGroupId;
-		
+
+		DECLARE @IsAllIsPayTransfer BIT = 0;
+		DECLARE @OutOfPocketStatusId INT;
+		SELECT @IsAllIsPayTransfer =
+			CASE 
+				WHEN SUM(CASE WHEN IsPayTransfer = 1 THEN 1 ELSE 0 END) = COUNT(*) THEN 1
+				ELSE 0
+			END
+		FROM ClaimPayBackSubGroup
+		WHERE IsActive = 1
+			AND TransactionType = 2
+			AND ClaimPayBackTransferId = @ClaimBayBackTransferId
+			AND ClaimPayBackSubGroupId <> @ClaimPayBackSubGroupId;
+	
+		IF @IsAllIsPayTransfer = 1
+		BEGIN
+			SET @OutOfPocketStatusId = 3
+		END
+		ELSE
+		BEGIN
+			SET @OutOfPocketStatusId = 6
+			SET @ClaimPayBackTransferStatusId = 4
+		END
+
+		UPDATE dbo.ClaimPayBackTransfer
+			SET OutOfPocketStatus = @OutOfPocketStatusId
+				,ClaimPayBackTransferStatusId = @ClaimPayBackTransferStatusId
+		FROM dbo.ClaimPayBackTransfer
+		WHERE ClaimPayBackTransferId = @ClaimBayBackTransferId;		
 
 		SET @IsResult = 1;
         SET @Msg = 'บันทึกข้อมูล สำเร็จ';
