@@ -22,6 +22,7 @@ ALTER PROCEDURE [dbo].[usp_ClaimPayBackTransfer_Update]
 	,@TransferAmount				DECIMAL(16,2)
 	,@TransferDate					DATETIME
 	,@UpdatedByUserId				INT
+	,@ClaimPayBackSubGroupId		INT
 
 AS	
 BEGIN
@@ -120,6 +121,28 @@ BEGIN
 	FROM dbo.ClaimPayBackSubGroup
 	WHERE ClaimPayBackTransferId = @ClaimBayBackTransferId
 
+	DECLARE @IsAllIsPayTransfer BIT = 0;
+	DECLARE @OutOfPocketStatusId INT;
+	SELECT @IsAllIsPayTransfer =
+	    CASE 
+	        WHEN SUM(CASE WHEN IsPayTransfer = 1 THEN 1 ELSE 0 END) = COUNT(*) THEN 1
+	        ELSE 0
+	    END
+	FROM ClaimPayBackSubGroup
+	WHERE IsActive = 1
+	    AND TransactionType = 2
+	    AND ClaimPayBackTransferId = @ClaimBayBackTransferId
+		AND ClaimPayBackSubGroupId <> @ClaimPayBackSubGroupId;
+	
+	IF @IsAllIsPayTransfer = 1
+	BEGIN
+		SET @OutOfPocketStatusId = 3
+	END
+	ELSE
+	BEGIN
+		SET @OutOfPocketStatusId = 6
+	END
+
     BEGIN TRY	
 		BEGIN TRANSACTION;
 
@@ -131,7 +154,7 @@ BEGIN
 				,ClaimPayBackTransferStatusId = IIF(ClaimGroupTypeId = 4,2,@ClaimPayBackTransferStatusId)
 				,UpdatedByUserId = @UpdatedByUserId
 				,UpdatedDate = @D
-				,OutOfPocketStatus = 3
+				,OutOfPocketStatus = @OutOfPocketStatusId
 				,OutOfPocketAmount = @TransferAmount
 				,OutOfPocketDate = @TransferDate
 				,OutOfPocketByUserId = @UpdatedByUserId
@@ -166,6 +189,7 @@ BEGIN
 				,UpdatedDate = @D 
 				,IsPayTransfer = 1
 			WHERE ClaimPayBackTransferId = @ClaimBayBackTransferId
+				AND ClaimPayBackSubGroupId = @ClaimPayBackSubGroupId
 				AND TransactionType = 2;
 
 		UPDATE sg
@@ -179,30 +203,8 @@ BEGIN
 		WHERE sd.IsActive = 1
 			AND sg.IsActive = 1
 			AND sd.ClaimPayBackTransferId = @ClaimBayBackTransferId
-		--IF @countSubGroup > 0 
-		--	BEGIN
-
-		--	    UPDATE dbo.ClaimPayBackSubGroup
-		--		SET BillingTransferDate = @TransferDate
-		--			,UpdatedByUserId = @UpdatedByUserId
-		--			,UpdatedDate = @D 
-		--			,IsPayTransfer = 1
-		--		WHERE ClaimPayBackTransferId = @ClaimBayBackTransferId
-		--			AND TransactionType = 2;
-
-		--		UPDATE sg
-		--		SET sg.BillingTransferDate = @TransferDate
-		--			,UpdatedByUserId = @UpdatedByUserId
-		--			,UpdatedDate = @D 
-		--			,IsPayTransfer = 1
-		--		FROM dbo.ClaimPayBackSubGroup sg 
-		--			LEFT JOIN dbo.ClaimPayBackSubGroupDetail sd
-		--				ON sg.ClaimPayBackSubGroupId = sd.ClaimPayBackSubGroupId
-		--		WHERE sd.IsActive = 1
-		--			AND sg.IsActive = 1
-		--			AND sd.ClaimPayBackTransferId = @ClaimBayBackTransferId
-
-		--	END 
+			AND sg.ClaimPayBackSubGroupId = @ClaimPayBackSubGroupId;
+		
 
 		SET @IsResult = 1;
         SET @Msg = 'บันทึกข้อมูล สำเร็จ';
