@@ -18,11 +18,10 @@ GO
 -- =============================================
 --ALTER PROCEDURE [dbo].[usp_ClaimPayBackTransfer_Update] 
 	-- Add the parameters for the stored procedure here
-	DECLARE
-	 @ClaimBayBackTransferId		INT = 4165
-	,@TransferAmount				DECIMAL(16,2) = 20011.11
-	,@TransferDate					DATETIME = '2026-02-02 13:58:00'
-	,@UpdatedByUserId				INT = 1
+	-- @ClaimBayBackTransferId		INT = 4165
+	--,@TransferAmount				DECIMAL(16,2) = 20011.11
+	--,@TransferDate					DATETIME = '2026-02-02 13:58:00'
+	--,@UpdatedByUserId				INT = 1
 
 --AS	
 --BEGIN
@@ -31,6 +30,12 @@ GO
 --	SET NOCOUNT ON;
 
 --------------------------------------------------------
+DECLARE
+	 @ClaimBayBackTransferId		INT = 4165
+	,@TransferAmount				DECIMAL(16,2) = 20011.11
+	,@TransferDate					DATETIME = '2026-02-02 13:58:00'
+	,@UpdatedByUserId				INT = 1
+	,@ClaimPayBackSubGroupId		INT;
 
 DECLARE @IsResult			BIT			 = 1;
 DECLARE @Result				VARCHAR(100) = '';
@@ -115,58 +120,103 @@ IF @IsResult = 1
 BEGIN
 
     DECLARE @countSubGroup INT = 0;
+	DECLARE @subGroupId INT = 0;
 
 	SELECT @countSubGroup = COUNT(*)  
 	FROM dbo.ClaimPayBackSubGroup
 	WHERE ClaimPayBackTransferId = @ClaimBayBackTransferId
 
+	DECLARE @IsAllIsPayTransfer BIT = 0;
+	DECLARE @OutOfPocketStatusId INT;
+	SELECT @IsAllIsPayTransfer =
+	    CASE 
+	        WHEN SUM(CASE WHEN IsPayTransfer = 1 THEN 1 ELSE 0 END) = COUNT(*) THEN 1
+	        ELSE 0
+	    END
+	FROM ClaimPayBackSubGroup
+	WHERE IsActive = 1
+	    AND TransactionType = 2
+	    AND ClaimPayBackTransferId = @ClaimBayBackTransferId
+		AND ClaimPayBackSubGroupId <> @ClaimPayBackSubGroupId;
+	
+	IF @IsAllIsPayTransfer = 1
+	BEGIN
+		SET @OutOfPocketStatusId = 3
+	END
+	ELSE
+	BEGIN
+		SET @OutOfPocketStatusId = 6
+		SET @ClaimPayBackTransferStatusId = 4
+	END
+
     BEGIN TRY	
 		BEGIN TRANSACTION;
 
 		--Update ClaimPayBackTransfer TransferAmount,TransferDate,Status
-		UPDATE dbo.ClaimPayBackTransfer
-			SET TransferAmount = IIF(ClaimGroupTypeId = 4,NULL,@TransferAmount)
-				,TransferDate= IIF(ClaimGroupTypeId = 4,NULL,@TransferDate)
-				,ClaimPayBackTransferStatusId = IIF(ClaimGroupTypeId = 4,2,@ClaimPayBackTransferStatusId)
-				,UpdatedByUserId = @UpdatedByUserId
-				,UpdatedDate = @D
-				,OutOfPocketStatus = 3
-				,OutOfPocketAmount = @TransferAmount
-				,OutOfPocketDate = @TransferDate
-				,OutOfPocketByUserId = @UpdatedByUserId
+		SELECT *
+		--UPDATE dbo.ClaimPayBackTransfer
+		--	SET 
+		--		TransferAmount = IIF(ClaimGroupTypeId = 4,NULL,@TransferAmount)
+		--		,TransferDate= IIF(ClaimGroupTypeId = 4,NULL,@TransferDate)
+		--		,ClaimPayBackTransferStatusId = IIF(ClaimGroupTypeId = 4,2,@ClaimPayBackTransferStatusId)
+		--		,UpdatedByUserId = @UpdatedByUserId
+		--		,UpdatedDate = @D
+		--		,OutOfPocketStatus = @OutOfPocketStatusId
+		--		,OutOfPocketAmount = @TransferAmount
+		--		,OutOfPocketDate = @TransferDate
+		--		,OutOfPocketByUserId = @UpdatedByUserId
 		FROM dbo.ClaimPayBackTransfer
 		WHERE ClaimPayBackTransferId = @ClaimBayBackTransferId;
 
 
 		--Update Status ClaimPayBack
-		UPDATE dbo.ClaimPayBack
-			SET ClaimPayBackStatusId = @ClaimPayBackStatusId
-				,UpdatedByUserId = @UpdatedByUserId
-				,UpdatedDate = @D 
+		SELECT *
+		--UPDATE dbo.ClaimPayBack
+		--	SET ClaimPayBackStatusId = @ClaimPayBackStatusId
+		--		,UpdatedByUserId = @UpdatedByUserId
+		--		,UpdatedDate = @D 
 		FROM dbo.ClaimPayBack b
 			INNER JOIN #TmplstClaimPayback t
 				ON b.ClaimPayBackId = t.ClaimPayBackId
+		WHERE b.ClaimGroupTypeId <> 4
 
 
 		--Update ClaimTransfer in ClaimPayBackXClaim
-		UPDATE dbo.ClaimPayBackXClaim
-			SET ClaimTransfer = m.ClaimPay
-				,UpdatedByUserId = @UpdatedByUserId
-				,UpdatedDate = @D
+		SELECT *
+		--UPDATE dbo.ClaimPayBackXClaim
+		--	SET ClaimTransfer = m.ClaimPay
+		--		,UpdatedByUserId = @UpdatedByUserId
+		--		,UpdatedDate = @D
 		FROM dbo.ClaimPayBackXClaim m
 			INNER JOIN #TmpUpdateClaimTransfer u
 				ON m.ClaimPayBackXClaimId = u.ClaimPayBackXClaimId
 		
 		--Update เฉพาะเคลมที่มี SubGroup
-		IF @countSubGroup > 0 
-			BEGIN
-			    UPDATE dbo.ClaimPayBackSubGroup
-				SET BillingTransferDate = @TransferDate
-					,UpdatedByUserId = @UpdatedByUserId
-					,UpdatedDate = @D 
-					,IsPayTransfer = 1
-				WHERE ClaimPayBackTransferId = @ClaimBayBackTransferId;
-			END
+		SELECT *
+		--UPDATE m
+		--	SET BillingTransferDate = @TransferDate
+		--		,UpdatedByUserId = @UpdatedByUserId
+		--		,UpdatedDate = @D 
+		--		,IsPayTransfer = 1
+			FROM dbo.ClaimPayBackSubGroup m
+			WHERE m.ClaimPayBackTransferId = @ClaimBayBackTransferId
+				AND m.ClaimPayBackSubGroupId = @ClaimPayBackSubGroupId
+				AND m.TransactionType = 2;
+
+		SELECT *
+		--UPDATE sg
+		--SET sg.BillingTransferDate = @TransferDate
+		--	,UpdatedByUserId = @UpdatedByUserId
+		--	,UpdatedDate = @D 
+		--	,IsPayTransfer = 1
+		FROM dbo.ClaimPayBackSubGroup sg 
+			LEFT JOIN dbo.ClaimPayBackSubGroupDetail sd
+				ON sg.ClaimPayBackSubGroupId = sd.ClaimPayBackSubGroupId
+		WHERE sd.IsActive = 1
+			AND sg.IsActive = 1
+			AND sd.ClaimPayBackTransferId = @ClaimBayBackTransferId
+			AND sg.ClaimPayBackSubGroupId = @ClaimPayBackSubGroupId;
+		
 
 		SET @IsResult = 1;
         SET @Msg = 'บันทึกข้อมูล สำเร็จ';
