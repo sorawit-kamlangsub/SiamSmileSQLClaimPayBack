@@ -141,6 +141,7 @@ BEGIN
 	ELSE
 	BEGIN
 		SET @OutOfPocketStatusId = 6
+		SET @ClaimPayBackTransferStatusId = 4
 	END
 
     BEGIN TRY	
