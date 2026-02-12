@@ -36,8 +36,8 @@ GO
 
 	-- Start Test --
 	DECLARE
-	@ClaimGroupCodeList		NVARCHAR(MAX) = 'c'
-	  , @ProductGroupId			INT = 4
+	@ClaimGroupCodeList		NVARCHAR(MAX) = 'CHCMO52169010001'
+	  , @ProductGroupId			INT = 11
 	  , @ClaimGroupTypeId		INT = 7
 	  , @CreatedByUserId		INT = 1; 
 	-- End Test --
@@ -1140,7 +1140,7 @@ GO
 	
 ----------------Kittisak.Ph 2024-04-05-------------------------------------------
 --บันทึกสถานะส่งตั้งเบิกเฉพาะเคลมออนไลน์ 
-	IF @ClaimGroupTypeId = 2				--Update Kittisak.Ph 2025-02-25 
+	IF @ClaimGroupTypeId IN (2,7)				--Update Kittisak.Ph 2025-02-25 
 	BEGIN
 
 		--INSERT INTO [ClaimOnlineV2].[dbo].[ClaimWithdrawal]
