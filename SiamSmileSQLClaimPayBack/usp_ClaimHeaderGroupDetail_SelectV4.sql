@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]    Script Date: 23/12/2568 10:38:16 ******/
+
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -287,22 +287,6 @@ ELSE IF @pProductGroupId = 2 AND @pClaimGroupTypeId IN (2,3,4,6)
 				ON i.ClaimHeader_id = v.Code
 			LEFT JOIN [sss].[dbo].[MT_ProductGroup] mtg
 				ON g.ProductGroup_id = mtg.Code
-			--LEFT JOIN
-			--	(
-			--		SELECT 
-			--			co.ClaimOnLineId
-			--			,co.ClaimOnLineCode
-			--			,cg.PaymentStatusId 
-			--			,SUM(cg.TotalAmount) TotalAmount
-			--		FROM ClaimOnlineV2.dbo.ClaimOnline co
-			--			LEFT JOIN ClaimOnlineV2.dbo.ClaimPayGroup cg
-			--				ON cg.ClaimOnLineId = co.ClaimOnLineId
-			--		WHERE co.IsActive = 1
-			--			AND cg.IsActive = 1 
-			--			AND cg.PaymentStatusId = 4
-			--		GROUP BY co.ClaimOnLineId, co.ClaimOnLineCode, cg.PaymentStatusId
-			--	) colPH
-			--	ON colPH.ClaimOnLineCode = cl.ClaimOnLineCode 
 		WHERE (g.InsuranceCompany_id = @pInsCode OR @pInsCode IS NULL)
 			AND (g.Branch_id = @pBranchCode OR @pBranchCode IS NULL)
 			AND (
@@ -357,7 +341,6 @@ ELSE IF @pProductGroupId = 2 AND @pClaimGroupTypeId IN (2,3,4,6)
 						AND cat.xFlag = 0
 						AND g.CreatedDate >= @fix_OpdDateCutoff
 						AND g.ClaimAdmitType_id IN('4000','4001','5001','5002')
-						--AND colPH.PaymentStatusId IS NULL
 					)
 				)
 				AND NOT EXISTS	(
@@ -413,22 +396,6 @@ ELSE IF @pProductGroupId = 3 AND @pClaimGroupTypeId IN (2,3,4,6)
 				ON i.ClaimHeader_id = c.Code
 			LEFT JOIN [SSSPA].[dbo].[MT_ProductGroup] mtg
 				ON g.ProductGroup_id = mtg.Code
-			--LEFT JOIN
-			--	(
-			--		SELECT 
-			--			co.ClaimOnLineId
-			--			,co.ClaimOnLineCode
-			--			,cg.PaymentStatusId 
-			--			,SUM(cg.TotalAmount)	TotalAmount
-			--		FROM ClaimOnlineV2.dbo.ClaimOnline co
-			--			LEFT JOIN ClaimOnlineV2.dbo.ClaimPayGroup cg
-			--				ON cg.ClaimOnLineId = co.ClaimOnLineId
-			--		WHERE co.IsActive = 1 
-			--			AND cg.IsActive = 1 
-			--			AND cg.PaymentStatusId = 4
-			--		GROUP BY co.ClaimOnLineId, co.ClaimOnLineCode, cg.PaymentStatusId
-			--	) colPA
-			--	ON colPA.ClaimOnLineCode = c.ClaimOnLineCode  
 		WHERE (g.InsuranceCompany_id = @pInsCode OR @pInsCode IS NULL)
 			AND (g.Branch_id = @pBranchCode OR @pBranchCode IS NULL)
 			AND (g.CreatedBy_id = @pCreatedByCode OR @pCreatedByCode IS NULL)
@@ -633,8 +600,8 @@ SELECT g.ClaimHeaderGroupCode									ClaimHeaderGroup_id
 		,oIns.OrganizeId										InsuranceCompanyId
 		,d.InsuranceCompanyName									InsuranceCompany	 
 		,COUNT(g.ClaimHeaderGroupCode) OVER ()					TotalCount
-		,IIF(g.ItemCount = doc.docCount ,1,0)					DocumentCount	 
-		--,1														DocumentCount
+		--,IIF(g.ItemCount = doc.docCount ,1,0)					DocumentCount	 
+		,1														DocumentCount
 		,g.TransferAmount										TransferAmount
 		,d.ProductTypeDetail									ProductTypeDetail
 FROM
