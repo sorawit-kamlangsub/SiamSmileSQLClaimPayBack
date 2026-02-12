@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-
+/****** Object:  StoredProcedure [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]    Script Date: 12/2/2569 16:30:29 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -42,19 +42,19 @@ BEGIN
 
 --======= for test =======
 	-- DECLARE
-	-- @ProductGroupId		INT 			= 4
+	-- @ProductGroupId		INT 			= 11
 	--,@InsuranceId			INT				= NULL
 	--,@ClaimGroupTypeId		INT				= 7
 	--,@BranchId				INT				= NULL	
 	--,@CreateByUser_Code		VARCHAR(20)		= NULL
 	--,@IndexStart			INT				= 0	
-	--,@PageSize				INT				= 50
+	--,@PageSize				INT				= 20
 	--,@SortField				NVARCHAR(MAX)	= NULL
 	--,@OrderType				NVARCHAR(MAX)	= NULL
 	--,@SearchDetail			NVARCHAR(MAX)	= NULL 
 	--,@IsShowDocumentLink	BIT				= NULL
 	--,@ProductTypeId			INT				= NULL
-	--,@ClaimPayBackTypeId	INT				= 2;
+	--,@ClaimPayBackTypeId	INT				= NULL;
 --==============
 
 DECLARE @pInsCode				VARCHAR(20)		= NULL	/*ถ้าส่ง @InsuranceId จะ set*/
@@ -491,7 +491,7 @@ ELSE IF @pProductGroupId IN (4,11) AND @pClaimGroupTypeId = 7
 			LEFT JOIN [DataCenterV1].[Product].[ProductType] pt
 				ON cm.ProductTypeId = pt.ProductType_ID
 			 LEFT JOIN (
-				SELECT 
+				SELECT DISTINCT
 				 h.ClaimMiscId
 				 ,cp.ClaimPaymentTypeId
 				 ,cp.ClaimPaymentTypeName
