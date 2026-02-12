@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [Claim].[usp_ClaimPayBackDetail_InsertV4]    Script Date: 9/10/2568 11:24:56 ******/
+
 --SET ANSI_NULLS ON
 --GO
 --SET QUOTED_IDENTIFIER ON
@@ -15,17 +15,32 @@ GO
 -- Description: ClaimGroupType 6 When is PA
 -- Update date: 2025-09-02 08:57 Bunchuai Chaiket
 -- Description: Change condition SELECT #TmpX IF InsCode = @InsuranceCompanyId SET GroupId = 2
+-- Update date: 2025-10-21 13:48 Sorawit Kamlangsub
+-- Description: Change to EXECUTE usp_ClaimPayBackDetail_InsertV5
+-- Update date: 2025-10-22 13:48 Sorawit Kamlangsub
+-- Description: Add ClaimMisc
+-- Update date: 2025-11-06 Kittisak.Ph Add RoundNumber to ClaimWithdrawal
+-- Update date: 2025-11-27 Sorawit Kamlangsub Add ClaimMisc
+-- Update date: 2025-12-4 Sorawit Kamlangsub แก้ไข @TmpD เพิ่มขนาด Field ProductCode จาก 20 เป็น 255
+-- Update date: 2025-12-9 Sorawit Kamlangsub แก้ไข ClaimMisc เพิ่ม Left Join DataCenterV1 ด้วย cm.InsCode เอา Organize_Id มาเก็บใน InsId
 -- =============================================
 --ALTER PROCEDURE [Claim].[usp_ClaimPayBackDetail_InsertV4]
-DECLARE
-	@ClaimGroupCodeList		NVARCHAR(MAX) = 'CHCMO52168120003,CHTAO88868120017,VRFAO88869010005'
-	  , @ProductGroupId			INT = 11
-	  , @ClaimGroupTypeId		INT = 7
-	  , @CreatedByUserId		INT = 1
+--	@ClaimGroupCodeList		NVARCHAR(MAX)
+--	  , @ProductGroupId			INT
+--	  , @ClaimGroupTypeId		INT 
+--	  , @CreatedByUserId		INT 
 --AS
 --BEGIN
 	
 --	SET NOCOUNT ON;
+
+	-- Start Test --
+	DECLARE
+	@ClaimGroupCodeList		NVARCHAR(MAX) = 'c'
+	  , @ProductGroupId			INT = 4
+	  , @ClaimGroupTypeId		INT = 7
+	  , @CreatedByUserId		INT = 1; 
+	-- End Test --
 	
 	DECLARE @IsResult	BIT				= 1;
 	DECLARE @Result		VARCHAR(100)	= '';
@@ -402,7 +417,7 @@ DECLARE
                                 )
                                 SELECT @ClaimGroupTypeId	ClaimGroupTypeId
                                         , BranchId			BranchId
-                                        , ROW_NUMBER() OVER(ORDER BY BranchId asc )	gId -- 1	gId
+                                        , 1					gId
                                         , SUM(Amount)		sumPremium
                                         ,1
                                 FROM @TmpD
@@ -472,8 +487,7 @@ DECLARE
 					  ,o.Organize_ID		InsId
 					  ,x.ClaimCode
 					  ,x.ClaimOnLineCode
-					  ,CASE WHEN x.InsCode = @InsuranceCompanyCode AND x.CreatedDate >= @SMICutOffDate THEN 2
-							--WHEN x.InsCode = @InsuranceCompanyCode AND @ClaimGroupTypeId = 4 THEN 2 AND @ClaimGroupTypeId = 2
+					  ,CASE WHEN x.InsCode = @InsuranceCompanyCode AND x.CreatedDate >= @SMICutOffDate THEN 2							
 						ELSE 1 END AS GroupId
 				INTO #TmpX
 				FROM
@@ -589,8 +603,6 @@ DECLARE
 							,lst.InsCode
 							,lst.InsId
 							,lst.ClaimCode
-							--,(ISNULL(cv.Pay,0) + ISNULL(cv.Compensate_net,0) ) Amount
-							--,IIF(ISNULL(cv.net,0) <> 0 ,ISNULL(cv.Pay_Total,0),ISNULL(cv.Compensate_net,0))  Amount  --เงื่อนไขใน บส.  ปรับให้ออกเหมือน บส. คอนเฟริมกับพี่โบว์แล้ว
 							,ISNULL(cv.PaySS_Total,0)   Amount  -- เปลี่ยนไปใช้ PaySS_Total รวมหักส่วนลดแล้ว 20231227
 							,cl.Product_id				ProductCode
 							,p.Detail					[Product]
@@ -606,9 +618,7 @@ DECLARE
 							,ci.AdmitDate				AdmitDate								--Update Chanadol 2023-12-07
 							,CONCAT(tt.Detail, cm.FirstName, ' ', cm.LastName)	 AS CustomerName --Update Chanadol 2023-12-07
 							,NULL						SchoolName
-							--,IIF(lst.InsCode ='100000000004' AND cl.CreatedDate <'2024-08-01', 1, 2) GroupId
 							,CASE WHEN lst.InsCode = @InsuranceCompanyCode AND cl.CreatedDate >= @SMICutOffDate  THEN 2
-								  --WHEN lst.InsCode =@InsuranceCompanyCode AND @ClaimGroupTypeId =4 THEN 2 AND @ClaimGroupTypeId = 2
 							ELSE 1 END AS GroupId
 					FROM sss.dbo.DB_ClaimHeader cl
 						INNER JOIN sss.dbo.DB_ClaimVoucher cv
@@ -657,7 +667,6 @@ DECLARE
 							,lst.InsCode
 							,lst.InsId
 							,lst.ClaimCode
-							--,ISNULL(cl.Amount_Net,0)	Amount
 							,ISNULL(cl.PaySS_Total,0)	Amount -- 20231227
 							,cl.Product_id				ProductCode
 							,pp.Detail					[Product]
@@ -673,9 +682,7 @@ DECLARE
 							,cl.DateIn					AdmitDate									--Update Chanadol 2023-12-07
 							,CONCAT(tt.Detail, cd.FirstName, ' ', cd.LastName)	 AS CustomerName	--Update Chanadol 2023-12-07
 							,CONCAT(ISNULL(c.CompanyTitle, ''), c.Detail)		 AS SchoolName	
-							--,IIF(lst.InsCode ='100000000004' AND cl.CreatedDate <'2024-08-01', 1, 2) GroupId
 							,CASE WHEN lst.InsCode =@InsuranceCompanyCode AND cl.CreatedDate >= @SMICutOffDate   THEN 2
-								  -- WHEN lst.InsCode =@InsuranceCompanyCode AND @ClaimGroupTypeId = 4 THEN 2 AND @ClaimGroupTypeId = 2
 							ELSE 1 END AS GroupId
 					FROM SSSPA.dbo.DB_ClaimHeader cl
 						INNER JOIN 
@@ -697,8 +704,6 @@ DECLARE
 							ON cl.ClaimType_id = clt.Code
 						LEFT JOIN ssspa.dbo.MT_AccidentCause adc
 							ON cl.AccidentCause_id = adc.Code
-						--LEFT JOIN ssspa.dbo.vw_ICD10 icd
-						--	ON cl.ICD10_1 = icd.Code
 						LEFT JOIN SSS.dbo.MT_ICD10 icd
 							ON cl.ICD10_1 = icd.Code
 						LEFT JOIN sss.dbo.MT_Company hos
@@ -735,13 +740,12 @@ DECLARE
 						SELECT ClaimGroupTypeId
 							  ,BranchId
 							  ,GroupId
-							  --,ROW_NUMBER() OVER(ORDER BY ClaimGroupTypeId ASC,BranchId ASC ) gId
 						FROM #TmpX
-						--GROUP BY ClaimGroupTypeId,BranchId
+
 					)h
 					LEFT JOIN 
 						(
-							--SELECT ClaimGroupTypeId,BranchId,SUM(Amount) sumPremium
+
 							SELECT 
 								ClaimGroupTypeId
 								,BranchId
@@ -875,8 +879,6 @@ DECLARE
 		SELECT @g_Total = MAX(gId) 
 
 		FROM @TmpGroup;
-
-		SELECT * FROM @TmpGroup;
 	
 		EXECUTE [dbo].[usp_GenerateCode_FromTo] 
 		   @g_TransactionCodeControlTypeDetail
@@ -896,9 +898,6 @@ DECLARE
 		DECLARE @h_lenght	INT = 6
 		SELECT @h_Total = MAX(hId)
 		FROM @TmpH
-
-		SELECT * FROM @TmpH
-
 	
 		EXECUTE [dbo].[usp_GenerateCode_FromTo] 
 		   @h_TransactionCodeControlTypeDetail
@@ -982,7 +981,7 @@ DECLARE
 			INNER JOIN ClaimOnlineV2.dbo.ClaimOnlineItem ci
 				ON d.ClaimCode = ci.ClaimCode
 		WHERE ci.IsActive = 1
-		--left JOIN vw_ClaimOnlineItem vcol ON vcol.ClaimCode =d.ClaimCode
+
 	END
 	ELSE	
 	BEGIN
@@ -1009,7 +1008,7 @@ DECLARE
 		IF @IsResult = 1
 		BEGIN
 	    
-		SELECT * FROM @TmpD
+	
 		-----------------------------------
 		BEGIN TRY
 			Begin TRANSACTION
@@ -1031,19 +1030,18 @@ DECLARE
 				--		)
 				--OUTPUT Inserted.ClaimGroupTypeId,Inserted.BranchId,Inserted.ClaimPayBackId,Inserted.GroupId,Inserted.ClaimPayBackCode INTO @TmpOutGroup(ClaimGroupTypeId,BranchId,gId,GroupId,ClaimPayBackCode) --Update Chanadol 20241112
 				SELECT 
-						CONCAT(@g_TransactionCodeControlTypeDetail,@g_YY,@g_MM ,dbo.func_ConvertIntToString((@g_RunningFrom + ig.gId - 1),@g_lenght)) Code
-						,ig.sumPremium
-						--,2
-						,IIF(ig.GroupId = 2, 5, 2)
-						,ig.ClaimGroupTypeId
-						,ig.BranchId
-						,NULL
-						,1
-						,@CreatedByUserId
-						,@D
-						,@CreatedByUserId
-						,@D
-						,ig.GroupId
+						CONCAT(@g_TransactionCodeControlTypeDetail,@g_YY,@g_MM ,dbo.func_ConvertIntToString((@g_RunningFrom + ig.gId - 1),@g_lenght)) ClaimPayBackCode
+						,ig.sumPremium				Amount
+						,IIF(ig.GroupId = 2, 5, 2)	ClaimPayBackStatusId
+						,ig.ClaimGroupTypeId		ClaimGroupTypeId
+						,ig.BranchId				BranchId
+						,NULL						ClaimPayBackTransferId
+						,1							IsActive
+						,@CreatedByUserId			CreatedByUserId
+						,@D							CreatedDate
+						,@CreatedByUserId			UpdatedByUserId
+						,@D							UpdatedDate
+						,ig.GroupId					GroupId
 				FROM @TmpGroup ig
 				ORDER BY ig.gId;
 			
@@ -1067,21 +1065,21 @@ DECLARE
 				--		)
 				--OUTPUT Inserted.ClaimGroupCode,Inserted.ClaimPayBackDetailId,Inserted.ClaimPayBackId,Inserted.InsuranceCompanyId INTO @TmpOutD (ClaimHeaderGroupCode,cdId,ClaimPayBackId,InsuranceCompanyId)
 				SELECT	
-						CONCAT(@h_TransactionCodeControlTypeDetail,@h_YY,@h_MM ,dbo.func_ConvertIntToString((@h_RunningFrom + h.hId - 1),@h_lenght)) Code
-						,o.gId
-						,h.ClaimHeaderGroupCode
-						,h.ItemCount
-						,h.SumAmount
-						,h.ProductGroupId
-						,h.InsId
-						,NULL
-						,1
-						,@CreatedByUserId
-						,@D
-						,@CreatedByUserId
-						,@D
-						,h.ClaimOnLineCode
-						,h.HospitalCode
+						CONCAT(@h_TransactionCodeControlTypeDetail,@h_YY,@h_MM ,dbo.func_ConvertIntToString((@h_RunningFrom + h.hId - 1),@h_lenght)) ClaimPayBackDetailCode
+						,o.gId					ClaimPayBackId
+						,h.ClaimHeaderGroupCode	ClaimGroupCode
+						,h.ItemCount			ItemCount
+						,h.SumAmount			Amount
+						,h.ProductGroupId		ProductGroupId
+						,h.InsId				InsuranceCompanyId
+						,NULL					CancelRemark
+						,1						IsActive
+						,@CreatedByUserId		CreatedByUserId
+						,@D						CreatedDate
+						,@CreatedByUserId		UpdatedByUserId
+						,@D						UpdatedDate
+						,h.ClaimOnLineCode		ClaimOnLineCode
+						,h.HospitalCode			HospitalCode
 				FROM @TmpH h
 					LEFT JOIN @TmpOutGroup o
 						ON h.ClaimGroupTypeId = o.ClaimGroupTypeId
@@ -1113,28 +1111,28 @@ DECLARE
 				--		,AdmitDate
 				--		,SchoolName)
 				--		OUTPUT Inserted.ClaimCode,Inserted.ClaimPayBackXClaimId,Inserted.ClaimPayBackDetailId INTO @TmpOutXClaim (ClaimCode,cxId,cdId) --Kittisak.Ph 2024-04-05
-				SELECT o.cdId
-						,d.ClaimCode
-						,d.ProductCode
-						,d.[Product]
-						,d.HospitalCode
-						,d.Hospital
-						,d.ClaimAdmitTypeCode
-						,d.ClaimAdmitType
-						,d.ChiefComplainCode
-						,d.ChiefComplain
-						,d.ICD10Code
-						,d.ICD10
-						,d.Amount
-						,0
-						,1
-						,@CreatedByUserId
-						,@D
-						,@CreatedByUserId
-						,@D
-						,d.CustomerName				
-						,d.AdmitDate
-						,d.SchoolName
+				SELECT o.cdId					ClaimPayBackDetailId
+						,d.ClaimCode			ClaimCode
+						,d.ProductCode			ProductCode
+						,d.[Product]			ProductName
+						,d.HospitalCode			HospitalCode
+						,d.Hospital				HospitalName
+						,d.ClaimAdmitTypeCode	ClaimAdmitTypeCode
+						,d.ClaimAdmitType		ClaimAdmitType
+						,d.ChiefComplainCode	ChiefComplainCode
+						,d.ChiefComplain		ChiefComplain
+						,d.ICD10Code			ICD10Code
+						,d.ICD10				ICD10
+						,d.Amount				ClaimPay
+						,0						ClaimTransfer
+						,1						IsActive
+						,@CreatedByUserId		CreatedByUserId
+						,@D						CreatedDate
+						,@CreatedByUserId		UpdatedByUserId
+						,@D						UpdatedDate
+						,d.CustomerName			CustomerName			
+						,d.AdmitDate			AdmitDate
+						,d.SchoolName			SchoolName
 				FROM @TmpD d
 					LEFT JOIN @TmpOutD o
 						ON d.ClaimHeaderGroupCode = o.ClaimHeaderGroupCode
@@ -1158,16 +1156,16 @@ DECLARE
   --    ,[ClaimPayBackXClaimCreatedDate]
   --    ,[RoundNo]
 	 -- )
-		SELECT NEWID()
-		,ClaimOnLineId
-			,ClaimOnLineItemId
-			,x.cxId
-			,tx.ClaimCode
-			,tx.ClaimPay
-			,1
-			,ClaimPayBackXClaimCreatedByUserId
-			,ClaimPayBackXClaimCreatedDate
-			,tx.RoundNo
+		SELECT NEWID()							ClaimWithdrawalId
+		,ClaimOnLineId							ClaimOnLineId
+			,ClaimOnLineItemId					ClaimOnLineItemId
+			,x.cxId								ClaimPayBackXClaimId
+			,tx.ClaimCode						ClaimCode
+			,tx.ClaimPay						ClaimPay
+			,1									IsActive
+			,ClaimPayBackXClaimCreatedByUserId	ClaimPayBackXClaimCreatedByUserId
+			,ClaimPayBackXClaimCreatedDate		ClaimPayBackXClaimCreatedDate
+			,tx.RoundNo							RoundNo
 		FROM @TmpXClaim tx
 		LEFT JOIN @TmpOutXClaim x ON tx.ClaimCode = x.ClaimCode
 
@@ -1192,7 +1190,7 @@ DECLARE
 		  --         ,[CreatedDate]
 		  --         ,[UpdatedByUserId]
 		  --         ,[UpdatedDate])
-				SELECT  claimD.Code AS ClaimGroupCode,
+				SELECT  claimD.Code AS ClaimGroupCode,		
 							sssHospital.Detail AS HospitalName,
 							claimD.CLCode AS ClaimCode,
 							claimD.CustomerName AS CustomerName,
@@ -1271,10 +1269,6 @@ DECLARE
 	IF @IsResult = 1 BEGIN	SET @Result = IIF(1=0,1,0) END	
 	ELSE BEGIN				SET @Result = 'Failure' END;	
 
-	--SELECT @IsResult IsResult
-	--		,@Result Result
-	--		,@Msg	 Msg; 
-
 	SELECT DISTINCT @IsResult IsResult
 		,@Result Result
 		,@Msg	 Msg
@@ -1297,13 +1291,10 @@ DECLARE
 		ON tod.cdId = toc.cdId
 	LEFT JOIN @TmpXClaim txc
 		ON toc.ClaimCode = txc.ClaimCode
-	--INNER JOIN dbo.vw_ClaimOnlineItem vcol
-	--	ON txc.ClaimCode = vcol.ClaimCode
-	--WHERE tod.InsuranceCompanyId = @InsuranceCompanyId
 
-	IF OBJECT_ID('tempdb..#TmpX') IS NOT NULL  DROP TABLE #TmpX;
-	IF OBJECT_ID('tempdb..#TmpX2') IS NOT NULL  DROP TABLE #TmpX2;
+	IF OBJECT_ID('tempdb..#TmpX') IS NOT NULL  DROP TABLE #TmpX;	
 	IF OBJECT_ID('tempdb..#Tmplst') IS NOT NULL  DROP TABLE #Tmplst;	
+	IF OBJECT_ID('tempdb..#TmpX2') IS NOT NULL  DROP TABLE #TmpX2;
 
 	IF OBJECT_ID('tempdb..@TmpH') IS NOT NULL  DELETE FROM @TmpH;	
 	IF OBJECT_ID('tempdb..@TmpGroup') IS NOT NULL  DELETE FROM @TmpGroup;	
