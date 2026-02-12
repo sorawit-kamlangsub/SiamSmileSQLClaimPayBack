@@ -35,23 +35,26 @@ ALTER PROCEDURE [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]
 	,@SearchDetail			NVARCHAR(MAX)	= NULL 
 	,@IsShowDocumentLink	BIT				= NULL
 	,@ProductTypeId			INT				= NULL
+	,@ClaimPayBackTypeId	INT				= NULL
 AS
 BEGIN
 	SET NOCOUNT ON;
 
 --======= for test =======
---DECLARE @ProductGroupId			INT 			= 11;
---DECLARE @ProductTypeId			INT 			= 10;
---DECLARE @InsuranceId			INT				= NULL;
---DECLARE @ClaimGroupTypeId		INT				= NULL;
---DECLARE @BranchId				INT				= NULL;
---DECLARE @CreateByUser_Code		VARCHAR(20)		= NULL;
---DECLARE @IndexStart				INT				= 0;
---DECLARE @PageSize				INT				= 10;
---DECLARE @SortField				NVARCHAR(MAX)	= NULL;
---DECLARE @OrderType				NVARCHAR(MAX)	= NULL;
---DECLARE @SearchDetail			NVARCHAR(MAX)	= NULL;
---DECLARE @IsShowDocumentLink		BIT				= NULL
+	-- DECLARE
+	-- @ProductGroupId		INT 			= 4
+	--,@InsuranceId			INT				= NULL
+	--,@ClaimGroupTypeId		INT				= 7
+	--,@BranchId				INT				= NULL	
+	--,@CreateByUser_Code		VARCHAR(20)		= NULL
+	--,@IndexStart			INT				= 0	
+	--,@PageSize				INT				= 50
+	--,@SortField				NVARCHAR(MAX)	= NULL
+	--,@OrderType				NVARCHAR(MAX)	= NULL
+	--,@SearchDetail			NVARCHAR(MAX)	= NULL 
+	--,@IsShowDocumentLink	BIT				= NULL
+	--,@ProductTypeId			INT				= NULL
+	--,@ClaimPayBackTypeId	INT				= 2;
 --==============
 
 DECLARE @pInsCode				VARCHAR(20)		= NULL	/*ถ้าส่ง @InsuranceId จะ set*/
@@ -60,6 +63,8 @@ DECLARE @pProductGroupId		INT				= @ProductGroupId
 DECLARE @pClaimGroupTypeId		INT				= @ClaimGroupTypeId
 DECLARE @pIsValidDoc			BIT				= @IsShowDocumentLink
 DECLARE @pCreatedByCode			VARCHAR(20)		= @CreateByUser_Code
+DECLARE @pProductTypeId			INT				= @ProductTypeId
+DECLARE @pClaimPayBackTypeId	INT				= @ClaimPayBackTypeId
 
 DECLARE @pIndexStart			INT				= @IndexStart
 DECLARE @pPageSize				INT				= @PageSize
@@ -274,7 +279,7 @@ ELSE IF @pProductGroupId = 2 AND @pClaimGroupTypeId IN (2,3,4,6)
 				,v.PaySS_Total												amount
 				,@pClaimGroupTypeId											ClaimGroupTypeId
 				,0															TransferAmount
-				,mtg.Detail														ProductTypeDetail
+				,mtg.Detail													ProductTypeDetail
 
 		FROM sss.dbo.DB_ClaimHeaderGroupItem i			WITH (NOLOCK)
 			INNER JOIN SSS.dbo.DB_ClaimHeaderGroup g	WITH (NOLOCK)
@@ -473,7 +478,7 @@ ELSE IF @pProductGroupId IN (4,11) AND @pClaimGroupTypeId = 7
 				,ISNULL(cm.PayAmount, 0) 									amount 
 				,@pClaimGroupTypeId											ClaimGroupTypeId
 				,NULL														TransferAmount
-				,pt.ProductTypeDetail										ProductTypeDetail
+				,IIF(@pProductGroupId = 4,cpbType.ClaimPaymentTypeName,pt.ProductTypeDetail)	ProductTypeDetail
 		FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
 			LEFT JOIN [DataCenterV1].[Product].[ProductGroup] pd
 				ON cm.ProductGroupId = pd.ProductGroup_ID
@@ -485,6 +490,18 @@ ELSE IF @pProductGroupId IN (4,11) AND @pClaimGroupTypeId = 7
 				ON cm.BranchId = b.Branch_ID
 			LEFT JOIN [DataCenterV1].[Product].[ProductType] pt
 				ON cm.ProductTypeId = pt.ProductType_ID
+			 LEFT JOIN (
+				SELECT 
+				 h.ClaimMiscId
+				 ,cp.ClaimPaymentTypeId
+				 ,cp.ClaimPaymentTypeName
+				FROM [ClaimMiscellaneous].[misc].[ClaimMiscPaymentHeader] h
+				 LEFT JOIN [ClaimMiscellaneous].[misc].[ClaimMiscPayment] p
+				  ON h.ClaimMiscPaymentHeaderId = p.ClaimMiscPaymentHeaderId
+				 LEFT JOIN [ClaimMiscellaneous].[misc].[ClaimPaymentType] cp
+				  ON cp.ClaimPaymentTypeId = p.ClaimPaymentTypeId
+				 ) cpbType
+			  ON cm.ClaimMiscId = cpbType.ClaimMiscId
 		WHERE cm.IsActive = 1  
 			AND cm.ClaimMiscStatusId = 3  
 			AND cm.ClaimHeaderGroupCode IS NOT NULL
@@ -499,9 +516,9 @@ ELSE IF @pProductGroupId IN (4,11) AND @pClaimGroupTypeId = 7
 					@pProductGroupId = 4
 					AND 
 						(
-							(@ProductTypeId IS NOT NULL AND cm.ProductTypeId = @ProductTypeId)
+							(@pClaimPayBackTypeId IS NOT NULL AND cpbType.ClaimPaymentTypeId = @pClaimPayBackTypeId)
 							OR
-							(@ProductTypeId IS NULL AND cm.ProductTypeId = 7)
+							(@pClaimPayBackTypeId IS NULL AND cm.ProductTypeId = 11)
 						)
 				)
 				OR
@@ -509,9 +526,9 @@ ELSE IF @pProductGroupId IN (4,11) AND @pClaimGroupTypeId = 7
 					@pProductGroupId = 11 
 					AND
 						(
-							(@ProductTypeId IS NOT NULL AND cm.ProductTypeId = @ProductTypeId)
+							(@pProductTypeId IS NOT NULL AND cm.ProductTypeId = @pProductTypeId)
 							OR
-							(@ProductTypeId IS NULL AND cm.ProductTypeId IN (10,27,38,41,42,32,33))
+							(@pProductTypeId IS NULL AND cm.ProductTypeId IN (10,27,38,41,42,32,33))
 						)
 				)
 			) 
