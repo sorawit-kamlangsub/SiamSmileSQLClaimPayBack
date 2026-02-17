@@ -478,7 +478,7 @@ GO
                                   ,BranchId
                                   ,InsId
                                   ,GroupId
-								  ,ClaimPaymentTypeId
+								  ,ISNULL(ClaimPaymentTypeId,3)	ClaimPaymentTypeId
                         FROM #TmpX2
                         GROUP BY ClaimHeaderGroupCode
                                         ,ClaimGroupTypeId
