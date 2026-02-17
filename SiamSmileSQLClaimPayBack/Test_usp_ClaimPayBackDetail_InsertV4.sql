@@ -81,7 +81,8 @@ GO
 		CustomerName NVARCHAR(255),
 		AdmitDate DATETIME,
 		SchoolName NVARCHAR(255),
-		GroupId INT
+		GroupId INT,
+		ClaimPaymentTypeId INT
 	);
 
 	DECLARE @TmpGroup TABLE (
@@ -104,7 +105,8 @@ GO
 		ClaimOnLineCode VARCHAR(20),
 		hId INT,
 		HospitalCode VARCHAR(20),
-		GroupId INT
+		GroupId INT,
+		ClaimPaymentTypeId INT
 	);
 
 ----------------Kittisak.Ph 2024-04-05-------------------------------------------
@@ -170,6 +172,7 @@ GO
 				  ,	AdmitDate
 				  ,	SchoolName 
 				  , GroupId 
+				  , ClaimPaymentTypeId
 				)
 				SELECT ccg.ClaimCompensateGroupCode	ClaimHeaderGroupCode
 					, @ProductGroupId				ProductGroupId
@@ -193,7 +196,8 @@ GO
 					, NULL
 					, NULL
 					, NULL
-					,1		--GroupId
+					,1		GroupId
+					,3		ClaimPaymentTypeId
 				FROM sss.dbo.ClaimCompensate cc
 				INNER JOIN sss.dbo.ClaimCompensateGroup ccg
 					ON cc.ClaimCompensateGroupId = ccg.ClaimCompensateGroupId
@@ -245,6 +249,7 @@ GO
 				  , hId
 				  , HospitalCode
 				  ,GroupId
+				  ,ClaimPaymentTypeId
 				)
 				SELECT g.ClaimHeaderGroupCode
 					, g.ClaimGroupTypeId
@@ -256,7 +261,8 @@ GO
 					, s.ClaimOnLineCode
 					, ROW_NUMBER() OVER(ORDER BY (g.ClaimHeaderGroupCode) asc ) hId
 					, g.HospitalCode
-					,1
+					,1	GroupId
+					,3	ClaimPaymentTypeId
 				FROM
 					(
 						SELECT ClaimHeaderGroupCode
@@ -315,6 +321,7 @@ GO
                           , AdmitDate
                           , SchoolName
                           , GroupId
+						  , ClaimPaymentTypeId
                         )
                         SELECT
                                 cm.ClaimHeaderGroupCode
@@ -341,6 +348,7 @@ GO
                                 ,cm.DateIn					AdmitDate
                                 ,NULL						SchoolName
                                 ,1							GroupId
+								,cpbType.ClaimPaymentTypeId	ClaimPaymentTypeId
                         FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
                                 LEFT JOIN [DataCenterV1].[Product].[ProductGroup] pd
                                         ON cm.ProductGroupId = pd.ProductGroup_ID
@@ -393,6 +401,18 @@ GO
 									WHERE IsActive = 1
 								) ins
 									ON ins.OrganizeCode = cm.InsuranceCompanyCode
+								 LEFT JOIN (
+									SELECT DISTINCT
+									 h.ClaimMiscId
+									 ,cp.ClaimPaymentTypeId
+									 ,cp.ClaimPaymentTypeName
+									FROM [ClaimMiscellaneous].[misc].[ClaimMiscPaymentHeader] h
+									 LEFT JOIN [ClaimMiscellaneous].[misc].[ClaimMiscPayment] p
+									  ON h.ClaimMiscPaymentHeaderId = p.ClaimMiscPaymentHeaderId
+									 LEFT JOIN [ClaimMiscellaneous].[misc].[ClaimPaymentType] cp
+									  ON cp.ClaimPaymentTypeId = p.ClaimPaymentTypeId
+									 ) cpbType
+								  ON cm.ClaimMiscId = cpbType.ClaimMiscId
 									
                         WHERE cm.IsActive = 1                                        
                         SELECT x.ClaimHeaderGroupCode
@@ -405,6 +425,7 @@ GO
                                   ,x.ClaimCode
                                   ,x.ClaimOnLineCode
                                   ,1					GroupId
+								  ,ClaimPaymentTypeId
                         INTO #TmpX2
                         FROM @TmpD x
                         INSERT INTO @TmpGroup
@@ -434,7 +455,8 @@ GO
                           , ClaimOnLineCode
                           , hId
                           , HospitalCode
-                          ,GroupId
+                          , GroupId
+						  , ClaimPaymentTypeId
                         )
                         SELECT g.ClaimHeaderGroupCode
                                   ,g.ClaimGroupTypeId
@@ -447,6 +469,7 @@ GO
                                   ,ROW_NUMBER() OVER(ORDER BY (g.ClaimHeaderGroupCode) asc ) hId
                                   ,s.HospitalCode
                                   ,GroupId
+								  ,ClaimPaymentTypeId
                         FROM
                         (
                         SELECT ClaimHeaderGroupCode
@@ -455,6 +478,7 @@ GO
                                   ,BranchId
                                   ,InsId
                                   ,GroupId
+								  ,ClaimPaymentTypeId
                         FROM #TmpX2
                         GROUP BY ClaimHeaderGroupCode
                                         ,ClaimGroupTypeId
@@ -462,6 +486,7 @@ GO
                                         ,BranchId
                                         ,InsId
                                         ,GroupId
+										,ClaimPaymentTypeId
                         )g
                         LEFT JOIN
                                 (
@@ -474,6 +499,7 @@ GO
                                         GROUP BY ClaimHeaderGroupCode, HospitalCode
                                 )s
                                 ON g.ClaimHeaderGroupCode = s.ClaimHeaderGroupCode
+					
 			END
 		ELSE
 			BEGIN
@@ -567,7 +593,8 @@ GO
 				  , CustomerName
 				  ,	AdmitDate
 				  ,	SchoolName 
-				  ,GroupId
+				  , GroupId
+				  , ClaimPaymentTypeId
 				)
 				SELECT d.ClaimHeaderGroupCode
 					  ,d.ProductGroupId
@@ -593,6 +620,7 @@ GO
 					  ,d.AdmitDate
 					  ,d.SchoolName 
 					  ,d.GroupId
+					  ,d.ClaimPaymentTypeId
 				FROM
 				(
 					SELECT 
@@ -625,6 +653,7 @@ GO
 							,CASE WHEN lst.InsCode = @InsuranceCompanyCode AND cl.CreatedDate >= @SMICutOffDate  THEN 2
 								  --WHEN lst.InsCode =@InsuranceCompanyCode AND @ClaimGroupTypeId =4 THEN 2 AND @ClaimGroupTypeId = 2
 							ELSE 1 END AS GroupId
+							,3	ClaimPaymentTypeId
 					FROM sss.dbo.DB_ClaimHeader cl
 						INNER JOIN sss.dbo.DB_ClaimVoucher cv
 							ON cl.Code = cv.Code
@@ -692,6 +721,7 @@ GO
 							,CASE WHEN lst.InsCode =@InsuranceCompanyCode AND cl.CreatedDate >= @SMICutOffDate   THEN 2
 								  -- WHEN lst.InsCode =@InsuranceCompanyCode AND @ClaimGroupTypeId = 4 THEN 2 AND @ClaimGroupTypeId = 2
 							ELSE 1 END AS GroupId
+							,3	ClaimPaymentTypeId
 					FROM SSSPA.dbo.DB_ClaimHeader cl
 						INNER JOIN 
 							(
@@ -785,6 +815,7 @@ GO
 						  , hId
 						  , HospitalCode
 						  ,GroupId
+						  ,ClaimPaymentTypeId
 						)
 						SELECT g.ClaimHeaderGroupCode
 							  ,g.ClaimGroupTypeId
@@ -797,6 +828,7 @@ GO
 							  ,ROW_NUMBER() OVER(ORDER BY (g.ClaimHeaderGroupCode) asc ) hId
 							  ,s.HospitalCode
 							  ,GroupId
+							  ,3	ClaimPaymentTypeId
 						FROM
 						(
 						SELECT ClaimHeaderGroupCode
@@ -839,6 +871,7 @@ GO
 					  , ClaimOnLineCode
 					  , hId
 					  ,GroupId
+					  ,ClaimPaymentTypeId
 					)
 					SELECT g.ClaimHeaderGroupCode
 						  ,g.ClaimGroupTypeId
@@ -850,6 +883,7 @@ GO
 						  ,s.ClaimOnLineCode
 						  ,ROW_NUMBER() OVER(ORDER BY (g.ClaimHeaderGroupCode) asc ) hId
 						  ,GroupId
+						  ,3	ClaimPaymentTypeId
 					FROM
 					(
 					SELECT ClaimHeaderGroupCode
@@ -1075,6 +1109,7 @@ GO
 				--		,UpdatedDate
 				--		,ClaimOnLineCode
 				--		,HospitalCode
+				--		,ClaimPaymentTypeId
 				--		)
 				--OUTPUT Inserted.ClaimGroupCode,Inserted.ClaimPayBackDetailId,Inserted.ClaimPayBackId,Inserted.InsuranceCompanyId INTO @TmpOutD (ClaimHeaderGroupCode,cdId,ClaimPayBackId,InsuranceCompanyId)
 				SELECT	
@@ -1093,6 +1128,7 @@ GO
 						,@D							UpdatedDate
 						,h.ClaimOnLineCode
 						,h.HospitalCode
+						,h.ClaimPaymentTypeId
 				FROM @TmpH h
 					LEFT JOIN @TmpOutGroup o
 						ON h.ClaimGroupTypeId = o.ClaimGroupTypeId
