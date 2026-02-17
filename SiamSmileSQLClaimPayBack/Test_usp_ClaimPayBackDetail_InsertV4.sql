@@ -36,8 +36,8 @@ GO
 
 	-- Start Test --
 	DECLARE
-	@ClaimGroupCodeList		NVARCHAR(MAX) = 'CHCMO52169010001'
-	  , @ProductGroupId			INT = 11
+	@ClaimGroupCodeList		NVARCHAR(MAX) = 'c'
+	  , @ProductGroupId			INT = 4
 	  , @ClaimGroupTypeId		INT = 7
 	  , @CreatedByUserId		INT = 1; 
 	-- End Test --
