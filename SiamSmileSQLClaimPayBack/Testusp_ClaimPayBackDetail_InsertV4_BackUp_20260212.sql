@@ -1,4 +1,4 @@
-USE [ClaimPayBack]
+﻿USE [ClaimPayBack]
 GO
 /****** Object:  StoredProcedure [Claim].[usp_ClaimPayBackDetail_InsertV4_BackUp_20260212]    Script Date: 17/2/2569 11:12:51 ******/
 --SET ANSI_NULLS ON
@@ -7,10 +7,10 @@ GO
 --GO
 
 -- =============================================
--- Author:		Kittisak.Ph (��ҧ�ԧ usp_ClaimPayBackDetail_InsertV3)
--- Description:	Add ClaimHospital and ClaimCompensate �ѹ�֡����ԡ���
+-- Author:		Kittisak.Ph (อ้างอิง usp_ClaimPayBackDetail_InsertV3)
+-- Description:	Add ClaimHospital and ClaimCompensate บันทึกตั้งเบิกเคลม
 -- Create date: 2024-10-09
--- Update date: 2025-02-26 �����示ѹ�֡ʶҹ��觵���ԡ੾������͹�Ź� 
+-- Update date: 2025-02-26 เพิ่มเช็คบันทึกสถานะส่งตั้งเบิกเฉพาะเคลมออนไลน์ 
 -- Update date: 2025-08-11 Krekpon.D 
 -- Description: ClaimGroupType 6 When is PA
 -- Update date: 2025-09-02 08:57 Bunchuai Chaiket
@@ -21,8 +21,8 @@ GO
 -- Description: Add ClaimMisc
 -- Update date: 2025-11-06 Kittisak.Ph Add RoundNumber to ClaimWithdrawal
 -- Update date: 2025-11-27 Sorawit Kamlangsub Add ClaimMisc
--- Update date: 2025-12-4 Sorawit Kamlangsub ��� @TmpD ������Ҵ Field ProductCode �ҡ 20 �� 255
--- Update date: 2025-12-9 Sorawit Kamlangsub ��� ClaimMisc ���� Left Join DataCenterV1 ���� cm.InsCode ��� Organize_Id ����� InsId
+-- Update date: 2025-12-4 Sorawit Kamlangsub แก้ไข @TmpD เพิ่มขนาด Field ProductCode จาก 20 เป็น 255
+-- Update date: 2025-12-9 Sorawit Kamlangsub แก้ไข ClaimMisc เพิ่ม Left Join DataCenterV1 ด้วย cm.InsCode เอา Organize_Id มาเก็บใน InsId
 -- =============================================
 --ALTER PROCEDURE [Claim].[usp_ClaimPayBackDetail_InsertV4_BackUp_20260212]
 DECLARE
@@ -598,8 +598,8 @@ DECLARE
 							,lst.InsId
 							,lst.ClaimCode
 							--,(ISNULL(cv.Pay,0) + ISNULL(cv.Compensate_net,0) ) Amount
-							--,IIF(ISNULL(cv.net,0) <> 0 ,ISNULL(cv.Pay_Total,0),ISNULL(cv.Compensate_net,0))  Amount  --���͹�� ��.  ��Ѻ����͡����͹ ��. �͹�����Ѻ����������
-							,ISNULL(cv.PaySS_Total,0)   Amount  -- ����¹��� PaySS_Total ����ѡ��ǹŴ���� 20231227
+							--,IIF(ISNULL(cv.net,0) <> 0 ,ISNULL(cv.Pay_Total,0),ISNULL(cv.Compensate_net,0))  Amount  --เงื่อนไขใน บส.  ปรับให้ออกเหมือน บส. คอนเฟริมกับพี่โบว์แล้ว
+							,ISNULL(cv.PaySS_Total,0)   Amount  -- เปลี่ยนไปใช้ PaySS_Total รวมหักส่วนลดแล้ว 20231227
 							,cl.Product_id				ProductCode
 							,p.Detail					[Product]
 							,cl.Hospital_id				HospitalCode
@@ -762,7 +762,7 @@ DECLARE
 							ON  h.ClaimGroupTypeId = s.ClaimGroupTypeId
 								AND h.BranchId = s.BranchId;	
 	
-			--����͹�Ź� ����ͧ save HospitalCode Update --2023-12-12
+			--เคลมออนไลน์ ไม่ต้อง save HospitalCode Update --2023-12-12
 			IF @ClaimGroupTypeId <> 2
 				BEGIN
 					    INSERT INTO @TmpH
@@ -934,7 +934,7 @@ DECLARE
 
 
 ----------------Kittisak.Ph 2024-04-05-------------------------------------------
-	--����͹�Ź�
+	--เคลมออนไลน์
 	IF @ClaimGroupTypeId = 2				--Update Chanadol 2025-02-26 
 	BEGIN
 
@@ -957,7 +957,7 @@ DECLARE
 	SET @startNumber = ISNULL(@lastNumber, 0) + 1;
 	--SELECT @startNumber
 		
-		--��Ѻ IsActive ��¡�÷���觵���ԡ���駡�͹ 2025-11-12 By Kittisak.Ph
+		--ปรับ IsActive รายการที่ส่งตั้งเบิกครั้งก่อน 2025-11-12 By Kittisak.Ph
 		SELECT *
 		--UPDATE cwd
 		--SET cwd.IsActive=0
@@ -1145,7 +1145,7 @@ DECLARE
 				ORDER BY o.cdId;
 	
 ----------------Kittisak.Ph 2024-04-05-------------------------------------------
---�ѹ�֡ʶҹ��觵���ԡ੾������͹�Ź� 
+--บันทึกสถานะส่งตั้งเบิกเฉพาะเคลมออนไลน์ 
 	IF @ClaimGroupTypeId = 2				--Update Kittisak.Ph 2025-02-25 
 	BEGIN
 
@@ -1256,7 +1256,7 @@ DECLARE
 -----------------------------------------------------------------------------------------------------------
 
 			SET @IsResult	= 1;
-			SET @Msg		= '�ѹ�֡ �����';
+			SET @Msg		= 'บันทึก สำเร็จ';
 	
 			COMMIT TRANSACTION
 		END TRY
@@ -1290,7 +1290,7 @@ DECLARE
 		,txc.ClaimCode
 		,txc.ClaimPay
 		,5 AS ReceiveTypeId
-		,9 AS TransferTypeId ----SMI �͹����١���
+		,9 AS TransferTypeId ----SMI โอนให้ลูกค้า
 		,tod.InsuranceCompanyId
 		,@CreatedByUserId AS UpdatedByUserId		
 		,@D AS UpdatedDate 
