@@ -49,6 +49,8 @@ GO
 -- Description:	ปรับเงื่อนไขการแสดงข้อมูลเคลม MISC ให้ไม่แสดง ธนาคาร,ชื่อบัญชี,เลขที่
 -- Update date: 2026-01-14 14.11 06588 Krekpon.D Mind
 -- Description: ปรับรายการแสดงของการเลือก ProductType
+-- Update date: 2026-02-17 14.11 Sorawit.k
+-- Description: ปรับการค้นหา ClaimMisc Motor
 -- =============================================
 --ALTER PROCEDURE [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]
 --	 @DateFrom			DATE =	NULL
