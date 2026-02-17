@@ -981,7 +981,7 @@ DECLARE
 			,d.Amount ClaimPay
 			,@CreatedByUserId AS ClaimPayBackXClaimCreatedByUserId
 			,@D ClaimPayBackXClaimCreatedDate
-			,(( (@startNumber - 1) + (ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) - 1) ) % @roundAmount) + 1
+			,(( (@startNumber - 1) + (ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) - 1) ) % @roundAmount) + 1	RoundNo
 		FROM @TmpD d
 			INNER JOIN ClaimOnlineV2.dbo.ClaimOnlineItem ci
 				ON d.ClaimCode = ci.ClaimCode
@@ -1035,19 +1035,19 @@ DECLARE
 				--		)
 				--OUTPUT Inserted.ClaimGroupTypeId,Inserted.BranchId,Inserted.ClaimPayBackId,Inserted.GroupId,Inserted.ClaimPayBackCode INTO @TmpOutGroup(ClaimGroupTypeId,BranchId,gId,GroupId,ClaimPayBackCode) --Update Chanadol 20241112
 				SELECT 
-						CONCAT(@g_TransactionCodeControlTypeDetail,@g_YY,@g_MM ,dbo.func_ConvertIntToString((@g_RunningFrom + ig.gId - 1),@g_lenght)) Code
-						,ig.sumPremium
+						CONCAT(@g_TransactionCodeControlTypeDetail,@g_YY,@g_MM ,dbo.func_ConvertIntToString((@g_RunningFrom + ig.gId - 1),@g_lenght)) ClaimPayBackCode
+						,ig.sumPremium	Amount
 						--,2
-						,IIF(ig.GroupId = 2, 5, 2)
+						,IIF(ig.GroupId = 2, 5, 2)	ClaimPayBackStatusId
 						,ig.ClaimGroupTypeId
 						,ig.BranchId
-						,NULL
-						,1
-						,@CreatedByUserId
-						,@D
-						,@CreatedByUserId
-						,@D
-						,ig.GroupId
+						,NULL						ClaimPayBackTransferId
+						,1							IsActive
+						,@CreatedByUserId			CreatedByUserId
+						,@D							CreatedDate
+						,@CreatedByUserId			UpdatedByUserId
+						,@D							UpdatedDate
+						,ig.GroupId					GroupId
 				FROM @TmpGroup ig
 				ORDER BY ig.gId;
 			
@@ -1071,20 +1071,20 @@ DECLARE
 				--		)
 				--OUTPUT Inserted.ClaimGroupCode,Inserted.ClaimPayBackDetailId,Inserted.ClaimPayBackId,Inserted.InsuranceCompanyId INTO @TmpOutD (ClaimHeaderGroupCode,cdId,ClaimPayBackId,InsuranceCompanyId)
 				SELECT	
-						CONCAT(@h_TransactionCodeControlTypeDetail,@h_YY,@h_MM ,dbo.func_ConvertIntToString((@h_RunningFrom + h.hId - 1),@h_lenght)) Code
-						,o.gId
-						,h.ClaimHeaderGroupCode
+						CONCAT(@h_TransactionCodeControlTypeDetail,@h_YY,@h_MM ,dbo.func_ConvertIntToString((@h_RunningFrom + h.hId - 1),@h_lenght)) ClaimPayBackDetailCode
+						,o.gId						ClaimPayBackId
+						,h.ClaimHeaderGroupCode		ClaimGroupCode
 						,h.ItemCount
-						,h.SumAmount
+						,h.SumAmount				Amount
 						,h.ProductGroupId
-						,h.InsId
-						,NULL
-						,1
-						,@CreatedByUserId
-						,@D
-						,@CreatedByUserId
-						,@D
-						,h.ClaimOnLineCode
+						,h.InsId					InsuranceCompanyId
+						,NULL						CancelRemark
+						,1							CreatedByUserId
+						,@CreatedByUserId			CreatedByUserId
+						,@D							CreatedDate
+						,@CreatedByUserId			UpdatedByUserId
+						,@D							UpdatedDate
+						,h.ClaimOnLineCode			
 						,h.HospitalCode
 				FROM @TmpH h
 					LEFT JOIN @TmpOutGroup o
@@ -1117,25 +1117,25 @@ DECLARE
 				--		,AdmitDate
 				--		,SchoolName)
 				--		OUTPUT Inserted.ClaimCode,Inserted.ClaimPayBackXClaimId,Inserted.ClaimPayBackDetailId INTO @TmpOutXClaim (ClaimCode,cxId,cdId) --Kittisak.Ph 2024-04-05
-				SELECT o.cdId
+				SELECT o.cdId					ClaimPayBackDetailId
 						,d.ClaimCode
 						,d.ProductCode
-						,d.[Product]
+						,d.[Product]			ProductName
 						,d.HospitalCode
-						,d.Hospital
+						,d.Hospital				HospitalName
 						,d.ClaimAdmitTypeCode
 						,d.ClaimAdmitType
 						,d.ChiefComplainCode
 						,d.ChiefComplain
 						,d.ICD10Code
 						,d.ICD10
-						,d.Amount
-						,0
-						,1
-						,@CreatedByUserId
-						,@D
-						,@CreatedByUserId
-						,@D
+						,d.Amount				ClaimPay
+						,0						ClaimTransfer
+						,1						IsActive
+						,@CreatedByUserId		CreatedByUserId
+						,@D						CreatedDate
+						,@CreatedByUserId		UpdatedByUserId
+						,@D						UpdatedDate
 						,d.CustomerName				
 						,d.AdmitDate
 						,d.SchoolName
