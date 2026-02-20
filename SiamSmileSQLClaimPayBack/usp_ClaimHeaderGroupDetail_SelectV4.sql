@@ -125,7 +125,7 @@ SELECT Organize_ID		OrganizeId
 		,OrganizeCode	OrganizeCode
 INTO #TmpIns
 FROM DataCenterV1.Organize.Organize WITH (NOLOCK)
-WHERE OrganizeType_ID = 2;
+WHERE OrganizeType_ID IN (2,6);
 
 
 /*Set @pInsCode*/
