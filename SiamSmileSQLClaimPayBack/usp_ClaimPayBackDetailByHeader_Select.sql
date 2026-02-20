@@ -15,6 +15,8 @@ GO
 --				Change left join from DB_ClaimHeaderGroup to DataCenterV1.Organize.Organize for get InsuranceCompany
 -- Update date: Bunchuai Chaiket 2026-01-07 16:14
 --				add temp table #InsuranceType select new ProductGroup
+-- Update date: Bunchuai Chaiket 2026-02-20 10:14
+--				where OrganizeType_ID IN(2,6)
 -- Description:	<Description,,>
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimPayBackDetailByHeader_Select]
