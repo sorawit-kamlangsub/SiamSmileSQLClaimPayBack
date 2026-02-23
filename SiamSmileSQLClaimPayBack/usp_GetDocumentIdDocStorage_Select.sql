@@ -1,6 +1,6 @@
 USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_GetDocumentIdDocStorage_Select]    Script Date: 12/22/2025 11:49:10 AM ******/
+
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -15,6 +15,8 @@ ALTER PROCEDURE [dbo].[usp_GetDocumentIdDocStorage_Select]
 AS
 BEGIN
 	SET NOCOUNT ON;
+
+--DECLARE  @ClaimHeaderGroupCodes NVARCHAR(MAX) =  'ZBMPO88869020001';
 
 	SELECT DISTINCT Element
 	INTO #Tmplst
