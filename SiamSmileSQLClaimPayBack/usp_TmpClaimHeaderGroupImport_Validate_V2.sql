@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_TmpClaimHeaderGroupImport_Validate_V2]    Script Date: 17/12/2568 9:24:03 ******/
+
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -21,6 +21,7 @@ GO
 -- update date: 2025-10-02 10:02 เพิ่ม IsActive ใน LEFT JOIN ClaimHeaderGroupImport
 -- Update date: 2025-10-16 14:01 Clear comment Krekpon.D
 -- Update date: 2025-10-30 09:34 Add ClaimMisc and Clean Script Sorawit kamlangsub
+-- Update date: 2026-02-20 14:20 เพิ่ม Validate กรณีเป็น บ.ส.นั้นเป็นเบิกจ่ายกองทุนม้าลาย
 -- Description:	
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_TmpClaimHeaderGroupImport_Validate_V2]
@@ -305,29 +306,28 @@ IF @IsResult = 1
 						,IIF(t.TotalAmount = 0,N'ไม่มียอดเงินในรายการ บ.ส., ','')
 						,IIF(t.TotalAmount<>ISNULL(c.TotalAmountInDB,0) AND t.ClaimHeaderGroupTypeId = pg.ProductGroupId AND s.ClaimHeaderGroupCode IS NULL,CONCAT(N'ข้อมูลจำนวนเงินรวมไม่ตรงกับในฐานข้อมูล','( ',FORMAT(c.TotalAmountInDB,'N'),'), '),'')
 						,IIF(imd.ClaimCodeInSystem IS NOT NULL AND t.ClaimHeaderGroupCode LIKE '%_0' AND cbd.ClaimGroupCode = t.ClaimHeaderGroupCode AND imd.ClaimHeaderGroupCode = t.ClaimHeaderGroupCode ,N'มีรายการเคลมนี้ในระบบแล้ว, ','') -- Update 2024-02-01 Kittisak.Ph เช็ครายการเคลมซ้ำ ใน บ.ส.เดียวกัน --Update 2024-06-17 Krekpon.Mind เพิ่มเงื่อนไข
-						,IIF(t.ClaimHeaderGroupTypeId <> pg.ProductGroupId ,CONCAT(N'รายการ บ.ส. นี้ ไม่ใช่กลุ่ม', 
-									' ',
-									--IIF(t.ClaimHeaderGroupTypeId = @ClaimHeaderSSS,'PH','PA30')
-									CASE
-										WHEN
-											t.ClaimHeaderGroupTypeId = @ClaimHeaderSSS
-										THEN 'PH'
-										WHEN 
-											t.ClaimHeaderGroupTypeId = @ClaimHeaderSSSPA
-										THEN 
-											'PA30'
-										WHEN 
-											t.ClaimHeaderGroupTypeId = @ClaimMisc
-										THEN 
-											'เบ็ดเตล็ด'
-										ELSE
-											'-'
-									END
-									,N' ตามกลุ่มที่ระบุ, '),'')
+						,IIF(t.ClaimHeaderGroupTypeId <> pg.ProductGroupId ,CONCAT(N'รายการ บ.ส. นี้ ไม่ใช่กลุ่ม'
+						,' '
+						, 
+							CASE
+								WHEN
+									t.ClaimHeaderGroupTypeId = @ClaimHeaderSSS
+								THEN 'PH'
+								WHEN 
+									t.ClaimHeaderGroupTypeId = @ClaimHeaderSSSPA
+								THEN 
+									'PA30'
+								WHEN 
+									t.ClaimHeaderGroupTypeId = @ClaimMisc
+								THEN 
+									'เบ็ดเตล็ด'
+								ELSE
+									'-'
+							END
+							,N' ตามกลุ่มที่ระบุ, '),'')
 						,IIF(doc.CountDoc > 0 ,N'บ.ส. ไม่มีเอกสารแนบ, ','')
 						,IIF(a.ClaimTypeCode = '',N'ไม่ได้ MappingType (H,C), ','')
-
-						--,IIF(c.PolicyNo = '' OR c.PolicyNo IS NULL,'ไม่มีกรมธรรม์ในรายการ บ.ส.','' ) --kittisak.Ph 20250513
+						,IIF(cbd.ClaimPaymentTypeId = 2, N'ตรวจสอบรายการเคลมกองทุนรถม้าลาย','')
 					)ValidateResult
 				---------------------------------------------------------------
 				,IIF(t.ClaimHeaderGroupTypeId = 6 ,'2000',a.ClaimTypeCode)	ClaimTypeCode
@@ -356,8 +356,9 @@ IF @IsResult = 1
 				ON t.ClaimHeaderGroupCode = img.ClaimHeaderGroupCode
 			LEFT JOIN
 				(
-					SELECT  d.ClaimHeaderGroupCodeInDB AS ClaimCodeInSystem
-							,imd.ClaimHeaderGroupCode AS ClaimHeaderGroupCode --Update 2024-06-17 Krekpon.Mind เพิ่มเงื่อนไข
+					SELECT  
+						d.ClaimHeaderGroupCodeInDB AS ClaimCodeInSystem
+						,imd.ClaimHeaderGroupCode AS ClaimHeaderGroupCode --Update 2024-06-17 Krekpon.Mind เพิ่มเงื่อนไข
 					FROM #TmpDetail d
 						INNER JOIN dbo.ClaimHeaderGroupImportDetail imd 
 							ON d.ClaimHeaderCodeInDB = imd.ClaimCode
@@ -389,7 +390,10 @@ IF @IsResult = 1
 				) doc
 				ON t.ClaimHeaderGroupCode = doc.ClaimHeaderGroupCodeInDB
 			-------------------------------------------------------------------	
-			LEFT JOIN [ClaimPayBack].[dbo].[ClaimPayBackDetail] cbd ON cbd.ClaimGroupCode = t.ClaimHeaderGroupCode
+			LEFT JOIN 
+				[ClaimPayBack].[dbo].[ClaimPayBackDetail] cbd 
+				ON cbd.ClaimGroupCode = t.ClaimHeaderGroupCode;
+
 			SELECT @CountIsError = COUNT(ValidateResult)
 			FROM #TmpUpdate
 			WHERE TmpCode = @TmpCode 
@@ -459,14 +463,10 @@ IF OBJECT_ID('tempdb..#TmpClaimType') IS NOT NULL  DROP TABLE #TmpClaimType;
 	END									  					
 										  					
 IF @IsResult = 1	BEGIN	SET @Result = IIF(@CountIsError = 0,1,0) END
-ELSE				BEGIN	SET @Result = 'Failure'END	
-			
-							  								
-            							  					
+ELSE				BEGIN	SET @Result = 'Failure' END	
+										  					
        SELECT @IsResult IsResult		  					
 		,@Result Result					  					
 		,@Msg	 Msg 		
-
-
 
 END
