@@ -8,6 +8,7 @@ GO
 -- =============================================
 -- Author:		Sorawit KamlangSub
 -- Create date: 2025-11-26 15:30
+-- Update date: 2026-02-23 14:22 Remove doctype
 -- Description:	For Get DocStorage Data
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_GetDocumentIdDocStorage_Select]
@@ -16,7 +17,9 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
---DECLARE  @ClaimHeaderGroupCodes NVARCHAR(MAX) =  'ZBMPO88869020001';
+	-- Start Test
+	--DECLARE  @ClaimHeaderGroupCodes NVARCHAR(MAX) =  'ZBMPO88869020001';
+	-- End Test
 
 	SELECT DISTINCT Element
 	INTO #Tmplst
@@ -25,8 +28,8 @@ BEGIN
 	SELECT 
 		CASE 
 			WHEN doc.TbType = 'ClaimMisc' THEN cm.ClaimMiscNo
-			WHEN doc.TbType = 'ClaimOnlineAppCode' AND doc.DocumentSubTypeId = 339 THEN ISNULL(cm.ApplicationCode,'-')
-			WHEN doc.TbType = 'ClaimOnlineDocCode' AND doc.DocumentSubTypeId = 339 THEN doc.DocumentCode
+			WHEN doc.TbType = 'ClaimOnlineAppCode' THEN cm.ApplicationCode
+			WHEN doc.TbType = 'ClaimOnlineDocCode' THEN doc.DocumentCode
 		END MainIndex
 		,cm.ClaimHeaderGroupCode
 		,doc.DocumentId
@@ -39,11 +42,8 @@ BEGIN
 					doc.ClaimMiscId
 					,doc.DocumentId
 					,doc.DocumentCode
-					,doct.DocumentSubTypeId
 					,'ClaimMisc'			TbType
 				FROM [ClaimMiscellaneous].[misc].[Document] doc
-					LEFT JOIN [ClaimMiscellaneous].[misc].[DocumentType] doct
-						ON doct.DocumentTypeId = doc.DocumentTypeId
 				WHERE doc.IsActive = 1
 				AND doc.DocumentTypeId <> 3
 
@@ -53,7 +53,6 @@ BEGIN
 					ClaimMiscId
 					,DocumentId
 					,DocumentCode
-					,DocumentSubTypeId
 					,'ClaimOnlineAppCode'			TbType
 				FROM [ClaimMiscellaneous].[misc].[DocumentClaimOnLine]
 				WHERE IsActive = 1
@@ -65,7 +64,6 @@ BEGIN
 					ClaimMiscId
 					,DocumentId
 					,DocumentCode
-					,DocumentSubTypeId
 					,'ClaimOnlineDocCode'			TbType
 				FROM [ClaimMiscellaneous].[misc].[DocumentClaimOnLine]
 				WHERE IsActive = 1
