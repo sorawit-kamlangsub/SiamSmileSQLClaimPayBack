@@ -1,10 +1,13 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]    Script Date: 24/12/2568 17:00:59 ******/
+
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+
+
+
 
 
 
@@ -42,26 +45,32 @@ GO
 -- Description:	ปรับเงื่อนไขการแสดงข้อมูลเคลมออนไลน์ไม่ให้แสดง ธนาคาร,ชื่อบัญชี,เลขที่
 -- Update date: 2025-12-24 17.07 Sorawit.k
 -- Description:	ปรับเงื่อนไขการแสดงข้อมูลเคลมเบ็ดเตล็ดให้แสดง ธนาคาร,ชื่อบัญชี,เลขที่ เฉพาะ ยิ้มแฉ่ง
+-- Update date: 2026-01-08 10.14 06588 Krekpon.D Mind
+-- Description:	ปรับเงื่อนไขการแสดงข้อมูลเคลม MISC ให้ไม่แสดง ธนาคาร,ชื่อบัญชี,เลขที่
+-- Update date: 2026-01-14 14.11 06588 Krekpon.D Mind
+-- Description: ปรับรายการแสดงของการเลือก ProductType
+-- Update date: 2026-02-17 14.11 Sorawit.k
+-- Description: ปรับการค้นหา ClaimMisc Motor
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]
-	-- Add the parameters for the stored procedure here
 	 @DateFrom			DATE =	NULL
 	,@DateTo			DATE =	NULL
 	,@InsuranceId		INT =	NULL
 	,@ProductGroupId	INT =	NULL
 	,@ClaimGroupTypeId	INT =	NULL
-
 AS
 BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
+-- START TEST
 --DECLARE
---	 @DateFrom			DATE =	'2025-12-19'
---	,@DateTo			DATE =	'2025-12-19'
+--	 @DateFrom			DATE =	'2026-02-16'
+--	,@DateTo			DATE =	'2026-02-17'
 --	,@InsuranceId		INT =	NULL
---	,@ProductGroupId	INT =	NULL
+--	,@ProductGroupId	INT =	4
 --	,@ClaimGroupTypeId	INT =	7;
+-- END Test
 
 DECLARE @TmpClaimPayBack TABLE (
 	 ClaimGroupCodeFromCPBD NVARCHAR(150),
@@ -95,6 +104,36 @@ DECLARE @TmpClaimPayBack TABLE (
 	CREATE INDEX IX_TmpPersonUser_User_ID ON #TmpPersonUser(User_ID);
 	CREATE INDEX IX_TmpPersonUser_Code ON #TmpPersonUser(EmployeeCode);
 
+	SELECT 11	ProductGroupID
+		  ,[ProductType_ID]
+		  ,CASE [ProductType_ID]
+			WHEN  27 THEN N'PA ชุมชน'
+			WHEN  32 THEN N'สไมล์พลัส'
+			WHEN  33 THEN N'ประกันเดินทาง'
+			WHEN  38 THEN N'PA บุคลากร ยิ้มแฉ่ง'
+			WHEN  41 THEN N'PA ครอบครัวอุ่นใจ'
+			WHEN  10 THEN N'ประกันบ้าน'
+			ELSE [ProductTypeDetail]
+		END as Detail
+	INTO #TmpProductClaimMisc
+	FROM [DataCenterV1].[Product].[ProductType]
+	WHERE ProductGroup_ID IN(6,7,9,11)
+		AND ProductType_ID IN (10,11,27,32,33,38,41,42)
+		AND IsActive = 1 
+
+	DECLARE @ProductGroupTB TABLE 
+	(
+		ProductGroupID INT,
+		ProductType_ID INT,
+		ProductGroupDetail NVARCHAR(100)	
+	);
+	INSERT INTO @ProductGroupTB (ProductGroupID,ProductType_ID, ProductGroupDetail)
+	VALUES
+		(1,1, N'รอข้อมูล'),
+		(2,2, N'PH'),
+		(3,3, N'PA'),
+		(4,4, N'Motor');
+
  -- เอาข้อมูลลงใน temp แล้วไป JOIN ต่อกับฝั่ง Base อื่น
  INSERT INTO @TmpClaimPayBack(
       ClaimGroupCodeFromCPBD,
@@ -120,19 +159,52 @@ DECLARE @TmpClaimPayBack TABLE (
 	 pu.PersonName								AS CreatedByUser,
 	 cpbd.HospitalCode							AS HospitalCode
  FROM  ClaimPayBack cpb
-	 LEFT JOIN ClaimPayBackDetail cpbd
-		ON cpb.ClaimPayBackId = cpbd.ClaimPayBackId
-	 LEFT JOIN [DataCenterV1].[Product].ProductGroup dppg
-		ON cpbd.ProductGroupId = dppg.ProductGroup_ID
-	 LEFT JOIN ClaimGroupType cgt
-		ON cpb.ClaimGroupTypeId = cgt.ClaimGroupTypeId
-	 INNER JOIN #TmpPersonUser pu
-		ON pu.User_ID = cpb.CreatedByUserId
+		 LEFT JOIN (
+			SELECT 
+			 ClaimPayBackId
+			 ,ClaimGroupCode
+			 ,ItemCount
+			 ,Amount
+			 ,ClaimOnLineCode
+			 ,HospitalCode
+			 ,ProductGroupId
+			 ,InsuranceCompanyId
+			FROM ClaimPayBackDetail
+			WHERE IsActive = 1
+		 ) cpbd
+			ON cpb.ClaimPayBackId = cpbd.ClaimPayBackId
+		LEFT JOIN [DataCenterV1].[Product].ProductGroup dppg
+			ON cpbd.ProductGroupId = dppg.ProductGroup_ID
+		LEFT JOIN ClaimGroupType cgt
+			ON cpb.ClaimGroupTypeId = cgt.ClaimGroupTypeId
+		INNER JOIN #TmpPersonUser pu
+			ON pu.User_ID = cpb.CreatedByUserId
+ 		LEFT JOIN
+		(
+			SELECT
+				ClaimHeaderGroupCode
+				,ProductGroupId
+				,ProductTypeId
+			FROM [ClaimMiscellaneous].[misc].[ClaimMisc] 
+			WHERE IsActive = 1
+		) cm
+			ON cm.ClaimHeaderGroupCode = cpbd.ClaimGroupCode
+		 LEFT JOIN 
+		 (
+			SELECT
+				* 
+			FROM #TmpProductClaimMisc
+			UNION ALL
+			SELECT
+				*
+			FROM @ProductGroupTB	 
+		 ) pg
+			ON pg.ProductType_ID = cpbd.ProductGroupId
+				OR pg.ProductType_ID = cm.ProductTypeId
  WHERE   cpb.ClaimGroupTypeId = @ClaimGroupTypeId
-	AND cpb.IsActive = 1 
-	AND cpbd.IsActive = 1
+	AND cpb.IsActive = 1
 	AND ((cpb.CreatedDate >= @DateFrom) AND (cpb.CreatedDate < DATEADD(Day,1,@DateTo)))
-    AND (cpbd.ProductGroupId = @ProductGroupId OR @ProductGroupId IS NULL)
+	AND (pg.ProductGroupId = @ProductGroupId OR @ProductGroupId IS NULL)
 	AND (cpbd.InsuranceCompanyId = @InsuranceId OR @InsuranceId IS NULL)
 	 
 	--SELECT เอาไปใช้งาน
@@ -155,24 +227,17 @@ DECLARE @TmpClaimPayBack TABLE (
 				,IIF(@ClaimGroupTypeId IN (2,4,6,7) ,icu.CustomerName,NULL)	CustomerName
 				,CASE 
 					WHEN @ClaimGroupTypeId IN (4,6)							THEN sssmtb.Detail
-					WHEN @ClaimGroupTypeId = 7 AND icu.ProductTypeId = 38	THEN icu.BankName
 					ELSE NULL
 				END												BankName
 				,CASE 
 					WHEN @ClaimGroupTypeId IN (4,6)							THEN sssmtc.BankAccountName
-					WHEN @ClaimGroupTypeId  = 7	AND icu.ProductTypeId = 38	THEN icu.BankAccountName
 					ELSE NULL
 				END												BankAccountName
 				,CASE 
 					WHEN @ClaimGroupTypeId IN (4,6)							THEN REPLACE(sssmtc.BankAccountNo,'-','')
-					WHEN @ClaimGroupTypeId  = 7	AND icu.ProductTypeId = 38	THEN icu.BankAccountNo
 					ELSE NULL
 				END												BankAccountNo
-				,CASE 
-					WHEN @ClaimGroupTypeId IN (4,6)							THEN NULL
-					WHEN @ClaimGroupTypeId  = 7 AND icu.ProductTypeId = 38	THEN icu.PhoneNo
-					ELSE NULL																	
-				END												PhoneNo
+				,NULL											PhoneNo
 				,TmpCPB.CreatedDate								CreatedDate
 				,pu.PersonName									ApprovedUser 
 				,TmpCPB.CreatedByUser							CteatedUser 
@@ -244,9 +309,9 @@ FROM @TmpClaimPayBack TmpCPB
 				,u.EmployeeCode				ApprovedUserFromSSS
 				,cm.CustomerName			CustomerName
 				,cm.ClaimMiscNo				ClaimCode
-				,miscacc.BankAccountName	BankAccountName
-				,miscacc.BankAccountNo		BankAccountNo
-				,miscacc.BankName			BankName
+				,NULL						BankAccountName
+				,NULL						BankAccountNo
+				,NULL						BankName
 				,ce.ContactPersonPhoneNo	PhoneNo
 				,pd.ProductTypeName
 				,pd.ProductTypeId
@@ -274,23 +339,6 @@ FROM @TmpClaimPayBack TmpCPB
 				GROUP BY x.ClaimMiscId
 			) cxa
 				ON cxa.ClaimMiscId = cm.ClaimMiscId
-			LEFT JOIN(
-				SELECT 
-					ch.ClaimMiscId
-					,cp.BankAccountName
-					,cp.BankAccountNo
-					,cp.BankName
-				FROM [ClaimMiscellaneous].[misc].[ClaimMiscPaymentHeader] ch
-					LEFT JOIN [ClaimMiscellaneous].[misc].[ClaimMiscPayment] cp
-						ON ch.ClaimMiscPaymentHeaderId = cp.ClaimMiscPaymentHeaderId
-				WHERE ch.IsActive = 1
-					AND cp.IsActive = 1
-				GROUP BY ch.ClaimMiscId
-					,cp.BankAccountName
-					,cp.BankAccountNo
-					,cp.BankName
-			)miscacc
-				ON cm.ClaimMiscId = miscacc.ClaimMiscId
 			LEFT JOIN [ClaimMiscellaneous].[misc].[ClaimEvent] ce
 				ON cm.ClaimEventId = ce.ClaimEventId
 			LEFT JOIN 
@@ -315,9 +363,9 @@ FROM @TmpClaimPayBack TmpCPB
 	LEFT JOIN SSS.dbo.DB_Address sssadr
 		ON sssmtc.Address_id = sssadr.Code
 	LEFT JOIN SSS.dbo.SM_Province sssmp
-		ON sssadr.Province_id = sssmp.Code
+		ON sssadr.Province_id = sssmp.Code;
 
 IF OBJECT_ID('tempdb..#TmpPersonUser') IS NOT NULL DROP TABLE #TmpPersonUser;
+IF OBJECT_ID('tempdb..#TmpProductClaimMisc') IS NOT NULL DROP TABLE #TmpProductClaimMisc;
 IF OBJECT_ID('tempdb..@TmpClaimPayBack') IS NOT NULL  DELETE FROM @TmpClaimPayBack;   
-
 END;

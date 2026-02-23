@@ -20,6 +20,7 @@ GO
 -- Update date: 20251021 Sorawit.k change to [usp_ClaimHeaderGroupDetail_SelectV5]
 -- Update date: 20261022 Sorawit.k change add Claimmisc
 -- Update date: 20251211 Bunchuai.c เปลี่ยนการ filter ข้อมูลของ ClaimMisc filter ข้อมูลตาม ProductTypeId
+-- Update date: 20260117 Sorawit.k เพิ่ม Left Join ClaimPaymentType
 -- Description:	
 -- =============================================
 ALTER PROCEDURE [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]
@@ -124,7 +125,7 @@ SELECT Organize_ID		OrganizeId
 		,OrganizeCode	OrganizeCode
 INTO #TmpIns
 FROM DataCenterV1.Organize.Organize WITH (NOLOCK)
-WHERE OrganizeType_ID = 2;
+WHERE OrganizeType_ID IN (2,6);
 
 
 /*Set @pInsCode*/

@@ -33,10 +33,19 @@ DECLARE @tmp TABLE
 
 INSERT INTO @tmp
 EXEC [ClaimPayBack].[Claim].[usp_ClaimHeaderGroupDetail_SelectV4]
-        @ProductGroupId = 3,
-        @ClaimGroupTypeId = 4,
-        @IndexStart = 1,
-        @PageSize = 50
+		@ProductGroupId = 11,
+		@InsuranceId = NULL,
+		@ClaimGroupTypeId = 7,
+		@BranchId = NULL,
+		@CreateByUser_Code = NULL,
+		@IndexStart = 0,
+		@PageSize = 20,
+		@SortField = NULL,
+		@OrderType = NULL,
+		@SearchDetail = NULL,
+		@IsShowDocumentLink = NULL,
+		@ProductTypeId = NULL,
+		@ClaimPayBackTypeId = NULL
 
 INSERT INTO @tmpClaimHeaderGroup_id(ClaimHeaderGroup_id)
 SELECT ClaimHeaderGroup_id FROM @tmp
@@ -54,8 +63,8 @@ STUFF
 
 INSERT INTO @tmpValid
 EXEC	[dbo].[usp_ClaimHeaderGroupValidateAmountPay_Select]
-		@ProductGroupId = 3,
-		@ClaimGroupTypeId = 4,
+		@ProductGroupId = 11,
+		@ClaimGroupTypeId = 7,
 		@ClaimHeaderGroupCode = @ClaimHeaderGroup_ids
 
 SELECT
