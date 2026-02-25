@@ -17,6 +17,20 @@
           <ConnectionProtocol>NotSpecified</ConnectionProtocol>
           <ApplicationName>Microsoft SQL Server Management Studio - Query</ApplicationName>
         </ConnectionNode>
+        <ConnectionNode Name="27.254.238.180:devcrud">
+          <Created>2026-02-25T09:33:33.8588406+07:00</Created>
+          <Type>SQL</Type>
+          <Server>27.254.238.180</Server>
+          <UserName>devcrud</UserName>
+          <Authentication>SQL</Authentication>
+          <InitialDB>ClaimPayBack</InitialDB>
+          <LoginTimeout>30</LoginTimeout>
+          <TrustServerCertificate>False</TrustServerCertificate>
+          <EncryptionOption>False</EncryptionOption>
+          <ExecutionTimeout>0</ExecutionTimeout>
+          <ConnectionProtocol>NotSpecified</ConnectionProtocol>
+          <ApplicationName>Microsoft SQL Server Management Studio - Query</ApplicationName>
+        </ConnectionNode>
       </Items>
     </LogicalFolder>
     <LogicalFolder Name="Queries" Type="0" Sorted="true">
@@ -32,6 +46,12 @@
           <AssociatedConnSrvName />
           <AssociatedConnUserName />
           <FullPath>CPBCheckISCSmileDoc.sql</FullPath>
+        </FileNode>
+        <FileNode Name="CPBReport_V1_20260225.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:27.254.238.180:False:devcrud</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>27.254.238.180</AssociatedConnSrvName>
+          <AssociatedConnUserName>devcrud</AssociatedConnUserName>
+          <FullPath>CPBReport_V1_20260225.sql</FullPath>
         </FileNode>
         <FileNode Name="Create_usp_ClaimHeaderGroupImportIsValidated_Select.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
