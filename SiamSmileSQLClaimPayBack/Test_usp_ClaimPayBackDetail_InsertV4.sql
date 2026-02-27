@@ -36,9 +36,9 @@ GO
 
 	-- Start Test --
 	DECLARE
-	@ClaimGroupCodeList		NVARCHAR(MAX) = 'BUHO-811-68110007-0'
-	  , @ProductGroupId			INT = 2
-	  , @ClaimGroupTypeId		INT = 2
+	@ClaimGroupCodeList		NVARCHAR(MAX) = 'CHMPO88869020011'
+	  , @ProductGroupId			INT = 4
+	  , @ClaimGroupTypeId		INT = 7
 	  , @CreatedByUserId		INT = 1; 
 	-- End Test --
 	
