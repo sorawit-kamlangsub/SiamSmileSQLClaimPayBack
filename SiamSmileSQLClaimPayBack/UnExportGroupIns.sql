@@ -1,4 +1,4 @@
-USE [ClaimPayBack]
+ÔªøUSE [ClaimPayBack]
 GO
 
 DECLARE 
@@ -10,7 +10,7 @@ DECLARE
     @UserId    INT       = @UpdatedByUserId;
 
 ------------------------------------------------
--- 1) ‡µ√’¬¡ List ¢Õß BillingRequestGroupCode
+-- 1) ‡πÄ‡∏ï‡∏£‡∏µ‡∏¢‡∏° List ‡∏Ç‡∏≠‡∏á BillingRequestGroupCode
 ------------------------------------------------
 DECLARE @GroupCodes TABLE (
     RowNo INT IDENTITY(1,1),
@@ -23,7 +23,7 @@ VALUES
 ;
 
 ------------------------------------------------
--- 2) Loop ∑’≈– Code
+-- 2) Loop ‡∏ó‡∏µ‡∏•‡∏∞ Code
 ------------------------------------------------
 DECLARE 
     @i INT = 1,
@@ -97,7 +97,7 @@ BEGIN
     --      ,[CreatedDate])
     --SELECT 
     --	ci.ClaimHeaderGroupImportId	  ClaimHeaderGroupImportId
-    --	,'¬°‡≈‘° Generate Group ‚¥¬√–∫∫' CancelDetail
+    --	,'‡∏¢‡∏Å‡πÄ‡∏•‡∏¥‡∏Å Generate Group ‡πÇ‡∏î‡∏¢‡∏£‡∏∞‡∏ö‡∏ö' CancelDetail
     --	,1							  IsActive
     --	,@UserId					  CreatedByUserId
     --	,@D2						  CreatedDate
