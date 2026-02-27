@@ -2,7 +2,7 @@ USE [ClaimPayBack]
 GO
 
 DECLARE 
-    @NewBillingDate        DATE = '2026-01-20',
+    @NewBillingDate        DATE = '2026-02-27',
     @UpdatedByUserId       INT  = 6772;
 
 DECLARE 
@@ -19,10 +19,7 @@ DECLARE @GroupCodes TABLE (
 
 INSERT INTO @GroupCodes (BillingRequestGroupCode)
 VALUES 
-('BQGFA02B6901011'),
-('BQGHM04B6901014'),
-('BQGSP04B6901015')
-
+('BQGPA39H6901005')
 ;
 
 ------------------------------------------------
@@ -90,14 +87,22 @@ BEGIN
     FROM dbo.BillingRequestItem bi
     WHERE bi.BillingRequestGroupId = @BillingRequestGroupId;
 
+    --Insert ClaimHeaderGroupImportCancel
     ------------------------------------------------
-    -- Deactivate ClaimHeaderGroupImportCancel
-    ------------------------------------------------
-    UPDATE gc
-    SET gc.IsActive = 0
-    FROM dbo.ClaimHeaderGroupImportCancel gc
-    WHERE gc.ClaimHeaderGroupImportId = @ClaimHeaderGroupImportId;
-
+    --INSERT INTO [dbo].[ClaimHeaderGroupImportCancel]
+    --      ([ClaimHeaderGroupImportId]
+    --      ,[CancelDetail]
+    --      ,[IsActive]
+    --      ,[CreatedByUserId]
+    --      ,[CreatedDate])
+    --SELECT 
+    --	ci.ClaimHeaderGroupImportId	  ClaimHeaderGroupImportId
+    --	,'ยกเลิก Generate Group โดยระบบ' CancelDetail
+    --	,1							  IsActive
+    --	,@UserId					  CreatedByUserId
+    --	,@D2						  CreatedDate
+    --FROM dbo.ClaimHeaderGroupImport ci
+    --WHERE ci.ClaimHeaderGroupImportId = @ClaimHeaderGroupImportId;
 
 
     SET @i += 1;
