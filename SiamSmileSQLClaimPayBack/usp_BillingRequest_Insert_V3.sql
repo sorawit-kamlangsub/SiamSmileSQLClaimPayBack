@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Insert_V3]    Script Date: 16/1/2569 10:45:15 ******/
+
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -141,7 +141,9 @@ WHILE ( @intFlag <= @max )
 				AND		i.IsActive = 1
 				AND		i.ClaimHeaderGroupImportStatusId = 2
 				AND		i.BillingRequestGroupId IS NULL
-				AND		i.BillingDate <= @BillingDateTo		
+				--AND		i.BillingDate <= @BillingDateTo
+				AND		i.CreatedDate >	@CreatedDateFrom
+				AND		i.CreatedDate <=  @CreatedDateTo
 				GROUP BY cm.ProductTypeId,cm.ProductTypeShortName,i.ClaimTypeCode
 
 				SELECT	@maxInput = MAX(RwId)
@@ -194,6 +196,7 @@ WHILE ( @intFlag <= @max )
 							,@ClaimHeaderGroupTypeId
 							,@InsuranceCompanyName
 		*/
+		/*Con*/
 				EXECUTE [dbo].[usp_BillingRequest_Sub01_Insert_V2] 
 									@GroupTypeId
 									,@ClaimTypeCode
@@ -239,7 +242,7 @@ BEGIN
 END	
 ELSE
 BEGIN
-	SET @Result = 'Failure';
+	SET @Result = 'Failure' + ERROR_MESSAGE();
 END;	
 
 SELECT @IsResult IsResult
