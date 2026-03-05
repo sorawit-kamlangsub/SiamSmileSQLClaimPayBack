@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Insert_V3]    Script Date: 30/10/2568 16:59:23 ******/
+
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -19,16 +19,22 @@ GO
 -- Description:
 -- =============================================
 --ALTER PROCEDURE [dbo].[usp_BillingRequest_Insert_V3]
-DECLARE
-		@CreatedByUserId	INT	 = 1
-		,@BillingDateTo		DATE = '2026-01-19'
-		,@CreatedDateFrom	DATE = '2026-01-19'
-		,@CreatedDateTo		DATE = '2026-01-19'
+--		@CreatedByUserId	INT	 
+--		,@BillingDateTo		DATE 
+--		,@CreatedDateFrom	DATE 
+--		,@CreatedDateTo		DATE 
 
 --AS
 --BEGIN
 --	SET NOCOUNT ON;
 
+-- Test Zone
+DECLARE
+		@CreatedByUserId	INT	 = 1
+		,@BillingDateTo		DATE = '2026-03-07'
+		,@CreatedDateFrom	DATE = '2026-03-04'
+		,@CreatedDateTo		DATE = '2026-03-05'
+-- End Test
 
 DECLARE @IsResult	BIT			 = 1;
 DECLARE @Result		VARCHAR(100) = '';
@@ -67,8 +73,8 @@ FROM
 			AND		i.IsActive = 1
 			AND		i.ClaimHeaderGroupImportStatusId = 2
 			AND		i.BillingRequestGroupId IS NULL
-			AND		i.CreatedDate >	@CreatedDateFrom
-			AND		i.CreatedDate <=  @CreatedDateTo
+			AND		i.CreatedDate >=	@CreatedDateFrom
+			AND		i.CreatedDate <  @CreatedDateTo
 		) AS g
 WHERE	g.GroupTypeId IS NOT NULL	
 GROUP BY	g.InsuranceCompanyId
@@ -79,15 +85,14 @@ GROUP BY	g.InsuranceCompanyId
 			,g.InsuranceCompanyName;
 
 DECLARE @TmpResult TABLE (IsResult BIT, Result VARCHAR(100), Msg NVARCHAR(MAX));
-DECLARE @TmpInput TABLE (RwId INT,ClaimTypeCode VARCHAR(100),ProductTypeId INT,ProductTypeShortName VARCHAR(100));
+DECLARE @TmpInput TABLE (RwId INT,ClaimTypeCode VARCHAR(20),ProductTypeId INT,ProductTypeShortName VARCHAR(20),CreatedDate DATETIME);
+
+SELECT * FROM #TmpLoop
 
 --WHILE Loop---------------------------------
 DECLARE @max INT;
 
 SELECT	@max = MAX(rwId)
-FROM	#TmpLoop;
-
-SELECT	*
 FROM	#TmpLoop;
 
 IF (@max IS NULL) SET @max = 0;
@@ -145,8 +150,9 @@ WHILE ( @intFlag <= @max )
 				AND		i.IsActive = 1
 				AND		i.ClaimHeaderGroupImportStatusId = 2
 				AND		i.BillingRequestGroupId IS NULL
-				AND		i.BillingDate <= @BillingDateTo		
-				GROUP BY cm.ProductTypeId,cm.ProductTypeShortName,i.ClaimTypeCode
+				AND		i.CreatedDate >=	@CreatedDateFrom
+				AND		i.CreatedDate <  @CreatedDateTo
+				GROUP BY cm.ProductTypeId,cm.ProductTypeShortName,i.ClaimTypeCode,i.CreatedDate
 
 				SELECT	@maxInput = MAX(RwId)
 				FROM	@TmpInput;
@@ -166,6 +172,7 @@ WHILE ( @intFlag <= @max )
 
 						SET @inputFlag = @inputFlag + 1;
 
+					-- Test Zone
 						PRINT '@GroupTypeId INT = ' + ISNULL(CAST(@GroupTypeId AS varchar(10)), 'NULL');
 						PRINT ',@ClaimTypeCode VARCHAR(20) = ' + 
 							  CASE WHEN @ClaimTypeCode IS NULL 
@@ -208,7 +215,7 @@ WHILE ( @intFlag <= @max )
 								   ELSE '''' + CAST(@ProductTypeShortName AS varchar(20)) + '''' END;
 
 						PRINT ',@ProductTypeId INT = ' + ISNULL(CAST(@ProductTypeId AS varchar(10)), 'NULL');
-
+					-- End Test
 
 					--INSERT INTO @TmpResult ( IsResult, Result, Msg)
 					--EXECUTE [dbo].[usp_BillingRequest_ClaimMisc_Insert] 
@@ -224,13 +231,26 @@ WHILE ( @intFlag <= @max )
 					--					,@CreatedDateTo
 					--					,@ProductTypeShortName
 					--					,@ProductTypeId				
-	
+
 					END
 				
 			END
 		ELSE
 			BEGIN
 
+		/* Original
+				INSERT INTO @TmpResult ( IsResult, Result, Msg)
+				EXECUTE [dbo].[usp_BillingRequest_Sub01_Insert] 
+							@GroupTypeId
+							,@ClaimTypeCode
+							,@InsuranceCompanyId
+							,@CreatedByUserId
+							,@BillingDate 
+							,@ClaimHeaderGroupTypeId
+							,@InsuranceCompanyName
+		*/
+
+		-- Test Zone
 			PRINT '@GroupTypeId INT = ' + ISNULL(CAST(@GroupTypeId AS varchar(10)), 'NULL');
 			PRINT ',@ClaimTypeCode VARCHAR(20) = ' + 
 				  CASE WHEN @ClaimTypeCode IS NULL 
@@ -273,20 +293,11 @@ WHILE ( @intFlag <= @max )
 					   ELSE '''' + CAST(@ProductTypeShortName AS varchar(20)) + '''' END;
 
 			PRINT ',@ProductTypeId INT = ' + ISNULL(CAST(@ProductTypeId AS varchar(10)), 'NULL');
+		-- End Test
 
 
+		/*Con*/
 				--INSERT INTO @TmpResult ( IsResult, Result, Msg)
-
-		/* Original
-				EXECUTE [dbo].[usp_BillingRequest_Sub01_Insert] 
-							@GroupTypeId
-							,@ClaimTypeCode
-							,@InsuranceCompanyId
-							,@CreatedByUserId
-							,@BillingDate 
-							,@ClaimHeaderGroupTypeId
-							,@InsuranceCompanyName
-		*/
 				--EXECUTE [dbo].[usp_BillingRequest_Sub01_Insert_V2] 
 				--					@GroupTypeId
 				--					,@ClaimTypeCode
@@ -298,14 +309,11 @@ WHILE ( @intFlag <= @max )
 				--					,@BillingDateTo
 				--					,@CreatedDateFrom
 				--					,@CreatedDateTo
-
 			END;
 		------------------------------
         SET @intFlag = @intFlag + 1;
     END;
 ---------------------------------------------
-
-SELECT * FROM @TmpInput
 
 IF OBJECT_ID('tempdb..#TmpLoop') IS NOT NULL  DROP TABLE #TmpLoop;	
 
@@ -343,5 +351,3 @@ SELECT @IsResult IsResult
 		,@Msg	 Msg;
 
 --END;
-
-

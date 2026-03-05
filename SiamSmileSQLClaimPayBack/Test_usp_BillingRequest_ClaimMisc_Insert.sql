@@ -34,16 +34,16 @@ DECLARE
 ------
 @GroupTypeId INT = 3
 ,@ClaimTypeCode VARCHAR(20) = '2000'
-,@InsuranceCompanyId INT = 389190
+,@InsuranceCompanyId INT = 18
 ,@CreatedByUserId INT = 1
-,@BillingDate DATE = '2026-01-20'
+,@BillingDate DATE = '2026-03-04'
 ,@ClaimHeaderGroupTypeId INT = 6
-,@InsuranceCompanyName NVARCHAR(300) = N'บริษัท เออร์โกประกันภัย (ประเทศไทย) จำกัด (มหาชน)'
-,@NewBillingDate DATE = '2026-01-20'
-,@CreatedDateFrom DATE = '2026-01-20'
-,@CreatedDateTo DATE = '2026-01-21'
-,@ProductTypeShortName VARCHAR(20) = 'YC'
-,@ProductTypeId INT = 38
+,@InsuranceCompanyName NVARCHAR(300) = N'บริษัท ชับบ์สามัคคีประกันภัย จำกัด (มหาชน)'
+,@NewBillingDate DATE = '2026-03-07'
+,@CreatedDateFrom DATE = '2026-03-04'
+,@CreatedDateTo DATE = '2026-03-05'
+,@ProductTypeShortName VARCHAR(20) = 'MP'
+,@ProductTypeId INT = 11
 		;
 
 
@@ -67,7 +67,7 @@ DECLARE	@BillindDueDate			DATE;
 DECLARE @DaysToAdd				INT				= 15;
 DECLARE @TransactionDetail		NVARCHAR(500)	= N'Generate Group เสร็จสิ้น';
 
-IF @CreatedDateTo IS NOT NULL SET @CreatedDateTo = DATEADD(DAY,1,@CreatedDateTo);
+--IF @CreatedDateTo IS NOT NULL SET @CreatedDateTo = DATEADD(DAY,1,@CreatedDateTo);
 
 SET @BillindDueDate = DATEADD(	DAY
 								,@DaysToAdd + ((@DaysToAdd - 1) / 5) * 2 
@@ -112,8 +112,8 @@ IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 	AND i.BillingRequestGroupId IS NULL
 	AND i.InsuranceCompanyId = @pInsuranceCompanyId
 	AND (i.ClaimTypeCode = @ClaimTypeCode)
-	AND	i.CreatedDate >	@CreatedDateFrom
-	AND	i.CreatedDate <=  @CreatedDateTo
+	AND	i.CreatedDate >= @CreatedDateFrom
+	AND	i.CreatedDate <  @CreatedDateTo
 	AND f.ClaimHeaderGroupTypeId = @ClaimHeaderGroupTypeId
 	AND cm.ProductTypeId = @productId
 
