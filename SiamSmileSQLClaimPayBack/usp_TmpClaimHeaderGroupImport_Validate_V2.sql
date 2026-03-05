@@ -326,8 +326,8 @@ IF @IsResult = 1
 							END
 							,N' ตามกลุ่มที่ระบุ, '),'')
 						,IIF(doc.CountDoc > 0 ,N'บ.ส. ไม่มีเอกสารแนบ, ','')
-						,IIF(a.ClaimTypeCode = '',N'ไม่ได้ MappingType (H,C), ','')
-						,IIF(cbd.ClaimPaymentTypeId = 2, N'ตรวจสอบรายการเคลมกองทุนรถม้าลาย','')
+						,IIF(a.ClaimTypeCode = '',N'ไม่ได้ MappingType (H,C), ','') 
+						,IIF(t.ClaimHeaderGroupTypeId = @ClaimMisc AND (cbd.ClaimPaymentTypeId IS NULL OR cbd.ClaimPaymentTypeId = 2), N'ตรวจสอบรายการเคลมกองทุนรถม้าลาย','')
 					)ValidateResult
 				---------------------------------------------------------------
 				,IIF(t.ClaimHeaderGroupTypeId = 6 ,'2000',a.ClaimTypeCode)	ClaimTypeCode
@@ -392,7 +392,7 @@ IF @IsResult = 1
 			-------------------------------------------------------------------	
 			LEFT JOIN 
 				[ClaimPayBack].[dbo].[ClaimPayBackDetail] cbd 
-				ON cbd.ClaimGroupCode = t.ClaimHeaderGroupCode;
+				ON cbd.ClaimGroupCode = t.ClaimHeaderGroupCode AND cbd.IsActive = 1;
 
 			SELECT @CountIsError = COUNT(ValidateResult)
 			FROM #TmpUpdate
