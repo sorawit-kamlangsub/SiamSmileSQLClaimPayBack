@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_ClaimMisc_Insert]    Script Date: 29/1/2569 17:07:22 ******/
+
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -12,6 +12,8 @@ GO
 -- Create date: 2025-12-16  15:43
 -- Update date: Sorawit Kamlangsub 2026-01-29 17:00
 --				เปลี่ยนเลขรัน BQG 5 หลัก
+-- Update date: Sorawit Kamlangsub 2026-02-05 13:00
+--				แก้บั๊กการ where วันที่นำเข้า
 -- Description:
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_BillingRequest_ClaimMisc_Insert]
@@ -32,6 +34,7 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
+-- Test Zone
 --DECLARE
 --		@GroupTypeId				INT				= 3
 --		,@ClaimTypeCode				VARCHAR(20)		= '2000'
@@ -46,7 +49,7 @@ BEGIN
 --		,@ProductTypeShortName		VARCHAR(20)		= 'SP'
 --		,@ProductTypeId				INT				= 32	
 --		;
-
+-- End Test
 
 DECLARE @IsResult	BIT			 = 1;
 DECLARE @Result		VARCHAR(100) = '';
@@ -68,7 +71,7 @@ DECLARE	@BillindDueDate			DATE;
 DECLARE @DaysToAdd				INT				= 15;
 DECLARE @TransactionDetail		NVARCHAR(500)	= N'Generate Group เสร็จสิ้น';
 
-IF @CreatedDateTo IS NOT NULL SET @CreatedDateTo = DATEADD(DAY,1,@CreatedDateTo);
+--IF @CreatedDateTo IS NOT NULL SET @CreatedDateTo = DATEADD(DAY,1,@CreatedDateTo);
 
 SET @BillindDueDate = DATEADD(	DAY
 								,@DaysToAdd + ((@DaysToAdd - 1) / 5) * 2 
@@ -114,8 +117,8 @@ IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 	AND i.BillingRequestGroupId IS NULL
 	AND i.InsuranceCompanyId = @pInsuranceCompanyId
 	AND (i.ClaimTypeCode = @ClaimTypeCode)
-	AND	i.CreatedDate >	@CreatedDateFrom
-	AND	i.CreatedDate <=  @CreatedDateTo
+	AND	i.CreatedDate >= @CreatedDateFrom
+	AND	i.CreatedDate < @CreatedDateTo
 	AND f.ClaimHeaderGroupTypeId = @ClaimHeaderGroupTypeId
 	AND cm.ProductTypeId = @productId
 

@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_Sub01_Insert_V2]    Script Date: 29/1/2569 17:08:05 ******/
+
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -32,6 +32,8 @@ GO
 				เพื่ม เงื่อนไข @ClaimHeaderGroupTypeId IN (2,4) ใน tmpCover
 	Update date: 2026-01-28 17:00 Sorawit kamlangsub
 				เปลี่ยนเลขรัน BQG 5 หลัก
+	Update date: 2026-02-05 13:00 Sorawit Kamlangsub
+				แก้บั๊กการ where วันที่นำเข้า
 */	
 -- Description:	<Description,,>
 -- =============================================
@@ -82,7 +84,7 @@ DECLARE	@BillindDueDate			DATE;
 DECLARE @DaysToAdd				INT				= 15;
 DECLARE @TransactionDetail		NVARCHAR(500)	= N'Generate Group เสร็จสิ้น';
 
-IF @CreatedDateTo IS NOT NULL SET @CreatedDateTo = DATEADD(DAY,1,@CreatedDateTo);
+--IF @CreatedDateTo IS NOT NULL SET @CreatedDateTo = DATEADD(DAY,1,@CreatedDateTo);
 
 SET @BillindDueDate = DATEADD(	DAY
 								,@DaysToAdd + ((@DaysToAdd - 1) / 5) * 2 
@@ -114,8 +116,8 @@ IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 	AND i.BillingRequestGroupId IS NULL
 	AND i.InsuranceCompanyId = @pInsuranceCompanyId
 	AND i.ClaimTypeCode = @ClaimTypeCode
-	AND	i.CreatedDate >	@CreatedDateFrom
-	AND	i.CreatedDate <=  @CreatedDateTo
+	AND	i.CreatedDate >= @CreatedDateFrom
+	AND	i.CreatedDate <  @CreatedDateTo
 	AND f.ClaimHeaderGroupTypeId = @ClaimHeaderGroupTypeId
 	AND 
 	(
