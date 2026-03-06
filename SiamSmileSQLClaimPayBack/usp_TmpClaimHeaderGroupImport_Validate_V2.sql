@@ -208,13 +208,13 @@ IF @IsResult = 1
 				-- ClaimMisc 
 				SELECT 
 					t.TmpClaimHeaderGroupImportId	
-					,cm.ClaimHeaderGroupCode		ClaimHeaderGroupCodeInDB
-					,cm.PayAmount					TotalAmount
-					,cm.PayAmount					TotalAmountSS
-					,org.Organize_ID				InsuranceCompanyId
-					,NULL							ClaimHeaderCodeInDB
-					,'Misc'							ProductGroup
-					,cm.PolicyNo					PolicyNo
+					,cm.ClaimHeaderGroupCode									ClaimHeaderGroupCodeInDB
+					,cm.PayAmount												TotalAmount
+					,cm.PayAmount												TotalAmountSS
+					,org.Organize_ID											InsuranceCompanyId
+					,NULL														ClaimHeaderCodeInDB
+					,IIF(cpbType.ClaimPaymentTypeId = 2, 'ZebraMisc','Misc')	ProductGroup
+					,cm.PolicyNo												PolicyNo
 				FROM #Tmp t
 					INNER JOIN [ClaimMiscellaneous].[misc].[ClaimMisc] cm
 						ON t.ClaimHeaderGroupCode = cm.ClaimHeaderGroupCode
@@ -222,7 +222,19 @@ IF @IsResult = 1
 						ON ins.InsuranceCompanyId = cm.InsuranceCompanyId
 					LEFT JOIN [DataCenterV1].[Organize].[Organize] org
 						ON org.OrganizeCode = ins.InsuranceCompanyCode
-			)d;
+					LEFT JOIN (
+							SELECT DISTINCT
+								h.ClaimMiscId
+								,cp.ClaimPaymentTypeId
+								,cp.ClaimPaymentTypeName
+							FROM [ClaimMiscellaneous].[misc].[ClaimMiscPaymentHeader] h
+								LEFT JOIN [ClaimMiscellaneous].[misc].[ClaimMiscPayment] p
+								 ON h.ClaimMiscPaymentHeaderId = p.ClaimMiscPaymentHeaderId
+								LEFT JOIN [ClaimMiscellaneous].[misc].[ClaimPaymentType] cp
+								 ON cp.ClaimPaymentTypeId = p.ClaimPaymentTypeId
+								) cpbType
+						ON cm.ClaimMiscId = cpbType.ClaimMiscId
+					)d;
 
 		----------------Update 2023-08-09-----------------------
 		SELECT m.TmpClaimHeaderGroupImportId
@@ -327,7 +339,9 @@ IF @IsResult = 1
 							,N' ตามกลุ่มที่ระบุ, '),'')
 						,IIF(doc.CountDoc > 0 ,N'บ.ส. ไม่มีเอกสารแนบ, ','')
 						,IIF(a.ClaimTypeCode = '',N'ไม่ได้ MappingType (H,C), ','') 
-						,IIF(t.ClaimHeaderGroupTypeId = @ClaimMisc AND (cbd.ClaimPaymentTypeId IS NULL OR cbd.ClaimPaymentTypeId = 2), N'ตรวจสอบรายการเคลมกองทุนรถม้าลาย','')
+						,IIF(c.ProductGroup = 'ZebraMisc', 'ตรวจสอบรายการเคลมกองทุนรถม้าลาย','')
+						--,)(cbd.ClaimPaymentTypeId = 2 AND t.ClaimHeaderGroupTypeId = @ClaimMisc, N'ตรวจสอบรายการเคลมกองทุนรถม้าลาย','')
+						--,IIF(t.ClaimHeaderGroupTypeId = @ClaimMisc AND (cbd.ClaimPaymentTypeId IS NULL OR cbd.ClaimPaymentTypeId = 2), N'ตรวจสอบรายการเคลมกองทุนรถม้าลาย','')
 					)ValidateResult
 				---------------------------------------------------------------
 				,IIF(t.ClaimHeaderGroupTypeId = 6 ,'2000',a.ClaimTypeCode)	ClaimTypeCode
