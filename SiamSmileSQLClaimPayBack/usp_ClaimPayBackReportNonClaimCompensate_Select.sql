@@ -309,17 +309,17 @@ FROM @TmpClaimPayBack TmpCPB
 			
 			-- ClaimMisc
 			SELECT 
-				ClaimHeaderGroupCode		Code
-				,InsuranceCompanyName		InsuranceCompany_Name
-				,cxa.ClaimAdmitType			ClaimAdmitType
-				,h.HospitalCode				Hospital
-				,u.EmployeeCode				ApprovedUserFromSSS
-				,cm.CustomerName			CustomerName
-				,cm.ClaimMiscNo				ClaimCode
-				,NULL						BankAccountName
-				,NULL						BankAccountNo
-				,NULL						BankName
-				,ce.ContactPersonPhoneNo	PhoneNo
+				ClaimHeaderGroupCode									Code
+				,InsuranceCompanyName									InsuranceCompany_Name
+				,IIF(pd.ProductTypeId <> 11,cxa.ClaimAdmitType,NULL)	ClaimAdmitType
+				,h.HospitalCode											Hospital
+				,u.EmployeeCode											ApprovedUserFromSSS
+				,cm.CustomerName										CustomerName
+				,cm.ClaimMiscNo											ClaimCode
+				,NULL													BankAccountName
+				,NULL													BankAccountNo
+				,NULL													BankName
+				,ce.ContactPersonPhoneNo								PhoneNo
 				,pd.ProductTypeName
 				,pd.ProductTypeId
 				,cpbType.ClaimPaymentTypeName

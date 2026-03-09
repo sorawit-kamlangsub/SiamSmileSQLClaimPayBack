@@ -291,17 +291,17 @@ FROM	@TmpClaimPayBack tmpCpbd
 			
 			-- ClaimMisc
 			SELECT 
-				ClaimHeaderGroupCode		Code
-				,InsuranceCompanyName		InsuranceCompany_Name
-				,cxa.ClaimAdmitType			ClaimAdmitType
-				,h.HospitalCode				Hospital
-				,u.EmployeeCode				ApprovedUserFromSSS
-				,cm.ClaimMiscNo				ClaimCode
-				,cm.CustomerName			CustomerName
-				,NUll						BankAccountName
-				,NUll						BankAccountNo
-				,NUll						BankName
-				,ce.ContactPersonPhoneNo	PhoneNo
+				ClaimHeaderGroupCode										Code
+				,InsuranceCompanyName										InsuranceCompany_Name
+				,IIF(pd.ProductTypeId <> 11,cxa.ClaimAdmitType,NULL)		ClaimAdmitType
+				,h.HospitalCode												Hospital
+				,u.EmployeeCode												ApprovedUserFromSSS
+				,cm.ClaimMiscNo												ClaimCode
+				,cm.CustomerName											CustomerName
+				,NUll														BankAccountName
+				,NUll														BankAccountNo
+				,NUll														BankName
+				,ce.ContactPersonPhoneNo									PhoneNo
 				,pd.ProductTypeName
 				,pd.ProductTypeId
 				,cpbType.ClaimPaymentTypeName
