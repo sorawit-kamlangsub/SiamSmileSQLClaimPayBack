@@ -12,7 +12,7 @@ GO
 -- Update date: 2025-05-15 Wetpisit.P
 -- Description:	เพิ่ม RecordedDate
 -- Update date: 2026-03-09 Sorawit.k
--- Description:	เพิ่ม RecordedDate
+-- Description:	เพิ่ม ClaimPaymentTypeName,ClaimPaymentTypeDetail
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimPayBackReportCompensate_Select]
 	-- Add the parameters for the stored procedure here
