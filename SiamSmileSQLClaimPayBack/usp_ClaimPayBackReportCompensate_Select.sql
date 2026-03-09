@@ -11,6 +11,8 @@ GO
 -- Description:	????????????????????????????????
 -- Update date: 2025-05-15 Wetpisit.P
 -- Description:	????? RecordedDate
+-- Update date: 2026-03-09 Sorawit.k
+-- Description:	????? RecordedDate
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimPayBackReportCompensate_Select]
 	-- Add the parameters for the stored procedure here
@@ -46,7 +48,8 @@ SELECT icu.InsuranceCompany_Name AS InsuranceCompany_Name,
 				CONCAT(dme.EmployeeCode,' ',dme.PersonName) AS CteatedUser ,
 				icu.ClaimAdmitType AS ClaimAdmitType,
 				NULL AS RecordedDate --Wetpisit.P 2025-05-13
-
+				,NULL AS ClaimPaymentTypeName
+				,NULL AS ClaimPaymentTypeDetail
 FROM ClaimPayBack cpb
 	 INNER JOIN ClaimPayBackDetail cpbd
 		ON cpb.ClaimPayBackId = cpbd.ClaimPayBackId
