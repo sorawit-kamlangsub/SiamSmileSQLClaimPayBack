@@ -23,57 +23,57 @@ BEGIN
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
 
-	DECLARE @Value NVARCHAR(Max) = NULL
-	DECLARE @IntVal INT = NULL
-	DECLARE @DeciVal Decimal = NULL
-	DeCLARE @DATETimes DATETIME = NULL
-	SELECT @Value AS InsuranceCompany_Name,
-				@Value AS Branch,
-				@Value AS Hospital,
-				@Value AS ProductGroupDetailName,
-				@Value AS ClaimGroupType,
-				@Value AS ClaimGroupCode,
-				@IntVal AS ItemCount,
-				@DeciVal AS Amount,
-				@Value AS ClaimCompensate,
-				@Value AS ClaimNo,
-				@Value AS COL,
-				@Value AS Province,
-				@Value AS CustomerName,
-				@Value As BankName,
-				@Value AS BankAccountName,
-				@Value AS BankAccountNo,
-				@Value AS PhoneNo,
-				@DATETimes AS SendDate,
-				@DATETimes AS CreatedDate,
-				@Value AS ApprovedUser ,
-				@Value AS CteatedUser ,
-				@Value AS ClaimAdmitType,
-				@Value AS ClaimPaymentTypeName,
-				@Value AS ClaimPaymentTypeDetail
+	--DECLARE @Value NVARCHAR(Max) = NULL
+	--DECLARE @IntVal INT = NULL
+	--DECLARE @DeciVal Decimal = NULL
+	--DeCLARE @DATETimes DATETIME = NULL
+	--SELECT @Value AS InsuranceCompany_Name,
+	--			@Value AS Branch,
+	--			@Value AS Hospital,
+	--			@Value AS ProductGroupDetailName,
+	--			@Value AS ClaimGroupType,
+	--			@Value AS ClaimGroupCode,
+	--			@IntVal AS ItemCount,
+	--			@DeciVal AS Amount,
+	--			@Value AS ClaimCompensate,
+	--			@Value AS ClaimNo,
+	--			@Value AS COL,
+	--			@Value AS Province,
+	--			@Value AS CustomerName,
+	--			@Value As BankName,
+	--			@Value AS BankAccountName,
+	--			@Value AS BankAccountNo,
+	--			@Value AS PhoneNo,
+	--			@DATETimes AS SendDate,
+	--			@DATETimes AS CreatedDate,
+	--			@Value AS ApprovedUser ,
+	--			@Value AS CteatedUser ,
+	--			@Value AS ClaimAdmitType,
+	--			@Value AS ClaimPaymentTypeName,
+	--			@Value AS ClaimPaymentTypeDetail
 
      --Insert statements for procedure here
 
-	--IF @ClaimGroupTypeId <> 5 -- เอาข้อมูลที่ไม่ใช่เคลมโอนแยก
-	--	BEGIN
+	IF @ClaimGroupTypeId <> 5 -- เอาข้อมูลที่ไม่ใช่เคลมโอนแยก
+		BEGIN
 
-	--	   EXECUTE [dbo].[usp_ClaimPayBackTransferNonClaimCompensateReport_Select]
-	--		  @DateFrom
-	--		  ,@DateTo
-	--		  ,@InsuranceId
-	--		  ,@ProductGroupId
-	--		  ,@ClaimGroupTypeId
+		   EXECUTE [dbo].[usp_ClaimPayBackTransferNonClaimCompensateReport_Select]
+			  @DateFrom
+			  ,@DateTo
+			  ,@InsuranceId
+			  ,@ProductGroupId
+			  ,@ClaimGroupTypeId
 
-	--	END
-	--ELSE
-	--	BEGIN
+		END
+	ELSE
+		BEGIN
 		    
-	--		 EXECUTE [dbo].[usp_ClaimPayBackTrasferReport_Select]
-	--			@DateFrom
-	--			,@DateTo
-	--			,@InsuranceId
-	--			,@ProductGroupId
-	--			,@ClaimGroupTypeId
+			 EXECUTE [dbo].[usp_ClaimPayBackTrasferReport_Select]
+				@DateFrom
+				,@DateTo
+				,@InsuranceId
+				,@ProductGroupId
+				,@ClaimGroupTypeId
 
-	--	END
+		END
 END

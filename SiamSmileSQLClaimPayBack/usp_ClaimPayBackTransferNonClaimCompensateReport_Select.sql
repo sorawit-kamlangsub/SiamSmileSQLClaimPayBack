@@ -1,10 +1,11 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackTransferNonClaimCompensateReport_Select]    Script Date: 14/1/2569 16:57:23 ******/
+/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackTransferNonClaimCompensateReport_Select]    Script Date: 3/9/2026 10:23:54 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+
 
 
 -- =============================================
@@ -29,6 +30,8 @@ GO
 -- Description:	ปรับเงื่อนไขการแสดงข้อมูลเคลม MISC ที่เป็น productIdType 38 ให้แสดง ธนาคาร,ชื่อบัญชี,เลขที่
 -- Update date: 2026-01-14 17:00 Sorawit.K
 -- Description:	เพิ่ม #TmpProductClaimMisc และปรับการ Join Product เคลมย่อย
+-- Update date: 2026-01-15 14:15 Krkepon.D
+-- Description:	เอาข้อมูลบัญชีของเคลม Misc ออก
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimPayBackTransferNonClaimCompensateReport_Select]
 	 @DateFrom			DATE 
@@ -289,9 +292,9 @@ FROM	@TmpClaimPayBack tmpCpbd
 				,u.EmployeeCode				ApprovedUserFromSSS
 				,cm.ClaimMiscNo				ClaimCode
 				,cm.CustomerName			CustomerName
-				,miscacc.BankAccountName	BankAccountName
-				,miscacc.BankAccountNo		BankAccountNo
-				,miscacc.BankName			BankName
+				,NUll						BankAccountName
+				,NUll						BankAccountNo
+				,NUll						BankName
 				,ce.ContactPersonPhoneNo	PhoneNo
 				,pd.ProductTypeName
 				,pd.ProductTypeId
@@ -319,20 +322,6 @@ FROM	@TmpClaimPayBack tmpCpbd
 				GROUP BY x.ClaimMiscId
 			) cxa
 				ON cxa.ClaimMiscId = cm.ClaimMiscId
-			LEFT JOIN(
-				SELECT 
-					ch.ClaimMiscId
-					,cp.BankAccountName
-					,cp.BankAccountNo
-					,cp.BankName
-				FROM [ClaimMiscellaneous].[misc].[ClaimMiscPaymentHeader] ch
-					LEFT JOIN [ClaimMiscellaneous].[misc].[ClaimMiscPayment] cp
-						ON ch.ClaimMiscPaymentHeaderId = cp.ClaimMiscPaymentHeaderId
-				WHERE ch.IsActive = 1
-					AND cp.IsActive = 1
-				GROUP BY ch.ClaimMiscId, cp.BankAccountName, cp.BankAccountNo, cp.BankName
-			)miscacc
-				ON cm.ClaimMiscId = miscacc.ClaimMiscId
 			LEFT JOIN [ClaimMiscellaneous].[misc].[ClaimEvent] ce
 				ON cm.ClaimEventId = ce.ClaimEventId
 			LEFT JOIN 
