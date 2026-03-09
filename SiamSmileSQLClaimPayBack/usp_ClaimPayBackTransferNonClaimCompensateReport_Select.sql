@@ -32,6 +32,8 @@ GO
 -- Description:	เพิ่ม #TmpProductClaimMisc และปรับการ Join Product เคลมย่อย
 -- Update date: 2026-01-15 14:15 Krkepon.D
 -- Description:	เอาข้อมูลบัญชีของเคลม Misc ออก
+-- Update date: 2026-03-09 Sorawit.k
+-- Description:	เพิ่ม ClaimPaymentTypeName,ClaimPaymentTypeDetail
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimPayBackTransferNonClaimCompensateReport_Select]
 	 @DateFrom			DATE 
@@ -226,8 +228,8 @@ SELECT 			icu.InsuranceCompany_Name														InsuranceCompany_Name
 				,dmeu.PersonName									ApprovedUser
 				,tmpCpbd.CreatedByUser								CteatedUser
 				,icu.ClaimAdmitType									ClaimAdmitType
-
-
+				,icu.ClaimPaymentTypeName							ClaimPaymentTypeName
+				,icu.ClaimPaymentDetailTypeName						ClaimPaymentTypeDetail
 FROM	@TmpClaimPayBack tmpCpbd
 	 LEFT JOIN(
 
@@ -245,6 +247,8 @@ FROM	@TmpClaimPayBack tmpCpbd
 				,NULL												PhoneNo
 				,NULL												ProductTypeName
 				,NULL												ProductTypeId
+				,NULL												ClaimPaymentTypeName
+				,NULL												ClaimPaymentDetailTypeName
 			FROM sss.dbo.DB_ClaimHeaderGroup chg
 			LEFT JOIN SSS.dbo.MT_ClaimAdmitType cat
 				ON chg.ClaimAdmitType_id = cat.Code
@@ -271,6 +275,8 @@ FROM	@TmpClaimPayBack tmpCpbd
 				,NULL											PhoneNo
 				,NULL											ProductTypeName
 				,NULL											ProductTypeId
+				,NULL											ClaimPaymentTypeName
+				,NULL											ClaimPaymentDetailTypeName
 			FROM SSSPA.dbo.DB_ClaimHeaderGroup pachg
 			LEFT JOIN SSSPA.dbo.SM_Code smc
 				ON pachg.ClaimTypeGroup_id = smc.Code
@@ -298,6 +304,8 @@ FROM	@TmpClaimPayBack tmpCpbd
 				,ce.ContactPersonPhoneNo	PhoneNo
 				,pd.ProductTypeName
 				,pd.ProductTypeId
+				,cpbType.ClaimPaymentTypeName
+				,cpbType.ClaimPaymentDetailTypeName
 			FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
 			LEFT JOIN [ClaimMiscellaneous].[misc].[Hospital] h
 				ON h.HospitalId = cm.HospitalId 
@@ -333,6 +341,21 @@ FROM	@TmpClaimPayBack tmpCpbd
 				WHERE IsActive = 1
 			) pd
 				ON pd.ProductTypeId = cm.ProductTypeId
+			LEFT JOIN (
+				SELECT DISTINCT
+				 h.ClaimMiscId
+				 ,cp.ClaimPaymentTypeName
+				 ,cpd.ClaimPaymentDetailTypeName
+				FROM [ClaimMiscellaneous].[misc].[ClaimMiscPaymentHeader] h
+				 LEFT JOIN [ClaimMiscellaneous].[misc].[ClaimMiscPayment] p
+				  ON h.ClaimMiscPaymentHeaderId = p.ClaimMiscPaymentHeaderId
+				 LEFT JOIN [ClaimMiscellaneous].[misc].[ClaimPaymentType] cp
+				  ON cp.ClaimPaymentTypeId = p.ClaimPaymentTypeId
+				 LEFT JOIN [ClaimMiscellaneous].[misc].[ClaimPaymentDetailType] cpd
+				  ON cpd.ClaimPaymentDetailTypeId = p.ClaimPaymentDetailTypeId
+				 ) cpbType
+			 ON cm.ClaimMiscId = cpbType.ClaimMiscId
+
 	) icu
 		ON tmpCpbd.ClaimGroupCodeFromCPBD = icu.Code
 	LEFT JOIN SSS.dbo.MT_Company ssicu
