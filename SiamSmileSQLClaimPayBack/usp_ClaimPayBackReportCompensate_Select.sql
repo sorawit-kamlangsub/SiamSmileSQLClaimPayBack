@@ -1,6 +1,6 @@
-USE [ClaimPayBack]
+﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackReportCompensate_Select]    Script Date: 3/9/2026 10:10:16 AM ******/
+
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -8,11 +8,11 @@ GO
 -- =============================================
 -- Author:		06588 Krekpon Dokkamklang Mind
 -- Create date: 2024-06-20
--- Description:	????????????????????????????????
+-- Description:	รายงานส่งการเงินสำหรับเคลมโอนแยก
 -- Update date: 2025-05-15 Wetpisit.P
--- Description:	????? RecordedDate
+-- Description:	เพิ่ม RecordedDate
 -- Update date: 2026-03-09 Sorawit.k
--- Description:	????? RecordedDate
+-- Description:	เพิ่ม RecordedDate
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimPayBackReportCompensate_Select]
 	-- Add the parameters for the stored procedure here
