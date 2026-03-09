@@ -1,4 +1,4 @@
-USE [ClaimPayBack]
+﻿USE [ClaimPayBack]
 GO
 /****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackTrasferReport_Select]    Script Date: 3/9/2026 10:43:28 AM ******/
 SET ANSI_NULLS ON
@@ -8,7 +8,9 @@ GO
 -- =============================================
 -- Author:		06588 Krekpon Dokkamklang Mind
 -- Create date: 2024-06-21
--- Description: ???????????????????????????????????????
+-- Description: รายงานหลังส่งการเงินของประเภทเคลมโอนแยก
+-- Update date: 2026-03-09 Sorawit.k
+-- Description:	เพิ่ม ClaimPaymentTypeName,ClaimPaymentTypeDetail
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimPayBackTrasferReport_Select]
 	-- Add the parameters for the stored procedure here
@@ -44,6 +46,8 @@ BEGIN
 				CONCAT(dmeu.EmployeeCode,' ',dmeu.PersonName) AS ApprovedUser ,
 				CONCAT(dme.EmployeeCode,' ',dme.PersonName) AS CteatedUser ,
 				icu.ClaimAdmitType AS ClaimAdmitType
+				,NULL AS ClaimPaymentTypeName
+				,NULL AS ClaimPaymentTypeDetail
 
 FROM ClaimPayBackTransfer cpbt 
 	 INNER JOIN ClaimPayBack cpb
@@ -101,7 +105,7 @@ FROM ClaimPayBackTransfer cpbt
 		ON dmpu.EmployeeId = dme.EmployeeId
 	INNER JOIN [DataCenterV1].[Master].vw_Employee dmeu  --
 		ON icu.ApproveUserBySSS = dmeu.EmployeeCode
-WHERE	cpbt.ClaimPayBackTransferStatusId = 3   --??????????????
+WHERE	cpbt.ClaimPayBackTransferStatusId = 3   --เอาที่จ่ายแล้ว
 	AND cpbt.ClaimGroupTypeId = @ClaimGroupTypeId
 	AND cpbt.IsActive = 1 
 	AND cpbd.IsActive = 1 
