@@ -1,4 +1,4 @@
-DECLARE @Name NVARCHAR(200) = N'usp_ClaimHeaderGroupImportIsValidated_Select';
+DECLARE @Name NVARCHAR(200) = N'usp_Report_ClaimPayBackFinancialTransaction_Select';
 DECLARE @SQL  NVARCHAR(MAX);
 
 SELECT 

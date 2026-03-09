@@ -1,28 +1,23 @@
-USE [ClaimPayBack]
+﻿USE [ClaimPayBack]
 GO
 
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-
-
-
-
 -- =============================================
 -- Author:		Prattana Phiwkaew
 -- Create date: 2021-10-06 15:52
--- Update date: 2024-02-28 Kittisak.Ph �����ѹ�֡�Ѵ�Ѻ����� ClaimOnlineV2
---				2024-11-11 Wetpisit.P �ѡ���͹�������Ѵ��¡�âͧ����ѷ SMI �͡�ҡ��§ҹ�������ҧ
+-- Update date: 2024-02-28 Kittisak.Ph เพิ่มบันทึกตัดรับชำระใน ClaimOnlineV2
+--				2024-11-11 Wetpisit.P ดักเงื่อนไขไม่ให้ตัดรายการของบริษัท SMI ออกจากรายงานเคลมคงค้าง
 -- Description:	ClaimPayBackTransfer Update
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimPayBackTransfer_Update] 
-	 --Add the parameters for the stored procedure here
+	-- Add the parameters for the stored procedure here
 	 @ClaimBayBackTransferId		INT
 	,@TransferAmount				DECIMAL(16,2)
 	,@TransferDate					DATETIME
 	,@UpdatedByUserId				INT
-	,@ClaimPayBackSubGroupId		INT
 
 AS	
 BEGIN
@@ -37,9 +32,9 @@ DECLARE @Result				VARCHAR(100) = '';
 DECLARE @Msg				NVARCHAR(500)= 'Not allowed to use';
 
 DECLARE @D		DATETIME = GETDATE();
-DECLARE @ClaimPayBackStatusId	INT = 4;		-- 4 ��������
-DECLARE @ClaimPayBackTransferStatusId	INT = 3; --3 �������� 
-DECLARE @InsuranceCompanyId INT = 699804; --����ѷ SMI
+DECLARE @ClaimPayBackStatusId	INT = 4;		-- 4 จ่ายแล้ว
+DECLARE @ClaimPayBackTransferStatusId	INT = 3; --3 จ่ายแล้ว 
+DECLARE @InsuranceCompanyId INT = 699804; --บริษัท SMI
 
 ---------------------------------------------------------
 
@@ -93,19 +88,19 @@ BEGIN
 	IF @Count_Transfer > 0
 	BEGIN
 	    SET @IsResult = 0;
-		SET @Msg = '��سҵ�Ǩ�ͺ ���ͧ�ҡ�ա���͹�Թ���º��������';
+		SET @Msg = 'กรุณาตรวจสอบ เนื่องจากมีการโอนเงินเรียบร้อยแล้ว';
 	END
 	ELSE IF (@TransferAmount <> @Sum_AmountClaimPayBack OR @TransferAmount <> @Sum_ClaimPay)
 	BEGIN
 
 		    SET @IsResult = 0;
-			SET @Msg = '��سҵ�Ǩ�ͺ �ӹǹ�Թ����͹ ���ͧ�ҡ�ʹ�Թ���ç�Ѻ��к�';
+			SET @Msg = 'กรุณาตรวจสอบ จำนวนเงินที่โอน เนื่องจากยอดเงินไม่ตรงกับในระบบ';
 
 	END
-	ELSE IF cast(@TransferDate AS TIME) = '00:00:00.0000000'
+	ELSE IF CAST(@TransferDate AS TIME) = '00:00:00.0000000'
 	BEGIN
 	     SET @IsResult = 0;
-		 SET @Msg = '��سҵ�Ǩ�ͺ �����͹�Թ';
+		 SET @Msg = 'กรุณาตรวจสอบ เวลาโอนเงิน';
 	END
 	
 END
@@ -115,7 +110,6 @@ IF @IsResult = 1
 BEGIN
 
     DECLARE @countSubGroup INT = 0;
-	DECLARE @subGroupId INT = 0;
 
 	SELECT @countSubGroup = COUNT(*)  
 	FROM dbo.ClaimPayBackSubGroup
@@ -126,18 +120,14 @@ BEGIN
 
 		--Update ClaimPayBackTransfer TransferAmount,TransferDate,Status
 		UPDATE dbo.ClaimPayBackTransfer
-			SET 
-				TransferAmount = IIF(ClaimGroupTypeId = 4,NULL,@TransferAmount)
-				,TransferDate= IIF(ClaimGroupTypeId = 4,NULL,@TransferDate)
-				,ClaimPayBackTransferStatusId = IIF(ClaimGroupTypeId = 4,2,@ClaimPayBackTransferStatusId)
+			SET TransferAmount = @TransferAmount
+				,TransferDate= @TransferDate
+				,ClaimPayBackTransferStatusId = @ClaimPayBackTransferStatusId
 				,UpdatedByUserId = @UpdatedByUserId
 				,UpdatedDate = @D
-				,OutOfPocketStatus = 3
-				,OutOfPocketAmount = @TransferAmount
-				,OutOfPocketDate = @TransferDate
-				,OutOfPocketByUserId = @UpdatedByUserId
 		FROM dbo.ClaimPayBackTransfer
 		WHERE ClaimPayBackTransferId = @ClaimBayBackTransferId;
+
 
 		--Update Status ClaimPayBack
 		UPDATE dbo.ClaimPayBack
@@ -147,7 +137,6 @@ BEGIN
 		FROM dbo.ClaimPayBack b
 			INNER JOIN #TmplstClaimPayback t
 				ON b.ClaimPayBackId = t.ClaimPayBackId
-		WHERE b.ClaimGroupTypeId <> 4
 
 
 		--Update ClaimTransfer in ClaimPayBackXClaim
@@ -159,74 +148,24 @@ BEGIN
 			INNER JOIN #TmpUpdateClaimTransfer u
 				ON m.ClaimPayBackXClaimId = u.ClaimPayBackXClaimId
 		
-		--Update ੾���������� SubGroup
-		UPDATE dbo.ClaimPayBackSubGroup
-			SET BillingTransferDate = @TransferDate
-				,UpdatedByUserId = @UpdatedByUserId
-				,UpdatedDate = @D 
-				,IsPayTransfer = 1
-			WHERE ClaimPayBackTransferId = @ClaimBayBackTransferId
-				AND ClaimPayBackSubGroupId = @ClaimPayBackSubGroupId
-				AND TransactionType = 2;
-
-		UPDATE sg
-		SET sg.BillingTransferDate = @TransferDate
-			,UpdatedByUserId = @UpdatedByUserId
-			,UpdatedDate = @D 
-			,IsPayTransfer = 1
-		FROM dbo.ClaimPayBackSubGroup sg 
-			LEFT JOIN dbo.ClaimPayBackSubGroupDetail sd
-				ON sg.ClaimPayBackSubGroupId = sd.ClaimPayBackSubGroupId
-		WHERE sd.IsActive = 1
-			AND sg.IsActive = 1
-			AND sd.ClaimPayBackTransferId = @ClaimBayBackTransferId
-			AND sg.ClaimPayBackSubGroupId = @ClaimPayBackSubGroupId;
-
-		DECLARE @IsAllIsPayTransfer BIT = 0;
-		DECLARE @OutOfPocketStatusId INT;
-		SELECT @IsAllIsPayTransfer =
-			CASE 
-				WHEN SUM(CASE WHEN IsPayTransfer = 1 THEN 1 ELSE 0 END) = COUNT(*) THEN 1
-				ELSE 0
+		--Update เฉพาะเคลมที่มี SubGroup
+		IF @countSubGroup > 0 
+			BEGIN
+			    UPDATE dbo.ClaimPayBackSubGroup
+				SET BillingTransferDate = @TransferDate
+					,UpdatedByUserId = @UpdatedByUserId
+					,UpdatedDate = @D 
+				WHERE ClaimPayBackTransferId = @ClaimBayBackTransferId;
 			END
-		FROM ClaimPayBackSubGroup sub
-		LEFT JOIN 
-		(
-			SELECT 
-				ClaimPayBackSubGroupId
-				,ClaimPayBackTransferId
-			FROM dbo.ClaimPayBackSubGroupDetail
-			WHERE IsActive = 1
-		) subD
-			ON subD.ClaimPayBackSubGroupId = sub.ClaimPayBackSubGroupId
-		WHERE sub.IsActive = 1
-			AND sub.TransactionType = 2
-			AND (sub.ClaimPayBackTransferId = @ClaimBayBackTransferId OR subD.ClaimPayBackTransferId = @ClaimBayBackTransferId);
-	
-		IF @IsAllIsPayTransfer = 1
-		BEGIN
-			SET @OutOfPocketStatusId = 3
-		END
-		ELSE
-		BEGIN
-			SET @OutOfPocketStatusId = 6
-			SET @ClaimPayBackTransferStatusId = 4
-		END
-
-		UPDATE dbo.ClaimPayBackTransfer
-			SET OutOfPocketStatus = @OutOfPocketStatusId
-				,ClaimPayBackTransferStatusId = IIF(ClaimGroupTypeId = 4,2,@ClaimPayBackTransferStatusId)
-		FROM dbo.ClaimPayBackTransfer
-		WHERE ClaimPayBackTransferId = @ClaimBayBackTransferId;		
 
 		SET @IsResult = 1;
-        SET @Msg = '�ѹ�֡������ �����';
+        SET @Msg = 'บันทึกข้อมูล สำเร็จ';
         COMMIT TRANSACTION;
 
 	END TRY
 	BEGIN CATCH
        SET @IsResult = 0;
-       SET @Msg = '�ѹ�֡������ ��������';
+       SET @Msg = 'บันทึกข้อมูล ไม่สำเร็จ';
        IF @@TRANCOUNT > 0
            ROLLBACK;
     END CATCH;
@@ -241,7 +180,7 @@ ELSE BEGIN				SET @Result = 'Failure' END;
 --SELECT @IsResult IsResult
 --		,@Result Result
 --		,@Msg	 Msg;
-SELECT distinct @IsResult IsResult
+SELECT DISTINCT @IsResult IsResult
 		,@Result Result
 		,@Msg	 Msg
 		,vcol.ClaimOnLineId
