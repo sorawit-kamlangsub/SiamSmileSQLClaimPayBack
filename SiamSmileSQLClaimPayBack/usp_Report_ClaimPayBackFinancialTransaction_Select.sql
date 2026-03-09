@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_Report_ClaimPayBackFinancialTransaction_Select]    Script Date: 14/10/2568 14:42:27 ******/
+/****** Object:  StoredProcedure [dbo].[usp_Report_ClaimPayBackFinancialTransaction_Select]    Script Date: 3/9/2026 9:03:59 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -52,7 +52,9 @@ BEGIN
 	--			@Value AS ApprovedUser ,
 	--			@Value AS CteatedUser ,
 	--			@Value AS ClaimAdmitType,
-	--			@DATETimes AS RecordedDate
+	--			@DATETimes AS RecordedDate,
+	--			@Value AS ClaimPaymentTypeName,
+	--			@Value AS ClaimPaymentTypeDetail
     -- Insert statements for procedure here
 	IF @ClaimGroupTypeId <> 5 -- เอาข้อมูลที่ไม่ใช่เคลมโอนแยก
 		BEGIN
