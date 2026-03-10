@@ -21,6 +21,7 @@ GO
 -- Update date: 20261022 Sorawit.k change add Claimmisc
 -- Update date: 20251211 Bunchuai.c เปลี่ยนการ filter ข้อมูลของ ClaimMisc filter ข้อมูลตาม ProductTypeId
 -- Update date: 20260117 Sorawit.k เพิ่ม Left Join ClaimPaymentType
+-- Update date: 20260310 Sorawit.k ปรับปรุง where not exist clammmisc
 -- Description:	
 -- =============================================
 ALTER PROCEDURE [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]
@@ -535,13 +536,9 @@ ELSE IF @pProductGroupId IN (4,11) AND @pClaimGroupTypeId = 7
 			) 
 			AND NOT EXISTS	
 			(
-				SELECT x.ClaimCode
-				FROM dbo.ClaimPayBackXClaim x	WITH(NOLOCK)
-				LEFT JOIN dbo.ClaimPayBackDetail cd	WITH(NOLOCK)
-					ON x.ClaimPayBackDetailId = cd.ClaimPayBackDetailId
-				LEFT JOIN dbo.ClaimPayBack cp
-					ON cd.ClaimPayBackId = cp.ClaimPayBackId
-				WHERE x.IsActive = 1
+				SELECT 1
+				FROM dbo.ClaimPayBackDetail cd	WITH(NOLOCK)
+				WHERE cd.IsActive = 1
 					AND cm.ClaimHeaderGroupCode = cd.ClaimGroupCode
 			)
 
