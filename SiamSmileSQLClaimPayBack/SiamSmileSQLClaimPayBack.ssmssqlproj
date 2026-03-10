@@ -42,9 +42,9 @@
           <FullPath>CheckClaimMisc.sql</FullPath>
         </FileNode>
         <FileNode Name="CPBCheckISCSmileDoc.sql">
-          <AssociatedConnectionMoniker />
-          <AssociatedConnSrvName />
-          <AssociatedConnUserName />
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
+          <AssociatedConnUserName>devdba</AssociatedConnUserName>
           <FullPath>CPBCheckISCSmileDoc.sql</FullPath>
         </FileNode>
         <FileNode Name="CPBReport_V1_20260225.sql">
@@ -160,6 +160,12 @@
           <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
           <AssociatedConnUserName>devdba</AssociatedConnUserName>
           <FullPath>SelectDocStorageMainIndexFromClaimMisc.sql</FullPath>
+        </FileNode>
+        <FileNode Name="SodaReport1.sql">
+          <AssociatedConnectionMoniker />
+          <AssociatedConnSrvName />
+          <AssociatedConnUserName />
+          <FullPath>SodaReport1.sql</FullPath>
         </FileNode>
         <FileNode Name="Test_CheckDoc_usp_TmpClaimHeaderGroupImport_Validate_V2.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
