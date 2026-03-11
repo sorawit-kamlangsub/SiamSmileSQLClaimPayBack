@@ -21,7 +21,6 @@ GO
 -- update date: 2025-10-02 10:02 เพิ่ม IsActive ใน LEFT JOIN ClaimHeaderGroupImport
 -- Update date: 2025-10-16 14:01 Clear comment Krekpon.D
 -- Update date: 2025-10-30 09:34 Add ClaimMisc and Clean Script Sorawit kamlangsub
--- Update date: 2026-02-20 14:20 เพิ่ม Validate กรณีเป็น บ.ส.นั้นเป็นเบิกจ่ายกองทุนม้าลาย
 -- Description:	
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_TmpClaimHeaderGroupImport_Validate_V2]
@@ -208,13 +207,13 @@ IF @IsResult = 1
 				-- ClaimMisc 
 				SELECT 
 					t.TmpClaimHeaderGroupImportId	
-					,cm.ClaimHeaderGroupCode									ClaimHeaderGroupCodeInDB
-					,cm.PayAmount												TotalAmount
-					,cm.PayAmount												TotalAmountSS
-					,org.Organize_ID											InsuranceCompanyId
-					,NULL														ClaimHeaderCodeInDB
-					,IIF(cpbType.ClaimPaymentTypeId = 2, 'ZebraMisc','Misc')	ProductGroup
-					,cm.PolicyNo												PolicyNo
+					,cm.ClaimHeaderGroupCode		ClaimHeaderGroupCodeInDB
+					,cm.PayAmount					TotalAmount
+					,cm.PayAmount					TotalAmountSS
+					,org.Organize_ID				InsuranceCompanyId
+					,NULL							ClaimHeaderCodeInDB
+					,'Misc'							ProductGroup
+					,cm.PolicyNo					PolicyNo
 				FROM #Tmp t
 					INNER JOIN [ClaimMiscellaneous].[misc].[ClaimMisc] cm
 						ON t.ClaimHeaderGroupCode = cm.ClaimHeaderGroupCode
@@ -222,19 +221,7 @@ IF @IsResult = 1
 						ON ins.InsuranceCompanyId = cm.InsuranceCompanyId
 					LEFT JOIN [DataCenterV1].[Organize].[Organize] org
 						ON org.OrganizeCode = ins.InsuranceCompanyCode
-					LEFT JOIN (
-							SELECT DISTINCT
-								h.ClaimMiscId
-								,cp.ClaimPaymentTypeId
-								,cp.ClaimPaymentTypeName
-							FROM [ClaimMiscellaneous].[misc].[ClaimMiscPaymentHeader] h
-								LEFT JOIN [ClaimMiscellaneous].[misc].[ClaimMiscPayment] p
-								 ON h.ClaimMiscPaymentHeaderId = p.ClaimMiscPaymentHeaderId
-								LEFT JOIN [ClaimMiscellaneous].[misc].[ClaimPaymentType] cp
-								 ON cp.ClaimPaymentTypeId = p.ClaimPaymentTypeId
-								) cpbType
-						ON cm.ClaimMiscId = cpbType.ClaimMiscId
-					)d;
+			)d;
 
 		----------------Update 2023-08-09-----------------------
 		SELECT m.TmpClaimHeaderGroupImportId
@@ -254,13 +241,13 @@ IF @IsResult = 1
 									-- ตรวจสอบเอกสาร PH ที่เป็นเคลมโรงพยาบาลต้องมีทั้งเอกสารเคลมโรงพยาบาล(24) กับหนังสือแจ้งชำระค่ารักษาพยาบาล (134)
 									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup IN ('P30','1000') AND dl.DocumentListID = 24 THEN 1 ELSE 0 END) >= 1
 									AND
-									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup IN ('P30','1000') AND dl.DocumentListID = 134 THEN 1 ELSE 0 END) >= 1
+									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup IN ('P30','1000') AND dl.DocumentListID = 137 THEN 1 ELSE 0 END) >= 1
 								THEN 1
 								WHEN 
 									-- ตรวจสอบเอกสาร PA ที่เป็นเคลมโรงพยาบาลต้องมีทั้งเอกสารเคลมโรงพยาบาล(26) กับหนังสือแจ้งชำระค่ารักษาพยาบาล (135)
 									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup = '2000' AND dl.DocumentListID = 26 THEN 1 ELSE 0 END) >= 1
 									AND
-									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup = '2000' AND dl.DocumentListID = 135 THEN 1 ELSE 0 END) >= 1
+									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup = '2000' AND dl.DocumentListID = 138 THEN 1 ELSE 0 END) >= 1
 								THEN 1
 								WHEN 
 									-- กรณีเป็นเคลมสาขา ต้องไม่มีของเคลมโรงพยาบาล
@@ -318,30 +305,29 @@ IF @IsResult = 1
 						,IIF(t.TotalAmount = 0,N'ไม่มียอดเงินในรายการ บ.ส., ','')
 						,IIF(t.TotalAmount<>ISNULL(c.TotalAmountInDB,0) AND t.ClaimHeaderGroupTypeId = pg.ProductGroupId AND s.ClaimHeaderGroupCode IS NULL,CONCAT(N'ข้อมูลจำนวนเงินรวมไม่ตรงกับในฐานข้อมูล','( ',FORMAT(c.TotalAmountInDB,'N'),'), '),'')
 						,IIF(imd.ClaimCodeInSystem IS NOT NULL AND t.ClaimHeaderGroupCode LIKE '%_0' AND cbd.ClaimGroupCode = t.ClaimHeaderGroupCode AND imd.ClaimHeaderGroupCode = t.ClaimHeaderGroupCode ,N'มีรายการเคลมนี้ในระบบแล้ว, ','') -- Update 2024-02-01 Kittisak.Ph เช็ครายการเคลมซ้ำ ใน บ.ส.เดียวกัน --Update 2024-06-17 Krekpon.Mind เพิ่มเงื่อนไข
-						,IIF(t.ClaimHeaderGroupTypeId <> pg.ProductGroupId ,CONCAT(N'รายการ บ.ส. นี้ ไม่ใช่กลุ่ม'
-						,' '
-						, 
-							CASE
-								WHEN
-									t.ClaimHeaderGroupTypeId = @ClaimHeaderSSS
-								THEN 'PH'
-								WHEN 
-									t.ClaimHeaderGroupTypeId = @ClaimHeaderSSSPA
-								THEN 
-									'PA30'
-								WHEN 
-									t.ClaimHeaderGroupTypeId = @ClaimMisc
-								THEN 
-									'เบ็ดเตล็ด'
-								ELSE
-									'-'
-							END
-							,N' ตามกลุ่มที่ระบุ, '),'')
+						,IIF(t.ClaimHeaderGroupTypeId <> pg.ProductGroupId ,CONCAT(N'รายการ บ.ส. นี้ ไม่ใช่กลุ่ม', 
+									' ',
+									--IIF(t.ClaimHeaderGroupTypeId = @ClaimHeaderSSS,'PH','PA30')
+									CASE
+										WHEN
+											t.ClaimHeaderGroupTypeId = @ClaimHeaderSSS
+										THEN 'PH'
+										WHEN 
+											t.ClaimHeaderGroupTypeId = @ClaimHeaderSSSPA
+										THEN 
+											'PA30'
+										WHEN 
+											t.ClaimHeaderGroupTypeId = @ClaimMisc
+										THEN 
+											'เบ็ดเตล็ด'
+										ELSE
+											'-'
+									END
+									,N' ตามกลุ่มที่ระบุ, '),'')
 						,IIF(doc.CountDoc > 0 ,N'บ.ส. ไม่มีเอกสารแนบ, ','')
-						,IIF(a.ClaimTypeCode = '',N'ไม่ได้ MappingType (H,C), ','') 
-						,IIF(c.ProductGroup = 'ZebraMisc', 'ตรวจสอบรายการเคลมกองทุนรถม้าลาย','')
-						--,)(cbd.ClaimPaymentTypeId = 2 AND t.ClaimHeaderGroupTypeId = @ClaimMisc, N'ตรวจสอบรายการเคลมกองทุนรถม้าลาย','')
-						--,IIF(t.ClaimHeaderGroupTypeId = @ClaimMisc AND (cbd.ClaimPaymentTypeId IS NULL OR cbd.ClaimPaymentTypeId = 2), N'ตรวจสอบรายการเคลมกองทุนรถม้าลาย','')
+						,IIF(a.ClaimTypeCode = '',N'ไม่ได้ MappingType (H,C), ','')
+
+						--,IIF(c.PolicyNo = '' OR c.PolicyNo IS NULL,'ไม่มีกรมธรรม์ในรายการ บ.ส.','' ) --kittisak.Ph 20250513
 					)ValidateResult
 				---------------------------------------------------------------
 				,IIF(t.ClaimHeaderGroupTypeId = 6 ,'2000',a.ClaimTypeCode)	ClaimTypeCode
@@ -370,9 +356,8 @@ IF @IsResult = 1
 				ON t.ClaimHeaderGroupCode = img.ClaimHeaderGroupCode
 			LEFT JOIN
 				(
-					SELECT  
-						d.ClaimHeaderGroupCodeInDB AS ClaimCodeInSystem
-						,imd.ClaimHeaderGroupCode AS ClaimHeaderGroupCode --Update 2024-06-17 Krekpon.Mind เพิ่มเงื่อนไข
+					SELECT  d.ClaimHeaderGroupCodeInDB AS ClaimCodeInSystem
+							,imd.ClaimHeaderGroupCode AS ClaimHeaderGroupCode --Update 2024-06-17 Krekpon.Mind เพิ่มเงื่อนไข
 					FROM #TmpDetail d
 						INNER JOIN dbo.ClaimHeaderGroupImportDetail imd 
 							ON d.ClaimHeaderCodeInDB = imd.ClaimCode
@@ -404,10 +389,7 @@ IF @IsResult = 1
 				) doc
 				ON t.ClaimHeaderGroupCode = doc.ClaimHeaderGroupCodeInDB
 			-------------------------------------------------------------------	
-			LEFT JOIN 
-				[ClaimPayBack].[dbo].[ClaimPayBackDetail] cbd 
-				ON cbd.ClaimGroupCode = t.ClaimHeaderGroupCode AND cbd.IsActive = 1;
-
+			LEFT JOIN [ClaimPayBack].[dbo].[ClaimPayBackDetail] cbd ON cbd.ClaimGroupCode = t.ClaimHeaderGroupCode
 			SELECT @CountIsError = COUNT(ValidateResult)
 			FROM #TmpUpdate
 			WHERE TmpCode = @TmpCode 
@@ -477,10 +459,14 @@ IF OBJECT_ID('tempdb..#TmpClaimType') IS NOT NULL  DROP TABLE #TmpClaimType;
 	END									  					
 										  					
 IF @IsResult = 1	BEGIN	SET @Result = IIF(@CountIsError = 0,1,0) END
-ELSE				BEGIN	SET @Result = 'Failure' END	
-										  					
+ELSE				BEGIN	SET @Result = 'Failure'END	
+			
+							  								
+            							  					
        SELECT @IsResult IsResult		  					
 		,@Result Result					  					
 		,@Msg	 Msg 		
+
+
 
 END
