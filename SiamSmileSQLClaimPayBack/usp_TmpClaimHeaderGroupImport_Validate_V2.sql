@@ -21,6 +21,7 @@ GO
 -- update date: 2025-10-02 10:02 เพิ่ม IsActive ใน LEFT JOIN ClaimHeaderGroupImport
 -- Update date: 2025-10-16 14:01 Clear comment Krekpon.D
 -- Update date: 2025-10-30 09:34 Add ClaimMisc and Clean Script Sorawit kamlangsub
+-- Update date: 2026-03-11 13:16 Add Pa Validate PolicyNo Sorawit kamlangsub
 -- Description:	PROD (P30,1000) dl.DocumentListID = 137 (2000) dl.DocumentListID = 138 
 --	UAT  dl.DocumentListID = 134 (2000) dl.DocumentListID = 135
 -- =============================================
