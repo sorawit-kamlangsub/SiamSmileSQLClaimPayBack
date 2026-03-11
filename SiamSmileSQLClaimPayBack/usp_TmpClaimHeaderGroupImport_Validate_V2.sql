@@ -21,7 +21,8 @@ GO
 -- update date: 2025-10-02 10:02 เพิ่ม IsActive ใน LEFT JOIN ClaimHeaderGroupImport
 -- Update date: 2025-10-16 14:01 Clear comment Krekpon.D
 -- Update date: 2025-10-30 09:34 Add ClaimMisc and Clean Script Sorawit kamlangsub
--- Description:	
+-- Description:	PROD (P30,1000) dl.DocumentListID = 137 (2000) dl.DocumentListID = 138 
+--	UAT  dl.DocumentListID = 134 (2000) dl.DocumentListID = 135
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_TmpClaimHeaderGroupImport_Validate_V2]
 	@TmpCode VARCHAR(20)
@@ -30,7 +31,11 @@ AS
 BEGIN
 	
 SET NOCOUNT ON;
+
+--Test Zone
 --DECLARE @TmpCode VARCHAR(20) = 'IMCHG6812000071'
+--End Test
+
 DECLARE @ClaimHeaderSSS INT = 2;
 DECLARE @ClaimHeaderSSSPA INT = 3;
 DECLARE @ClaimCompensate INT = 4;
@@ -238,16 +243,16 @@ IF @IsResult = 1
 							,td.ClaimHeaderCodeInDB
 							,CASE 
 								WHEN 
-									-- ตรวจสอบเอกสาร PH ที่เป็นเคลมโรงพยาบาลต้องมีทั้งเอกสารเคลมโรงพยาบาล(24) กับหนังสือแจ้งชำระค่ารักษาพยาบาล (134)
+									-- ตรวจสอบเอกสาร PH ที่เป็นเคลมโรงพยาบาลต้องมีทั้งเอกสารเคลมโรงพยาบาล(24) กับหนังสือแจ้งชำระค่ารักษาพยาบาล (134,PROD 137)
 									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup IN ('P30','1000') AND dl.DocumentListID = 24 THEN 1 ELSE 0 END) >= 1
 									AND
-									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup IN ('P30','1000') AND dl.DocumentListID = 137 THEN 1 ELSE 0 END) >= 1
+									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup IN ('P30','1000') AND dl.DocumentListID = 134 THEN 1 ELSE 0 END) >= 1
 								THEN 1
 								WHEN 
-									-- ตรวจสอบเอกสาร PA ที่เป็นเคลมโรงพยาบาลต้องมีทั้งเอกสารเคลมโรงพยาบาล(26) กับหนังสือแจ้งชำระค่ารักษาพยาบาล (135)
+									-- ตรวจสอบเอกสาร PA ที่เป็นเคลมโรงพยาบาลต้องมีทั้งเอกสารเคลมโรงพยาบาล(26) กับหนังสือแจ้งชำระค่ารักษาพยาบาล (135,PROD 138)
 									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup = '2000' AND dl.DocumentListID = 26 THEN 1 ELSE 0 END) >= 1
 									AND
-									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup = '2000' AND dl.DocumentListID = 138 THEN 1 ELSE 0 END) >= 1
+									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup = '2000' AND dl.DocumentListID = 135 THEN 1 ELSE 0 END) >= 1
 								THEN 1
 								WHEN 
 									-- กรณีเป็นเคลมสาขา ต้องไม่มีของเคลมโรงพยาบาล
@@ -326,8 +331,7 @@ IF @IsResult = 1
 									,N' ตามกลุ่มที่ระบุ, '),'')
 						,IIF(doc.CountDoc > 0 ,N'บ.ส. ไม่มีเอกสารแนบ, ','')
 						,IIF(a.ClaimTypeCode = '',N'ไม่ได้ MappingType (H,C), ','')
-
-						--,IIF(c.PolicyNo = '' OR c.PolicyNo IS NULL,'ไม่มีกรมธรรม์ในรายการ บ.ส.','' ) --kittisak.Ph 20250513
+						,IIF(c.ProductGroup = '2000' AND (c.PolicyNo = '' OR c.PolicyNo IS NULL),'ไม่มีเลขกรมธรรม์','' )
 					)ValidateResult
 				---------------------------------------------------------------
 				,IIF(t.ClaimHeaderGroupTypeId = 6 ,'2000',a.ClaimTypeCode)	ClaimTypeCode
