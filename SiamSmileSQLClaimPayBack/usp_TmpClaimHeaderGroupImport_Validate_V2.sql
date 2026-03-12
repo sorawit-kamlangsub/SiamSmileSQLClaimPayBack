@@ -22,6 +22,7 @@ GO
 -- Update date: 2025-10-16 14:01 Clear comment Krekpon.D
 -- Update date: 2025-10-30 09:34 Add ClaimMisc and Clean Script Sorawit kamlangsub
 -- Update date: 2026-03-11 13:16 Add Pa Validate PolicyNo Sorawit kamlangsub
+-- Update date: 2026-03-12 08:47 เพิ่ม Validate กรณีเป็น บ.ส.นั้นเป็นเบิกจ่ายกองทุนม้าลาย Sorawit kamlangsub
 -- Description:	PROD (P30,1000) dl.DocumentListID = 137 (2000) dl.DocumentListID = 138 
 --	UAT  dl.DocumentListID = 134 (2000) dl.DocumentListID = 135
 -- =============================================
@@ -213,13 +214,13 @@ IF @IsResult = 1
 				-- ClaimMisc 
 				SELECT 
 					t.TmpClaimHeaderGroupImportId	
-					,cm.ClaimHeaderGroupCode		ClaimHeaderGroupCodeInDB
-					,cm.PayAmount					TotalAmount
-					,cm.PayAmount					TotalAmountSS
-					,org.Organize_ID				InsuranceCompanyId
-					,NULL							ClaimHeaderCodeInDB
-					,'Misc'							ProductGroup
-					,cm.PolicyNo					PolicyNo
+					,cm.ClaimHeaderGroupCode									ClaimHeaderGroupCodeInDB
+					,cm.PayAmount												TotalAmount
+					,cm.PayAmount												TotalAmountSS
+					,org.Organize_ID											InsuranceCompanyId
+					,NULL														ClaimHeaderCodeInDB
+					,IIF(cpbType.ClaimPaymentTypeId = 2, 'ZebraMisc','Misc')	ProductGroup
+					,cm.PolicyNo												PolicyNo
 				FROM #Tmp t
 					INNER JOIN [ClaimMiscellaneous].[misc].[ClaimMisc] cm
 						ON t.ClaimHeaderGroupCode = cm.ClaimHeaderGroupCode
@@ -227,6 +228,18 @@ IF @IsResult = 1
 						ON ins.InsuranceCompanyId = cm.InsuranceCompanyId
 					LEFT JOIN [DataCenterV1].[Organize].[Organize] org
 						ON org.OrganizeCode = ins.InsuranceCompanyCode
+					LEFT JOIN (
+							SELECT DISTINCT
+								h.ClaimMiscId
+								,cp.ClaimPaymentTypeId
+								,cp.ClaimPaymentTypeName
+							FROM [ClaimMiscellaneous].[misc].[ClaimMiscPaymentHeader] h
+								LEFT JOIN [ClaimMiscellaneous].[misc].[ClaimMiscPayment] p
+								 ON h.ClaimMiscPaymentHeaderId = p.ClaimMiscPaymentHeaderId
+								LEFT JOIN [ClaimMiscellaneous].[misc].[ClaimPaymentType] cp
+								 ON cp.ClaimPaymentTypeId = p.ClaimPaymentTypeId
+								) cpbType
+						ON cm.ClaimMiscId = cpbType.ClaimMiscId
 			)d;
 
 		----------------Update 2023-08-09-----------------------
@@ -333,6 +346,7 @@ IF @IsResult = 1
 						,IIF(doc.CountDoc > 0 ,N'บ.ส. ไม่มีเอกสารแนบ, ','')
 						,IIF(a.ClaimTypeCode = '',N'ไม่ได้ MappingType (H,C), ','')
 						,IIF(c.ProductGroup = '2000' AND (c.PolicyNo = '' OR c.PolicyNo IS NULL),'ไม่มีเลขกรมธรรม์','' )
+						,IIF(c.ProductGroup = 'ZebraMisc', 'ตรวจสอบรายการเคลมกองทุนรถม้าลาย','')
 					)ValidateResult
 				---------------------------------------------------------------
 				,IIF(t.ClaimHeaderGroupTypeId = 6 ,'2000',a.ClaimTypeCode)	ClaimTypeCode
