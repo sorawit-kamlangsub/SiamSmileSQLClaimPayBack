@@ -24,6 +24,7 @@ GO
 -- Update date: 2025-12-4 Sorawit Kamlangsub แก้ไข @TmpD เพิ่มขนาด Field ProductCode จาก 20 เป็น 255
 -- Update date: 2025-12-9 Sorawit Kamlangsub แก้ไข ClaimMisc เพิ่ม Left Join DataCenterV1 ด้วย cm.InsCode เอา Organize_Id มาเก็บใน InsId
 -- Update date: 2026-02-17 Sorawit Kamlangsub เพิ่ม ClaimPaymentTypeId
+-- Update date: 2026-03-17 Sorawit Kamlangsub เพิ่ม @ClaimGroupTypeId = 6 ในการ Insert ClaimWithdrawal
 -- =============================================
 ALTER PROCEDURE [Claim].[usp_ClaimPayBackDetail_InsertV4]
 	@ClaimGroupCodeList		NVARCHAR(MAX)
@@ -1190,7 +1191,7 @@ BEGIN
 	
 ----------------Kittisak.Ph 2024-04-05-------------------------------------------
 --บันทึกสถานะส่งตั้งเบิกเฉพาะเคลมออนไลน์ 
-	IF @ClaimGroupTypeId IN (2,7)				--Update Kittisak.Ph 2025-02-25 
+	IF @ClaimGroupTypeId IN (2,6,7)				--Update Kittisak.Ph 2025-02-25 
 	BEGIN
 
 		INSERT INTO [ClaimOnlineV2].[dbo].[ClaimWithdrawal]
