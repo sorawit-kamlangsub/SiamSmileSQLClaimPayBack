@@ -160,7 +160,7 @@ CREATE TABLE #Tmplst
 	,Amount					DECIMAL(16,2) 
 	,ClaimGroupTypeId		INT
 	,TransferAmount			DECIMAL(16,2)
-	,ProductTypeDetail		VARCHAR(100)
+	,ProductTypeDetail		NVARCHAR(100)
 );
 
 CREATE TABLE #TmpDoc 
