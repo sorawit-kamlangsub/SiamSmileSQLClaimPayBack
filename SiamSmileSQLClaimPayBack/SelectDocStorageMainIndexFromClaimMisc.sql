@@ -1,17 +1,35 @@
 USE [ClaimPayBack]
 GO
-	
-	DECLARE @ClaimHeaderGroupCodes	NVARCHAR(MAX) = 'TSCMO57369010001' --CHSPO23169010002
-  
-  SELECT DISTINCT Element
+/****** Object:  StoredProcedure [dbo].[usp_GetDocumentIdDocStorage_Select]    Script Date: 18/3/2569 9:38:33 ******/
+--SET ANSI_NULLS ON
+--GO
+--SET QUOTED_IDENTIFIER ON
+--GO
+-- =============================================
+-- Author:		Sorawit KamlangSub
+-- Create date: 2025-11-26 15:30
+-- Update date: 2026-02-23 14:22 Remove doctype
+-- Description:	For Get DocStorage Data
+-- =============================================
+--ALTER PROCEDURE [dbo].[usp_GetDocumentIdDocStorage_Select]
+--	@ClaimHeaderGroupCodes	NVARCHAR(MAX)
+--AS
+--BEGIN
+--	SET NOCOUNT ON;
+
+	-- Start Test
+	DECLARE  @ClaimHeaderGroupCodes NVARCHAR(MAX) =  'ZBMPO88869020001';
+	-- End Test
+
+	SELECT DISTINCT Element
 	INTO #Tmplst
 	from dbo.func_SplitStringToTable(@ClaimHeaderGroupCodes,',');
 	
 	SELECT 
 		CASE 
 			WHEN doc.TbType = 'ClaimMisc' THEN cm.ClaimMiscNo
-			WHEN doc.TbType = 'ClaimOnlineAppCode' AND doc.DocumentSubTypeId = 339 THEN ISNULL(cm.ApplicationCode,'-')
-			WHEN doc.TbType = 'ClaimOnlineDocCode' AND doc.DocumentSubTypeId = 339 THEN doc.DocumentCode
+			WHEN doc.TbType = 'ClaimOnlineAppCode' THEN cm.ApplicationCode
+			WHEN doc.TbType = 'ClaimOnlineDocCode' THEN doc.DocumentCode
 		END MainIndex
 		,cm.ClaimHeaderGroupCode
 		,doc.DocumentId
@@ -24,11 +42,8 @@ GO
 					doc.ClaimMiscId
 					,doc.DocumentId
 					,doc.DocumentCode
-					,doct.DocumentSubTypeId
 					,'ClaimMisc'			TbType
 				FROM [ClaimMiscellaneous].[misc].[Document] doc
-					LEFT JOIN [ClaimMiscellaneous].[misc].[DocumentType] doct
-						ON doct.DocumentTypeId = doc.DocumentTypeId
 				WHERE doc.IsActive = 1
 				AND doc.DocumentTypeId <> 3
 
@@ -38,7 +53,6 @@ GO
 					ClaimMiscId
 					,DocumentId
 					,DocumentCode
-					,DocumentSubTypeId
 					,'ClaimOnlineAppCode'			TbType
 				FROM [ClaimMiscellaneous].[misc].[DocumentClaimOnLine]
 				WHERE IsActive = 1
@@ -50,7 +64,6 @@ GO
 					ClaimMiscId
 					,DocumentId
 					,DocumentCode
-					,DocumentSubTypeId
 					,'ClaimOnlineDocCode'			TbType
 				FROM [ClaimMiscellaneous].[misc].[DocumentClaimOnLine]
 				WHERE IsActive = 1
@@ -61,3 +74,13 @@ GO
 	WHERE cm.IsActive = 1
 
 	IF OBJECT_ID('tempdb..#Tmplst') IS NOT NULL  DROP TABLE #Tmplst;
+
+	--DECLARE @MainIndex				NVARCHAR(MAX)
+	--DECLARE @DocumentId				UNIQUEIDENTIFIER
+	--DECLARE @ClaimHeaderGroupCode	NVARCHAR(MAX)
+	--SELECT
+	--	@MainIndex				MainIndex
+	--	,@DocumentId			DocumentId
+	--	,@ClaimHeaderGroupCode	ClaimHeaderGroupCode
+
+--END
