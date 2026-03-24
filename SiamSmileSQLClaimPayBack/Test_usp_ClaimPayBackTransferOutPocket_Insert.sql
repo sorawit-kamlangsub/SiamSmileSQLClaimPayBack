@@ -25,7 +25,7 @@ GO
 --	SET NOCOUNT ON;
 
 	-- For Test
-	DECLARE @ClaimPayBackTransferId NVARCHAR(MAX) = '4176,4175,4174';--'4166,4168' 4165
+	DECLARE @ClaimPayBackTransferId NVARCHAR(MAX) = '5296,5298,5299';--'4166,4168' 4165
 	DECLARE @CreatedByUserId INT = 1
 
 	-- Add the parameters for the stored procedure here
@@ -70,7 +70,7 @@ GO
 			WHERE cd.IsActive = 1	
 			AND c.IsActive = 1
 			AND cpt.IsActive = 1
-			AND cpt.OutOfPocketStatus = 2
+			AND cpt.OutOfPocketStatus = 7
 
 			SELECT 
 					ROW_NUMBER() OVER(ORDER BY (ClaimPayBackTransferId) asc ) AS rwId
@@ -183,7 +183,7 @@ GO
 			-----------------------------------
 			BEGIN TRY
 				BEGIN TRANSACTION
-	
+				
 				DECLARE @OffsetGNo INT = 1,
 						@TotalGroupNoCount INT;
 				SELECT @TotalGroupNoCount = COUNT(DISTINCT GroupNo) FROM @SumResult;

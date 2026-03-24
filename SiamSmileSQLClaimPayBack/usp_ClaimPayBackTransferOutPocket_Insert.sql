@@ -70,7 +70,7 @@ BEGIN
 			WHERE cd.IsActive = 1	
 			AND c.IsActive = 1
 			AND cpt.IsActive = 1
-			AND cpt.OutOfPocketStatus = 2
+			AND cpt.OutOfPocketStatus = 7
 
 			SELECT 
 					ROW_NUMBER() OVER(ORDER BY (ClaimPayBackTransferId) asc ) AS rwId
@@ -342,6 +342,23 @@ BEGIN
 				 ,@CreatedByUserId			CreatedByUserId
 				 ,@CreatedDate				CreatedDate
 				FROM #TmpGroupTotalRunNo
+
+/* Update ClaimPayBackTransfer  */	
+
+				--SELECT * 
+				UPDATE cpt
+					SET cpt.OutOfPocketStatus = 2
+						,cpt.UpdatedDate = @CreatedDate
+						,cpt.UpdatedByUserId = @CreatedByUserId
+				FROM dbo.ClaimPayBackTransfer cpt
+				INNER JOIN 
+					(
+						SELECT
+						 ClaimPayBackTransferId
+						FROM #TmpGroupTotalRunNo
+						GROUP BY ClaimPayBackTransferId
+					) t
+					ON t.ClaimPayBackTransferId = cpt.ClaimPayBackTransferId
 	
 				SET @IsResult   = 1;
 				SET @Msg        = 'บันทึก สำเร็จ';

@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackTransferOutPocket_Select]    Script Date: 30/1/2569 8:57:24 ******/
+
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -60,18 +60,18 @@ BEGIN
       ,t.ClaimGroupTypeId
 	  ,cg_t.ClaimGroupType
       ,t.Amount
-      ,t.TransferAmount
-      ,t.TransferDate
+      ,t.OutOfPocketAmount					TransferAmount
+      ,t.OutOfPocketDate					TransferDate	
       ,t.ClaimPayBackTransferStatusId
 	  ,ops.OutOfPocketStatusName
-	  ,t.OutOfPocketStatus				OutOfPocketStatus
+	  ,t.OutOfPocketStatus					OutOfPocketStatus
       ,t.IsActive
       ,t.CreatedByUserId
       ,t.CreatedDate
       ,t.UpdatedByUserId
       ,t.UpdatedDate
 	  ,CASE WHEN t.Amount > @OutOfPocketAmountLimit THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END IsCheck 
-	  ,IIF(cpbsg.ClaimPayBackTransferId = t.ClaimPayBackTransferId , 1 ,0)						IsGroup
+	  ,IIF(cpbsg.ClaimPayBackTransferId = t.ClaimPayBackTransferId OR cpbsgdt.ClaimPayBackTransferId IS NOT NULL, 1 ,0)						IsGroup
 	  ,COUNT(t.ClaimPayBackTransferId) OVER ( ) AS TotalCount
 	FROM dbo.ClaimPayBackTransfer t
 		LEFT JOIN dbo.ClaimPayBackOutOfPocketStatus ops
@@ -80,17 +80,50 @@ BEGIN
 			ON t.ClaimGroupTypeId = cg_t.ClaimGroupTypeId
 		LEFT JOIN 
 		(
-			SELECT cpbsg.ClaimPayBackTransferId
-			FROM dbo.ClaimPayBackSubGroup cpbsg
+			SELECT 
+				cpbsg.ClaimPayBackTransferId 
+				FROM dbo.ClaimPayBackSubGroup cpbsg
 			WHERE cpbsg.IsActive = 1
-			GROUP BY cpbsg.ClaimPayBackTransferId
+				AND cpbsg.TransactionType = 2
+				GROUP BY cpbsg.ClaimPayBackTransferId
 		) cpbsg
 			ON t.ClaimPayBackTransferId = cpbsg.ClaimPayBackTransferId
-	WHERE t.ClaimPayBackTransferStatusId = 2 
-	AND (t.CreatedDate >= @CreatedDateFrom AND t.CreatedDate < @CreatedDateTo)
+		LEFT JOIN
+		(
+			SELECT 
+				ClaimPayBackTransferId
+			FROM dbo.ClaimPayBackSubGroupDetail
+			WHERE IsActive = 1
+			GROUP BY ClaimPayBackTransferId
+		) cpbsgdt
+			ON cpbsgdt.ClaimPayBackTransferId = t.ClaimPayBackTransferId
+		LEFT JOIN (
+			SELECT 
+				TransactionType
+				,ClaimPayBackTransferId
+			FROM dbo.ClaimPayBackSubGroup
+			WHERE IsActive = 1
+			GROUP BY 
+				TransactionType
+				,ClaimPayBackTransferId
+		)cpsgf
+			ON t.ClaimPayBackTransferId = cpsgf.ClaimPayBackTransferId
+			
+	WHERE (t.CreatedDate >= @CreatedDateFrom AND t.CreatedDate < @CreatedDateTo)
 	AND (t.OutOfPocketStatus = @OutOfPocketStatusId OR @OutOfPocketStatusId IS NULL)
 	AND (t.IsActive = 1)
 	AND (t.ClaimGroupTypeId = @ClaimGroupType OR @ClaimGroupType IS NULL)
+	AND (
+		(
+			t.ClaimGroupTypeId = 4
+			AND
+			(
+				(cpsgf.TransactionType = 1 AND cpsgf.ClaimPayBackTransferId IS NOT NULL)
+			)
+		)
+		OR
+		t.ClaimGroupTypeId <> 4 
+	) 
 
 	ORDER BY CASE WHEN @l_OrderType IS NULL AND @l_SortField IS NULL THEN t.ClaimPayBackTransferId END ASC 
 		,CASE WHEN @l_OrderType = 'ASC' AND @l_SortField = 'ClaimPayBackTransferCode' THEN t.ClaimPayBackTransferId END ASC 
