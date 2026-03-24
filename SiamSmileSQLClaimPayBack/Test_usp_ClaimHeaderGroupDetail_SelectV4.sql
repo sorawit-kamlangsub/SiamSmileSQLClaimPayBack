@@ -20,9 +20,9 @@ GO
 -- Description:	
 -- =============================================
 DECLARE
-	 @ProductGroupId		INT 			= 4
+	 @ProductGroupId		INT 			= 2
 	,@InsuranceId			INT				= NULL	
-	,@ClaimGroupTypeId		INT				= 7	  
+	,@ClaimGroupTypeId		INT				= 4  
 	,@BranchId				INT				= NULL	
 	,@CreateByUser_Code		VARCHAR(20)		= NULL
 
@@ -30,7 +30,7 @@ DECLARE
 	,@PageSize				INT				= NULL
 	,@SortField				NVARCHAR(MAX)	= NULL
 	,@OrderType				NVARCHAR(MAX)	= NULL
-	,@SearchDetail			NVARCHAR(MAX)	= NULL 
+	,@SearchDetail			NVARCHAR(MAX)	= 'BUHH-888-68110003-0' 
 	,@IsShowDocumentLink	BIT				= NULL
 --AS
 --BEGIN

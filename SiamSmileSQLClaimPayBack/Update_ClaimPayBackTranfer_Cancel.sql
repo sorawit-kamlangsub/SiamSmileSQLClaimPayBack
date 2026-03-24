@@ -13,14 +13,7 @@ DECLARE @List TABLE (
 
 INSERT INTO @List (Id)
 VALUES 
-(4148)
-,(4149)
-,(4151)
-,(4153)
-,(4154)
-,(4155)
-,(4257)
-,(4263)
+(5302)
 
 SELECT @max = COUNT(*) FROM @List
 
