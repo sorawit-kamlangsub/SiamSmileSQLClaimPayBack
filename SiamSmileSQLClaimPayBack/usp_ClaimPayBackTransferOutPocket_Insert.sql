@@ -47,30 +47,47 @@ BEGIN
 	INTO #Tmplst
 	from dbo.func_SplitStringToTable(@ClaimPayBackTransferId,',');
 
+	SELECT cd.ClaimPayBackDetailId
+			,c.ClaimPayBackCode				CPGCode
+			,c.ClaimPayBackId
+			, cd.ClaimPayBackDetailCode		
+			, cpt.ClaimPayBackTransferCode
+			, cd.ItemCount					ItemCountDetail
+			, cd.Amount
+			, cd.CreatedDate
+			, c.ClaimPayBackTransferId					
+	INTO #TmpD
+	FROM dbo.ClaimPayBackDetail cd
+	INNER JOIN dbo.ClaimPayBack c
+		ON cd.ClaimPayBackId = c.ClaimPayBackId
+	INNER JOIN dbo.ClaimPayBackTransfer cpt
+		ON cpt.ClaimPayBackTransferId = c.ClaimPayBackTransferId
+	INNER JOIN #Tmplst tl
+		ON tl.Element = c.ClaimPayBackTransferId
+	WHERE cd.IsActive = 1	
+	AND c.IsActive = 1
+	AND cpt.IsActive = 1
+	AND cpt.OutOfPocketStatus = 7
+	
+	DECLARE @CountLimit  INT = 0;
+	SELECT @CountLimit = COUNT(rs.CPGCode)
+	FROM
+	(
+		SELECT 
+			SUM(Amount) SumAmount
+			,CPGCode
+		FROM #TmpD
+		GROUP BY CPGCode			
+	) rs
+	WHERE rs.SumAmount > @OutOfPocketAmountLimit
+	IF @CountLimit > 0
+	BEGIN
+	    SET @IsResult = 0;
+		SET @Msg = CONCAT('กรุณาตรวจสอบ เนื่องจาก ยอดเงิน CPBG มากกว่า ',FORMAT(@OutOfPocketAmountLimit,'N2'));
+	END
+
 	IF (@IsResult = 1)
 		BEGIN
-
-			SELECT cd.ClaimPayBackDetailId
-					,c.ClaimPayBackCode				CPGCode
-					,c.ClaimPayBackId
-					, cd.ClaimPayBackDetailCode		
-					, cpt.ClaimPayBackTransferCode
-					, cd.ItemCount					ItemCountDetail
-					, cd.Amount
-					, cd.CreatedDate
-					, c.ClaimPayBackTransferId					
-			INTO #TmpD
-			FROM dbo.ClaimPayBackDetail cd
-			INNER JOIN dbo.ClaimPayBack c
-				ON cd.ClaimPayBackId = c.ClaimPayBackId
-			INNER JOIN dbo.ClaimPayBackTransfer cpt
-				ON cpt.ClaimPayBackTransferId = c.ClaimPayBackTransferId
-			INNER JOIN #Tmplst tl
-				ON tl.Element = c.ClaimPayBackTransferId
-			WHERE cd.IsActive = 1	
-			AND c.IsActive = 1
-			AND cpt.IsActive = 1
-			AND cpt.OutOfPocketStatus = 7
 
 			SELECT 
 					ROW_NUMBER() OVER(ORDER BY (ClaimPayBackTransferId) asc ) AS rwId

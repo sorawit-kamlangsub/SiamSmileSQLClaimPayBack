@@ -25,7 +25,7 @@ GO
 --	SET NOCOUNT ON;
 
 	-- For Test
-	DECLARE @ClaimPayBackTransferId NVARCHAR(MAX) = '5296,5298,5299';--'4166,4168' 4165
+	DECLARE @ClaimPayBackTransferId NVARCHAR(MAX) = '5300';--'4166,4168' 4165
 	DECLARE @CreatedByUserId INT = 1
 
 	-- Add the parameters for the stored procedure here
@@ -71,6 +71,19 @@ GO
 			AND c.IsActive = 1
 			AND cpt.IsActive = 1
 			AND cpt.OutOfPocketStatus = 7
+
+			DECLARE @CountLimit  INT = 0;
+			SELECT @CountLimit = COUNT(rs.CPGCode)
+			FROM
+			(
+				SELECT 
+					SUM(Amount) SumAmount
+					,CPGCode
+				FROM #TmpD
+				GROUP BY CPGCode			
+			) rs
+			WHERE rs.SumAmount > @OutOfPocketAmountLimit
+			SELECT @CountLimit CountLimit
 
 			SELECT 
 					ROW_NUMBER() OVER(ORDER BY (ClaimPayBackTransferId) asc ) AS rwId
