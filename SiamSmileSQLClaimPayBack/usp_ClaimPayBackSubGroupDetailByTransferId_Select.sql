@@ -1,10 +1,11 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackSubGroupDetailByTransferId_Select]    Script Date: 6/2/2569 13:43:56 ******/
+
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+
 -- =============================================
 -- Author:		Krekpon.D
 -- Create date: 2026-01-31 11:14
@@ -18,125 +19,24 @@ BEGIN
 	SET NOCOUNT ON;
 
 	--TEST
-	--DECLARE @ClaimPayBackTransferId INT = 4185;
+	--DECLARE @ClaimPayBackTransferId INT = 5301;
 	--END Test
 
-	DECLARE @Tmp TABLE
-	(
-		ClaimPayBackSubGroupId INT
-		,ClaimPayBackSubGroupCode VARCHAR(MAX)
-		,ClaimPayBackTransferCode VARCHAR(MAX)
-		,ClaimPayBackTransferStatusId INT
-		,ClaimGroupType NVARCHAR(MAX)
-		,TransferDate DATETIME2
-		,Amount DECIMAL(16,2)
-		,ClaimPayBackTransferId INT
-		,IsThisCpbt BIT
-	);
-
-	DECLARE @IsLimitAmount BIT = 0;
-	DECLARE @ResultOutOfPocketAmountLimit  INT;
-	SELECT @ResultOutOfPocketAmountLimit = COUNT(DISTINCT ClaimPayBackSubGroupId) FROM ClaimPayBackSubGroupDetail WHERE ClaimPayBackTransferId = @ClaimPayBackTransferId 
-
-	IF @ResultOutOfPocketAmountLimit > 1
-	BEGIN
-		SET @IsLimitAmount = 1;
-	END
-
-	DECLARE @ClaimPayBackSubGroupId INT;
-	SELECT @ClaimPayBackSubGroupId = ClaimPayBackSubGroupId FROM [dbo].ClaimPayBackSubGroupDetail WHERE ClaimPayBackTransferId = @ClaimPayBackTransferId
-
-	IF @IsLimitAmount = 0
-	BEGIN
-		INSERT INTO @Tmp
-		(
-			ClaimPayBackSubGroupId
-			,ClaimPayBackSubGroupCode
-			,ClaimPayBackTransferCode
-			,ClaimPayBackTransferStatusId
-			,ClaimGroupType
-			,TransferDate
-			,Amount
-			,ClaimPayBackTransferId
-			,IsThisCpbt
-		)
-		SELECT
-				cpbsgd.ClaimPayBackSubGroupId  
-				,cpbsg.ClaimPayBackSubGroupCode
-				,cpbt.ClaimPayBackTransferCode
-				,cpbt.ClaimPayBackTransferStatusId
-				,cgt.ClaimGroupType
-				,cpbt.TransferDate
-				,cpbt.Amount
-				,cpbsgd.ClaimPayBackTransferId
-				,IIF(cpbsgd.ClaimPayBackTransferId = @ClaimPayBackTransferId,1,0) IsThisCpbt
-			FROM [dbo].ClaimPayBackSubGroupDetail cpbsgd
-				LEFT JOIN (
-						SELECT
-							ClaimPayBackTransferCode
-							,ClaimPayBackTransferId
-							,ClaimPayBackTransferStatusId
-							,ClaimGroupTypeId
-							,TransferDate
-							,Amount
-						FROM [dbo].ClaimPayBackTransfer 	
-						WHERE IsActive = 1
-					) cpbt
-						ON cpbt.ClaimPayBackTransferId = cpbsgd.ClaimPayBackTransferId
-				LEFT JOIN (
-					SELECT
-						ClaimPayBackSubGroupId
-						,ClaimPayBackSubGroupCode
-						,Amount
-					FROM dbo.ClaimPayBackSubGroup
-					WHERE IsActive = 1
-						AND TransactionType = 2
-				) cpbsg
-					ON cpbsg.ClaimPayBackSubGroupId = cpbsgd.ClaimPayBackSubGroupId
-				LEFT JOIN (
-					SELECT 
-					cgt.ClaimGroupTypeId
-					,cgt.ClaimGroupType
-					FROM ClaimGroupType cgt
-					WHERE cgt.IsActive = 1
-				)cgt
-					ON cgt.ClaimGroupTypeId = cpbt.ClaimGroupTypeId
-			WHERE cpbsgd.ClaimPayBackSubGroupId = @ClaimPayBackSubGroupId
-			GROUP BY cpbsgd.ClaimPayBackSubGroupId
-					,cpbsg.ClaimPayBackSubGroupCode
-					,cpbsgd.ClaimPayBackTransferId
-					,cpbt.ClaimPayBackTransferStatusId
-					,cgt.ClaimGroupType
-					,cpbt.TransferDate
-					,cpbt.ClaimPayBackTransferCode
-					,cpbt.Amount
-			ORDER BY IsThisCpbt DESC
-	END
-	ELSE
-	BEGIN
-
-		INSERT INTO @Tmp
-		(
-			ClaimPayBackSubGroupId
-			,ClaimPayBackSubGroupCode
-			,ClaimPayBackTransferCode
-			,ClaimPayBackTransferStatusId
-			,ClaimGroupType
-			,TransferDate
-			,Amount
-			,ClaimPayBackTransferId
-			,IsThisCpbt
-		)
 		SELECT
 				cpbsg.ClaimPayBackSubGroupId  
 				,cpbsg.ClaimPayBackSubGroupCode
 				,cpbt.ClaimPayBackTransferCode
 				,cpbt.ClaimPayBackTransferStatusId
+				,cpbts.ClaimPayBackTransferStatus
+				,cpbt.OutOfPocketStatus
+				,cpbops.OutOfPocketStatusName
 				,cgt.ClaimGroupType
 				,cpbt.TransferDate
 				,cpbsg.Amount
 				,cpbsg.ClaimPayBackTransferId
 				,IIF(cpbsg.ClaimPayBackTransferId = @ClaimPayBackTransferId,1,0) IsThisCpbt
+				,cpbsg.IsPayTransfer
+				,cpbsg.BillingTransferDate
 			FROM [dbo].[ClaimPayBackTransfer] cpbt
 				LEFT JOIN (
 					SELECT 
@@ -152,16 +52,18 @@ BEGIN
 						,ClaimPayBackSubGroupCode
 						,ClaimPayBackTransferId
 						,Amount
+						,IsPayTransfer
+						,BillingTransferDate
 					FROM dbo.ClaimPayBackSubGroup
 					WHERE IsActive = 1
 						AND TransactionType = 2
 				) cpbsg
 					ON cpbsg.ClaimPayBackTransferId = cpbt.ClaimPayBackTransferId
+				LEFT JOIN ClaimPayBackTransferStatus cpbts
+					ON cpbt.ClaimPayBackTransferStatusId = cpbts.ClaimPayBackTransferStatusId
+				LEFT JOIN ClaimPayBackOutOfPocketStatus cpbops
+					ON cpbt.OutOfPocketStatus = cpbops.OutOfPocketStatusId
 			WHERE cpbt.ClaimPayBackTransferId = @ClaimPayBackTransferId
 			ORDER BY IsThisCpbt DESC
-
-	END
-
-	SELECT * FROM @Tmp
 
 END;
