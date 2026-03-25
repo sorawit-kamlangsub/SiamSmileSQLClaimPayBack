@@ -19,7 +19,7 @@ BEGIN
 	SET NOCOUNT ON;
 
 	--TEST
-	--DECLARE @ClaimPayBackTransferId INT = 5299;
+	--DECLARE @ClaimPayBackTransferId INT = 5301;
 	--END Test
 		
 		DECLARE @ClaimPayBackSubGroupId INT;
@@ -41,18 +41,7 @@ BEGIN
 				,cpbsg.IsPayTransfer
 				,cpbsg.BillingTransferDate
 			FROM [dbo].[ClaimPayBackSubGroupDetail] cpbsgdt
-				LEFT JOIN (
-					SELECT 
-						ClaimPayBackTransferId
-						,ClaimPayBackTransferCode
-						,ClaimPayBackTransferStatusId
-						,OutOfPocketStatus
-						,ClaimGroupTypeId
-						,TransferDate
-						,Amount
-					FROM dbo.ClaimPayBackTransfer 
-					WHERE IsActive = 1
-				) cpbt
+				INNER JOIN dbo.ClaimPayBackTransfer cpbt
 					ON cpbt.ClaimPayBackTransferId = cpbsgdt.ClaimPayBackTransferId
 				LEFT JOIN (
 					SELECT 
@@ -80,6 +69,7 @@ BEGIN
 				LEFT JOIN ClaimPayBackOutOfPocketStatus cpbops
 					ON cpbt.OutOfPocketStatus = cpbops.OutOfPocketStatusId
 			WHERE cpbsgdt.IsActive = 1
+			AND cpbt.IsActive = 1
 			AND cpbsgdt.ClaimPayBackSubGroupId = @ClaimPayBackSubGroupId
 			ORDER BY IsThisCpbt DESC
 
