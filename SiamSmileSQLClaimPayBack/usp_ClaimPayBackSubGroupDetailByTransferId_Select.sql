@@ -19,11 +19,14 @@ BEGIN
 	SET NOCOUNT ON;
 
 	--TEST
-	--DECLARE @ClaimPayBackTransferId INT = 5301;
+	--DECLARE @ClaimPayBackTransferId INT = 5315;
 	--END Test
 		
-		DECLARE @ClaimPayBackSubGroupId INT;
-		SELECT @ClaimPayBackSubGroupId = ClaimPayBackSubGroupId FROM [dbo].ClaimPayBackSubGroupDetail WHERE ClaimPayBackTransferId = @ClaimPayBackTransferId
+		SELECT 
+			ClaimPayBackSubGroupId 
+		INTO #Tmp
+		FROM [dbo].ClaimPayBackSubGroupDetail 
+		WHERE ClaimPayBackTransferId = @ClaimPayBackTransferId
 
 		SELECT DISTINCT
 				cpbsg.ClaimPayBackSubGroupId  
@@ -35,7 +38,7 @@ BEGIN
 				,cpbops.OutOfPocketStatusName	ClaimPayBackOutOfPokectStatus
 				,cgt.ClaimGroupType
 				,cpbt.TransferDate
-				,cpbt.Amount
+				,IIF(cpbsg.ClaimPayBackTransferId IS NULL,cpbt.Amount,cpbsg.Amount)	Amount
 				,cpbsgdt.ClaimPayBackTransferId
 				,IIF(cpbsgdt.ClaimPayBackTransferId = @ClaimPayBackTransferId,CAST(1 AS BIT),CAST(0 AS BIT)) IsThisCpbt
 				,cpbsg.IsPayTransfer
@@ -68,9 +71,12 @@ BEGIN
 					ON cpbt.ClaimPayBackTransferStatusId = cpbts.ClaimPayBackTransferStatusId
 				LEFT JOIN ClaimPayBackOutOfPocketStatus cpbops
 					ON cpbt.OutOfPocketStatus = cpbops.OutOfPocketStatusId
+				INNER JOIN #Tmp t
+					ON t.ClaimPayBackSubGroupId = cpbsgdt.ClaimPayBackSubGroupId
 			WHERE cpbsgdt.IsActive = 1
 			AND cpbt.IsActive = 1
-			AND cpbsgdt.ClaimPayBackSubGroupId = @ClaimPayBackSubGroupId
 			ORDER BY IsThisCpbt DESC
+
+			IF OBJECT_ID('tempdb..#Tmp') IS NOT NULL  DROP TABLE #Tmp;
 
 END;
