@@ -19,25 +19,41 @@ BEGIN
 	SET NOCOUNT ON;
 
 	--TEST
-	--DECLARE @ClaimPayBackTransferId INT = 5301;
+	--DECLARE @ClaimPayBackTransferId INT = 5299;
 	--END Test
+		
+		DECLARE @ClaimPayBackSubGroupId INT;
+		SELECT @ClaimPayBackSubGroupId = ClaimPayBackSubGroupId FROM [dbo].ClaimPayBackSubGroupDetail WHERE ClaimPayBackTransferId = @ClaimPayBackTransferId
 
-		SELECT
+		SELECT DISTINCT
 				cpbsg.ClaimPayBackSubGroupId  
 				,cpbsg.ClaimPayBackSubGroupCode
 				,cpbt.ClaimPayBackTransferCode
 				,cpbt.ClaimPayBackTransferStatusId
 				,cpbts.ClaimPayBackTransferStatus
-				,cpbt.OutOfPocketStatus
-				,cpbops.OutOfPocketStatusName
+				,cpbt.OutOfPocketStatus			ClaimPayBackOutOfPokectStatusId		
+				,cpbops.OutOfPocketStatusName	ClaimPayBackOutOfPokectStatus
 				,cgt.ClaimGroupType
 				,cpbt.TransferDate
-				,cpbsg.Amount
-				,cpbsg.ClaimPayBackTransferId
-				,IIF(cpbsg.ClaimPayBackTransferId = @ClaimPayBackTransferId,1,0) IsThisCpbt
+				,cpbt.Amount
+				,cpbsgdt.ClaimPayBackTransferId
+				,IIF(cpbsgdt.ClaimPayBackTransferId = @ClaimPayBackTransferId,CAST(1 AS BIT),CAST(0 AS BIT)) IsThisCpbt
 				,cpbsg.IsPayTransfer
 				,cpbsg.BillingTransferDate
-			FROM [dbo].[ClaimPayBackTransfer] cpbt
+			FROM [dbo].[ClaimPayBackSubGroupDetail] cpbsgdt
+				LEFT JOIN (
+					SELECT 
+						ClaimPayBackTransferId
+						,ClaimPayBackTransferCode
+						,ClaimPayBackTransferStatusId
+						,OutOfPocketStatus
+						,ClaimGroupTypeId
+						,TransferDate
+						,Amount
+					FROM dbo.ClaimPayBackTransfer 
+					WHERE IsActive = 1
+				) cpbt
+					ON cpbt.ClaimPayBackTransferId = cpbsgdt.ClaimPayBackTransferId
 				LEFT JOIN (
 					SELECT 
 					cgt.ClaimGroupTypeId
@@ -58,12 +74,13 @@ BEGIN
 					WHERE IsActive = 1
 						AND TransactionType = 2
 				) cpbsg
-					ON cpbsg.ClaimPayBackTransferId = cpbt.ClaimPayBackTransferId
+					ON cpbsg.ClaimPayBackSubGroupId = cpbsgdt.ClaimPayBackSubGroupId
 				LEFT JOIN ClaimPayBackTransferStatus cpbts
 					ON cpbt.ClaimPayBackTransferStatusId = cpbts.ClaimPayBackTransferStatusId
 				LEFT JOIN ClaimPayBackOutOfPocketStatus cpbops
 					ON cpbt.OutOfPocketStatus = cpbops.OutOfPocketStatusId
-			WHERE cpbt.ClaimPayBackTransferId = @ClaimPayBackTransferId
+			WHERE cpbsgdt.IsActive = 1
+			AND cpbsgdt.ClaimPayBackSubGroupId = @ClaimPayBackSubGroupId
 			ORDER BY IsThisCpbt DESC
 
 END;
