@@ -1,27 +1,27 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackByTransfer_Select]    Script Date: 14/10/2568 14:04:19 ******/
+
 --SET ANSI_NULLS ON
 --GO
 --SET QUOTED_IDENTIFIER ON
 --GO
 
--- =============================================
--- Author:		Prattana  Phiwkaew
--- Create date: 2021-10-07 10:03
--- Description:	<Description,,>
--- =============================================
+---- =============================================
+---- Author:		Prattana  Phiwkaew
+---- Create date: 2021-10-07 10:03
+---- Update date: 2026-02-06 16:11 Sorawit Kamlangsub
+---- Description:	<Description,,>
+---- =============================================
 --ALTER PROCEDURE [dbo].[usp_ClaimPayBackByTransfer_Select]
-DECLARE
-	-- Add the parameters for the stored procedure here
-	 @ClaimPayBackTransferId	INT = NULL
+--	-- Add the parameters for the stored procedure here
+--	 @ClaimPayBackTransferId	INT = NULL
 
 
-	,@IndexStart			INT = NULL 
-	,@PageSize				INT = NULL 
-	,@SortField				NVARCHAR(MAX) = NULL
-	,@OrderType				NVARCHAR(MAX) = NULL
-	,@SearchDetail			NVARCHAR(MAX) = NULL
+--	,@IndexStart			INT = NULL 
+--	,@PageSize				INT = NULL 
+--	,@SortField				NVARCHAR(MAX) = NULL
+--	,@OrderType				NVARCHAR(MAX) = NULL
+--	,@SearchDetail			NVARCHAR(MAX) = NULL
 
 --AS
 --BEGIN
@@ -29,6 +29,14 @@ DECLARE
 --	-- interfering with SELECT statements.
 --	SET NOCOUNT ON;
 ----------------------------------------------------------
+
+DECLARE
+		@ClaimPayBackTransferId INT = 5309,
+		@IndexStart INT = 0,
+		@PageSize INT = 10,
+		@SortField NVARCHAR(MAX) = NULL,
+		@OrderType NVARCHAR(MAX) = NULL,
+		@SearchDetail NVARCHAR(MAX) = NULL;
 
 DECLARE @l_IndexStart INT				= @IndexStart;
 DECLARE @l_PageSize INT				= @PageSize;
@@ -61,7 +69,8 @@ SELECT b.ClaimPayBackId
       ,b.UpdatedDate 
 	  ,t.CreatedDate					TransferCreatedDate
 	  ,t.UpdatedDate					TransferUpdatedDate
-	   ,COUNT(b.ClaimPayBackId) OVER ( ) AS TotalCount
+	  ,COUNT(b.ClaimPayBackId) OVER ( ) AS TotalCount
+	  ,cpbsgd.ClaimPayBackSubGroupId
 FROM dbo.ClaimPayBack b
 	LEFT JOIN dbo.ClaimPayBackTransfer t
 		ON b.ClaimPayBackTransferId = t.ClaimPayBackTransferId
@@ -73,9 +82,11 @@ FROM dbo.ClaimPayBack b
 		ON b.BranchId = brh.Branch_ID
 	LEFT JOIN DataCenterV1.Person.vw_PersonUser pu
 		ON b.CreatedByUserId = pu.UserId
+	LEFT JOIN ClaimPayBackSubGroupDetail cpbsgd
+		ON cpbsgd.ClaimPayBackId = b.ClaimPayBackId
 WHERE (b.ClaimPayBackTransferId = @ClaimPayBackTransferId)
 AND (b.IsActive = 1)
-
+AND (cpbsgd.ClaimPayBackSubGroupId = @l_SearchDetail  OR @l_SearchDetail LIKE '')
 --AND (b.ClaimPayBackCode LIKE N'%'+ @l_SearchDetail + '%' OR @l_SearchDetail IS NULL)
 
 ORDER BY CASE WHEN @l_OrderType IS NULL AND @l_SortField IS NULL THEN b.ClaimPayBackId END ASC 

@@ -76,9 +76,10 @@ FROM dbo.ClaimPayBack b
 		ON b.CreatedByUserId = pu.UserId
 	LEFT JOIN ClaimPayBackSubGroupDetail cpbsgd
 		ON cpbsgd.ClaimPayBackId = b.ClaimPayBackId
-WHERE (b.ClaimPayBackTransferId = @ClaimPayBackTransferId)
-AND (b.IsActive = 1)
-AND (cpbsgd.ClaimPayBackSubGroupId = @l_SearchDetail  OR @l_SearchDetail LIKE '')
+WHERE (b.IsActive = 1)
+AND (b.ClaimPayBackTransferId = @ClaimPayBackTransferId	OR @ClaimPayBackTransferId IS NULL)
+AND (cpbsgd.ClaimPayBackSubGroupId = @l_SearchDetail OR @l_SearchDetail = '')
+
 --AND (b.ClaimPayBackCode LIKE N'%'+ @l_SearchDetail + '%' OR @l_SearchDetail IS NULL)
 
 ORDER BY CASE WHEN @l_OrderType IS NULL AND @l_SortField IS NULL THEN b.ClaimPayBackId END ASC 
@@ -89,4 +90,3 @@ OFFSET @l_IndexStart ROWS FETCH NEXT @l_PageSize ROWS ONLY;
 
 
 END
-
