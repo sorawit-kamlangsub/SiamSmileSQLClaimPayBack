@@ -32,6 +32,17 @@ BEGIN
 
 --------------------------------------------------------
 
+--Test Zone
+--DECLARE 
+--	 @ClaimBayBackTransferId		INT 
+--	,@TransferAmount				DECIMAL(16,2)
+--	,@TransferDate					DATETIME
+--	,@UpdatedByUserId				INT
+--	,@ClaimPayBackSubGroupId		INT;
+--End Test
+
+--------------------------------------------------------
+
 DECLARE @IsResult			BIT			 = 1;
 DECLARE @Result				VARCHAR(100) = '';
 DECLARE @Msg				NVARCHAR(500)= 'Not allowed to use';
