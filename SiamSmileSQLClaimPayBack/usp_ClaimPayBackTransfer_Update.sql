@@ -14,6 +14,7 @@ GO
 -- Create date: 2021-10-06 15:52
 -- Update date: 2024-02-28 Kittisak.Ph เพิ่มบันทึกตัดรับชำระใน ClaimOnlineV2
 --				2024-11-11 Wetpisit.P ดักเงื่อนไขไม่ให้ตัดรายการของบริษัท SMI ออกจากรายงานเคลมคงค้าง
+--				2026-03-30 Sorawit.k เพิ่ม @ClaimPayBackSubGroupId สำหรับสำรองจ่าย และ เพิ่ม #TmplstClaimPaybackAndSubGroup
 -- Description:	ClaimPayBackTransfer Update
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimPayBackTransfer_Update] 
@@ -85,6 +86,15 @@ FROM dbo.ClaimPayBackDetail d
 		ON d.ClaimPayBackDetailId = c.ClaimPayBackDetailId
 WHERE d.IsActive = 1
 AND c.IsActive = 1;
+
+--Get listClaimPayBackAndSubGroup
+SELECT ClaimPayBackId
+	  ,ClaimPayBackSubGroupId
+INTO #TmplstClaimPaybackAndSubGroup	
+FROM dbo.ClaimPayBackSubGroupDetail 
+WHERE IsActive = 1
+AND ClaimPayBackTransferId = @ClaimBayBackTransferId
+AND ClaimPayBackSubGroupId = @ClaimPayBackSubGroupId; 
 
 DECLARE @Sum_AmountClaimPayBack		DECIMAL(16,2)
 DECLARE @Sum_ClaimPay				DECIMAL(16,2)
@@ -158,6 +168,8 @@ BEGIN
 		FROM dbo.ClaimPayBack b
 			INNER JOIN #TmplstClaimPayback t
 				ON b.ClaimPayBackId = t.ClaimPayBackId
+			INNER JOIN #TmplstClaimPaybackAndSubGroup sg 
+				ON sg.ClaimPayBackId = b.ClaimPayBackId	
 		WHERE b.ClaimGroupTypeId <> 4
 
 
@@ -243,8 +255,9 @@ BEGIN
     END CATCH;
 END
 
-DROP TABLE #TmplstClaimPayback;
-DROP TABLE #TmpUpdateClaimTransfer;
+IF OBJECT_ID('tempdb..#TmplstClaimPayback') IS NOT NULL DROP TABLE #TmplstClaimPayback;
+IF OBJECT_ID('tempdb..#TmpUpdateClaimTransfer') IS NOT NULL DROP TABLE #TmpUpdateClaimTransfer;
+IF OBJECT_ID('tempdb..#TmplstClaimPaybackAndSubGroup') IS NOT NULL DROP TABLE #TmplstClaimPaybackAndSubGroup;
 
 IF @IsResult = 1 BEGIN	SET @Result = 'Success' END	
 ELSE BEGIN				SET @Result = 'Failure' END;	
