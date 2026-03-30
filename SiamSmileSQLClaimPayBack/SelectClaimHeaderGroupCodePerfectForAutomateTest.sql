@@ -1,6 +1,30 @@
 USE [ClaimPayBack]
 GO
 
+
+/*
+
+ProductGroup_ID	ProductGroupDetail
+2	PH
+3	PA
+4	Motor
+11	Miscellaneous
+
+ClaimGroupTypeId	ClaimGroupType
+2	เคลมออนไลน์
+3	เคลมสาขา
+4	เคลมโรงพยาบาล
+5	เคลมโอนแยก
+6	เคลมเสียชีวิต ทุพพลภาพ
+7	เคลมเบ็ดเตล็ด
+
+*/
+
+DECLARE @ProductGroupId INT = 2;
+DECLARE @ClaimGroupTypeId INT = 2;
+DECLARE @MaxPage INT = 20;
+
+
 DECLARE @ClaimHeaderGroup_ids NVARCHAR(MAX)
 DECLARE @tmpClaimHeaderGroup_id TABLE (ClaimHeaderGroup_id NVARCHAR(50));
 DECLARE @tmpValid TABLE
@@ -33,13 +57,13 @@ DECLARE @tmp TABLE
 
 INSERT INTO @tmp
 EXEC [ClaimPayBack].[Claim].[usp_ClaimHeaderGroupDetail_SelectV4]
-		@ProductGroupId = 11,
+		@ProductGroupId = @ProductGroupId,
 		@InsuranceId = NULL,
-		@ClaimGroupTypeId = 7,
+		@ClaimGroupTypeId = @ClaimGroupTypeId,
 		@BranchId = NULL,
 		@CreateByUser_Code = NULL,
 		@IndexStart = 0,
-		@PageSize = 20,
+		@PageSize = @MaxPage,
 		@SortField = NULL,
 		@OrderType = NULL,
 		@SearchDetail = NULL,
@@ -63,8 +87,8 @@ STUFF
 
 INSERT INTO @tmpValid
 EXEC	[dbo].[usp_ClaimHeaderGroupValidateAmountPay_Select]
-		@ProductGroupId = 11,
-		@ClaimGroupTypeId = 7,
+		@ProductGroupId = @ProductGroupId,
+		@ClaimGroupTypeId = @ClaimGroupTypeId,
 		@ClaimHeaderGroupCode = @ClaimHeaderGroup_ids
 
 SELECT
