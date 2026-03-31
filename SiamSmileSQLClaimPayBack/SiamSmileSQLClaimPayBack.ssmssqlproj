@@ -299,6 +299,12 @@
           <AssociatedConnUserName>devdba</AssociatedConnUserName>
           <FullPath>Update_ClaimPayBackTranfer_Cancel.sql</FullPath>
         </FileNode>
+        <FileNode Name="UpdateISmileDocS3.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
+          <AssociatedConnUserName>devdba</AssociatedConnUserName>
+          <FullPath>UpdateISmileDocS3.sql</FullPath>
+        </FileNode>
         <FileNode Name="UpdateProductGroupId.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
           <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
