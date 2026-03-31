@@ -1,4 +1,4 @@
-USE [ClaimPayBack]
+ï»¿USE [ClaimPayBack]
 GO
 
 DECLARE @D DATETIME = GETDATE();
@@ -25,7 +25,7 @@ WHERE sub.ClaimPayBackSubGroupTransactionStatusId IN (4,5,6)
 AND sub.CreatedDate > @CutOffDate 
 AND sub.CreatedDate <= @D
 
--- µéÍ§ÁÕ 5
+-- à¸•à¹‰à¸­à¸‡à¸¡à¸µ 5
 AND EXISTS (
     SELECT 1
     FROM dbo.ClaimPayBackSubGroupTransaction s5
@@ -35,7 +35,7 @@ AND EXISTS (
     AND s5.CreatedDate <= @D
 )
 
--- áÅÐµéÍ§ÁÕ 4 ËÃ×Í 6 ÍÂèÒ§¹éÍÂ 1
+-- à¹à¸¥à¸°à¸•à¹‰à¸­à¸‡à¸¡à¸µ 4 à¸«à¸£à¸·à¸­ 6 à¸­à¸¢à¹ˆà¸²à¸‡à¸™à¹‰à¸­à¸¢ 1
 AND (
     EXISTS (
         SELECT 1
