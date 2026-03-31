@@ -41,6 +41,12 @@
           <AssociatedConnUserName />
           <FullPath>AekReport_TransferError.sql</FullPath>
         </FileNode>
+        <FileNode Name="AekReport_TransferError2.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
+          <AssociatedConnUserName>devdba</AssociatedConnUserName>
+          <FullPath>AekReport_TransferError2.sql</FullPath>
+        </FileNode>
         <FileNode Name="AlterTable20260318.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
           <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
