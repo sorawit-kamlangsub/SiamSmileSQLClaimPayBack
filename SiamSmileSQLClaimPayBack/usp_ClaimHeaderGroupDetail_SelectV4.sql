@@ -412,7 +412,7 @@ ELSE IF @pProductGroupId = 3 AND @pClaimGroupTypeId IN (2,3,4,6)
 						@pClaimGroupTypeId = 2
 						AND g.IsClaimOnLine = 1
 						AND g.CreatedDate >= @CreatedDateFrom
-						AND (c.ClaimType_id IN('4001','4002','4003','4004','4009','4010') OR (c.ClaimType_id='4005' AND c.CreatedDate >@DisabilityCutoffDate))
+						AND (c.ClaimType_id IN('4001','4002','4003','4004') OR (c.ClaimType_id='4005' AND c.CreatedDate >@DisabilityCutoffDate))
 					)
 				OR	(
 						@pClaimGroupTypeId = 3
@@ -429,7 +429,7 @@ ELSE IF @pProductGroupId = 3 AND @pClaimGroupTypeId IN (2,3,4,6)
 				OR	(
 						@pClaimGroupTypeId = 6
 						AND (g.IsClaimOnLine = 1)
-						AND c.ClaimType_id IN ('4006','4006_2','4007','4008')
+						AND c.ClaimType_id IN ('4006','4006_2','4007','4008','4009','4010')
 						AND g.CreatedDate >= @fix_IpdDateCutoff
 					)
 				)
@@ -615,8 +615,8 @@ SELECT g.ClaimHeaderGroupCode									ClaimHeaderGroup_id
 		,oIns.OrganizeId										InsuranceCompanyId
 		,d.InsuranceCompanyName									InsuranceCompany	 
 		,COUNT(g.ClaimHeaderGroupCode) OVER ()					TotalCount
-		--,IIF(g.ItemCount = doc.docCount ,1,0)					DocumentCount	 
-		,1														DocumentCount
+		,IIF(g.ItemCount = doc.docCount ,1,0)					DocumentCount	 
+		--,1														DocumentCount
 		,g.TransferAmount										TransferAmount
 		,d.ProductTypeDetail									ProductTypeDetail
 FROM
