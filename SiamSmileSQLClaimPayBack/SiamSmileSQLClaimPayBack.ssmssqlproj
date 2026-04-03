@@ -695,6 +695,12 @@
           <AssociatedConnUserName>devdba</AssociatedConnUserName>
           <FullPath>usp_ReportBillingRequestResultConfirm_Select.sql</FullPath>
         </FileNode>
+        <FileNode Name="usp_TmpBillingRequestResult_Validate.sql">
+          <AssociatedConnectionMoniker />
+          <AssociatedConnSrvName />
+          <AssociatedConnUserName />
+          <FullPath>usp_TmpBillingRequestResult_Validate.sql</FullPath>
+        </FileNode>
         <FileNode Name="usp_TmpClaimHeaderGroupImport_Validate_V2.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
           <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
