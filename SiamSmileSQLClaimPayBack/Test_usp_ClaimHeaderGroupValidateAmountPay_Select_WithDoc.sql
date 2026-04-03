@@ -301,9 +301,6 @@ ELSE IF @ProductGroupId > 3
     -- ‚Õπ‡ß‘π
     SELECT 
      pv.ClaimMiscId
-     --,ISNULL(pv.[2],0)   [FirstBlood]
-     --,ISNULL(pv.[3] ,0)   [DoubleKill]
-     --,ISNULL(pv.[4] ,0)   [Denie]
      ,(ISNULL(pv.[2],0) + ISNULL(pv.[3],0) - ISNULL(pv.[4],0)) PayAmount
     FROM
     (
@@ -356,8 +353,6 @@ SELECT
  ,tmp.Amount               Amount
  ,tmp.NPLAmount              NPLAmount
  ,tmp.TransferAmount             TransferAmount
- --, IIF(tmp.WarningMessage IS NULL OR tmp.WarningMessage = '', 1, 0)  IsValid 
- --,tmp.WarningMessage             WarningMessage
  ,CASE 
     WHEN doc.DocumentIndexData IS NOT NULL THEN IIF(tmp.WarningMessage IS NULL OR tmp.WarningMessage = '', 1, 0)
     ELSE 0 
