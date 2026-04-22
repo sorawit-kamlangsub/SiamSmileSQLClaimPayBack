@@ -264,7 +264,21 @@ BEGIN
 								FROM sss.dbo.ClaimCompensateGroup		
 							) x
 			ON d.ClaimGroupCode = x.Code
-			LEFT JOIN sss.dbo.ClaimCompensate cs
+			LEFT JOIN 
+				(
+					SELECT	
+									ClaimCompensateGroupId
+									,ClaimHeaderCode
+									,BankCodeTransfer
+									,BankCode
+									,ClaimCompensateCode
+									,PhoneNo 
+									,BankAccountNameTransfer
+									,Remark
+									,BankAccountNoTransfer
+					FROM sss.dbo.ClaimCompensate
+					WHERE IsActive = 1				
+				) cs
 				ON x.ClaimCompensateGroupId = cs.ClaimCompensateGroupId
 			LEFT JOIN sss.dbo.DB_ClaimHeader ch
 				ON cs.ClaimHeaderCode = ch.Code
