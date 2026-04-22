@@ -5,6 +5,7 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+
 -- =============================================
 -- Author:		06588 Krekpon Dokkamklang Mind
 -- Create date: 2024-06-20
@@ -93,6 +94,7 @@ FROM ClaimPayBack cpb
 									LEFT JOIN SSS.dbo.MT_Bank sscmtb
 										ON scc.BankCodeTransfer = sscmtb.Code --UpdateDate 2024-07-16 Add BankTransfer
 									WHERE ccg.IsActive = 1
+										AND scc.IsActive = 1
 								
 					) icu
 			ON cpbd.ClaimGroupCode = icu.Code
@@ -104,9 +106,22 @@ FROM ClaimPayBack cpb
 		ON dmpu.EmployeeId = dme.EmployeeId
 	INNER JOIN [DataCenterV1].[Master].vw_Employee dmeu
 		ON icu.ApproveUserBySSS = dmeu.EmployeeCode
-WHERE	cpb.ClaimGroupTypeId = @ClaimGroupTypeId
-	AND cpb.IsActive = 1 
-	AND ((cpb.CreatedDate >= @DateFrom) AND (cpb.CreatedDate <= DATEADD(Day,1,@DateTo)))
-	AND (cpbd.ProductGroupId = @ProductGroupId OR @ProductGroupId IS NULL)
-	AND (cpbd.InsuranceCompanyId = @InsuranceId OR @InsuranceId IS NULL)
+    WHERE cpb.ClaimGroupTypeId = @ClaimGroupTypeId
+          AND cpb.IsActive = 1
+		  AND cpbd.IsActive = 1
+          AND
+          (
+              (cpb.CreatedDate >= @DateFrom)
+              AND (cpb.CreatedDate <= DATEADD(DAY, 1, @DateTo))
+          )
+          AND
+          (
+              cpbd.ProductGroupId = @ProductGroupId
+              OR @ProductGroupId IS NULL
+          )
+          AND
+          (
+              cpbd.InsuranceCompanyId = @InsuranceId
+              OR @InsuranceId IS NULL
+          );
 END
