@@ -3,6 +3,21 @@
   <Items>
     <LogicalFolder Name="Connections" Type="2" Sorted="true">
       <Items>
+        <ConnectionNode Name="147.50.133.169:devcrud">
+          <Created>2026-05-11T16:30:54.3080788+07:00</Created>
+          <Type>SQL</Type>
+          <Server>147.50.133.169</Server>
+          <UserName>devcrud</UserName>
+          <Authentication>SQL</Authentication>
+          <InitialDB />
+          <LoginTimeout>30</LoginTimeout>
+          <TrustServerCertificate>False</TrustServerCertificate>
+          <HostNameInServerCertificate />
+          <EncryptionOption>False</EncryptionOption>
+          <ExecutionTimeout>0</ExecutionTimeout>
+          <ConnectionProtocol>NotSpecified</ConnectionProtocol>
+          <ApplicationName>Microsoft SQL Server Management Studio - Query</ApplicationName>
+        </ConnectionNode>
         <ConnectionNode Name="147.50.133.169:devdba">
           <Created>2025-09-19T10:24:18.6271281+07:00</Created>
           <Type>SQL</Type>
@@ -107,6 +122,12 @@
           <AssociatedConnUserName>devdba</AssociatedConnUserName>
           <FullPath>Note.sql</FullPath>
         </FileNode>
+        <FileNode Name="Pang_BillingRequestResultDetail.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:27.254.238.180:False:devcrud</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>27.254.238.180</AssociatedConnSrvName>
+          <AssociatedConnUserName>devcrud</AssociatedConnUserName>
+          <FullPath>Pang_BillingRequestResultDetail.sql</FullPath>
+        </FileNode>
         <FileNode Name="PangReportV1.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
           <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
@@ -132,9 +153,9 @@
           <FullPath>SearchLogWithDathRangAndMsgTemplate.sql</FullPath>
         </FileNode>
         <FileNode Name="SearchSP.sql">
-          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devcrud</AssociatedConnectionMoniker>
           <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
-          <AssociatedConnUserName>devdba</AssociatedConnUserName>
+          <AssociatedConnUserName>devcrud</AssociatedConnUserName>
           <FullPath>SearchSP.sql</FullPath>
         </FileNode>
         <FileNode Name="Select_ClaimNotDoctButInserCPB.sql">
