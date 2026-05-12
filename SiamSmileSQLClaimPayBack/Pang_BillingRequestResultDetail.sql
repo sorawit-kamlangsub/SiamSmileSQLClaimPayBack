@@ -7,26 +7,25 @@
 
 
 SELECT hi.CreatedDate
-  --    ,hi.BillingDate
-	 -- ,hi.InsuranceCompanyName				InsuranceCompany
-	 -- ,cgt.ClaimHeaderGroupTypeName  
-	 -- ,hi.ClaimHeaderGroupCode
-	  ,d.ClaimCode
-	 -- ,hi.ItemCount
-	 -- ,ISNULL(npl.CoverAmount,0)			ManualNPLAmount
-	 -- ,ISNULL(nplo.CoverAmount,0)			NPLTotalAmount
-	 -- ,ISNULL(ba.CoverAmount,0)				AutoTotalAmount
-	 -- ,d.PaySS_Total
-	 -- ,CASE 
-		--	WHEN cgt.ClaimHeaderGroupTypeId <> 6 THEN (d.PaySS_Total - ISNULL(ba.CoverAmount,0)) - ISNULL(npl.CoverAmount,0)
-		--	WHEN cgt.ClaimHeaderGroupTypeId = 6 THEN (hi.TotalAmount - (ISNULL(ISNULL(npl.CoverAmount,0) + ISNULL(ba.CoverAmount,0),0)))
-		--ELSE 0 END TotalAmount
-	 -- ,ct.Detail
-	 -- ,cgs.ClaimHeaderGroupImportStatusName
-	 -- ,d.DateHappen
-	 -- ,d.DateIn
 	 ,d.ClaimHeaderGroupImportDetailId
-	 ,ba.*
+      ,hi.BillingDate
+	  ,hi.InsuranceCompanyName				InsuranceCompany
+	  ,cgt.ClaimHeaderGroupTypeName  
+	  ,hi.ClaimHeaderGroupCode
+	  ,d.ClaimCode
+	  ,hi.ItemCount
+	  ,ISNULL(npl.CoverAmount,0)			ManualNPLAmount
+	  ,ISNULL(nplo.CoverAmount,0)			NPLTotalAmount
+	  ,ISNULL(ba.CoverAmount,0)				AutoTotalAmount
+	  ,d.PaySS_Total
+	  ,CASE 
+			WHEN cgt.ClaimHeaderGroupTypeId <> 6 THEN (d.PaySS_Total - ISNULL(ba.CoverAmount,0)) - ISNULL(npl.CoverAmount,0)
+			WHEN cgt.ClaimHeaderGroupTypeId = 6 THEN (hi.TotalAmount - (ISNULL(ISNULL(npl.CoverAmount,0) + ISNULL(ba.CoverAmount,0),0)))
+		ELSE 0 END TotalAmount
+	  ,ct.Detail
+	  ,cgs.ClaimHeaderGroupImportStatusName
+	  ,d.DateHappen
+	  ,d.DateIn
 FROM dbo.ClaimHeaderGroupImport hi
 	LEFT JOIN dbo.ClaimHeaderGroupImportDetail d
 		ON hi.ClaimHeaderGroupImportId = d.ClaimHeaderGroupImportId
@@ -69,20 +68,11 @@ FROM dbo.ClaimHeaderGroupImport hi
 						ON d.ClaimHeaderGroupImportId = bai.ClaimHeaderGroupImportId
 					LEFT JOIN  dbo.ClaimHeaderGroupImportFile baf
 						ON bai.ClaimGroupImportFileId = baf.ClaimHeaderGroupImportFileId
-					--LEFT JOIN 
-					--	(
-					--		SELECT cs.ClaimCompensateCode
-					--			,cs.ClaimHeaderCode
-					--		FROM SSS.dbo.ClaimCompensate cs
-					--		WHERE cs.IsActive = 1	
-					--	)cs
-					--	ON d.ClaimCode = cs.ClaimHeaderCode
 					LEFT JOIN dbo.BillingRequestResultDetail rd
 						ON d.ClaimHeaderGroupImportDetailId = rd.ClaimHeaderGroupImportDetailId
 					LEFT JOIN dbo.BillingRequestResultHeader rh
 						ON rd.BillingRequestResultHeaderId = rh.BillingRequestResultHeaderId
 				WHERE d.IsActive = 1 
-				--AND cs.ClaimCompensateCode IS NULL
 				AND rd.IsActive = 1
 				AND rh.IsManualNPL = 0
 
@@ -109,8 +99,22 @@ WHERE
 --    OR (@ClaimHeaderGroupImportStatusId IS NOT NULL AND hi.ClaimHeaderGroupImportStatusId = @ClaimHeaderGroupImportStatusId)
 --)
 AND hi.IsActive = 1
-AND hi.ClaimHeaderGroupCode IN ('PCHO-541-68090149-1','PCHO-551-69010106-1')
+AND hi.ClaimHeaderGroupCode IN ('PCHO-551-69010106-0','PCHO-551-69010106-1')
+
+--SELECT * 
+--FROM dbo.BillingRequestResultDetail
+--WHERE ClaimHeaderGroupImportDetailId IN (565195,858529)
 
 SELECT * 
-FROM dbo.BillingRequestResultDetail
-WHERE ClaimHeaderGroupImportDetailId IN (565195,858529)
+FROM dbo.TmpClaimHeaderGroupImport
+WHERE ClaimHeaderGroupCode IN ('PCHO-551-69010106-0','PCHO-551-69010106-1')
+
+SELECT ci.BillingDate,cid.* 
+FROM dbo.ClaimHeaderGroupImportDetail cid
+INNER JOIN ClaimHeaderGroupImport ci
+	ON ci.ClaimHeaderGroupImportId = cid.ClaimHeaderGroupImportId
+WHERE cid.ClaimHeaderGroupCode IN ('PCHO-551-69010106-0','PCHO-551-69010106-1')
+
+SELECT *
+FROM EventLogging.SmileSClaimPayBackLogs
+WHERE [Message] LIKE '%IMCHG6905000112%'
