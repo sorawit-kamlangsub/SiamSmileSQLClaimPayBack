@@ -25,6 +25,7 @@ GO
 -- Update date: 2025-12-9 Sorawit Kamlangsub แก้ไข ClaimMisc เพิ่ม Left Join DataCenterV1 ด้วย cm.InsCode เอา Organize_Id มาเก็บใน InsId
 -- Update date: 2026-02-17 Sorawit Kamlangsub เพิ่ม ClaimPaymentTypeId
 -- Update date: 2026-03-17 Sorawit Kamlangsub เพิ่ม @ClaimGroupTypeId = 6 ในการ Insert ClaimWithdrawal
+-- Update date: 2026-05-25 Sorawit Kamlangsub เพิ่ม การ Insert เคลมเบ็ดเตล็ด(โรงพยาบาล)
 -- =============================================
 ALTER PROCEDURE [Claim].[usp_ClaimPayBackDetail_InsertV4]
 	@ClaimGroupCodeList		NVARCHAR(MAX)
@@ -294,7 +295,7 @@ BEGIN
 					ON g.ClaimHeaderGroupCode = s.ClaimHeaderGroupCode		
 
                         END
-        ELSE IF @ProductGroupId IN (4,11) AND @ClaimGroupTypeId = 7
+        ELSE IF @ProductGroupId IN (4,11) AND @ClaimGroupTypeId IN (7,8)
                 BEGIN
                                                                                         
                         INSERT INTO @TmpD
@@ -330,7 +331,7 @@ BEGIN
                                 ,pd.ProductGroup_ID			ProductGroupId
                                 ,NULL						BranchCode
                                 ,cm.BranchId
-                                ,@ClaimGroupTypeId			ClaimGroupTypeId
+                                ,@ClaimGroupTypeId			ClaimGroupTypeId 
                                 ,cm.InsuranceCompanyCode	InsCode
                                 ,ins.Organize_ID			InsId
                                 ,cm.ClaimMiscNo				ClaimCode
