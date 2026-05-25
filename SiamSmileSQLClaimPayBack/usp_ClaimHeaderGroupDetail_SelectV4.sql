@@ -22,6 +22,7 @@ GO
 -- Update date: 20251211 Bunchuai.c เปลี่ยนการ filter ข้อมูลของ ClaimMisc filter ข้อมูลตาม ProductTypeId
 -- Update date: 20260117 Sorawit.k เพิ่ม Left Join ClaimPaymentType
 -- Update date: 20260310 Sorawit.k ปรับปรุง where not exist clammmisc
+-- Update date: 20260525 Sorawit.k CR เพิ่มการดึงเคลมเบ็ดเตล็ด(โรงพยาบาล)
 -- Description:	
 -- =============================================
 ALTER PROCEDURE [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]

@@ -14,6 +14,7 @@ GO
 -- Update date: 2023-09-21 golffy Add ClaomCompensate
 --				2025-10-21 Sorawit kamlangsub Add ClaimMisc 
 --				2026-01-22 Sorawit kamlangsub Update Prod Url 
+-- Update date: 20260525 Sorawit.k CR เพิ่มการดึงเคลมเบ็ดเตล็ด(โรงพยาบาล)
 -- Description:	<Description,,>
 -- =============================================
 ALTER PROCEDURE [Claim].[usp_ClaimHeaderGroupItem_Select] 
