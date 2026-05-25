@@ -1,6 +1,6 @@
 USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [Claim].[usp_ClaimHeaderGroupItem_Select]    Script Date: 21/10/2568 9:26:22 ******/
+/****** Object:  StoredProcedure [Claim].[usp_ClaimHeaderGroupItem_Select]    Script Date: 25/5/2569 13:42:40 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -12,7 +12,8 @@ GO
 -- Author:		supattra
 -- Create date: 2021-10-07
 -- Update date: 2023-09-21 golffy Add ClaomCompensate
---				2025-10-21 Add ClaimMisc Sorawit kamlangsub
+--				2025-10-21 Sorawit kamlangsub Add ClaimMisc 
+--				2026-01-22 Sorawit kamlangsub Update Prod Url 
 -- Description:	<Description,,>
 -- =============================================
 ALTER PROCEDURE [Claim].[usp_ClaimHeaderGroupItem_Select] 
@@ -55,8 +56,8 @@ WHERE ParameterName = @SSSPAPath
 -- Set URL
 SET @SSSURL =	CONCAT(@SSSURL,'Modules/Claim/frmClaimApproveOverview.aspx?clm=');
 SET @SSSPAURL = CONCAT(@SSSPAURL,'Modules/Claim/frmClaimPA_New.aspx?clm=');
+--SET @ClaimMiscURL = 'https://claimmisc.siamsmile.co.th/viewclaimdetails?id=';
 SET @ClaimMiscURL = 'https://uatclaimmisc.siamsmile.co.th/viewclaimdetails?id=';
-
 
 DECLARE @tmpClg TABLE (
 	ClaimHeaderGroup_id VARCHAR(20),
@@ -97,7 +98,7 @@ DECLARE @tmpCliamMisc TABLE
 
 		END
 
-	IF @ProductGroupId IN (4,5,6,7,8,9,10,11) AND @ClaimGroupTypeId = 7
+	IF @ProductGroupId IN (4,5,6,7,8,9,10,11) AND @ClaimGroupTypeId IN (7,8)
 		BEGIN
 			INSERT INTO @tmpCliamMisc
 			(
@@ -146,7 +147,7 @@ DECLARE @tmpCliamMisc TABLE
 			FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
 				LEFT JOIN 
 				(
-					SELECT
+					SELECT 
 						ProductTypeId
 						,ProductTypeName
 					FROM [ClaimMiscellaneous].[misc].[ProductType] 
