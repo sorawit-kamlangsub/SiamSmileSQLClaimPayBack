@@ -9,5 +9,4 @@
 	- แก้ => AND t.ClaimGroupTypeId IN (4,7)
 -usp_ClaimPayBackTransferNonClaimCompensateReport_Select
 	- แก้ union claimmisc 
-
 */

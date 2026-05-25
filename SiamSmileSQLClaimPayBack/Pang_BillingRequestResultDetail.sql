@@ -107,7 +107,7 @@ AND hi.ClaimHeaderGroupCode IN ('PCHO-551-69010106-0','PCHO-551-69010106-1')
 
 SELECT * 
 FROM dbo.TmpClaimHeaderGroupImport
-WHERE ClaimHeaderGroupCode IN ('PCHO-551-69010106-0','PCHO-551-69010106-1')
+WHERE ClaimHeaderGroupCode IN ('PCHO-551-69010106-1')
 
 SELECT ci.BillingDate,cid.* 
 FROM dbo.ClaimHeaderGroupImportDetail cid

@@ -19,8 +19,7 @@ DECLARE @GroupCodes TABLE (
 
 INSERT INTO @GroupCodes (BillingRequestGroupCode)
 VALUES 
-('BQGMP04B6900026'),
-('BQGMP04B6900027')
+('BQGPA05B6811003')
 ;
 
 ------------------------------------------------
