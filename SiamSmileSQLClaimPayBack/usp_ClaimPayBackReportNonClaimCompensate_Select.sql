@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-
+/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]    Script Date: 26/5/2569 9:21:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -53,6 +53,8 @@ GO
 -- Description: ปรับการค้นหา ClaimMisc Motor
 -- Update date: 2026-03-09 Sorawit.k
 -- Description:	เพิ่ม ClaimPaymentTypeName,ClaimPaymentTypeDetail
+-- Update date: 2026-05-26 Sorawit.k
+-- Description:	เพิ่มเงื่อนไขการแสดงข้อมูลเคลมเบ็ดเตล็ด(โรงพยาบาล)
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]
 	 @DateFrom			DATE =	NULL
@@ -67,11 +69,11 @@ BEGIN
 	SET NOCOUNT ON;
 -- START TEST
 --DECLARE
---	 @DateFrom			DATE =	'2026-02-16'
---	,@DateTo			DATE =	'2026-02-17'
+--	 @DateFrom			DATE =	'2026-05-25'
+--	,@DateTo			DATE =	'2026-05-26'
 --	,@InsuranceId		INT =	NULL
---	,@ProductGroupId	INT =	4
---	,@ClaimGroupTypeId	INT =	7;
+--	,@ProductGroupId	INT =	11
+--	,@ClaimGroupTypeId	INT =	8;
 -- END Test
 
 DECLARE @TmpClaimPayBack TABLE (
@@ -210,43 +212,46 @@ DECLARE @TmpClaimPayBack TABLE (
 	AND (cpbd.InsuranceCompanyId = @InsuranceId OR @InsuranceId IS NULL)
 	 
 	--SELECT เอาไปใช้งาน
-    SELECT		icu.InsuranceCompany_Name									InsuranceCompany_Name
-				,dab.BranchDetail											Branch
-				,IIF(@ClaimGroupTypeId IN( 4,6,7),sssmtc.Detail,NULL)		Hospital
+    SELECT		icu.InsuranceCompany_Name													InsuranceCompany_Name
+				,dab.BranchDetail															Branch
+				,IIF(@ClaimGroupTypeId IN( 4,6,7,8),sssmtc.Detail,NULL)						Hospital
 				,CASE 
 					WHEN @ClaimGroupTypeId IN (2,4,6) THEN TmpCPB.ProductGroupDetailName
-					WHEN @ClaimGroupTypeId = 7		  THEN icu.ProductTypeName
+					WHEN @ClaimGroupTypeId IN (7,8)		  THEN icu.ProductTypeName
 					ELSE NULL
-				END															ProductGroupDetailName
-				,TmpCPB.ClaimGroupType										ClaimGroupType
-				,TmpCPB.ClaimGroupCodeFromCPBD								ClaimGroupCode
-				,TmpCPB.ItemCount											ItemCount
-				,TmpCPB.Amount												Amount
-				,NULL														ClaimCompensate
-				,icu.ClaimCode												ClaimNo 
-				,IIF(@ClaimGroupTypeId IN (2,6,7) , TmpCPB.COL,NULL)		COL
-				,IIF(@ClaimGroupTypeId IN (2,4,6,7) ,sssmp.Detail,NULL)		Province
-				,IIF(@ClaimGroupTypeId IN (2,4,6,7) ,icu.CustomerName,NULL)	CustomerName
+				END																			ProductGroupDetailName
+				,TmpCPB.ClaimGroupType														ClaimGroupType
+				,TmpCPB.ClaimGroupCodeFromCPBD												ClaimGroupCode
+				,TmpCPB.ItemCount															ItemCount
+				,TmpCPB.Amount																Amount
+				,NULL																		ClaimCompensate
+				,icu.ClaimCode																ClaimNo 
+				,IIF(@ClaimGroupTypeId IN (2,6,7,8) , TmpCPB.COL,NULL)						COL
+				,IIF(@ClaimGroupTypeId IN (2,4,6,7,8) ,sssmp.Detail,NULL)					Province
+				,IIF(@ClaimGroupTypeId IN (2,4,6,7,8) ,icu.CustomerName,NULL)				CustomerName
 				,CASE 
-					WHEN @ClaimGroupTypeId IN (4,6)							THEN sssmtb.Detail
+					WHEN @ClaimGroupTypeId IN (4,6)							
+					THEN sssmtb.Detail
 					ELSE NULL
-				END												BankName
+				END																			BankName
 				,CASE 
-					WHEN @ClaimGroupTypeId IN (4,6)							THEN sssmtc.BankAccountName
+					WHEN @ClaimGroupTypeId IN (4,6)							
+					THEN sssmtc.BankAccountName
 					ELSE NULL
-				END												BankAccountName
+				END																			BankAccountName
 				,CASE 
-					WHEN @ClaimGroupTypeId IN (4,6)							THEN REPLACE(sssmtc.BankAccountNo,'-','')
+					WHEN @ClaimGroupTypeId IN (4,6)							
+					THEN REPLACE(sssmtc.BankAccountNo,'-','')
 					ELSE NULL
-				END												BankAccountNo
-				,NULL											PhoneNo
-				,TmpCPB.CreatedDate								CreatedDate
-				,pu.PersonName									ApprovedUser 
-				,TmpCPB.CreatedByUser							CteatedUser 
-				,icu.ClaimAdmitType								ClaimAdmitType
-				,NULL											RecordedDate
-				,icu.ClaimPaymentTypeName						ClaimPaymentTypeName
-				,icu.ClaimPaymentDetailTypeName					ClaimPaymentTypeDetail
+				END																			BankAccountNo
+				,NULL																		PhoneNo
+				,TmpCPB.CreatedDate															CreatedDate
+				,pu.PersonName																ApprovedUser 
+				,TmpCPB.CreatedByUser														CteatedUser 
+				,icu.ClaimAdmitType															ClaimAdmitType
+				,NULL																		RecordedDate
+				,icu.ClaimPaymentTypeName													ClaimPaymentTypeName
+				,icu.ClaimPaymentDetailTypeName												ClaimPaymentTypeDetail
 FROM @TmpClaimPayBack TmpCPB
 	 LEFT JOIN(
 
