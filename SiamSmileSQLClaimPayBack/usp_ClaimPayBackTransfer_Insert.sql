@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-
+/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackTransfer_Insert]    Script Date: 26/5/2569 10:17:32 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -14,8 +14,6 @@ GO
 -- Description:	ClaimPayBackTransfer Insert
 -- Update By:	Krekpon Mind 06588
 -- Update Date:	2024-08-09
--- Update Date:	2026-01-27 14:38 Sorawit 
---				Add OutOfPocket status set to 7
 -- Description:	Add Status Hospital When Add
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimPayBackTransfer_Insert] 
@@ -125,8 +123,7 @@ BEGIN
 					,CreatedByUserId
 					,CreatedDate
 					,UpdatedByUserId
-					,UpdatedDate
-					,OutOfPocketStatus)
+					,UpdatedDate)
 			SELECT @ClaimPayBackTransferCode
 				   ,@ClaimGroupTypeId
 				   ,@SumAmount
@@ -137,7 +134,6 @@ BEGIN
 				   ,@D
 				   ,@UpdatedByUserId
 				   ,@D
-				   ,7
 
 		DECLARE @ClaimPayBackTransferId INT = SCOPE_IDENTITY();
 
