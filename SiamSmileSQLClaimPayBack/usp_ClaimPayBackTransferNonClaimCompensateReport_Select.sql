@@ -1,10 +1,11 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackTransferNonClaimCompensateReport_Select]    Script Date: 3/9/2026 10:23:54 AM ******/
+/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackTransferNonClaimCompensateReport_Select]    Script Date: 26/5/2569 9:51:16 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+
 
 
 
@@ -34,6 +35,8 @@ GO
 -- Description:	เอาข้อมูลบัญชีของเคลม Misc ออก
 -- Update date: 2026-03-09 Sorawit.k
 -- Description:	เพิ่ม ClaimPaymentTypeName,ClaimPaymentTypeDetail
+-- Update date: 2026-05-27 Sorawit.k
+-- Description:	เพิ่มการแสดงผลเคลมเบ็ดเตล็ด (โรงพยาบาล)
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimPayBackTransferNonClaimCompensateReport_Select]
 	 @DateFrom			DATE 
@@ -191,7 +194,7 @@ SELECT 			icu.InsuranceCompany_Name														InsuranceCompany_Name
 				,IIF(@ClaimGroupTypeId IN (4,7),ssicu.Detail,NULL)								Hospital
 				,CASE 
 					WHEN @ClaimGroupTypeId IN (2,4,6) THEN tmpCpbd.ProductGroupDetailName
-					WHEN @ClaimGroupTypeId = 7		  THEN icu.ProductTypeName
+					WHEN @ClaimGroupTypeId IN (4,7)   THEN icu.ProductTypeName
 					ELSE NULL
 				END																				ProductGroupDetailName				
 				,tmpCpbd.ClaimGroupType															ClaimGroupType
