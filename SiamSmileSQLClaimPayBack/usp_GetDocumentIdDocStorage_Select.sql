@@ -30,11 +30,12 @@ BEGIN
 		CASE 
 			WHEN doc.TbType = 'ClaimMisc'	THEN cm.ClaimMiscNo
 			WHEN doc.TbType = 'ClaimOnline' THEN cm.ApplicationCode
-			WHEN doc.TbType = 'ClaimOnline' THEN doc.DocumentCode
 		END MainIndex
 		,cm.ClaimHeaderGroupCode
 		,doc.DocumentId
+		,doc.DocumentTypeId
 		,doc.DocumentSubTypeId
+		,doc.DocumentCode
 	FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
 		INNER JOIN #Tmplst tl
 			ON cm.ClaimHeaderGroupCode = tl.Element
@@ -44,9 +45,12 @@ BEGIN
 					doc.ClaimMiscId
 					,doc.DocumentId
 					,doc.DocumentCode
-					,'ClaimMisc'			TbType
-					,doc.DocumentTypeId		DocumentSubTypeId
+					,'ClaimMisc'				TbType
+					,doc.DocumentTypeId			DocumentTypeId
+					,docType.DocumentSubTypeId	DocumentSubTypeId
 				FROM [ClaimMiscellaneous].[misc].[Document] doc
+				LEFT JOIN [ClaimMiscellaneous].[misc].[DocumentType] docType
+					ON docType.DocumentTypeId = doc.DocumentTypeId
 				WHERE doc.IsActive = 1
 				AND doc.DocumentTypeId <> 3
 
@@ -57,6 +61,7 @@ BEGIN
 					,DocumentId
 					,DocumentCode
 					,'ClaimOnline'			TbType
+					,NULL					DocumentTypeId
 					,DocumentSubTypeId	
 				FROM [ClaimMiscellaneous].[misc].[DocumentClaimOnLine]
 				WHERE IsActive = 1
@@ -73,9 +78,13 @@ BEGIN
 	--DECLARE @DocumentId				UNIQUEIDENTIFIER
 	--DECLARE @ClaimHeaderGroupCode	NVARCHAR(MAX)
 	--DECLARE @DocumentSubTypeId		INT
+	--DECLARE @DocumentTypeId			INT
+	--DECLARE @DocumentCode			NVARCHAR(MAX)
 	--SELECT
 	--	@MainIndex				MainIndex
 	--	,@DocumentId			DocumentId
 	--	,@ClaimHeaderGroupCode	ClaimHeaderGroupCode
 	--	,@DocumentSubTypeId		DocumentSubTypeId
+	--	,@DocumentTypeId		DocumentTypeId
+	--	,@DocumentCode			DocumentCode
 END
