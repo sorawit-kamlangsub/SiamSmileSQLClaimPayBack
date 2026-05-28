@@ -1,6 +1,6 @@
 USE [ClaimPayBack]
 GO
-
+/****** Object:  StoredProcedure [dbo].[usp_GetDocumentIdDocStorage_Select]    Script Date: 27/5/2569 16:19:54 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -9,6 +9,7 @@ GO
 -- Author:		Sorawit KamlangSub
 -- Create date: 2025-11-26 15:30
 -- Update date: 2026-02-23 14:22 Remove doctype
+-- Update date: 2026-05-26 16:42 Add DocumentSubTypeId
 -- Description:	For Get DocStorage Data
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_GetDocumentIdDocStorage_Select]
@@ -27,12 +28,13 @@ BEGIN
 	
 	SELECT 
 		CASE 
-			WHEN doc.TbType = 'ClaimMisc' THEN cm.ClaimMiscNo
-			WHEN doc.TbType = 'ClaimOnlineAppCode' THEN cm.ApplicationCode
-			WHEN doc.TbType = 'ClaimOnlineDocCode' THEN doc.DocumentCode
+			WHEN doc.TbType = 'ClaimMisc'	THEN cm.ClaimMiscNo
+			WHEN doc.TbType = 'ClaimOnline' THEN cm.ApplicationCode
+			WHEN doc.TbType = 'ClaimOnline' THEN doc.DocumentCode
 		END MainIndex
 		,cm.ClaimHeaderGroupCode
 		,doc.DocumentId
+		,doc.DocumentSubTypeId
 	FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
 		INNER JOIN #Tmplst tl
 			ON cm.ClaimHeaderGroupCode = tl.Element
@@ -43,6 +45,7 @@ BEGIN
 					,doc.DocumentId
 					,doc.DocumentCode
 					,'ClaimMisc'			TbType
+					,doc.DocumentTypeId		DocumentSubTypeId
 				FROM [ClaimMiscellaneous].[misc].[Document] doc
 				WHERE doc.IsActive = 1
 				AND doc.DocumentTypeId <> 3
@@ -53,21 +56,12 @@ BEGIN
 					ClaimMiscId
 					,DocumentId
 					,DocumentCode
-					,'ClaimOnlineAppCode'			TbType
+					,'ClaimOnline'			TbType
+					,DocumentSubTypeId	
 				FROM [ClaimMiscellaneous].[misc].[DocumentClaimOnLine]
 				WHERE IsActive = 1
 				AND DocumentSubTypeId <> 340
 
-				UNION ALL 
-
-				SELECT 
-					ClaimMiscId
-					,DocumentId
-					,DocumentCode
-					,'ClaimOnlineDocCode'			TbType
-				FROM [ClaimMiscellaneous].[misc].[DocumentClaimOnLine]
-				WHERE IsActive = 1
-				AND DocumentSubTypeId <> 340
 
 		) doc
 			ON doc.ClaimMiscId = cm.ClaimMiscId
@@ -78,9 +72,10 @@ BEGIN
 	--DECLARE @MainIndex				NVARCHAR(MAX)
 	--DECLARE @DocumentId				UNIQUEIDENTIFIER
 	--DECLARE @ClaimHeaderGroupCode	NVARCHAR(MAX)
+	--DECLARE @DocumentSubTypeId		INT
 	--SELECT
 	--	@MainIndex				MainIndex
 	--	,@DocumentId			DocumentId
 	--	,@ClaimHeaderGroupCode	ClaimHeaderGroupCode
-
+	--	,@DocumentSubTypeId		DocumentSubTypeId
 END
