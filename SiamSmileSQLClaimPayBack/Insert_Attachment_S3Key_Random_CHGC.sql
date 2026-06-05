@@ -95,7 +95,8 @@ DECLARE @S3Bucket NVARCHAR(255) = 'p-isc-ss-1-bucketdata'
 	WHERE td.ClaimHeaderCodeInDB IN
 	(
 
-		'CLPA690400001521'
+		'CLPA690600000209',
+		'CLPA690600000207'
 	)
 
 	ORDER BY ProductGroup 
