@@ -127,6 +127,7 @@ IF @IsResult = 1
 			,d.ClaimHeaderCodeInDB
 			,d.ProductGroup
 			,d.PolicyNo
+			,d.ClaimTypeId
 		INTO #TmpDetail
 		FROM
 			(	--SSS------
@@ -138,6 +139,7 @@ IF @IsResult = 1
 						,h.Code									AS ClaimHeaderCodeInDB
 						,IIF(h.Product_id = 'P30',h.Product_id,'1000') AS ProductGroup
 						,cus.InsuredPolicy_no					AS PolicyNo
+						,NULL									AS ClaimTypeId
 				FROM #Tmp t
 					LEFT JOIN SSS.dbo.DB_ClaimHeader h
 						ON t.ClaimHeaderGroupCode = h.ClaimHeaderGroup_id
@@ -162,6 +164,7 @@ IF @IsResult = 1
 						,h.Code									AS ClaimHeaderCodeInDB
 						,'2000'									AS ProductGroup
 						,ctp.Detail								AS PolicyNo
+						,NULL									AS ClaimTypeId
 				FROM #Tmp t
 					INNER JOIN SSSPA.dbo.DB_ClaimHeaderGroup AS hg
 						ON t.ClaimHeaderGroupCode = hg.Code
@@ -188,6 +191,7 @@ IF @IsResult = 1
 					,cc.ClaimCompensateCode						AS ClaimHeaderCodeInDB
 					,'2222'										AS ProductGroup
 					,cus.InsuredPolicy_no						AS PolicyNo
+					,NULL										AS ClaimTypeId
 				FROM #Tmp t
 					INNER JOIN SSS.dbo.ClaimCompensateGroup cg
 						ON t.ClaimHeaderGroupCode = cg.ClaimCompensateGroupCode
@@ -221,6 +225,7 @@ IF @IsResult = 1
 					,NULL														ClaimHeaderCodeInDB
 					,IIF(cpbType.ClaimPaymentTypeId = 2, 'ZebraMisc','Misc')	ProductGroup
 					,cm.PolicyNo												PolicyNo
+					,cm.ClaimTypeId
 				FROM #Tmp t
 					INNER JOIN [ClaimMiscellaneous].[misc].[ClaimMisc] cm
 						ON t.ClaimHeaderGroupCode = cm.ClaimHeaderGroupCode
@@ -349,7 +354,7 @@ IF @IsResult = 1
 						,IIF(c.ProductGroup = 'ZebraMisc', 'ตรวจสอบรายการเคลมกองทุนรถม้าลาย','')
 					)ValidateResult
 				---------------------------------------------------------------
-				,IIF(t.ClaimHeaderGroupTypeId = 6 ,'2000',a.ClaimTypeCode)	ClaimTypeCode
+				,IIF(t.ClaimHeaderGroupTypeId = 6 ,IIF(c.ClaimTypeId = 2,'1000','2000'),a.ClaimTypeCode)	ClaimTypeCode
 
 		INTO #TmpUpdate
 		FROM #Tmp t
@@ -361,8 +366,9 @@ IF @IsResult = 1
 						,SUM(TotalAmountSS)  TotalAmountInDB
 						,MAX(ProductGroup)	ProductGroup
 						,PolicyNo
+						,ClaimTypeId
 					FROM #TmpDetail
-					GROUP BY ClaimHeaderGroupCodeInDB,InsuranceCompanyId,PolicyNo
+					GROUP BY ClaimHeaderGroupCodeInDB,InsuranceCompanyId,PolicyNo,ClaimTypeId
 				) c
 				ON t.ClaimHeaderGroupCode = c.ClaimHeaderGroupCodeInDB
 			LEFT JOIN @ProductGroup pg
