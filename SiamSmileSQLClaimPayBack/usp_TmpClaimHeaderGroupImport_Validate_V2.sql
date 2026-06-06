@@ -23,6 +23,7 @@ GO
 -- Update date: 2025-10-30 09:34 Add ClaimMisc and Clean Script Sorawit kamlangsub
 -- Update date: 2026-03-11 13:16 Add Pa Validate PolicyNo Sorawit kamlangsub
 -- Update date: 2026-03-12 08:47 เพิ่ม Validate กรณีเป็น บ.ส.นั้นเป็นเบิกจ่ายกองทุนม้าลาย Sorawit kamlangsub
+-- Update date: 2026-06-06 08:57 เพิ่ม union ClaimMisc ใน #TmpClaimType Sorawit kamlangsub
 -- Description:	PROD (P30,1000) dl.DocumentListID = 137 (2000) dl.DocumentListID = 138 
 --	UAT  dl.DocumentListID = 134 (2000) dl.DocumentListID = 135
 -- =============================================
@@ -114,6 +115,19 @@ IF @IsResult = 1
 			SELECT g.ClaimCompensateGroupCode	ClaimHeaderGroupCode
 					,@ClaimTypeCode_H			ClaimTypeCode	
 			FROM SSS.dbo.ClaimCompensateGroup g
+
+		UNION ALL 
+			
+			SELECT 
+				ClaimHeaderGroupCode	
+				,CASE ClaimTypeId 
+					WHEN 2 THEN @ClaimTypeCode_H
+					WHEN 3 THEN @ClaimTypeCode_C
+					ELSE ''
+					END								ClaimTypeCode
+			FROM [ClaimMiscellaneous].[misc].[ClaimMisc] 
+			
+
 		)m
 			INNER JOIN #Tmp x
 				ON m.ClaimHeaderGroupCode = x.ClaimHeaderGroupCode;
@@ -247,8 +261,8 @@ IF @IsResult = 1
 			 , m.ClaimHeaderGroupCodeInDB
              , m.ClaimHeaderCodeInDB
 			 , m.TotalAmountSS
-			 , IIF(m.ProductGroup = 'Misc',1,ISNULL(d.CountDoc,0)) CountDoc
-			 , IIF(IIF(m.ProductGroup = 'Misc',1,ISNULL(d.CountDoc,0)) = 0,N'ไม่พบเอกสารแนบ','') ValidateDetailResult
+			 , IIF(m.ProductGroup IN ('Misc','ZebraMisc'),1,ISNULL(d.CountDoc,0)) CountDoc
+			 , IIF(IIF(m.ProductGroup IN ('Misc','ZebraMisc'),1,ISNULL(d.CountDoc,0)) = 0,N'ไม่พบเอกสารแนบ','') ValidateDetailResult
 		INTO #TmpDoc
 		FROM #TmpDetail m
 			LEFT JOIN 
@@ -257,16 +271,16 @@ IF @IsResult = 1
 							,td.ClaimHeaderCodeInDB
 							,CASE 
 								WHEN 
-									-- ตรวจสอบเอกสาร PH ที่เป็นเคลมโรงพยาบาลต้องมีทั้งเอกสารเคลมโรงพยาบาล(24) กับหนังสือแจ้งชำระค่ารักษาพยาบาล (134,PROD 137)
+									-- ตรวจสอบเอกสาร PH ที่เป็นเคลมโรงพยาบาลต้องมีทั้งเอกสารเคลมโรงพยาบาล(24) กับหนังสือแจ้งชำระค่ารักษาพยาบาล (UAT 134,PROD 137)
 									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup IN ('P30','1000') AND dl.DocumentListID = 24 THEN 1 ELSE 0 END) >= 1
 									AND
-									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup IN ('P30','1000') AND dl.DocumentListID = 137 THEN 1 ELSE 0 END) >= 1
+									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup IN ('P30','1000') AND dl.DocumentListID = 134 THEN 1 ELSE 0 END) >= 1
 								THEN 1
 								WHEN 
-									-- ตรวจสอบเอกสาร PA ที่เป็นเคลมโรงพยาบาลต้องมีทั้งเอกสารเคลมโรงพยาบาล(26) กับหนังสือแจ้งชำระค่ารักษาพยาบาล (135,PROD 138)
+									-- ตรวจสอบเอกสาร PA ที่เป็นเคลมโรงพยาบาลต้องมีทั้งเอกสารเคลมโรงพยาบาล(26) กับหนังสือแจ้งชำระค่ารักษาพยาบาล (UAT 135,PROD 138)
 									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup = '2000' AND dl.DocumentListID = 26 THEN 1 ELSE 0 END) >= 1
 									AND
-									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup = '2000' AND dl.DocumentListID = 138 THEN 1 ELSE 0 END) >= 1
+									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup = '2000' AND dl.DocumentListID = 135 THEN 1 ELSE 0 END) >= 1
 								THEN 1
 								WHEN 
 									-- กรณีเป็นเคลมสาขา ต้องไม่มีของเคลมโรงพยาบาล
@@ -349,7 +363,7 @@ IF @IsResult = 1
 						,IIF(c.ProductGroup = 'ZebraMisc', 'ตรวจสอบรายการเคลมกองทุนรถม้าลาย','')
 					)ValidateResult
 				---------------------------------------------------------------
-				,IIF(t.ClaimHeaderGroupTypeId = 6 ,'2000',a.ClaimTypeCode)	ClaimTypeCode
+				,a.ClaimTypeCode	ClaimTypeCode
 
 		INTO #TmpUpdate
 		FROM #Tmp t
