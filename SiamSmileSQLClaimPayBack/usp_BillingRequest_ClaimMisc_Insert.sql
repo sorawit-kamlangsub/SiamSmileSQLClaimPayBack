@@ -7,6 +7,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 
+
 -- =============================================
 -- Author:		Sorawit Kamlangsub
 -- Create date: 2025-12-16  15:43
@@ -14,6 +15,8 @@ GO
 --				เปลี่ยนเลขรัน BQG 5 หลัก
 -- Update date: Sorawit Kamlangsub 2026-02-05 13:00
 --				แก้บั๊กการ where วันที่นำเข้า
+-- Update date: Sorawit Kamlangsub 2026-06-06 11:24
+--				แก้การรันเลข BQG เงื่อนไขเคลมโรงพยาบาลเบ็ดเตล็ด
 -- Description:
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_BillingRequest_ClaimMisc_Insert]
@@ -250,7 +253,7 @@ BEGIN
 
 	SET @Last2numbersOfInsurance = RIGHT(@InsuranceCompanyCode,2);
 
-	SELECT @ClaimHeaderGroupCodeIndex3 = (SELECT TOP(1) RIGHT(LEFT(ClaimHeaderGroupCode, 4) ,1) FROM #Tmplst);
+	SELECT @ClaimHeaderGroupCodeIndex3 = (SELECT TOP(1) RIGHT(LEFT(ClaimHeaderGroupCode, 5) ,1) FROM #Tmplst);
 
 	IF (@ClaimHeaderGroupCodeIndex3 = 'H' or @ClaimHeaderGroupTypeId = 4)
 	BEGIN
