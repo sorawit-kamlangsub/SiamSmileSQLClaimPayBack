@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImport_Insert]    Script Date: 17/12/2568 9:07:17 ******/
+/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImport_Insert]    Script Date: 6/6/2569 9:24:41 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -20,6 +20,8 @@ GO
 --				 - เพิ่ม parameters @ImportFrom เพื่อแยกว่ารายการที่ Import มาจากช่องทางไหน กำหนด 1 ImportExcel 2 Import จากการตั้งเบิก
 -- UpdateDate:	2025-11-06 15:20 Sorawit Kamlangsub
 --				- Add ClaimMisc
+-- UpdateDate:	2026-06-06 9:28 Sorawit Kamlangsub
+--				- Add ClaimMisc Hospital
 -- Description:	<Description,,>
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimHeaderGroupImport_Insert]
@@ -690,7 +692,7 @@ IF @IsResult = 1
 					,cm.StartCoverDate								StartCoverDate
 					,NULL											ClaimAdmitTypeCode
 					,cxa.ClaimAdmitType								ClaimAdmitType
-					,'เคลมลูกค้า'										ClaimType
+					,IIF(cm.ClaimTypeId = 2,'เคลมโรงพยาบาล','เคลมลูกค้า')	ClaimType
 					,NULL											ICD10_1Code
 					,NULL											ICD10
 					,NULL											IPDCount
