@@ -1,6 +1,6 @@
 USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_GetDocumentIdDocStorage_Select]    Script Date: 27/5/2569 16:19:54 ******/
+/****** Object:  StoredProcedure [dbo].[usp_GetDocumentIdDocStorage_Select]    Script Date: 8/6/2569 11:48:08 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -30,6 +30,7 @@ BEGIN
 		CASE 
 			WHEN doc.TbType = 'ClaimMisc'	THEN cm.ClaimMiscNo
 			WHEN doc.TbType = 'ClaimOnline' THEN cm.ApplicationCode
+			WHEN doc.TbType = 'DocCode'		THEN doc.DocumentCode
 		END MainIndex
 		,cm.ClaimHeaderGroupCode
 		,doc.DocumentId
@@ -61,6 +62,19 @@ BEGIN
 					,DocumentId
 					,DocumentCode
 					,'ClaimOnline'			TbType
+					,NULL					DocumentTypeId
+					,DocumentSubTypeId	
+				FROM [ClaimMiscellaneous].[misc].[DocumentClaimOnLine]
+				WHERE IsActive = 1
+				AND DocumentSubTypeId <> 340
+
+				UNION ALL 
+
+				SELECT 
+					ClaimMiscId
+					,DocumentId
+					,DocumentCode
+					,'DocCode'				TbType
 					,NULL					DocumentTypeId
 					,DocumentSubTypeId	
 				FROM [ClaimMiscellaneous].[misc].[DocumentClaimOnLine]
