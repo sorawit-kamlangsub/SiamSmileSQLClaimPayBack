@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]    Script Date: 25/5/2569 9:34:50 ******/
+/****** Object:  StoredProcedure [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]    Script Date: 8/6/2569 13:31:10 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -450,7 +450,7 @@ ELSE IF @pProductGroupId = 3 AND @pClaimGroupTypeId IN (2,3,4,6)
 		  
 	END
 -- ClaimMisc
-ELSE IF @pProductGroupId IN (4,11) AND @pClaimGroupTypeId IN (7,8)
+ELSE IF @pProductGroupId IN (4,11) AND (@pClaimGroupTypeId IN (7,8) OR @pClaimGroupTypeId IS NULL)
 	BEGIN
 		INSERT INTO @TmpClaimMisc
 		        (ClaimMiscId
@@ -538,11 +538,11 @@ ELSE IF @pProductGroupId IN (4,11) AND @pClaimGroupTypeId IN (7,8)
 			AND 
 			(
 			
-				@ClaimGroupTypeId = 7 AND cm.ClaimTypeId = 3
+				@pClaimGroupTypeId = 7 AND cm.ClaimTypeId = 3
 				OR
-				@ClaimGroupTypeId = 8 AND cm.ClaimTypeId = 2
+				@pClaimGroupTypeId = 8 AND cm.ClaimTypeId = 2
 				OR
-				@ClaimGroupTypeId IS NULL
+				@pClaimGroupTypeId IS NULL
 			)
 			AND NOT EXISTS	
 			(
