@@ -1,10 +1,13 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]    Script Date: 26/5/2569 9:21:36 ******/
+
+
 SET ANSI_NULLS ON
 GO
+
 SET QUOTED_IDENTIFIER ON
 GO
+
 
 
 
@@ -230,17 +233,17 @@ DECLARE @TmpClaimPayBack TABLE (
 				,IIF(@ClaimGroupTypeId IN (2,4,6,7,8) ,sssmp.Detail,NULL)					Province
 				,IIF(@ClaimGroupTypeId IN (2,4,6,7,8) ,icu.CustomerName,NULL)				CustomerName
 				,CASE 
-					WHEN @ClaimGroupTypeId IN (4,6)							
+					WHEN @ClaimGroupTypeId IN (4,6,8)							
 					THEN sssmtb.Detail
 					ELSE NULL
 				END																			BankName
 				,CASE 
-					WHEN @ClaimGroupTypeId IN (4,6)							
+					WHEN @ClaimGroupTypeId IN (4,6,8)							
 					THEN sssmtc.BankAccountName
 					ELSE NULL
 				END																			BankAccountName
 				,CASE 
-					WHEN @ClaimGroupTypeId IN (4,6)							
+					WHEN @ClaimGroupTypeId IN (4,6,8)							
 					THEN REPLACE(sssmtc.BankAccountNo,'-','')
 					ELSE NULL
 				END																			BankAccountNo
@@ -398,3 +401,5 @@ IF OBJECT_ID('tempdb..#TmpPersonUser') IS NOT NULL DROP TABLE #TmpPersonUser;
 IF OBJECT_ID('tempdb..#TmpProductClaimMisc') IS NOT NULL DROP TABLE #TmpProductClaimMisc;
 IF OBJECT_ID('tempdb..@TmpClaimPayBack') IS NOT NULL  DELETE FROM @TmpClaimPayBack;   
 END;
+GO
+

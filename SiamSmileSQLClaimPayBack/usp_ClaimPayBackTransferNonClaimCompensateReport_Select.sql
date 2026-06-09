@@ -1,10 +1,13 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackTransferNonClaimCompensateReport_Select]    Script Date: 26/5/2569 9:51:16 ******/
+
+
 SET ANSI_NULLS ON
 GO
+
 SET QUOTED_IDENTIFIER ON
 GO
+
 
 
 
@@ -379,3 +382,5 @@ IF OBJECT_ID('tempdb..#TmpProductClaimMisc') IS NOT NULL DROP TABLE #TmpProductC
 IF OBJECT_ID('tempdb..@TmpClaimPayBack') IS NOT NULL  DELETE FROM @TmpClaimPayBack;
 
 END;
+GO
+
