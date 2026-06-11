@@ -1,7 +1,7 @@
 ﻿USE [ClaimPayBack]
 GO
 
-/****** Object:  StoredProcedure [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]    Script Date: 11/6/2569 9:00:47 ******/
+/****** Object:  StoredProcedure [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]    Script Date: 11/6/2569 10:50:06 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -25,6 +25,7 @@ GO
 -- Update date: 20251211 Bunchuai.c เปลี่ยนการ filter ข้อมูลของ ClaimMisc filter ข้อมูลตาม ProductTypeId
 -- Update date: 20260117 Sorawit.k เพิ่ม Left Join ClaimPaymentType
 -- Update date: 20260310 Sorawit.k ปรับปรุง where not exist clammmisc
+-- Update date: 20260525 Sorawit.k CR เพิ่มการดึงเคลมเบ็ดเตล็ด(โรงพยาบาล)
 -- Description:	
 -- =============================================
 CREATE PROCEDURE [Claim].[usp_ClaimHeaderGroupDetail_SelectV4]
@@ -452,7 +453,7 @@ ELSE IF @pProductGroupId = 3 AND @pClaimGroupTypeId IN (2,3,4,6)
 		  
 	END
 -- ClaimMisc
-ELSE IF @pProductGroupId IN (4,11) AND @pClaimGroupTypeId = 7
+ELSE IF @pProductGroupId IN (4,11) AND (@pClaimGroupTypeId IN (7,8) OR @pClaimGroupTypeId IS NULL)
 	BEGIN
 		INSERT INTO @TmpClaimMisc
 		        (ClaimMiscId
@@ -537,6 +538,15 @@ ELSE IF @pProductGroupId IN (4,11) AND @pClaimGroupTypeId = 7
 						)
 				)
 			) 
+			AND 
+			(
+			
+				@pClaimGroupTypeId = 7 AND cm.ClaimTypeId = 3
+				OR
+				@pClaimGroupTypeId = 8 AND cm.ClaimTypeId = 2
+				OR
+				@pClaimGroupTypeId IS NULL
+			)
 			AND NOT EXISTS	
 			(
 				SELECT 1
@@ -704,7 +714,7 @@ IF OBJECT_ID('tempdb..#TmpIns') IS NOT NULL  DROP TABLE #TmpIns;
 END;
 GO
 
-/****** Object:  StoredProcedure [Claim].[usp_ClaimHeaderGroupItem_Select]    Script Date: 11/6/2569 9:00:47 ******/
+/****** Object:  StoredProcedure [Claim].[usp_ClaimHeaderGroupItem_Select]    Script Date: 11/6/2569 10:50:06 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -720,6 +730,7 @@ GO
 -- Update date: 2023-09-21 golffy Add ClaomCompensate
 --				2025-10-21 Sorawit kamlangsub Add ClaimMisc 
 --				2026-01-22 Sorawit kamlangsub Update Prod Url 
+-- Update date: 20260525 Sorawit.k CR เพิ่มการดึงเคลมเบ็ดเตล็ด(โรงพยาบาล)
 -- Description:	<Description,,>
 -- =============================================
 CREATE PROCEDURE [Claim].[usp_ClaimHeaderGroupItem_Select] 
@@ -762,8 +773,8 @@ WHERE ParameterName = @SSSPAPath
 -- Set URL
 SET @SSSURL =	CONCAT(@SSSURL,'Modules/Claim/frmClaimApproveOverview.aspx?clm=');
 SET @SSSPAURL = CONCAT(@SSSPAURL,'Modules/Claim/frmClaimPA_New.aspx?clm=');
-SET @ClaimMiscURL = 'https://claimmisc.siamsmile.co.th/viewclaimdetails?id=';
-
+--SET @ClaimMiscURL = 'https://claimmisc.siamsmile.co.th/viewclaimdetails?id=';
+SET @ClaimMiscURL = 'https://uatclaimmisc.siamsmile.co.th/viewclaimdetails?id=';
 
 DECLARE @tmpClg TABLE (
 	ClaimHeaderGroup_id VARCHAR(20),
@@ -804,7 +815,7 @@ DECLARE @tmpCliamMisc TABLE
 
 		END
 
-	IF @ProductGroupId IN (4,5,6,7,8,9,10,11) AND @ClaimGroupTypeId = 7
+	IF @ProductGroupId IN (4,5,6,7,8,9,10,11) AND @ClaimGroupTypeId IN (7,8)
 		BEGIN
 			INSERT INTO @tmpCliamMisc
 			(
@@ -993,7 +1004,7 @@ END
 
 GO
 
-/****** Object:  StoredProcedure [Claim].[usp_ClaimPayBackDetail_InsertV4]    Script Date: 11/6/2569 9:00:47 ******/
+/****** Object:  StoredProcedure [Claim].[usp_ClaimPayBackDetail_InsertV4]    Script Date: 11/6/2569 10:50:06 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -1019,6 +1030,8 @@ GO
 -- Update date: 2025-12-4 Sorawit Kamlangsub แก้ไข @TmpD เพิ่มขนาด Field ProductCode จาก 20 เป็น 255
 -- Update date: 2025-12-9 Sorawit Kamlangsub แก้ไข ClaimMisc เพิ่ม Left Join DataCenterV1 ด้วย cm.InsCode เอา Organize_Id มาเก็บใน InsId
 -- Update date: 2026-02-17 Sorawit Kamlangsub เพิ่ม ClaimPaymentTypeId
+-- Update date: 2026-03-17 Sorawit Kamlangsub เพิ่ม @ClaimGroupTypeId = 6 ในการ Insert ClaimWithdrawal
+-- Update date: 2026-05-25 Sorawit Kamlangsub เพิ่ม การ Insert เคลมเบ็ดเตล็ด(โรงพยาบาล)
 -- =============================================
 CREATE PROCEDURE [Claim].[usp_ClaimPayBackDetail_InsertV4]
 	@ClaimGroupCodeList		NVARCHAR(MAX)
@@ -1288,7 +1301,7 @@ BEGIN
 					ON g.ClaimHeaderGroupCode = s.ClaimHeaderGroupCode		
 
                         END
-        ELSE IF @ProductGroupId IN (4,11) AND @ClaimGroupTypeId = 7
+        ELSE IF @ProductGroupId IN (4,11) AND @ClaimGroupTypeId IN (7,8)
                 BEGIN
                                                                                         
                         INSERT INTO @TmpD
@@ -1324,7 +1337,7 @@ BEGIN
                                 ,pd.ProductGroup_ID			ProductGroupId
                                 ,NULL						BranchCode
                                 ,cm.BranchId
-                                ,@ClaimGroupTypeId			ClaimGroupTypeId
+                                ,@ClaimGroupTypeId			ClaimGroupTypeId 
                                 ,cm.InsuranceCompanyCode	InsCode
                                 ,ins.Organize_ID			InsId
                                 ,cm.ClaimMiscNo				ClaimCode
@@ -2185,7 +2198,7 @@ BEGIN
 	
 ----------------Kittisak.Ph 2024-04-05-------------------------------------------
 --บันทึกสถานะส่งตั้งเบิกเฉพาะเคลมออนไลน์ 
-	IF @ClaimGroupTypeId IN (2,7)				--Update Kittisak.Ph 2025-02-25 
+	IF @ClaimGroupTypeId IN (2,6,7)				--Update Kittisak.Ph 2025-02-25 
 	BEGIN
 
 		INSERT INTO [ClaimOnlineV2].[dbo].[ClaimWithdrawal]
@@ -2375,7 +2388,7 @@ BEGIN
 	END
 GO
 
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_ClaimMisc_Insert]    Script Date: 11/6/2569 9:00:47 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequest_ClaimMisc_Insert]    Script Date: 11/6/2569 10:50:06 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -2390,6 +2403,10 @@ GO
 -- Create date: 2025-12-16  15:43
 -- Update date: Sorawit Kamlangsub 2026-01-29 17:00
 --				เปลี่ยนเลขรัน BQG 5 หลัก
+-- Update date: Sorawit Kamlangsub 2026-02-05 13:00
+--				แก้บั๊กการ where วันที่นำเข้า
+-- Update date: Sorawit Kamlangsub 2026-06-06 11:24
+--				แก้การรันเลข BQG เงื่อนไขเคลมโรงพยาบาลเบ็ดเตล็ด
 -- Description:
 -- =============================================
 CREATE PROCEDURE [dbo].[usp_BillingRequest_ClaimMisc_Insert]
@@ -2410,6 +2427,7 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
+-- Test Zone
 --DECLARE
 --		@GroupTypeId				INT				= 3
 --		,@ClaimTypeCode				VARCHAR(20)		= '2000'
@@ -2424,7 +2442,7 @@ BEGIN
 --		,@ProductTypeShortName		VARCHAR(20)		= 'SP'
 --		,@ProductTypeId				INT				= 32	
 --		;
-
+-- End Test
 
 DECLARE @IsResult	BIT			 = 1;
 DECLARE @Result		VARCHAR(100) = '';
@@ -2625,7 +2643,7 @@ BEGIN
 
 	SET @Last2numbersOfInsurance = RIGHT(@InsuranceCompanyCode,2);
 
-	SELECT @ClaimHeaderGroupCodeIndex3 = (SELECT TOP(1) RIGHT(LEFT(ClaimHeaderGroupCode, 4) ,1) FROM #Tmplst);
+	SELECT @ClaimHeaderGroupCodeIndex3 = (SELECT TOP(1) RIGHT(LEFT(ClaimHeaderGroupCode, 5) ,1) FROM #Tmplst);
 
 	IF (@ClaimHeaderGroupCodeIndex3 = 'H' or @ClaimHeaderGroupTypeId = 4)
 	BEGIN
@@ -2993,7 +3011,7 @@ END;
 
 GO
 
-/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImport_Insert]    Script Date: 11/6/2569 9:00:47 ******/
+/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImport_Insert]    Script Date: 11/6/2569 10:50:06 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -3015,6 +3033,8 @@ GO
 --				 - เพิ่ม parameters @ImportFrom เพื่อแยกว่ารายการที่ Import มาจากช่องทางไหน กำหนด 1 ImportExcel 2 Import จากการตั้งเบิก
 -- UpdateDate:	2025-11-06 15:20 Sorawit Kamlangsub
 --				- Add ClaimMisc
+-- UpdateDate:	2026-06-06 9:28 Sorawit Kamlangsub
+--				- Add ClaimMisc Hospital
 -- Description:	<Description,,>
 -- =============================================
 CREATE PROCEDURE [dbo].[usp_ClaimHeaderGroupImport_Insert]
@@ -3685,7 +3705,7 @@ IF @IsResult = 1
 					,cm.StartCoverDate								StartCoverDate
 					,NULL											ClaimAdmitTypeCode
 					,cxa.ClaimAdmitType								ClaimAdmitType
-					,'เคลมลูกค้า'										ClaimType
+					,IIF(cm.ClaimTypeId = 2,'เคลมโรงพยาบาล','เคลมลูกค้า')	ClaimType
 					,NULL											ICD10_1Code
 					,NULL											ICD10
 					,NULL											IPDCount
@@ -3997,12 +4017,13 @@ ELSE BEGIN	SET @Result = 'Failure'; END ;
 END
 GO
 
-/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupValidateAmountPay_Select]    Script Date: 11/6/2569 9:00:47 ******/
+/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupValidateAmountPay_Select]    Script Date: 11/6/2569 10:50:06 ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
+
 
 
 -- =============================================
@@ -4022,6 +4043,8 @@ GO
 --				เพิ่มการตรวจสอบสถานะของ Claim online
 -- Update date: 2026-03-11 13:39 Bunchaui chaiket
 --				LEFT JOIN DB_Customer PA
+-- Update date: 2026-06-08 13:26
+--				เปลี่ยน ClaimMiscPaymentHeader จาก INNER JOIN เป็น LEFT JOIN และกำหนด ISNULL TransferAmount
 -- Description:	Function สำหรับ Validate ยอดเงิน บ.ส. และยอดเงินโอน
 -- =============================================
 CREATE PROCEDURE [dbo].[usp_ClaimHeaderGroupValidateAmountPay_Select]  
@@ -4033,9 +4056,9 @@ BEGIN
 SET NOCOUNT ON;
 
 -- =============================================
---DECLARE @ProductGroupId				INT				= 3;
---DECLARE @ClaimGroupTypeId			INT				= 3; 
---DECLARE @ClaimHeaderGroupCode		VARCHAR(MAX)	= 'TSAN-888-69030001-0';
+--DECLARE @ProductGroupId				INT				= 11;
+--DECLARE @ClaimGroupTypeId			INT				= 8; 
+--DECLARE @ClaimHeaderGroupCode		VARCHAR(MAX)	= 'CHSPO88869060004';
 -- =============================================
 
 -- Set message 
@@ -4059,7 +4082,7 @@ CREATE TABLE #Tmplst
 	,Amount					DECIMAL(16,2)
 	,NPLAmount				DECIMAL(16,2)
 	,WarningMessage			NVARCHAR(MAX)
-);
+); 
 
 -- PH
 IF @ProductGroupId = 2
@@ -4262,7 +4285,7 @@ ELSE IF @ProductGroupId > 3
 		)
 		SELECT 
 				cm.ClaimHeaderGroupCode				ClaimHeaderGroupCode
-				,cph.PayAmount						TransferAmount
+				,ISNULL(cph.PayAmount, 0)			TransferAmount 
 				,ISNULL(cm.PayAmount, 0)			Amount
 				,ISNULL(colnlp.NPLAmount, 0)		NPLAmount 
 				,(
@@ -4276,7 +4299,10 @@ ELSE IF @ProductGroupId > 3
 					+
 					ISNULL(
 						CASE 
-							WHEN ISNULL(cph.PayAmount, 0) <> (ISNULL(cm.PayAmount, 0) + ISNULL(colnlp.NPLAmount, 0))
+							WHEN  @ClaimGroupTypeId <> 8 
+								AND (
+									ISNULL(cph.PayAmount, 0) <> (ISNULL(cm.PayAmount, 0) + ISNULL(colnlp.NPLAmount, 0))
+								)
 								THEN CONCAT(@AmountWarning, ' , ')
 							ELSE ''
 						END, NULL
@@ -4292,7 +4318,10 @@ ELSE IF @ProductGroupId > 3
 					+
 					ISNULL(
 						CASE 
-							WHEN (cph.ClaimMiscId IS NULL OR phxcmp.PaymentStatusId IS NOT NULL)
+							WHEN @ClaimGroupTypeId <> 8 
+								AND (
+									(cph.ClaimMiscId IS NULL OR phxcmp.PaymentStatusId IS NOT NULL)
+								) 
 								THEN CONCAT(@ClaimHeaderPaymentWarning, ' , ')
 							ELSE ''
 						END, NULL
@@ -4323,7 +4352,7 @@ ELSE IF @ProductGroupId > 3
 				GROUP BY nplh.ClaimOnLineId
 			)colnlp
 				ON colnlp.ClaimOnLineId = cm.ClaimOnLineId 
-			INNER JOIN 
+			LEFT JOIN 
 			(
 				-- โอนเงิน
 				SELECT 
@@ -4372,11 +4401,12 @@ ELSE IF @ProductGroupId > 3
 					AND cmp.PaymentStatusId NOT IN (4,5)
 			)phxcmp
 				ON cm.ClaimMiscId = phxcmp.ClaimMiscId
-		WHERE cm.IsActive = 1
+		WHERE cm.IsActive = 1 
 			 
  	END
 
 -- set result
+
 SELECT  
 	 tmp.ClaimHeaderGroupCode											ClaimHeaderGroupCode 
 	,tmp.Amount															Amount
@@ -4413,7 +4443,7 @@ IF OBJECT_ID('tempdb..#Tmp') IS NOT NULL  DROP TABLE #Tmp;
 END;
 GO
 
-/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackForGroupTransfer_Select]    Script Date: 11/6/2569 9:00:47 ******/
+/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackForGroupTransfer_Select]    Script Date: 11/6/2569 10:50:06 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -4424,6 +4454,7 @@ GO
 -- =============================================
 -- Author:		Prattana  Phiwkaew
 -- Create date: 2021-10-07 10:03
+-- Update date: 2026-05-25 Sorawit.k CR เพิ่มการดึงเคลมเบ็ดเตล็ด(โรงพยาบาล)
 -- Description:	<Description,,>
 -- =============================================
 CREATE PROCEDURE [dbo].[usp_ClaimPayBackForGroupTransfer_Select]
@@ -4492,13 +4523,21 @@ FROM dbo.ClaimPayBack b
 		ON b.BranchId = brh.Branch_ID
 	LEFT JOIN DataCenterV1.Person.vw_PersonUser pu
 		ON b.CreatedByUserId = pu.UserId
-WHERE (b.CreatedDate >= @CreatedDateFrom AND  b.CreatedDate < @CreatedDateTo )
-AND (b.ClaimGroupTypeId = @ClaimGroupTypeId OR @ClaimGroupTypeId IS NULL)
-AND (b.ClaimPayBackStatusId = 2)	--2 รอดำเนินการ
-AND (b.IsActive = 1)
-
---AND (b.ClaimPayBackCode LIKE N'%'+ @l_SearchDetail + '%' OR @l_SearchDetail IS NULL)
-
+WHERE (b.CreatedDate >= @CreatedDateFrom AND  b.CreatedDate < @CreatedDateTo)
+	AND (b.ClaimPayBackStatusId = 2)--2 รอดำเนินการ
+	AND (b.IsActive = 1)
+	AND (
+		@ClaimGroupTypeId IS NULL
+		OR (
+			@ClaimGroupTypeId = 4
+			AND b.ClaimGroupTypeId IN (4,8)
+		)
+		OR 
+		(
+			@ClaimGroupTypeId <> 4
+			AND b.ClaimGroupTypeId = @ClaimGroupTypeId
+		)
+	)
 ORDER BY CASE WHEN @l_OrderType IS NULL AND @l_SortField IS NULL THEN b.ClaimPayBackId END ASC 
 ,CASE WHEN @l_OrderType = 'ASC' AND @l_SortField = 'ClaimPayBackCode' THEN b.ClaimPayBackId END ASC 
 ,CASE WHEN @l_OrderType = 'DESC' AND @l_SortField = 'ClaimPayBackCode' THEN b.ClaimPayBackId END DESC 
@@ -4508,15 +4547,15 @@ OFFSET @l_IndexStart ROWS FETCH NEXT @l_PageSize ROWS ONLY;
 
 END
 
-
 GO
 
-/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]    Script Date: 11/6/2569 9:00:47 ******/
+/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]    Script Date: 11/6/2569 10:50:06 ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
+
 
 
 
@@ -4566,6 +4605,8 @@ GO
 -- Description: ปรับการค้นหา ClaimMisc Motor
 -- Update date: 2026-03-09 Sorawit.k
 -- Description:	เพิ่ม ClaimPaymentTypeName,ClaimPaymentTypeDetail
+-- Update date: 2026-05-26 Sorawit.k
+-- Description:	เพิ่มเงื่อนไขการแสดงข้อมูลเคลมเบ็ดเตล็ด(โรงพยาบาล)
 -- =============================================
 CREATE PROCEDURE [dbo].[usp_ClaimPayBackReportNonClaimCompensate_Select]
 	 @DateFrom			DATE =	NULL
@@ -4580,11 +4621,11 @@ BEGIN
 	SET NOCOUNT ON;
 -- START TEST
 --DECLARE
---	 @DateFrom			DATE =	'2026-02-16'
---	,@DateTo			DATE =	'2026-02-17'
+--	 @DateFrom			DATE =	'2026-05-25'
+--	,@DateTo			DATE =	'2026-05-26'
 --	,@InsuranceId		INT =	NULL
---	,@ProductGroupId	INT =	4
---	,@ClaimGroupTypeId	INT =	7;
+--	,@ProductGroupId	INT =	11
+--	,@ClaimGroupTypeId	INT =	8;
 -- END Test
 
 DECLARE @TmpClaimPayBack TABLE (
@@ -4723,43 +4764,46 @@ DECLARE @TmpClaimPayBack TABLE (
 	AND (cpbd.InsuranceCompanyId = @InsuranceId OR @InsuranceId IS NULL)
 	 
 	--SELECT เอาไปใช้งาน
-    SELECT		icu.InsuranceCompany_Name									InsuranceCompany_Name
-				,dab.BranchDetail											Branch
-				,IIF(@ClaimGroupTypeId IN( 4,6,7),sssmtc.Detail,NULL)		Hospital
+    SELECT		icu.InsuranceCompany_Name													InsuranceCompany_Name
+				,dab.BranchDetail															Branch
+				,IIF(@ClaimGroupTypeId IN( 4,6,7,8),sssmtc.Detail,NULL)						Hospital
 				,CASE 
 					WHEN @ClaimGroupTypeId IN (2,4,6) THEN TmpCPB.ProductGroupDetailName
-					WHEN @ClaimGroupTypeId = 7		  THEN icu.ProductTypeName
+					WHEN @ClaimGroupTypeId IN (7,8)		  THEN icu.ProductTypeName
 					ELSE NULL
-				END															ProductGroupDetailName
-				,TmpCPB.ClaimGroupType										ClaimGroupType
-				,TmpCPB.ClaimGroupCodeFromCPBD								ClaimGroupCode
-				,TmpCPB.ItemCount											ItemCount
-				,TmpCPB.Amount												Amount
-				,NULL														ClaimCompensate
-				,icu.ClaimCode												ClaimNo 
-				,IIF(@ClaimGroupTypeId IN (2,6,7) , TmpCPB.COL,NULL)		COL
-				,IIF(@ClaimGroupTypeId IN (2,4,6,7) ,sssmp.Detail,NULL)		Province
-				,IIF(@ClaimGroupTypeId IN (2,4,6,7) ,icu.CustomerName,NULL)	CustomerName
+				END																			ProductGroupDetailName
+				,TmpCPB.ClaimGroupType														ClaimGroupType
+				,TmpCPB.ClaimGroupCodeFromCPBD												ClaimGroupCode
+				,TmpCPB.ItemCount															ItemCount
+				,TmpCPB.Amount																Amount
+				,NULL																		ClaimCompensate
+				,icu.ClaimCode																ClaimNo 
+				,IIF(@ClaimGroupTypeId IN (2,6,7,8) , TmpCPB.COL,NULL)						COL
+				,IIF(@ClaimGroupTypeId IN (2,4,6,7,8) ,sssmp.Detail,NULL)					Province
+				,IIF(@ClaimGroupTypeId IN (2,4,6,7,8) ,icu.CustomerName,NULL)				CustomerName
 				,CASE 
-					WHEN @ClaimGroupTypeId IN (4,6)							THEN sssmtb.Detail
+					WHEN @ClaimGroupTypeId IN (4,6,8)							
+					THEN sssmtb.Detail
 					ELSE NULL
-				END												BankName
+				END																			BankName
 				,CASE 
-					WHEN @ClaimGroupTypeId IN (4,6)							THEN sssmtc.BankAccountName
+					WHEN @ClaimGroupTypeId IN (4,6,8)							
+					THEN sssmtc.BankAccountName
 					ELSE NULL
-				END												BankAccountName
+				END																			BankAccountName
 				,CASE 
-					WHEN @ClaimGroupTypeId IN (4,6)							THEN REPLACE(sssmtc.BankAccountNo,'-','')
+					WHEN @ClaimGroupTypeId IN (4,6,8)							
+					THEN REPLACE(sssmtc.BankAccountNo,'-','')
 					ELSE NULL
-				END												BankAccountNo
-				,NULL											PhoneNo
-				,TmpCPB.CreatedDate								CreatedDate
-				,pu.PersonName									ApprovedUser 
-				,TmpCPB.CreatedByUser							CteatedUser 
-				,icu.ClaimAdmitType								ClaimAdmitType
-				,NULL											RecordedDate
-				,icu.ClaimPaymentTypeName						ClaimPaymentTypeName
-				,icu.ClaimPaymentDetailTypeName					ClaimPaymentTypeDetail
+				END																			BankAccountNo
+				,NULL																		PhoneNo
+				,TmpCPB.CreatedDate															CreatedDate
+				,pu.PersonName																ApprovedUser 
+				,TmpCPB.CreatedByUser														CteatedUser 
+				,icu.ClaimAdmitType															ClaimAdmitType
+				,NULL																		RecordedDate
+				,icu.ClaimPaymentTypeName													ClaimPaymentTypeName
+				,icu.ClaimPaymentDetailTypeName												ClaimPaymentTypeDetail
 FROM @TmpClaimPayBack TmpCPB
 	 LEFT JOIN(
 
@@ -4908,7 +4952,7 @@ IF OBJECT_ID('tempdb..@TmpClaimPayBack') IS NOT NULL  DELETE FROM @TmpClaimPayBa
 END;
 GO
 
-/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackSubGroup_Insert]    Script Date: 11/6/2569 9:00:47 ******/
+/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackSubGroup_Insert]    Script Date: 11/6/2569 10:50:06 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -4922,200 +4966,201 @@ GO
 --GO
 
 -- =============================================
--- Author:		Sahatsawat golffy 06958
+-- Author:  Sahatsawat golffy 06958
 -- Create date: 20230908
--- Update date: 
--- Description:	For Group ClaimHospital and ClaimCompensate
+-- Update date: 2026-05-25 Sorawit.k เพิ่มการเช็คเคลมเบ็ดเตล็ด(โรงพยาบาล) 
+-- Description: For Group ClaimHospital and ClaimCompensate
 -- =============================================
 CREATE PROCEDURE [dbo].[usp_ClaimPayBackSubGroup_Insert]
 -- Add the parameters for the stored procedure here
-	@ClaimPayBackTransferId		INT
-	,@CreatedByUserId			INT
+ @ClaimPayBackTransferId  INT
+ ,@CreatedByUserId   INT
 AS
 BEGIN
-	-- SET NOCOUNT ON added to prevent extra result sets from
-	-- interfering with SELECT statements.
-	SET NOCOUNT ON;
+ -- SET NOCOUNT ON added to prevent extra result sets from
+ -- interfering with SELECT statements.
+ SET NOCOUNT ON;
 
-	-- For Test
-	--DECLARE @ClaimPayBackTransferId INT = 389
-	--DECLARE @CreatedByUserId INT = 4957
+ -- For Test
+ --DECLARE @ClaimPayBackTransferId INT = 389
+ --DECLARE @CreatedByUserId INT = 4957
 
-	-- Add the parameters for the stored procedure here
-	DECLARE @IsResult			BIT				= 1;
-	DECLARE @Result				VARCHAR(100)	= '';
-	DECLARE @Msg				NVARCHAR(500)	= '';
+ -- Add the parameters for the stored procedure here
+ DECLARE @IsResult   BIT    = 1;
+ DECLARE @Result    VARCHAR(100) = '';
+ DECLARE @Msg    NVARCHAR(500) = '';
 
-	DECLARE @CreatedDate				DATETIME2 = GETDATE();
-	DECLARE @ClaimPayBackSubGroupCount	INT = 0;
-	DECLARE @ClaimGroupTypeId			INT;
+ DECLARE @CreatedDate    DATETIME2 = GETDATE();
+ DECLARE @ClaimPayBackSubGroupCount INT = 0;
+ DECLARE @ClaimGroupTypeId   INT;
 
-	-- Validate
-	SELECT @ClaimPayBackSubGroupCount = COUNT(ClaimPayBackSubGroupId) 
-	FROM dbo.ClaimPayBackSubGroup
-	WHERE ClaimPayBackTransferId = @ClaimPayBackTransferId
+ -- Validate
+ SELECT @ClaimPayBackSubGroupCount = COUNT(ClaimPayBackSubGroupId) 
+ FROM dbo.ClaimPayBackSubGroup
+ WHERE ClaimPayBackTransferId = @ClaimPayBackTransferId
 
-	IF @ClaimPayBackSubGroupCount > 0
-		BEGIN
-		    SET @IsResult = 0;
-			SET @Msg = N'ถูก Generate Group แล้ว';
-		END
+ IF @ClaimPayBackSubGroupCount > 0
+  BEGIN
+      SET @IsResult = 0;
+   SET @Msg = N'ถูก Generate Group แล้ว';
+  END
 
-	SELECT @ClaimGroupTypeId = ClaimGroupTypeId 
-	FROM dbo.ClaimPayBack 
-	WHERE ClaimPayBackTransferId = @ClaimPayBackTransferId
+ SELECT @ClaimGroupTypeId = ClaimGroupTypeId 
+ FROM dbo.ClaimPayBack 
+ WHERE ClaimPayBackTransferId = @ClaimPayBackTransferId
 
-	IF @ClaimGroupTypeId <> 4
-	BEGIN
-		SET @IsResult = 0;
-		SET @Msg = N'ต้องเป็นเคลมโรงพยาบาลเท่านั้น';
-	END
+ IF @ClaimGroupTypeId NOT IN (4,8)
+ BEGIN
+  SET @IsResult = 0;
+  SET @Msg = N'ต้องเป็นเคลมโรงพยาบาลเท่านั้น';
+ END
 
-	IF (@IsResult = 1)
-		BEGIN
+ IF (@IsResult = 1)
+  BEGIN
 
-			SELECT cd.ClaimPayBackDetailId
-					, cd.ItemCount
-					, cd.Amount
-					, cd.HospitalCode
-					, h.Detail AS HospitalName
-					, cd.CreatedDate
-					, c.ClaimPayBackTransferId
-					--, cd.ProductGroupId
-					--, pdg.ProductGroupDetail AS ProductGroup
-					,h.ContactEmail
-			INTO #TmpHeader
-			FROM dbo.ClaimPayBackDetail cd
-			LEFT JOIN sss.dbo.vw_CompanyGroupHospital h
-				ON cd.HospitalCode = h.Code
-			INNER JOIN dbo.ClaimPayBack c
-				ON cd.ClaimPayBackId = c.ClaimPayBackId
-			--LEFT JOIN DataCenterV1.Product.ProductGroup pdg
-			--	ON cd.ProductGroupId = pdg.ProductGroup_ID
-			WHERE c.ClaimPayBackTransferId = @ClaimPayBackTransferId
-				AND cd.IsActive = 1
+   SELECT cd.ClaimPayBackDetailId
+     , cd.ItemCount
+     , cd.Amount
+     , cd.HospitalCode
+     , h.Detail AS HospitalName
+     , cd.CreatedDate
+     , c.ClaimPayBackTransferId
+     --, cd.ProductGroupId
+     --, pdg.ProductGroupDetail AS ProductGroup
+     ,h.ContactEmail
+   INTO #TmpHeader
+   FROM dbo.ClaimPayBackDetail cd
+   LEFT JOIN sss.dbo.vw_CompanyGroupHospital h
+    ON cd.HospitalCode = h.Code
+   INNER JOIN dbo.ClaimPayBack c
+    ON cd.ClaimPayBackId = c.ClaimPayBackId
+   --LEFT JOIN DataCenterV1.Product.ProductGroup pdg
+   -- ON cd.ProductGroupId = pdg.ProductGroup_ID
+   WHERE c.ClaimPayBackTransferId = @ClaimPayBackTransferId
+    AND cd.IsActive = 1
 
-			SELECT COUNT(ClaimPayBackDetailId)		ItemCount
-					, SUM(Amount)					SumAmount 
-					, HospitalCode					HospitalCode
-					, MAX(HospitalName) 			HospitalName
-					, ROW_NUMBER() OVER(ORDER BY (HospitalCode) asc ) AS rwId
-					, ContactEmail
-			INTO #TmpGroup
-			FROM #TmpHeader
-			GROUP BY HospitalCode, ContactEmail;
+   SELECT COUNT(ClaimPayBackDetailId)  ItemCount
+     , SUM(Amount)     SumAmount 
+     , HospitalCode     HospitalCode
+     , MAX(HospitalName)    HospitalName
+     , ROW_NUMBER() OVER(ORDER BY (HospitalCode) asc ) AS rwId
+     , ContactEmail
+   INTO #TmpGroup
+   FROM #TmpHeader
+   GROUP BY HospitalCode, ContactEmail;
 
-			DECLARE @TT          VARCHAR(6) = 'HCG'
-				  , @Total		 INT 
-				  , @YY          VARCHAR(2)
-				  , @MM          VARCHAR(2)
-				  , @RunningFrom INT
-				  , @RunningTo   INT;
+   DECLARE @TT          VARCHAR(6) = 'HCG'
+      , @Total   INT 
+      , @YY          VARCHAR(2)
+      , @MM          VARCHAR(2)
+      , @RunningFrom INT
+      , @RunningTo   INT;
 
-			SELECT @Total = MAX(rwId)
-			FROM #TmpGroup;
+   SELECT @Total = MAX(rwId)
+   FROM #TmpGroup;
 
-			EXECUTE dbo.usp_GenerateCode_FromTo @TT -- varchar(6)
-										   , @Total -- int
-										   , @YY OUTPUT -- varchar(2)
-										   , @MM OUTPUT -- varchar(2)
-										   , @RunningFrom OUTPUT -- int
-										   , @RunningTo OUTPUT -- int
+   EXECUTE dbo.usp_GenerateCode_FromTo @TT -- varchar(6)
+             , @Total -- int
+             , @YY OUTPUT -- varchar(2)
+             , @MM OUTPUT -- varchar(2)
+             , @RunningFrom OUTPUT -- int
+             , @RunningTo OUTPUT -- int
 
-	
-			-- สร้าง ClaimPayBackSubGroup และเก็บ ClaimPayBackSubGroupId ที่สร้างขึ้นใหม่
-			DECLARE @GeneratedIds TABLE (ClaimPayBackSubGroupId INT, HospitalCode VARCHAR(20))
+ 
+   -- สร้าง ClaimPayBackSubGroup และเก็บ ClaimPayBackSubGroupId ที่สร้างขึ้นใหม่
+   DECLARE @GeneratedIds TABLE (ClaimPayBackSubGroupId INT, HospitalCode VARCHAR(20))
 
-			--SELECT * FROM #TmpHeader
-			--SELECT * FROM #TmpGroup
+   --SELECT * FROM #TmpHeader
+   --SELECT * FROM #TmpGroup
 
-			-----------------------------------
-			BEGIN TRY
-				BEGIN TRANSACTION
-	
+   -----------------------------------
+   BEGIN TRY
+    BEGIN TRANSACTION
+ 
 
-				INSERT INTO dbo.ClaimPayBackSubGroup
-				(
-					ClaimPayBackSubGroupCode
-					, Amount
-					, ItemCount
-					, HospitalCode
-					, HospitalName
-					, ClaimPayBackTransferId
-					, IsActive
-					, CreatedDate
-					, CreatedByUserId
-					, UpdatedDate
-					, UpdatedByUserId
-					, ContactEmail
-				)
-				OUTPUT INSERTED.ClaimPayBackSubGroupId, INSERTED.HospitalCode INTO @GeneratedIds (ClaimPayBackSubGroupId, HospitalCode)
-				SELECT CONCAT(@TT,@YY,@MM ,FORMAT(@RunningFrom + rwId - 1,'000000')) 
-					, SumAmount
-					, ItemCount
-					, HospitalCode
-					, HospitalName
-					, @ClaimPayBackTransferId
-					, 1
-					, @CreatedDate
-					, @CreatedByUserId
-					, @CreatedDate
-					, @CreatedByUserId
-					, ContactEmail
-				FROM #TmpGroup
+    INSERT INTO dbo.ClaimPayBackSubGroup
+    (
+     ClaimPayBackSubGroupCode
+     , Amount
+     , ItemCount
+     , HospitalCode
+     , HospitalName
+     , ClaimPayBackTransferId
+     , IsActive
+     , CreatedDate
+     , CreatedByUserId
+     , UpdatedDate
+     , UpdatedByUserId
+     , ContactEmail
+    )
+    OUTPUT INSERTED.ClaimPayBackSubGroupId, INSERTED.HospitalCode INTO @GeneratedIds (ClaimPayBackSubGroupId, HospitalCode)
+    SELECT CONCAT(@TT,@YY,@MM ,FORMAT(@RunningFrom + rwId - 1,'000000')) 
+     , SumAmount
+     , ItemCount
+     , HospitalCode
+     , HospitalName
+     , @ClaimPayBackTransferId
+     , 1
+     , @CreatedDate
+     , @CreatedByUserId
+     , @CreatedDate
+     , @CreatedByUserId
+     , ContactEmail
+    FROM #TmpGroup
 
-				-- อัปเดต ClaimPayBackDetail ด้วย ClaimPayBackSubGroupId
-				UPDATE CPBD
-				SET CPBD.ClaimPayBackSubGroupId = GID.ClaimPayBackSubGroupId
-					, CPBD.UpdatedDate = @CreatedDate
-					, CPBD.UpdatedByUserId = @CreatedByUserId
-				FROM dbo.ClaimPayBackDetail CPBD
-				INNER JOIN #TmpHeader TH 
-					ON CPBD.ClaimPayBackDetailId = TH.ClaimPayBackDetailId
-				INNER JOIN @GeneratedIds GID 
-					ON TH.HospitalCode = GID.HospitalCode;
-	
-				SET @IsResult   = 1;
-				SET @Msg        = 'บันทึก สำเร็จ';
-	
-				COMMIT TRANSACTION
-			END TRY
-			BEGIN CATCH
-	
-				SET @IsResult   = 0;
-				SET @Msg        = 'บันทึก ไม่สำเร็จ';
-	
-				IF (@@Trancount > 0) ROLLBACK;
-			END CATCH
-			-----------------------------------
+    -- อัปเดต ClaimPayBackDetail ด้วย ClaimPayBackSubGroupId
+    UPDATE CPBD
+    SET CPBD.ClaimPayBackSubGroupId = GID.ClaimPayBackSubGroupId
+     , CPBD.UpdatedDate = @CreatedDate
+     , CPBD.UpdatedByUserId = @CreatedByUserId
+    FROM dbo.ClaimPayBackDetail CPBD
+    INNER JOIN #TmpHeader TH 
+     ON CPBD.ClaimPayBackDetailId = TH.ClaimPayBackDetailId
+    INNER JOIN @GeneratedIds GID 
+     ON TH.HospitalCode = GID.HospitalCode;
+ 
+    SET @IsResult   = 1;
+    SET @Msg        = 'บันทึก สำเร็จ';
+ 
+    COMMIT TRANSACTION
+   END TRY
+   BEGIN CATCH
+ 
+    SET @IsResult   = 0;
+    SET @Msg        = 'บันทึก ไม่สำเร็จ';
+ 
+    IF (@@Trancount > 0) ROLLBACK;
+   END CATCH
+   -----------------------------------
 
-		IF OBJECT_ID('tempdb..#TmpHeader') IS NOT NULL  DROP TABLE #TmpHeader;
-		IF OBJECT_ID('tempdb..#TmpGroup') IS NOT NULL  DROP TABLE #TmpGroup;
-	
-	END;
-	
-	IF (@IsResult = 1) 
-		BEGIN
-			SET @Result = 'Success';
-		END
-	ELSE
-		BEGIN
-			SET @Result = 'Failure';
-		END;	
-	
-	SELECT	@IsResult	AS IsResult
-			,@Result	AS Result
-			,@Msg		AS Msg;
-	
+  IF OBJECT_ID('tempdb..#TmpHeader') IS NOT NULL  DROP TABLE #TmpHeader;
+  IF OBJECT_ID('tempdb..#TmpGroup') IS NOT NULL  DROP TABLE #TmpGroup;
+ 
+ END;
+ 
+ IF (@IsResult = 1) 
+  BEGIN
+   SET @Result = 'Success';
+  END
+ ELSE
+  BEGIN
+   SET @Result = 'Failure';
+  END; 
+ 
+ SELECT @IsResult AS IsResult
+   ,@Result AS Result
+   ,@Msg  AS Msg;
+ 
 END;
 GO
 
-/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackTransferNonClaimCompensateReport_Select]    Script Date: 11/6/2569 9:00:47 ******/
+/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackTransferNonClaimCompensateReport_Select]    Script Date: 11/6/2569 10:50:06 ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
+
 
 
 
@@ -5147,6 +5192,8 @@ GO
 -- Description:	เอาข้อมูลบัญชีของเคลม Misc ออก
 -- Update date: 2026-03-09 Sorawit.k
 -- Description:	เพิ่ม ClaimPaymentTypeName,ClaimPaymentTypeDetail
+-- Update date: 2026-05-27 Sorawit.k
+-- Description:	เพิ่มการแสดงผลเคลมเบ็ดเตล็ด (โรงพยาบาล)
 -- =============================================
 CREATE PROCEDURE [dbo].[usp_ClaimPayBackTransferNonClaimCompensateReport_Select]
 	 @DateFrom			DATE 
@@ -5304,7 +5351,7 @@ SELECT 			icu.InsuranceCompany_Name														InsuranceCompany_Name
 				,IIF(@ClaimGroupTypeId IN (4,7),ssicu.Detail,NULL)								Hospital
 				,CASE 
 					WHEN @ClaimGroupTypeId IN (2,4,6) THEN tmpCpbd.ProductGroupDetailName
-					WHEN @ClaimGroupTypeId = 7		  THEN icu.ProductTypeName
+					WHEN @ClaimGroupTypeId IN (4,7)   THEN icu.ProductTypeName
 					ELSE NULL
 				END																				ProductGroupDetailName				
 				,tmpCpbd.ClaimGroupType															ClaimGroupType
@@ -5491,16 +5538,19 @@ IF OBJECT_ID('tempdb..@TmpClaimPayBack') IS NOT NULL  DELETE FROM @TmpClaimPayBa
 END;
 GO
 
-/****** Object:  StoredProcedure [dbo].[usp_GetDocumentIdDocStorage_Select]    Script Date: 11/6/2569 9:00:47 ******/
+/****** Object:  StoredProcedure [dbo].[usp_GetDocumentIdDocStorage_Select]    Script Date: 11/6/2569 10:50:06 ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
 
+
 -- =============================================
 -- Author:		Sorawit KamlangSub
 -- Create date: 2025-11-26 15:30
+-- Update date: 2026-02-23 14:22 Remove doctype
+-- Update date: 2026-05-26 16:42 Add DocumentSubTypeId
 -- Description:	For Get DocStorage Data
 -- =============================================
 CREATE PROCEDURE [dbo].[usp_GetDocumentIdDocStorage_Select]
@@ -5509,18 +5559,25 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
+	-- Start Test
+	--DECLARE  @ClaimHeaderGroupCodes NVARCHAR(MAX) =  'ZBMPO88869020001';
+	-- End Test
+
 	SELECT DISTINCT Element
 	INTO #Tmplst
 	from dbo.func_SplitStringToTable(@ClaimHeaderGroupCodes,',');
 	
 	SELECT 
 		CASE 
-			WHEN doc.TbType = 'ClaimMisc' THEN cm.ClaimMiscNo
-			WHEN doc.TbType = 'ClaimOnlineAppCode' THEN cm.ApplicationCode
-			WHEN doc.TbType = 'ClaimOnlineDocCode' THEN doc.DocumentCode
+			WHEN doc.TbType = 'ClaimMisc'	THEN cm.ClaimMiscNo
+			WHEN doc.TbType = 'ClaimOnline' THEN cm.ApplicationCode
+			WHEN doc.TbType = 'DocCode'		THEN doc.DocumentCode
 		END MainIndex
 		,cm.ClaimHeaderGroupCode
 		,doc.DocumentId
+		,doc.DocumentTypeId
+		,doc.DocumentSubTypeId
+		,doc.DocumentCode
 	FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
 		INNER JOIN #Tmplst tl
 			ON cm.ClaimHeaderGroupCode = tl.Element
@@ -5530,11 +5587,12 @@ BEGIN
 					doc.ClaimMiscId
 					,doc.DocumentId
 					,doc.DocumentCode
-					,doct.DocumentSubTypeId
-					,'ClaimMisc'			TbType
+					,'ClaimMisc'				TbType
+					,doc.DocumentTypeId			DocumentTypeId
+					,docType.DocumentSubTypeId	DocumentSubTypeId
 				FROM [ClaimMiscellaneous].[misc].[Document] doc
-					LEFT JOIN [ClaimMiscellaneous].[misc].[DocumentType] doct
-						ON doct.DocumentTypeId = doc.DocumentTypeId
+				LEFT JOIN [ClaimMiscellaneous].[misc].[DocumentType] docType
+					ON docType.DocumentTypeId = doc.DocumentTypeId
 				WHERE doc.IsActive = 1
 				AND doc.DocumentTypeId <> 3
 
@@ -5544,8 +5602,9 @@ BEGIN
 					ClaimMiscId
 					,DocumentId
 					,DocumentCode
-					,DocumentSubTypeId
-					,'ClaimOnlineAppCode'			TbType
+					,'ClaimOnline'			TbType
+					,NULL					DocumentTypeId
+					,DocumentSubTypeId	
 				FROM [ClaimMiscellaneous].[misc].[DocumentClaimOnLine]
 				WHERE IsActive = 1
 				AND DocumentSubTypeId <> 340
@@ -5556,11 +5615,13 @@ BEGIN
 					ClaimMiscId
 					,DocumentId
 					,DocumentCode
-					,DocumentSubTypeId
-					,'ClaimOnlineDocCode'			TbType
+					,'DocCode'				TbType
+					,NULL					DocumentTypeId
+					,DocumentSubTypeId	
 				FROM [ClaimMiscellaneous].[misc].[DocumentClaimOnLine]
 				WHERE IsActive = 1
 				AND DocumentSubTypeId <> 340
+
 
 		) doc
 			ON doc.ClaimMiscId = cm.ClaimMiscId
@@ -5571,15 +5632,20 @@ BEGIN
 	--DECLARE @MainIndex				NVARCHAR(MAX)
 	--DECLARE @DocumentId				UNIQUEIDENTIFIER
 	--DECLARE @ClaimHeaderGroupCode	NVARCHAR(MAX)
+	--DECLARE @DocumentSubTypeId		INT
+	--DECLARE @DocumentTypeId			INT
+	--DECLARE @DocumentCode			NVARCHAR(MAX)
 	--SELECT
 	--	@MainIndex				MainIndex
 	--	,@DocumentId			DocumentId
 	--	,@ClaimHeaderGroupCode	ClaimHeaderGroupCode
-
+	--	,@DocumentSubTypeId		DocumentSubTypeId
+	--	,@DocumentTypeId		DocumentTypeId
+	--	,@DocumentCode			DocumentCode
 END
 GO
 
-/****** Object:  StoredProcedure [dbo].[usp_TmpClaimHeaderGroupImport_Validate_V2]    Script Date: 11/6/2569 9:00:47 ******/
+/****** Object:  StoredProcedure [dbo].[usp_TmpClaimHeaderGroupImport_Validate_V2]    Script Date: 11/6/2569 10:50:06 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -5604,6 +5670,7 @@ GO
 -- Update date: 2025-10-30 09:34 Add ClaimMisc and Clean Script Sorawit kamlangsub
 -- Update date: 2026-03-11 13:16 Add Pa Validate PolicyNo Sorawit kamlangsub
 -- Update date: 2026-03-12 08:47 เพิ่ม Validate กรณีเป็น บ.ส.นั้นเป็นเบิกจ่ายกองทุนม้าลาย Sorawit kamlangsub
+-- Update date: 2026-06-06 08:57 เพิ่ม union ClaimMisc ใน #TmpClaimType Sorawit kamlangsub
 -- Description:	PROD (P30,1000) dl.DocumentListID = 137 (2000) dl.DocumentListID = 138 
 --	UAT  dl.DocumentListID = 134 (2000) dl.DocumentListID = 135
 -- =============================================
@@ -5695,6 +5762,19 @@ IF @IsResult = 1
 			SELECT g.ClaimCompensateGroupCode	ClaimHeaderGroupCode
 					,@ClaimTypeCode_H			ClaimTypeCode	
 			FROM SSS.dbo.ClaimCompensateGroup g
+
+		UNION ALL 
+			
+			SELECT 
+				ClaimHeaderGroupCode	
+				,CASE ClaimTypeId 
+					WHEN 2 THEN @ClaimTypeCode_H
+					WHEN 3 THEN @ClaimTypeCode_C
+					ELSE ''
+					END								ClaimTypeCode
+			FROM [ClaimMiscellaneous].[misc].[ClaimMisc] 
+			
+
 		)m
 			INNER JOIN #Tmp x
 				ON m.ClaimHeaderGroupCode = x.ClaimHeaderGroupCode;
@@ -5828,8 +5908,8 @@ IF @IsResult = 1
 			 , m.ClaimHeaderGroupCodeInDB
              , m.ClaimHeaderCodeInDB
 			 , m.TotalAmountSS
-			 , IIF(m.ProductGroup = 'Misc',1,ISNULL(d.CountDoc,0)) CountDoc
-			 , IIF(IIF(m.ProductGroup = 'Misc',1,ISNULL(d.CountDoc,0)) = 0,N'ไม่พบเอกสารแนบ','') ValidateDetailResult
+			 , IIF(m.ProductGroup IN ('Misc','ZebraMisc'),1,ISNULL(d.CountDoc,0)) CountDoc
+			 , IIF(IIF(m.ProductGroup IN ('Misc','ZebraMisc'),1,ISNULL(d.CountDoc,0)) = 0,N'ไม่พบเอกสารแนบ','') ValidateDetailResult
 		INTO #TmpDoc
 		FROM #TmpDetail m
 			LEFT JOIN 
@@ -5838,16 +5918,16 @@ IF @IsResult = 1
 							,td.ClaimHeaderCodeInDB
 							,CASE 
 								WHEN 
-									-- ตรวจสอบเอกสาร PH ที่เป็นเคลมโรงพยาบาลต้องมีทั้งเอกสารเคลมโรงพยาบาล(24) กับหนังสือแจ้งชำระค่ารักษาพยาบาล (134,PROD 137)
+									-- ตรวจสอบเอกสาร PH ที่เป็นเคลมโรงพยาบาลต้องมีทั้งเอกสารเคลมโรงพยาบาล(24) กับหนังสือแจ้งชำระค่ารักษาพยาบาล (UAT 134,PROD 137)
 									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup IN ('P30','1000') AND dl.DocumentListID = 24 THEN 1 ELSE 0 END) >= 1
 									AND
-									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup IN ('P30','1000') AND dl.DocumentListID = 137 THEN 1 ELSE 0 END) >= 1
+									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup IN ('P30','1000') AND dl.DocumentListID = 134 THEN 1 ELSE 0 END) >= 1
 								THEN 1
 								WHEN 
-									-- ตรวจสอบเอกสาร PA ที่เป็นเคลมโรงพยาบาลต้องมีทั้งเอกสารเคลมโรงพยาบาล(26) กับหนังสือแจ้งชำระค่ารักษาพยาบาล (135,PROD 138)
+									-- ตรวจสอบเอกสาร PA ที่เป็นเคลมโรงพยาบาลต้องมีทั้งเอกสารเคลมโรงพยาบาล(26) กับหนังสือแจ้งชำระค่ารักษาพยาบาล (UAT 135,PROD 138)
 									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup = '2000' AND dl.DocumentListID = 26 THEN 1 ELSE 0 END) >= 1
 									AND
-									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup = '2000' AND dl.DocumentListID = 138 THEN 1 ELSE 0 END) >= 1
+									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup = '2000' AND dl.DocumentListID = 135 THEN 1 ELSE 0 END) >= 1
 								THEN 1
 								WHEN 
 									-- กรณีเป็นเคลมสาขา ต้องไม่มีของเคลมโรงพยาบาล
@@ -5930,7 +6010,7 @@ IF @IsResult = 1
 						,IIF(c.ProductGroup = 'ZebraMisc', 'ตรวจสอบรายการเคลมกองทุนรถม้าลาย','')
 					)ValidateResult
 				---------------------------------------------------------------
-				,IIF(t.ClaimHeaderGroupTypeId = 6 ,'2000',a.ClaimTypeCode)	ClaimTypeCode
+				,a.ClaimTypeCode	ClaimTypeCode
 
 		INTO #TmpUpdate
 		FROM #Tmp t
