@@ -18,7 +18,7 @@ GO
 --	SET NOCOUNT ON;
 
 	-- Start Test
-	DECLARE  @ClaimHeaderGroupCodes NVARCHAR(MAX) =  'ZBMPO88869020001';
+	DECLARE  @ClaimHeaderGroupCodes NVARCHAR(MAX) =  'CHSPH88869060018,CHCMH88869060010,CHSPH88869060019,CHCMH88869060011';
 	-- End Test
 
 	SELECT DISTINCT Element
@@ -33,6 +33,7 @@ GO
 		END MainIndex
 		,cm.ClaimHeaderGroupCode
 		,doc.DocumentId
+		,doc.DocumentCode
 	FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
 		INNER JOIN #Tmplst tl
 			ON cm.ClaimHeaderGroupCode = tl.Element

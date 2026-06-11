@@ -5,13 +5,18 @@ VisualStudioVersion = 17.14.36408.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{4F2E2C19-372F-40D8-9FA7-9D2138C6997A}") = "SiamSmileSQLClaimPayBack", "SiamSmileSQLClaimPayBack.ssmssqlproj", "{81F9C8E8-7583-A700-5CE6-F9B6F3403E8E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "V1.6.0", "V1.6.0", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+	ProjectSection(SolutionItems) = preProject
+		V_1_6_0.sql = V_1_6_0.sql
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Default|Default = Default|Default
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{81F9C8E8-7583-A700-5CE6-F9B6F3403E8E}.Default|Default.ActiveCfg = Default
-		{A4BE1B25-093B-4555-9C0B-8B7CEEE499AC}.Default|Default.ActiveCfg = Default
+		{0396D159-603F-42A6-B20B-68425E449E1F}.Default|Default.ActiveCfg = Default
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
