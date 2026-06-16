@@ -1,177 +1,74 @@
-﻿SELECT 
- hg.*
-FROM
-(
-SELECT  
-		hg.Code								AS ClaimHeaderGroupCodeInDB
-		,CAST(h.Amount_Pay AS DECIMAL(16,2))	AS TotalAmount
-		,h.PaySS_Total							AS TotalAmountSS
-		,ins.Organize_ID						AS InsuranceCompanyId
-		,h.Code									AS ClaimHeaderCodeInDB
-		,'2000'									AS ProductGroup
-		,ctp.Detail								AS PolicyNo
+﻿/* ======================================================================
+   Parameters — เปลี่ยนค่า 2 ตัวนี้เพื่อทดสอบ claim group / บริษัทประกันอื่น
+   ====================================================================== */
+DECLARE @InsuranceOrgId       VARCHAR(50) = '1120992';
+DECLARE @ClaimHeaderGroupCode VARCHAR(50) = 'AGAO-181-69060001-0';
+
+/* ======================================================================
+   Step 1: ตรวจสอบเงื่อนไขเดิม (ทำครั้งเดียว) ว่า ClaimHeaderGroup นี้
+   ผูกอยู่กับบริษัทประกัน @InsuranceOrgId จริงหรือไม่
+   ====================================================================== */
+
+SELECT
+      hg.Code AS ClaimHeaderGroupCode
+INTO  #ClaimContext
 FROM SSSPA.dbo.DB_ClaimHeaderGroup AS hg
-	INNER JOIN SSSPA.dbo.DB_ClaimHeader h
-		ON hg.Code = h.ClaimheaderGroup_id
-	LEFT JOIN DataCenterV1.Organize.Organize AS ins
-		ON hg.InsuranceCompany_id = ins.OrganizeCode
-	LEFT JOIN SSSPA.dbo.DB_CustomerDetail AS ctd
-		ON h.CustomerDetail_id = ctd.Code
-	LEFT JOIN SSSPA.dbo.DB_Customer AS cus
-		ON ctd.Application_id = cus.App_id AND cus.Status_id <> '3090'
-	LEFT JOIN SSSPA.dbo.DB_CustomerPolicy  AS ctp
-		ON cus.App_id  = ctp.App_id AND PolicyType_id = '9601'
-	WHERE ins.Organize_ID = '1120992'
+INNER JOIN SSSPA.dbo.DB_ClaimHeader AS h
+    ON hg.Code = h.ClaimheaderGroup_id
+LEFT JOIN DataCenterV1.Organize.Organize AS ins
+    ON hg.InsuranceCompany_id = ins.OrganizeCode
+WHERE ins.Organize_ID = @InsuranceOrgId;
+-- หมายเหตุ: ส่วน LEFT JOIN ctd/cus/ctp ในซับควรรีเดิมไม่มีผลต่อผลลัพธ์ของ
+-- ขั้นตอนนี้ (ใช้แค่กรอง ins.Organize_ID) จึงตัดออกได้โดยไม่กระทบผลลัพธ์
 
-) rs
-INNER JOIN SSSPA.dbo.DB_ClaimHeaderGroup AS hg 
-	ON hg.Code = rs.ClaimHeaderGroupCodeInDB
-INNER JOIN SSSPA.dbo.DB_ClaimHeader h
-	ON h.ClaimheaderGroup_id = hg.Code
-WHERE hg.Code = 'AGAO-181-69060001-0'
+/* ======================================================================
+   Step 2: ดึงข้อมูลแต่ละตาราง โดยอ้างอิงเงื่อนไขผ่าน EXISTS กับ #ClaimContext
+   (เทียบเท่ากับ INNER JOIN rs เดิม แต่ไม่ต้อง join ซ้ำกับตารางที่ filter
+   ด้วย literal อยู่แล้ว)
+   ====================================================================== */
 
-SELECT 
- h.*
-FROM
-(
-SELECT  
-		hg.Code								AS ClaimHeaderGroupCodeInDB
-		,CAST(h.Amount_Pay AS DECIMAL(16,2))	AS TotalAmount
-		,h.PaySS_Total							AS TotalAmountSS
-		,ins.Organize_ID						AS InsuranceCompanyId
-		,h.Code									AS ClaimHeaderCodeInDB
-		,'2000'									AS ProductGroup
-		,ctp.Detail								AS PolicyNo
+-- 1) ClaimHeaderGroup
+SELECT hg.*
 FROM SSSPA.dbo.DB_ClaimHeaderGroup AS hg
-	INNER JOIN SSSPA.dbo.DB_ClaimHeader h
-		ON hg.Code = h.ClaimheaderGroup_id
-	LEFT JOIN DataCenterV1.Organize.Organize AS ins
-		ON hg.InsuranceCompany_id = ins.OrganizeCode
-	LEFT JOIN SSSPA.dbo.DB_CustomerDetail AS ctd
-		ON h.CustomerDetail_id = ctd.Code
-	LEFT JOIN SSSPA.dbo.DB_Customer AS cus
-		ON ctd.Application_id = cus.App_id AND cus.Status_id <> '3090'
-	LEFT JOIN SSSPA.dbo.DB_CustomerPolicy  AS ctp
-		ON cus.App_id  = ctp.App_id AND PolicyType_id = '9601'
-	WHERE ins.Organize_ID = '1120992'
+WHERE hg.Code = @ClaimHeaderGroupCode
+  AND EXISTS (SELECT 1 FROM #ClaimContext cc WHERE cc.ClaimHeaderGroupCode = hg.Code);
 
-) rs
-INNER JOIN SSSPA.dbo.DB_ClaimHeaderGroup AS hg 
-	ON hg.Code = rs.ClaimHeaderGroupCodeInDB
-INNER JOIN SSSPA.dbo.DB_ClaimHeader h
-	ON h.ClaimheaderGroup_id = hg.Code
-WHERE hg.Code = 'AGAO-181-69060001-0'
+-- 2) ClaimHeader
+SELECT h.*
+FROM SSSPA.dbo.DB_ClaimHeader AS h
+WHERE h.ClaimheaderGroup_id = @ClaimHeaderGroupCode
+  AND EXISTS (SELECT 1 FROM #ClaimContext cc WHERE cc.ClaimHeaderGroupCode = h.ClaimheaderGroup_id);
 
-SELECT 
- ctd.*
-FROM
-(
-SELECT  
-		hg.Code								AS ClaimHeaderGroupCodeInDB
-		,CAST(h.Amount_Pay AS DECIMAL(16,2))	AS TotalAmount
-		,h.PaySS_Total							AS TotalAmountSS
-		,ins.Organize_ID						AS InsuranceCompanyId
-		,h.Code									AS ClaimHeaderCodeInDB
-		,'2000'									AS ProductGroup
-		,ctp.Detail								AS PolicyNo
-FROM SSSPA.dbo.DB_ClaimHeaderGroup AS hg
-	INNER JOIN SSSPA.dbo.DB_ClaimHeader h
-		ON hg.Code = h.ClaimheaderGroup_id
-	LEFT JOIN DataCenterV1.Organize.Organize AS ins
-		ON hg.InsuranceCompany_id = ins.OrganizeCode
-	LEFT JOIN SSSPA.dbo.DB_CustomerDetail AS ctd
-		ON h.CustomerDetail_id = ctd.Code
-	LEFT JOIN SSSPA.dbo.DB_Customer AS cus
-		ON ctd.Application_id = cus.App_id AND cus.Status_id <> '3090'
-	LEFT JOIN SSSPA.dbo.DB_CustomerPolicy  AS ctp
-		ON cus.App_id  = ctp.App_id AND PolicyType_id = '9601'
-	WHERE ins.Organize_ID = '1120992'
-
-) rs
-INNER JOIN SSSPA.dbo.DB_ClaimHeaderGroup AS hg 
-	ON hg.Code = rs.ClaimHeaderGroupCodeInDB
-INNER JOIN SSSPA.dbo.DB_ClaimHeader h
-	ON h.ClaimheaderGroup_id = hg.Code
+-- 3) CustomerDetail
+SELECT ctd.*
+FROM SSSPA.dbo.DB_ClaimHeader AS h
 LEFT JOIN SSSPA.dbo.DB_CustomerDetail AS ctd
-		ON h.CustomerDetail_id = ctd.Code
-LEFT JOIN SSSPA.dbo.DB_Customer AS cus
-		ON ctd.Application_id = cus.App_id AND cus.Status_id <> '3090'
-LEFT JOIN SSSPA.dbo.DB_CustomerPolicy  AS ctp
-		ON cus.App_id  = ctp.App_id 
-WHERE hg.Code = 'AGAO-181-69060001-0'
+    ON h.CustomerDetail_id = ctd.Code
+WHERE h.ClaimheaderGroup_id = @ClaimHeaderGroupCode
+  AND EXISTS (SELECT 1 FROM #ClaimContext cc WHERE cc.ClaimHeaderGroupCode = h.ClaimheaderGroup_id);
 
-SELECT 
- cus.*
-FROM
-(
-SELECT  
-		hg.Code								AS ClaimHeaderGroupCodeInDB
-		,CAST(h.Amount_Pay AS DECIMAL(16,2))	AS TotalAmount
-		,h.PaySS_Total							AS TotalAmountSS
-		,ins.Organize_ID						AS InsuranceCompanyId
-		,h.Code									AS ClaimHeaderCodeInDB
-		,'2000'									AS ProductGroup
-		,ctp.Detail								AS PolicyNo
-FROM SSSPA.dbo.DB_ClaimHeaderGroup AS hg
-	INNER JOIN SSSPA.dbo.DB_ClaimHeader h
-		ON hg.Code = h.ClaimheaderGroup_id
-	LEFT JOIN DataCenterV1.Organize.Organize AS ins
-		ON hg.InsuranceCompany_id = ins.OrganizeCode
-	LEFT JOIN SSSPA.dbo.DB_CustomerDetail AS ctd
-		ON h.CustomerDetail_id = ctd.Code
-	LEFT JOIN SSSPA.dbo.DB_Customer AS cus
-		ON ctd.Application_id = cus.App_id AND cus.Status_id <> '3090'
-	LEFT JOIN SSSPA.dbo.DB_CustomerPolicy  AS ctp
-		ON cus.App_id  = ctp.App_id AND PolicyType_id = '9601'
-	WHERE ins.Organize_ID = '1120992'
-
-) rs
-INNER JOIN SSSPA.dbo.DB_ClaimHeaderGroup AS hg 
-	ON hg.Code = rs.ClaimHeaderGroupCodeInDB
-INNER JOIN SSSPA.dbo.DB_ClaimHeader h
-	ON h.ClaimheaderGroup_id = hg.Code
+-- 4) Customer
+SELECT cus.*
+FROM SSSPA.dbo.DB_ClaimHeader AS h
 LEFT JOIN SSSPA.dbo.DB_CustomerDetail AS ctd
-		ON h.CustomerDetail_id = ctd.Code
+    ON h.CustomerDetail_id = ctd.Code
 LEFT JOIN SSSPA.dbo.DB_Customer AS cus
-		ON ctd.Application_id = cus.App_id AND cus.Status_id <> '3090'
-LEFT JOIN SSSPA.dbo.DB_CustomerPolicy  AS ctp
-		ON cus.App_id  = ctp.App_id 
-WHERE hg.Code = 'AGAO-181-69060001-0'
+    ON ctd.Application_id = cus.App_id
+   AND cus.Status_id <> '3090'
+WHERE h.ClaimheaderGroup_id = @ClaimHeaderGroupCode
+  AND EXISTS (SELECT 1 FROM #ClaimContext cc WHERE cc.ClaimHeaderGroupCode = h.ClaimheaderGroup_id);
 
-SELECT 
- ctp.*
-FROM
-(
-SELECT  
-		hg.Code								AS ClaimHeaderGroupCodeInDB
-		,CAST(h.Amount_Pay AS DECIMAL(16,2))	AS TotalAmount
-		,h.PaySS_Total							AS TotalAmountSS
-		,ins.Organize_ID						AS InsuranceCompanyId
-		,h.Code									AS ClaimHeaderCodeInDB
-		,'2000'									AS ProductGroup
-		,ctp.Detail								AS PolicyNo
-FROM SSSPA.dbo.DB_ClaimHeaderGroup AS hg
-	INNER JOIN SSSPA.dbo.DB_ClaimHeader h
-		ON hg.Code = h.ClaimheaderGroup_id
-	LEFT JOIN DataCenterV1.Organize.Organize AS ins
-		ON hg.InsuranceCompany_id = ins.OrganizeCode
-	LEFT JOIN SSSPA.dbo.DB_CustomerDetail AS ctd
-		ON h.CustomerDetail_id = ctd.Code
-	LEFT JOIN SSSPA.dbo.DB_Customer AS cus
-		ON ctd.Application_id = cus.App_id AND cus.Status_id <> '3090'
-	LEFT JOIN SSSPA.dbo.DB_CustomerPolicy  AS ctp
-		ON cus.App_id  = ctp.App_id AND PolicyType_id = '9601'
-	WHERE ins.Organize_ID = '1120992'
-
-) rs
-INNER JOIN SSSPA.dbo.DB_ClaimHeaderGroup AS hg 
-	ON hg.Code = rs.ClaimHeaderGroupCodeInDB
-INNER JOIN SSSPA.dbo.DB_ClaimHeader h
-	ON h.ClaimheaderGroup_id = hg.Code
+-- 5) CustomerPolicy (ไม่กรอง PolicyType_id ตามพฤติกรรมเดิมของ query นี้)
+SELECT ctp.*
+FROM SSSPA.dbo.DB_ClaimHeader AS h
 LEFT JOIN SSSPA.dbo.DB_CustomerDetail AS ctd
-		ON h.CustomerDetail_id = ctd.Code
+    ON h.CustomerDetail_id = ctd.Code
 LEFT JOIN SSSPA.dbo.DB_Customer AS cus
-		ON ctd.Application_id = cus.App_id AND cus.Status_id <> '3090'
-LEFT JOIN SSSPA.dbo.DB_CustomerPolicy  AS ctp
-		ON cus.App_id  = ctp.App_id 
-WHERE hg.Code = 'AGAO-181-69060001-0'
+    ON ctd.Application_id = cus.App_id
+   AND cus.Status_id <> '3090'
+LEFT JOIN SSSPA.dbo.DB_CustomerPolicy AS ctp
+    ON cus.App_id = ctp.App_id
+WHERE h.ClaimheaderGroup_id = @ClaimHeaderGroupCode
+  AND EXISTS (SELECT 1 FROM #ClaimContext cc WHERE cc.ClaimHeaderGroupCode = h.ClaimheaderGroup_id);
+
+IF OBJECT_ID('tempdb..#ClaimContext') IS NOT NULL DROP TABLE #ClaimContext;
