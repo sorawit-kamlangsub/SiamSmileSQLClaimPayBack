@@ -32,6 +32,20 @@
           <ConnectionProtocol>NotSpecified</ConnectionProtocol>
           <ApplicationName>Microsoft SQL Server Management Studio - Query</ApplicationName>
         </ConnectionNode>
+        <ConnectionNode Name="147.50.150.227:devdba">
+          <Created>2026-06-16T15:15:00.3329046+07:00</Created>
+          <Type>SQL</Type>
+          <Server>147.50.150.227</Server>
+          <UserName>devdba</UserName>
+          <Authentication>SQL</Authentication>
+          <InitialDB>SmilesInsuranceV2</InitialDB>
+          <LoginTimeout>30</LoginTimeout>
+          <TrustServerCertificate>True</TrustServerCertificate>
+          <EncryptionOption>True</EncryptionOption>
+          <ExecutionTimeout>0</ExecutionTimeout>
+          <ConnectionProtocol>NotSpecified</ConnectionProtocol>
+          <ApplicationName>Microsoft SQL Server Management Studio - Query</ApplicationName>
+        </ConnectionNode>
         <ConnectionNode Name="27.254.238.180:devcrud">
           <Created>2026-02-25T09:33:33.8588406+07:00</Created>
           <Type>SQL</Type>
