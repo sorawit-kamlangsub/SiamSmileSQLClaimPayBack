@@ -8,7 +8,7 @@ DECLARE @D DATETIME2 = GETDATE();
   DECLARE @CodeCategory VARCHAR(20) = 'PN';
   DECLARE @Result NVARCHAR(250);
 
-  EXECUTE [SSSPA].[dbo].[SP_GenerateCode]
+  EXECUTE [SSSPA].[dbo].[SP_GenerateCode_BE]
   @CodeCategory
   ,@Result OUTPUT
  
@@ -32,7 +32,7 @@ INSERT INTO [SSSPA].[dbo].[DB_CustomerPolicy]
 VALUES 
 (
     @Result,                        -- Code
-    '60202608',                     -- App_id
+    '51202608',                     -- App_id
     '9601',                         -- PolicyType_id
     '000-26-11-PAA-12573',          -- Detail
     NULL,                           -- BranchReceiveDate
