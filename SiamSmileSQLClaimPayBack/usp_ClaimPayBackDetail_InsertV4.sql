@@ -3,8 +3,10 @@ GO
 
 SET ANSI_NULLS ON
 GO
+
 SET QUOTED_IDENTIFIER ON
 GO
+
 
 -- =============================================
 -- Author:		Kittisak.Ph (อ้างอิง usp_ClaimPayBackDetail_InsertV3)
@@ -1226,7 +1228,7 @@ BEGIN
 ---------------------------------------------------------------------------------
 
 ------------------------------------- Krekpon.D Mind 06588 2024-06-27 -------------------------------------------
-	IF @ClaimGroupTypeId = 4
+	IF @ClaimGroupTypeId IN (4,8)
 		BEGIN
 				INSERT INTO [dbo].[ClaimPayBackDetailReport]
 		           ([ClaimGroupCode]

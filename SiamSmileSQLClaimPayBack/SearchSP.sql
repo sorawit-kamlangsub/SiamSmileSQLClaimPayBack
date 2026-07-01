@@ -12,7 +12,7 @@ INNER JOIN
 INNER JOIN 
     sys.schemas s ON o.schema_id = s.schema_id
 WHERE 1=1
-    AND m.definition LIKE '%usp_ClaimPayBackTransferOutPocket_Insert%' 
+    AND m.definition LIKE '%ClaimPayBackDetailReport%' 
     AND o.type = 'P'  -- 'P' stands for stored procedures
 ORDER BY 
     s.name, o.name;

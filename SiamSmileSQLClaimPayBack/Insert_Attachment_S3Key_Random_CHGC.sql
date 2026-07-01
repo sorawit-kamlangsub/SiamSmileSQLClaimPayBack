@@ -91,12 +91,17 @@ DECLARE @S3Bucket NVARCHAR(255) = 'p-isc-ss-1-bucketdata'
 					ON h.App_id = cus.App_id
 
 	) td	
-	-- WHERE td.ClaimHeaderGroupCodeInDB IN
-	WHERE td.ClaimHeaderCodeInDB IN
-	(
+	 WHERE td.ClaimHeaderGroupCodeInDB IN
+	 (
+		'SBAD-888-69070001-0',
+		'SBAD-888-69070002-0',
+		'SBAD-888-69070003-0'
+	 )
+	--WHERE td.ClaimHeaderCodeInDB IN
+	--(
 
-		'CLPA690600002777'
-	)
+	--	'CLPA690600002777'
+	--)
 
 	ORDER BY ProductGroup 
 
@@ -282,6 +287,35 @@ BEGIN TRY
 				FROM @Document
 			) d
 				ON t.Seq = d.Seq;
+
+			INSERT INTO [ISC_SmileDoc].[dbo].[ClaimDocument]
+			(
+					   [DocumentStatusId]
+					   ,[UpdatedDate]
+					   ,[DocumentIndexId]
+					   ,[DocumentIndexData]
+					   ,[ExtUpdatedDate]
+					   ,[IsActive]
+					   ,[CreatedDate]
+					   ,[DocumentListId]
+					   ,[DocumentListName]
+					   ,[DocumentTypeId]
+					   ,[DocumentTypeName])
+				SELECT 
+					2						DocumentStatusId
+					,@D						UpdatedDate
+					,NULL					DocumentIndexId
+					,ClaimHeaderCodeInDB	DocumentIndexData
+					,NULL					ExtUpdatedDate
+					,1						IsActive
+					,@D						CreatedDate
+					,NULL					DocumentListId
+					,NULL					DocumentListName
+					,NULL					DocumentTypeId
+					,NULL					DocumentTypeName
+				FROM #Tmp
+
+
 
 			SELECT
 			 *

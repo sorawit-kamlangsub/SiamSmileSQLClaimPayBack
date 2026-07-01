@@ -84,5 +84,5 @@
 
 	WHERE td.ClaimHeaderGroupCodeInDB IN
 	(
-		'TSAH-888-69060013-0'
+		'SBAD-888-69060001-0'
 	)
