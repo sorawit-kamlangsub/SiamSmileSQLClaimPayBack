@@ -1,5 +1,17 @@
-﻿DECLARE @D DATETIME2 = GETDATE();
+﻿USE [SSSPA]
+GO
 
+
+DECLARE @D DATETIME2 = GETDATE();
+
+/*PN */
+  DECLARE @CodeCategory VARCHAR(20) = 'PN';
+  DECLARE @Result NVARCHAR(250);
+
+  EXECUTE [SSSPA].[dbo].[SP_GenerateCode]
+  @CodeCategory
+  ,@Result OUTPUT
+ 
 INSERT INTO [SSSPA].[dbo].[DB_CustomerPolicy] 
 (
     [Code],
@@ -19,8 +31,8 @@ INSERT INTO [SSSPA].[dbo].[DB_CustomerPolicy]
 )
 VALUES 
 (
-    'PN690500000066',               -- Code
-    '69502611',                     -- App_id
+    @Result,                        -- Code
+    '60202608',                     -- App_id
     '9601',                         -- PolicyType_id
     '000-26-11-PAA-12573',          -- Detail
     NULL,                           -- BranchReceiveDate
