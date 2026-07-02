@@ -12,6 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "V1.6.0", "V1.6.0", "{02EA68
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fix_Data", "Fix_Data", "{393229F8-4702-459F-92F1-5A0BF9FC3693}"
 	ProjectSection(SolutionItems) = preProject
+		InsertOut2BlueYellowGreem.sql = InsertOut2BlueYellowGreem.sql
 		Insert_ClaimPayBackDetailReport.sql = Insert_ClaimPayBackDetailReport.sql
 	EndProjectSection
 EndProject
@@ -27,7 +28,7 @@ Global
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{81F9C8E8-7583-A700-5CE6-F9B6F3403E8E}.Default|Default.ActiveCfg = Default
-		{71213198-B81C-4DC8-9FD1-FACF4C236A6A}.Default|Default.ActiveCfg = Default
+		{F799DC0F-114D-4952-B7E4-75680671B593}.Default|Default.ActiveCfg = Default
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
