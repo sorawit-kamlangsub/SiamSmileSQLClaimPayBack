@@ -4,6 +4,35 @@ GO
 DECLARE @D DATETIME2; 
 
 SET @D = CAST(CAST(GETDATE() AS DATE) AS DATETIME2);
+
+SELECT 
+      bi.[BillingRequestItemCode]
+      ,bg.[BillingRequestGroupCode]
+      ,gi.[InsuranceCompanyId]
+      ,gi.[ClaimTypeCode]
+      ,@D             [PaymentDate]
+      ,bi.PaySS_Total [AmountPayment]
+      ,b.[BankName]
+      ,b.[BankAccountName]
+      ,b.[BankAccountNumber]
+      ,bg.BillingDate
+      ,gd.ClaimCode
+      ,gd.ClaimHeaderGroupImportDetailId
+      ,gd.PaySS_Total
+      ,gf.[FileName]
+INTO #Tmp
+FROM dbo.ClaimHeaderGroupImportFile gf
+    LEFT JOIN dbo.ClaimHeaderGroupImport gi
+	    ON gf.ClaimHeaderGroupImportFileId = gi.ClaimGroupImportFileId
+    LEFT JOIN dbo.ClaimHeaderGroupImportDetail gd
+	    ON gi.ClaimHeaderGroupImportId = gd.ClaimHeaderGroupImportId
+    LEFT JOIN dbo.BillingRequestGroup bg
+	    ON gi.BillingRequestGroupId = bg.BillingRequestGroupId
+    LEFT JOIN dbo.BillingRequestItem bi
+	    ON gd.ClaimHeaderGroupImportDetailId = bi.ClaimHeaderGroupImportDetailId
+    CROSS JOIN dbo.BillingBank b 
+WHERE b.BillingBankId = 1
+AND bg.BillingRequestGroupCode = 'BQGPA04B6907001'
 	
 BEGIN TRY
 	BEGIN TRANSACTION
@@ -16,37 +45,6 @@ BEGIN TRY
        @TransactionCodeControlTypeDetail
       ,@RunningLenght
       ,@Result OUTPUT
-
-
-
-    SELECT 
-          bi.[BillingRequestItemCode]
-          ,bg.[BillingRequestGroupCode]
-          ,gi.[InsuranceCompanyId]
-          ,gi.[ClaimTypeCode]
-          ,@D             [PaymentDate]
-          ,bi.PaySS_Total [AmountPayment]
-          ,b.[BankName]
-          ,b.[BankAccountName]
-          ,b.[BankAccountNumber]
-          ,bg.BillingDate
-          ,gd.ClaimCode
-          ,gd.ClaimHeaderGroupImportDetailId
-          ,gd.PaySS_Total
-          ,gf.[FileName]
-    INTO #Tmp
-    FROM dbo.ClaimHeaderGroupImportFile gf
-	    LEFT JOIN dbo.ClaimHeaderGroupImport gi
-		    ON gf.ClaimHeaderGroupImportFileId = gi.ClaimGroupImportFileId
-	    LEFT JOIN dbo.ClaimHeaderGroupImportDetail gd
-		    ON gi.ClaimHeaderGroupImportId = gd.ClaimHeaderGroupImportId
-	    LEFT JOIN dbo.BillingRequestGroup bg
-		    ON gi.BillingRequestGroupId = bg.BillingRequestGroupId
-	    LEFT JOIN dbo.BillingRequestItem bi
-		    ON gd.ClaimHeaderGroupImportDetailId = bi.ClaimHeaderGroupImportDetailId
-        CROSS JOIN dbo.BillingBank b 
-    WHERE b.BillingBankId = 1
-    AND bg.BillingRequestGroupCode = 'BQGPA04B6907001'
 
 
     INSERT INTO [dbo].[TmpBillingRequestResult]
