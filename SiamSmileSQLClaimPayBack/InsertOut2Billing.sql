@@ -1,6 +1,7 @@
 ﻿USE [ClaimPayBack]
 GO
 
+DECLARE @TmpCode VARCHAR(50) = 'TCB6907000087';
 DECLARE @D DATETIME2; 
 
 SET @D = CAST(CAST(GETDATE() AS DATE) AS DATETIME2);
@@ -30,48 +31,42 @@ FROM dbo.ClaimHeaderGroupImportFile gf
 	    ON gi.BillingRequestGroupId = bg.BillingRequestGroupId
     LEFT JOIN dbo.BillingRequestItem bi
 	    ON gd.ClaimHeaderGroupImportDetailId = bi.ClaimHeaderGroupImportDetailId
+    INNER JOIN dbo.BillingRequestResultImport bri 
+        ON bri.BillingRequestItemCode = bi.BillingRequestItemCode 
     CROSS JOIN dbo.BillingBank b 
 WHERE b.BillingBankId = 1
-AND bg.BillingRequestGroupCode = 'BQGPA04B6907001'
+AND bri.IsActive = 1
+AND bri.tmpCode = @TmpCode
 	
 BEGIN TRY
 	BEGIN TRANSACTION
 
-    DECLARE @TransactionCodeControlTypeDetail varchar(8) = 'TCB';
-    DECLARE @RunningLenght int = 6;
-    DECLARE @Result varchar(20);
 
-    EXECUTE [dbo].[usp_GenerateCode] 
-       @TransactionCodeControlTypeDetail
-      ,@RunningLenght
-      ,@Result OUTPUT
-
-
-    INSERT INTO [dbo].[TmpBillingRequestResult]
-               (
-               [TmpCode]
-               ,[BillingRequestItemCode]
-               ,[PaymentReferenceId]
-               ,[CoverAmount]
-               ,[UncoverAmount]
-               ,[UnCoverRemark]
-               ,[DecisionStatus]
-               ,[DecisionStatusId]
-               ,[RejectResult]
-               ,[DecisionDate]
-               ,[EstimatePaymentDate]
-               ,[Remark]
-               ,[IsValid]
-               ,[ValidateResult]
-               ,[PaymentDate]
-               ,[AmountPayment]
-               ,[BankName]
-               ,[BankAccountName]
-               ,[BankAccountNumber]
-               ,[Remark3]
-               )
+    --INSERT INTO [dbo].[TmpBillingRequestResult]
+    --           (
+    --           [TmpCode]
+    --           ,[BillingRequestItemCode]
+    --           ,[PaymentReferenceId]
+    --           ,[CoverAmount]
+    --           ,[UncoverAmount]
+    --           ,[UnCoverRemark]
+    --           ,[DecisionStatus]
+    --           ,[DecisionStatusId]
+    --           ,[RejectResult]
+    --           ,[DecisionDate]
+    --           ,[EstimatePaymentDate]
+    --           ,[Remark]
+    --           ,[IsValid]
+    --           ,[ValidateResult]
+    --           ,[PaymentDate]
+    --           ,[AmountPayment]
+    --           ,[BankName]
+    --           ,[BankAccountName]
+    --           ,[BankAccountNumber]
+    --           ,[Remark3]
+    --           )
      SELECT             
-                @Result             [TmpCode]
+                @TmpCode             [TmpCode]
                ,[BillingRequestItemCode]
                ,NULL                [PaymentReferenceId]
                ,0                   [CoverAmount]
@@ -93,23 +88,23 @@ BEGIN TRY
                ,NULL                [Remark3]
      FROM #Tmp
 
-    INSERT INTO [dbo].[TmpBillingReceiveResultHeader]
-               (
-               [TmpCode]
-               ,[BillingDate]
-               ,[BillingReceiveStatusId]
-               ,[BillingRequestGroupCode]
-               ,[InsuranceCompanyId]
-               ,[ClaimTypeCode]
-               ,[IsActive]
-               ,[CreatedByUserId]
-               ,[CreatedDate]
-               ,[UpdatedByUserId]
-               ,[UpdatedDate]
-               )
+    --INSERT INTO [dbo].[TmpBillingReceiveResultHeader]
+    --           (
+    --           [TmpCode]
+    --           ,[BillingDate]
+    --           ,[BillingReceiveStatusId]
+    --           ,[BillingRequestGroupCode]
+    --           ,[InsuranceCompanyId]
+    --           ,[ClaimTypeCode]
+    --           ,[IsActive]
+    --           ,[CreatedByUserId]
+    --           ,[CreatedDate]
+    --           ,[UpdatedByUserId]
+    --           ,[UpdatedDate]
+    --           )
     SELECT 
-               TOP(1)
-               @Result                      [TmpCode]
+               DISTINCT
+               @TmpCode                      [TmpCode]
                ,[BillingDate]
                ,2                           [BillingReceiveStatusId]
                ,[BillingRequestGroupCode]
@@ -122,20 +117,19 @@ BEGIN TRY
                ,@D                          [UpdatedDate]
     FROM #Tmp
 
-    INSERT INTO [dbo].[BillingRequestResultHeader]
-               (
-               [FileName]
-               ,[BillingRequestResultHeaderCode]
-               ,[IsActive]
-               ,[CreatedDate]
-               ,[CreatedByUserId]
-               ,[UpdatedDate]
-               ,[UpdatedByUserId]
-               ,[IsManual]
-               ,[IsManualNPL]
-               )
-    SELECT 
-               TOP(1)
+    --INSERT INTO [dbo].[BillingRequestResultHeader]
+    --           (
+    --           [FileName]
+    --           ,[BillingRequestResultHeaderCode]
+    --           ,[IsActive]
+    --           ,[CreatedDate]
+    --           ,[CreatedByUserId]
+    --           ,[UpdatedDate]
+    --           ,[UpdatedByUserId]
+    --           ,[IsManual]
+    --           ,[IsManualNPL]
+    --           )
+    SELECT     DISTINCT
                [FileName]
                ,BillingRequestGroupCode    [BillingRequestResultHeaderCode]
                ,1   [IsActive]
@@ -149,34 +143,34 @@ BEGIN TRY
 
     DECLARE @TmpBillingRequestResultId INT = SCOPE_IDENTITY();
 
-    INSERT INTO [dbo].[BillingRequestResultDetail]
-               (
-               [BillingRequestResultHeaderId]
-               ,[BillingRequestItemCode]
-               ,[PaymentReferenceId]
-               ,[CoverAmount]
-               ,[UncoverAmount]
-               ,[UnCoverRemark]
-               ,[DecisionStatus]
-               ,[DecisionStatusId]
-               ,[RejectResult]
-               ,[DecisionDate]
-               ,[EstimatePaymentDate]
-               ,[Remark]
-               ,[ClaimCode]
-               ,[IsActive]
-               ,[CreatedDate]
-               ,[CreatedByUserId]
-               ,[UpdatedDate]
-               ,[UpdatedByUserId]
-               ,[ClaimHeaderGroupImportDetailId]
-               ,[PaySS_Total]
-               )
+    --INSERT INTO [dbo].[BillingRequestResultDetail]
+    --           (
+    --           [BillingRequestResultHeaderId]
+    --           ,[BillingRequestItemCode]
+    --           ,[PaymentReferenceId]
+    --           ,[CoverAmount]
+    --           ,[UncoverAmount]
+    --           ,[UnCoverRemark]
+    --           ,[DecisionStatus]
+    --           ,[DecisionStatusId]
+    --           ,[RejectResult]
+    --           ,[DecisionDate]
+    --           ,[EstimatePaymentDate]
+    --           ,[Remark]
+    --           ,[ClaimCode]
+    --           ,[IsActive]
+    --           ,[CreatedDate]
+    --           ,[CreatedByUserId]
+    --           ,[UpdatedDate]
+    --           ,[UpdatedByUserId]
+    --           ,[ClaimHeaderGroupImportDetailId]
+    --           ,[PaySS_Total]
+    --           )
     SELECT
                @TmpBillingRequestResultId   [BillingRequestResultHeaderId]
                ,[BillingRequestItemCode]
-               ,NULL                        [PaymentReferenceId]
-               ,NULL                        [CoverAmount]
+               ,'-'                         [PaymentReferenceId]
+               ,[AmountPayment]             [CoverAmount]
                ,NULL                        [UncoverAmount]
                ,NULL                        [UnCoverRemark]
                ,NULL                        [DecisionStatus]
