@@ -1,7 +1,7 @@
 ﻿USE [ClaimPayBack]
 GO
 
-DECLARE @TmpCode VARCHAR(50) = 'TCB6907000087';
+DECLARE @TmpCode VARCHAR(50) = 'TCB6907000088';
 DECLARE @D DATETIME2; 
 
 SET @D = CAST(CAST(GETDATE() AS DATE) AS DATETIME2);
@@ -21,6 +21,8 @@ SELECT
       ,gd.ClaimHeaderGroupImportDetailId
       ,gd.PaySS_Total
       ,gf.[FileName]
+      ,brd.BillingRequestItemCode           BillingRequestResultDetailItemCode
+      ,brd.CoverAmount
 INTO #Tmp
 FROM dbo.ClaimHeaderGroupImportFile gf
     LEFT JOIN dbo.ClaimHeaderGroupImport gi
@@ -31,6 +33,15 @@ FROM dbo.ClaimHeaderGroupImportFile gf
 	    ON gi.BillingRequestGroupId = bg.BillingRequestGroupId
     LEFT JOIN dbo.BillingRequestItem bi
 	    ON gd.ClaimHeaderGroupImportDetailId = bi.ClaimHeaderGroupImportDetailId
+    LEFT JOIN 
+        (
+            SELECT
+             BillingRequestItemCode
+             ,CoverAmount
+            FROM dbo.BillingRequestResultDetail
+            WHERE IsActive = 1
+        ) brd
+        ON brd.BillingRequestItemCode = bi.BillingRequestItemCode
     INNER JOIN dbo.BillingRequestResultImport bri 
         ON bri.BillingRequestItemCode = bi.BillingRequestItemCode 
     CROSS JOIN dbo.BillingBank b 
@@ -139,7 +150,12 @@ BEGIN TRY
                ,1   [UpdatedByUserId]
                ,0   [IsManual]
                ,0   [IsManualNPL]
-    FROM #Tmp
+    FROM #Tmp t
+    WHERE NOT EXISTS 
+    (
+        SELECT 1 FROM dbo.BillingRequestResultDetail rd
+        WHERE rd.BillingRequestItemCode = t.BillingRequestResultDetailItemCode
+    )
 
     DECLARE @TmpBillingRequestResultId INT = SCOPE_IDENTITY();
 
@@ -187,7 +203,12 @@ BEGIN TRY
                ,1                           [UpdatedByUserId]
                ,[ClaimHeaderGroupImportDetailId]
                ,[PaySS_Total]
-    FROM #Tmp
+    FROM #Tmp t
+    WHERE NOT EXISTS 
+    (
+        SELECT 1 FROM dbo.BillingRequestResultDetail rd
+        WHERE rd.BillingRequestItemCode = t.BillingRequestResultDetailItemCode
+    )
 
 	COMMIT TRANSACTION
 END TRY
