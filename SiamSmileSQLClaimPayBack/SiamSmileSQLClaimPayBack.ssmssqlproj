@@ -60,6 +60,21 @@
           <ConnectionProtocol>NotSpecified</ConnectionProtocol>
           <ApplicationName>Microsoft SQL Server Management Studio - Query</ApplicationName>
         </ConnectionNode>
+        <ConnectionNode Name="27.254.238.180:devread">
+          <Created>2026-07-06T15:25:42.4308889+07:00</Created>
+          <Type>SQL</Type>
+          <Server>27.254.238.180</Server>
+          <UserName>devread</UserName>
+          <Authentication>SQL</Authentication>
+          <InitialDB />
+          <LoginTimeout>30</LoginTimeout>
+          <TrustServerCertificate>False</TrustServerCertificate>
+          <HostNameInServerCertificate />
+          <EncryptionOption>False</EncryptionOption>
+          <ExecutionTimeout>0</ExecutionTimeout>
+          <ConnectionProtocol>NotSpecified</ConnectionProtocol>
+          <ApplicationName>Microsoft SQL Server Management Studio - Query</ApplicationName>
+        </ConnectionNode>
       </Items>
     </LogicalFolder>
     <LogicalFolder Name="Queries" Type="0" Sorted="true">
@@ -377,9 +392,9 @@
           <FullPath>Test_usp_GetClaimHeaderGroupImportDetailById_Select.sql</FullPath>
         </FileNode>
         <FileNode Name="Testusp_ClaimPayBackDetail_InsertV4_BackUp_20260212.sql">
-          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
-          <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
-          <AssociatedConnUserName>devdba</AssociatedConnUserName>
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:27.254.238.180:False:devread</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>27.254.238.180</AssociatedConnSrvName>
+          <AssociatedConnUserName>devread</AssociatedConnUserName>
           <FullPath>Testusp_ClaimPayBackDetail_InsertV4_BackUp_20260212.sql</FullPath>
         </FileNode>
         <FileNode Name="UnExportGroupIns.sql">

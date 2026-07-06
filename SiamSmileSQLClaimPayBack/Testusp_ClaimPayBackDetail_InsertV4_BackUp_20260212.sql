@@ -26,8 +26,8 @@ GO
 -- =============================================
 --ALTER PROCEDURE [Claim].[usp_ClaimPayBackDetail_InsertV4_BackUp_20260212]
 DECLARE
-	@ClaimGroupCodeList		NVARCHAR(MAX) = 'BUHO-811-68110007-0'
-	  , @ProductGroupId			INT = 2
+	@ClaimGroupCodeList		NVARCHAR(MAX) = 'TSAO-861-69030116-0'
+	  , @ProductGroupId			INT = 3
 	  , @ClaimGroupTypeId		INT = 2
 	  , @CreatedByUserId		INT = 1
 --AS
@@ -131,6 +131,8 @@ DECLARE
 			SET @Msg = 'ClaimHeaderGroupCode Data duplication';
 		END	
 	END	
+
+	SELECT @Msg
 
 	IF @IsResult = 1
 	BEGIN
@@ -1018,7 +1020,7 @@ DECLARE
 		BEGIN TRY
 			Begin TRANSACTION
 	
-	
+
 				--INSERT INTO dbo.ClaimPayBack
 				--		(ClaimPayBackCode
 				--		,Amount
