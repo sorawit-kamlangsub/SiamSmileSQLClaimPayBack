@@ -1,10 +1,18 @@
 ﻿USE [ClaimPayBack]
 GO
 
-DECLARE @TmpCode VARCHAR(50) = 'TCB6907000088';
+DECLARE @TmpCode VARCHAR(50) = 'TCB6907000122';
 DECLARE @D DATETIME2; 
 
 SET @D = CAST(CAST(GETDATE() AS DATE) AS DATETIME2);
+
+SELECT DISTINCT
+ a.BillingRequestGroupCode
+INTO #temp
+FROM dbo.BillingExport a 
+ INNER JOIN dbo.BillingRequestResultImport bri
+  ON a.BillingRequestItemCode = bri.BillingRequestItemCode
+WHERE bri.tmpCode = @TmpCode
 
 SELECT 
       bi.[BillingRequestItemCode]
@@ -23,6 +31,7 @@ SELECT
       ,gf.[FileName]
       ,brd.BillingRequestItemCode           BillingRequestResultDetailItemCode
       ,brd.CoverAmount
+      ,rj.BillingRequestItemCode            BillingRequestResultImportItemCode
 INTO #Tmp
 FROM dbo.ClaimHeaderGroupImportFile gf
     LEFT JOIN dbo.ClaimHeaderGroupImport gi
@@ -42,12 +51,22 @@ FROM dbo.ClaimHeaderGroupImportFile gf
             WHERE IsActive = 1
         ) brd
         ON brd.BillingRequestItemCode = bi.BillingRequestItemCode
-    INNER JOIN dbo.BillingRequestResultImport bri 
-        ON bri.BillingRequestItemCode = bi.BillingRequestItemCode 
+    INNER JOIN #temp t 
+        ON t.BillingRequestGroupCode = bg.BillingRequestGroupCode
+	 LEFT JOIN 
+	 (
+		SELECT 
+		 BillingRequestItemCode
+		 ,RejectedAmount
+		 ,IsActive 
+		FROM dbo.BillingRequestResultImport 
+		WHERE IsActive = 1
+	 ) rj
+		ON rj.BillingRequestItemCode = bi.BillingRequestItemCode
     CROSS JOIN dbo.BillingBank b 
 WHERE b.BillingBankId = 1
-AND bri.IsActive = 1
-AND bri.tmpCode = @TmpCode
+AND bg.IsActive = 1
+AND rj.BillingRequestItemCode IS NULL
 	
 BEGIN TRY
 	BEGIN TRANSACTION
@@ -80,7 +99,7 @@ BEGIN TRY
                 @TmpCode             [TmpCode]
                ,[BillingRequestItemCode]
                ,NULL                [PaymentReferenceId]
-               ,0                   [CoverAmount]
+               ,CoverAmount         [CoverAmount]
                ,NULL                [UncoverAmount]
                ,NULL                [UnCoverRemark]
                ,NULL                [DecisionStatus]
@@ -220,3 +239,4 @@ END CATCH
 -----------------------------
 
 IF OBJECT_ID('tempdb..#Tmp') IS NOT NULL  DROP TABLE #Tmp;
+IF OBJECT_ID('tempdb..#temp') IS NOT NULL DROP TABLE #temp;
