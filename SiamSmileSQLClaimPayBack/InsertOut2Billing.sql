@@ -1,15 +1,48 @@
-﻿	DECLARE @D DATETIME2;
+﻿USE [ClaimPayBack]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequestResultImportGroup_Insert]    Script Date: 9/7/2569 15:05:24 ******/
+--SET ANSI_NULLS ON
+--GO
+--SET QUOTED_IDENTIFIER ON
+--GO
+-- =============================================
+-- Author:		Sorawit kamlangsub
+-- Create date: 2026-07-04 16:30
+-- Description:	Insert Tmp Out2
+-- =============================================
+--ALTER PROCEDURE [dbo].[usp_BillingRequestResultImportGroup_Insert]
+	-- Add the parameters for the stored procedure here
+	DECLARE
+    @TmpCode VARCHAR(20),
+	@PaymentDate DATETIME2 = '2026-07-09',
+	@UserId INT = 1,
+    @BillingRequestGroupCode VARCHAR(MAX) = 'BQGCM04H6900002,BQGSP04H6900002'
+--AS
+--BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	--SET NOCOUNT ON;
+
+	DECLARE @IsResult			BIT				= 1;
+	DECLARE @Result				VARCHAR(100)	= '';
+	DECLARE @Msg				NVARCHAR(500)	= '';
+	DECLARE @IsActive			BIT = 1;
+
+    -- Insert statements for procedure here
+	DECLARE @D DATETIME2;
     DECLARE @InsId INT;
     DECLARE @InsIdReject INT;
     DECLARE @CountBqgApprove INT;
+    DECLARE @TransactionCodeControlTypeDetail VARCHAR(20) = 'TCB';
+    DECLARE @_TmpCode VARCHAR(20) = @TmpCode;
+	DECLARE @_BillingRequestGroupCode NVARCHAR(MAX) = @BillingRequestGroupCode ;
 
-	SET @D = CAST(GETDATE() AS DATE);	
+    DECLARE @_PaymentDate DATETIME2 = @PaymentDate;
+    DECLARE @_UserId INT = @UserId;
     
-    DECLARE @_TmpCode VARCHAR(20) = 'TCB6907000188';
-	DECLARE @_BillingRequestGroupCode NVARCHAR(MAX);-- = 'BQGHM04B6901013,BQGHS04B6901013,BQGSP04B6901014,BQGYC04B6901007'; --BQGSP04H6900001
+    SET @D = GETDATE();
 
-    DECLARE @_PaymentDate DATETIME2 = '2026-07-08'
-    DECLARE @_UserId INT = 1
+	IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 
 	SELECT
 	*
@@ -18,7 +51,7 @@
 
 	SELECT DISTINCT
 	 a.BillingRequestGroupCode
-    ,a.InsuranceCompanyId
+     ,a.InsuranceCompanyId
 	 INTO #temp
 	FROM dbo.BillingExport a 
 	 LEFT JOIN dbo.BillingRequestResultImport bri
@@ -36,6 +69,20 @@
 				WHERE t.Element = a.BillingRequestGroupCode
 			)
 		)
+
+-- Validate
+    SELECT 
+     @CountBqgApprove = COUNT(trh.BillingReceiveStatusId)
+    FROM #temp t
+    INNER JOIN dbo.TmpBillingReceiveResultHeader trh
+        ON trh.BillingRequestGroupCode = t.BillingRequestGroupCode
+    WHERE trh.BillingReceiveStatusId IN (2,3)
+
+    IF (@CountBqgApprove > 0) 
+    BEGIN 
+        SET @IsResult = 0;
+        SET @Msg = N'รายการ ซ้ำกับในระบบ';
+    END
 
     SELECT
     rs.*
@@ -135,9 +182,21 @@
     LEFT JOIN [dbo].[DecisionStatus] ds
             ON rs.DecisionStatusId = ds.DecisionStatusId
 
+	/*Process*/
+	IF (@IsResult = 1)
+	BEGIN
+
 		--BEGIN TRY
 		--	BEGIN TRANSACTION
 
+  --              IF @_TmpCode IS NULL
+  --              BEGIN
+  --              EXECUTE [dbo].[usp_GenerateCode] 
+  --                 @TransactionCodeControlTypeDetail
+  --                ,6
+  --                ,@_TmpCode OUTPUT                    
+  --              END
+                
                 --INSERT INTO [dbo].[TmpBillingRequestResult]
                 --           (
                 --           [TmpCode]
@@ -214,6 +273,12 @@
                            ,@D                          [UpdatedDate]
                 FROM #Tmp
 
+                DECLARE @TmpBillingRequestResultHeader TABLE
+                (
+                    BillingRequestResultHeaderId INT
+                    ,BillingRequestResultHeaderCode VARCHAR(20)
+                );
+
                 --INSERT INTO [dbo].[BillingRequestResultHeader]
                 --           (
                 --           [FileName]
@@ -226,6 +291,10 @@
                 --           ,[IsManual]
                 --           ,[IsManualNPL]
                 --           )
+                --OUTPUT
+                --    INSERTED.BillingRequestResultHeaderId
+                --    ,INSERTED.BillingRequestResultHeaderCode
+                --INTO @TmpBillingRequestResultHeader
                 SELECT     DISTINCT
                            [FileName]
                            ,BillingRequestGroupCode    [BillingRequestResultHeaderCode]
@@ -242,8 +311,6 @@
                     SELECT 1 FROM dbo.BillingRequestResultDetail rd
                     WHERE rd.BillingRequestItemCode = t.BillingRequestResultDetailItemCode
                 )
-
-                DECLARE @TmpBillingRequestResultId INT = SCOPE_IDENTITY();
 
                 --INSERT INTO [dbo].[BillingRequestResultDetail]
                 --           (
@@ -269,7 +336,7 @@
                 --           ,[PaySS_Total]
                 --           )
                 SELECT
-                           @TmpBillingRequestResultId   [BillingRequestResultHeaderId]
+                           th.BillingRequestResultHeaderId   [BillingRequestResultHeaderId]
                            ,[BillingRequestItemCode]
                            ,'-'                         [PaymentReferenceId]
                            ,[CalCoverAmount]            [CoverAmount]
@@ -290,6 +357,8 @@
                            ,[ClaimHeaderGroupImportDetailId]
                            ,[PaySS_Total]
                 FROM #Tmp t
+                INNER JOIN @TmpBillingRequestResultHeader th
+                    ON th.BillingRequestResultHeaderCode = t.BillingRequestGroupCode
                 WHERE NOT EXISTS 
                 (
                     SELECT 1 FROM dbo.BillingRequestResultDetail rd
@@ -309,9 +378,29 @@
 		--BEGIN CATCH
 
 		--	IF @@TRANCOUNT > 0 ROLLBACK;
+
 		--END CATCH
+
+	END;
+
+	IF (@IsResult = 1)
+	BEGIN
+		SET @Result = 'Success';
+	END
+	ELSE
+	BEGIN
+		SET @Result = 'Failure';
+	END;
+
+	SELECT	@IsResult	AS IsResult
+			,@Result	AS Result
+			,@Msg		AS Msg;
+
+	-----------------------------
 
     IF OBJECT_ID('tempdb..#Tmp') IS NOT NULL DROP TABLE #Tmp;
 	IF OBJECT_ID('tempdb..#temp') IS NOT NULL DROP TABLE #temp;
 	IF OBJECT_ID('tempdb..#rawData') IS NOT NULL DROP TABLE #rawData;
     IF OBJECT_ID('tempdb..#tmplist') IS NOT NULL DROP TABLE #tmplist;
+
+--END
