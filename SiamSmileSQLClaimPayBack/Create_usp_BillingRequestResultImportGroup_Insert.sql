@@ -1,7 +1,7 @@
 USE [ClaimPayBack]
 GO
 
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequestResultImportGroup_Insert]    Script Date: 9/7/2569 15:48:42 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequestResultImportGroup_Insert]    Script Date: 9/7/2569 16:51:33 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -32,6 +32,7 @@ BEGIN
 
     -- Insert statements for procedure here
 	DECLARE @D DATETIME2;
+    DECLARE @D2 DATETIME2;
     DECLARE @InsId INT;
     DECLARE @InsIdReject INT;
     DECLARE @CountForInsert INT;
@@ -44,6 +45,7 @@ BEGIN
     DECLARE @_UserId INT = @UserId;
     
     SET @D = GETDATE();
+    SET @D2 = CAST(GETDATE() AS DATE);
 
 	IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 
@@ -274,17 +276,17 @@ BEGIN
                            )
                 SELECT 
                            DISTINCT
-                           @_TmpCode                     [TmpCode]
+                           @_TmpCode                    [TmpCode]
                            ,BillingDate                 [BillingDate]
                            ,2                           [BillingReceiveStatusId]
                            ,[BillingRequestGroupCode]
                            ,[InsuranceCompanyId]
                            ,[ClaimTypeCode]
-                           ,1                           [IsActive]
+                           ,1                            [IsActive]
                            ,@_UserId                     [CreatedByUserId]
-                           ,@D                          [CreatedDate]
+                           ,@D2                          [CreatedDate]
                            ,@_UserId                     [UpdatedByUserId]
-                           ,@D                          [UpdatedDate]
+                           ,@D2                          [UpdatedDate]
                 FROM #Tmp
 
                 DECLARE @TmpBillingRequestResultHeader TABLE
