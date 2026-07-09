@@ -16,7 +16,7 @@ GO
     @TmpCode VARCHAR(20),
 	@PaymentDate DATETIME2 = '2026-07-09',
 	@UserId INT = 1,
-    @BillingRequestGroupCode VARCHAR(MAX) = ''
+    @BillingRequestGroupCode VARCHAR(MAX) = 'BQGCM04H6900002,BQGSP04H6900002'
 --AS
 --BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
@@ -30,6 +30,7 @@ GO
 
     -- Insert statements for procedure here
 	DECLARE @D DATETIME2;
+    DECLARE @D2 DATETIME2;
     DECLARE @InsId INT;
     DECLARE @InsIdReject INT;
     DECLARE @CountForInsert INT;
@@ -42,6 +43,7 @@ GO
     DECLARE @_UserId INT = @UserId;
     
     SET @D = GETDATE();
+    SET @D2 = CAST(GETDATE() AS DATE);
 
 	IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 
@@ -272,17 +274,17 @@ GO
                 --           )
                 SELECT 
                            DISTINCT
-                           @_TmpCode                     [TmpCode]
+                           @_TmpCode                    [TmpCode]
                            ,BillingDate                 [BillingDate]
                            ,2                           [BillingReceiveStatusId]
                            ,[BillingRequestGroupCode]
                            ,[InsuranceCompanyId]
                            ,[ClaimTypeCode]
-                           ,1                           [IsActive]
+                           ,1                            [IsActive]
                            ,@_UserId                     [CreatedByUserId]
-                           ,@D                          [CreatedDate]
+                           ,@D2                          [CreatedDate]
                            ,@_UserId                     [UpdatedByUserId]
-                           ,@D                          [UpdatedDate]
+                           ,@D2                          [UpdatedDate]
                 FROM #Tmp
 
                 DECLARE @TmpBillingRequestResultHeader TABLE
