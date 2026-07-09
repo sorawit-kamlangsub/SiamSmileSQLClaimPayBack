@@ -16,7 +16,7 @@ GO
     @TmpCode VARCHAR(20),
 	@PaymentDate DATETIME2 = '2026-07-09',
 	@UserId INT = 1,
-    @BillingRequestGroupCode VARCHAR(MAX) = 'BQGCM04H6900002,BQGSP04H6900002'
+    @BillingRequestGroupCode VARCHAR(MAX) = ''
 --AS
 --BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
@@ -32,6 +32,7 @@ GO
 	DECLARE @D DATETIME2;
     DECLARE @InsId INT;
     DECLARE @InsIdReject INT;
+    DECLARE @CountForInsert INT;
     DECLARE @CountBqgApprove INT;
     DECLARE @TransactionCodeControlTypeDetail VARCHAR(20) = 'TCB';
     DECLARE @_TmpCode VARCHAR(20) = @TmpCode;
@@ -83,6 +84,17 @@ GO
         SET @IsResult = 0;
         SET @Msg = N'รายการ ซ้ำกับในระบบ';
     END
+
+    SELECT 
+     @CountForInsert = COUNT(*)
+    FROM #temp
+
+    IF (@CountForInsert = 0) 
+    BEGIN 
+        SET @IsResult = 0;
+        SET @Msg = N'ไม่มีข้อมูล';
+    END
+--End Validate
 
     SELECT
     rs.*
