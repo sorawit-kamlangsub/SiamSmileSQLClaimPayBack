@@ -1,7 +1,7 @@
 USE [ClaimPayBack]
 GO
 
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequestResultImportGroup_Insert]    Script Date: 9/7/2569 15:45:31 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequestResultImportGroup_Insert]    Script Date: 9/7/2569 15:48:42 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -86,6 +86,10 @@ BEGIN
         SET @IsResult = 0;
         SET @Msg = N'รายการ ซ้ำกับในระบบ';
     END
+
+    SELECT 
+     @CountForInsert = COUNT(*)
+    FROM #temp
 
     IF (@CountForInsert = 0) 
     BEGIN 
