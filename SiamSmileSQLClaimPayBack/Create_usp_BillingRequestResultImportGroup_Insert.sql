@@ -1,7 +1,7 @@
 USE [ClaimPayBack]
 GO
 
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequestResultImportGroup_Insert]    Script Date: 9/7/2569 10:56:25 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequestResultImportGroup_Insert]    Script Date: 9/7/2569 15:45:31 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -18,7 +18,7 @@ CREATE PROCEDURE [dbo].[usp_BillingRequestResultImportGroup_Insert]
 	@TmpCode VARCHAR(20),
 	@PaymentDate DATETIME2,
 	@UserId INT,
-    @BillingRequestGroupCode VARCHAR(20)
+    @BillingRequestGroupCode VARCHAR(MAX)
 AS
 BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
@@ -34,13 +34,16 @@ BEGIN
 	DECLARE @D DATETIME2;
     DECLARE @InsId INT;
     DECLARE @InsIdReject INT;
+    DECLARE @CountForInsert INT;
     DECLARE @CountBqgApprove INT;
-
+    DECLARE @TransactionCodeControlTypeDetail VARCHAR(20) = 'TCB';
     DECLARE @_TmpCode VARCHAR(20) = @TmpCode;
 	DECLARE @_BillingRequestGroupCode NVARCHAR(MAX) = @BillingRequestGroupCode ;
 
     DECLARE @_PaymentDate DATETIME2 = @PaymentDate;
     DECLARE @_UserId INT = @UserId;
+    
+    SET @D = GETDATE();
 
 	IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 
@@ -71,9 +74,6 @@ BEGIN
 		)
 
 -- Validate
-    SELECT @InsId = InsuranceCompanyId FROM #temp
-    SELECT @InsIdReject = InsuranceId FROM dbo.BillingRequestResultImport WHERE IsActive = 1 AND tmpCode = @TmpCode   
-
     SELECT 
      @CountBqgApprove = COUNT(trh.BillingReceiveStatusId)
     FROM #temp t
@@ -81,8 +81,18 @@ BEGIN
         ON trh.BillingRequestGroupCode = t.BillingRequestGroupCode
     WHERE trh.BillingReceiveStatusId IN (2,3)
 
-    IF (@InsIdReject <> @InsIdReject) SET @IsResult = 0 SET @Msg = N'บริษัทไม่ตรงกับไฟล์';
-    IF (@CountBqgApprove > 0) SET @IsResult = 0 SET @Msg = N'รายการ ซ้ำกับในระบบ';
+    IF (@CountBqgApprove > 0) 
+    BEGIN 
+        SET @IsResult = 0;
+        SET @Msg = N'รายการ ซ้ำกับในระบบ';
+    END
+
+    IF (@CountForInsert = 0) 
+    BEGIN 
+        SET @IsResult = 0;
+        SET @Msg = N'ไม่มีข้อมูล';
+    END
+--End Validate
 
     SELECT
     rs.*
@@ -189,6 +199,14 @@ BEGIN
 		BEGIN TRY
 			BEGIN TRANSACTION
 
+                IF @_TmpCode IS NULL
+                BEGIN
+                EXECUTE [dbo].[usp_GenerateCode] 
+                   @TransactionCodeControlTypeDetail
+                  ,6
+                  ,@_TmpCode OUTPUT                    
+                END
+                
                 INSERT INTO [dbo].[TmpBillingRequestResult]
                            (
                            [TmpCode]
@@ -265,6 +283,12 @@ BEGIN
                            ,@D                          [UpdatedDate]
                 FROM #Tmp
 
+                DECLARE @TmpBillingRequestResultHeader TABLE
+                (
+                    BillingRequestResultHeaderId INT
+                    ,BillingRequestResultHeaderCode VARCHAR(20)
+                );
+
                 INSERT INTO [dbo].[BillingRequestResultHeader]
                            (
                            [FileName]
@@ -277,6 +301,10 @@ BEGIN
                            ,[IsManual]
                            ,[IsManualNPL]
                            )
+                OUTPUT
+                    INSERTED.BillingRequestResultHeaderId
+                    ,INSERTED.BillingRequestResultHeaderCode
+                INTO @TmpBillingRequestResultHeader
                 SELECT     DISTINCT
                            [FileName]
                            ,BillingRequestGroupCode    [BillingRequestResultHeaderCode]
@@ -293,8 +321,6 @@ BEGIN
                     SELECT 1 FROM dbo.BillingRequestResultDetail rd
                     WHERE rd.BillingRequestItemCode = t.BillingRequestResultDetailItemCode
                 )
-
-                DECLARE @TmpBillingRequestResultId INT = SCOPE_IDENTITY();
 
                 INSERT INTO [dbo].[BillingRequestResultDetail]
                            (
@@ -320,7 +346,7 @@ BEGIN
                            ,[PaySS_Total]
                            )
                 SELECT
-                           @TmpBillingRequestResultId   [BillingRequestResultHeaderId]
+                           th.BillingRequestResultHeaderId   [BillingRequestResultHeaderId]
                            ,[BillingRequestItemCode]
                            ,'-'                         [PaymentReferenceId]
                            ,[CalCoverAmount]            [CoverAmount]
@@ -341,6 +367,8 @@ BEGIN
                            ,[ClaimHeaderGroupImportDetailId]
                            ,[PaySS_Total]
                 FROM #Tmp t
+                INNER JOIN @TmpBillingRequestResultHeader th
+                    ON th.BillingRequestResultHeaderCode = t.BillingRequestGroupCode
                 WHERE NOT EXISTS 
                 (
                     SELECT 1 FROM dbo.BillingRequestResultDetail rd
@@ -360,6 +388,7 @@ BEGIN
 		BEGIN CATCH
 
 			IF @@TRANCOUNT > 0 ROLLBACK;
+
 		END CATCH
 
 	END;
