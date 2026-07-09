@@ -6,7 +6,7 @@ VALUES
   ( N'GpgParthner', NULL, N'CHUBBUAT (For UAT ENV)', NULL, NULL, NULL, NULL, NULL, NULL, NULL );
 INSERT INTO [dbo].[ProgramConfig] ( [ParameterName], [ValueNumber], [ValueString], [ValueDateTime], [ValueBoolean], [Remark], [CreatedDate], [CreatedByUserId], [UpdatedDate], [UpdatedByUserId] )
 VALUES
-  ( N'GpgKeyringPath', NULL, N'D:/DocumentFiles/Claim/ClaimPayBack/Chub/Key', NULL, NULL, NULL, NULL, NULL, NULL, NULL );
+  ( N'GpgKeyringPath', NULL, N'D:/GPG_CHUBB/CPB', NULL, NULL, NULL, NULL, NULL, NULL, NULL );
 INSERT INTO [dbo].[ProgramConfig] ( [ParameterName], [ValueNumber], [ValueString], [ValueDateTime], [ValueBoolean], [Remark], [CreatedDate], [CreatedByUserId], [UpdatedDate], [UpdatedByUserId] )
 VALUES
-  ( N'GpgKeyFile', NULL, N'D:/DocumentFiles/Claim/ClaimPayBack/Chub/Key/CHUBBUAT_public.asc', NULL, NULL, NULL, NULL, NULL, NULL, NULL );
+  ( N'GpgKeyFile', NULL, N'D:/GPG_CHUBB/CHUBBUAT_public.asc', NULL, NULL, NULL, NULL, NULL, NULL, NULL );
