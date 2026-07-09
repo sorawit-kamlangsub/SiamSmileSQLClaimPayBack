@@ -1,7 +1,7 @@
-﻿USE [ClaimPayBack]
+USE [ClaimPayBack]
 GO
 
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequestResultImportGroup_Insert]    Script Date: 8/7/2569 17:07:26 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequestResultImportGroup_Insert]    Script Date: 9/7/2569 10:56:25 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -41,8 +41,6 @@ BEGIN
 
     DECLARE @_PaymentDate DATETIME2 = @PaymentDate;
     DECLARE @_UserId INT = @UserId;
-
-	SET @D = CAST(GETDATE() AS DATE);
 
 	IF (@IsResult = 0) SET @Msg = N'ปิดใช้งาน';
 
