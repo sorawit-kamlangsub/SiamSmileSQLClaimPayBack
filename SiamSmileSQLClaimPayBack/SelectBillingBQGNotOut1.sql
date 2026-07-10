@@ -6,9 +6,12 @@ b.BillingRequestGroupCode
 FROM [dbo].[BillingRequestGroup] b
 LEFT JOIN [dbo].[BillingRequestItem] bi
 	ON bi.BillingRequestGroupId = b.BillingRequestGroupId
+LEFT JOIN [dbo].[BillingRequestResultDetail] brd
+	ON brd.BillingRequestItemCode = bi.BillingRequestItemCode
  WHERE b.[BillingRequestGroupStatusId] = N'3' 
  AND b.[IsActive] = N'1' 
  AND b.[InsuranceCompanyId] = N'18' 
+ AND brd.BillingRequestResultDetailId IS NULL
 AND NOT EXISTS 
 (
 SELECT 1

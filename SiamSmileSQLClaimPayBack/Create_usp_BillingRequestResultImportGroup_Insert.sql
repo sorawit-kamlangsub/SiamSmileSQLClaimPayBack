@@ -1,7 +1,7 @@
 USE [ClaimPayBack]
 GO
 
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequestResultImportGroup_Insert]    Script Date: 9/7/2569 16:51:33 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequestResultImportGroup_Insert]    Script Date: 10/7/2569 17:18:52 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -15,9 +15,9 @@ GO
 -- =============================================
 CREATE PROCEDURE [dbo].[usp_BillingRequestResultImportGroup_Insert]
 	-- Add the parameters for the stored procedure here
-	@TmpCode VARCHAR(20),
+    @TmpCode VARCHAR(MAX),
 	@PaymentDate DATETIME2,
-	@UserId INT,
+	@UserId INT = 1,
     @BillingRequestGroupCode VARCHAR(MAX)
 AS
 BEGIN
@@ -31,15 +31,15 @@ BEGIN
 	DECLARE @IsActive			BIT = 1;
 
     -- Insert statements for procedure here
+    DECLARE @InsId INT;
 	DECLARE @D DATETIME2;
     DECLARE @D2 DATETIME2;
-    DECLARE @InsId INT;
     DECLARE @InsIdReject INT;
     DECLARE @CountForInsert INT;
     DECLARE @CountBqgApprove INT;
+    DECLARE @_TmpCode VARCHAR(MAX) = @TmpCode;
     DECLARE @TransactionCodeControlTypeDetail VARCHAR(20) = 'TCB';
-    DECLARE @_TmpCode VARCHAR(20) = @TmpCode;
-	DECLARE @_BillingRequestGroupCode NVARCHAR(MAX) = @BillingRequestGroupCode ;
+	DECLARE @_BillingRequestGroupCode NVARCHAR(MAX) = @BillingRequestGroupCode;
 
     DECLARE @_PaymentDate DATETIME2 = @PaymentDate;
     DECLARE @_UserId INT = @UserId;
@@ -51,29 +51,48 @@ BEGIN
 
 	SELECT
 	*
+	INTO #tmpTmplist
+	FROM dbo.func_SplitStringToTable(@TmpCode,',')
+
+	SELECT
+	*
 	INTO #tmplist
 	FROM dbo.func_SplitStringToTable(@_BillingRequestGroupCode,',')
 
 	SELECT DISTINCT
-	 a.BillingRequestGroupCode
-     ,a.InsuranceCompanyId
+	 bg.BillingRequestGroupCode
+     ,bg.InsuranceCompanyId
 	 INTO #temp
-	FROM dbo.BillingExport a 
+	FROM dbo.BillingRequestItem bi 
+     LEFT JOIN dbo.BillingRequestGroup bg
+        ON bg.BillingRequestGroupId = bi.BillingRequestGroupId
 	 LEFT JOIN dbo.BillingRequestResultImport bri
-	  ON a.BillingRequestItemCode = bri.BillingRequestItemCode
+	  ON bi.BillingRequestItemCode = bri.BillingRequestItemCode
+	 LEFT JOIN dbo.BillingRequestResultDetail brd
+	  ON brd.BillingRequestItemCode = bi.BillingRequestItemCode
 	 LEFT JOIN #tmplist t
-	  ON t.Element = a.BillingRequestGroupCode
-	WHERE	(bri.tmpCode = @_TmpCode AND @_BillingRequestGroupCode IS NULL)
-	OR (
-		@_TmpCode IS NULL 
-		AND 
-		EXISTS 
-			(
-				SELECT 1
-				FROM #tmplist t
-				WHERE t.Element = a.BillingRequestGroupCode
-			)
-		)
+	  ON t.Element = bg.BillingRequestGroupCode
+	WHERE brd.BillingRequestResultDetailId IS NULL
+    AND
+        (   
+         EXISTS 
+         (
+            SELECT 1 
+            FROM #tmpTmplist t
+            WHERE t.Element = bri.tmpCode
+         )
+            AND @_BillingRequestGroupCode IS NULL
+         )
+	    OR (
+		    @_TmpCode IS NULL 
+		    AND 
+		    EXISTS 
+			    (
+				    SELECT 1
+				    FROM #tmplist t
+				    WHERE t.Element = bg.BillingRequestGroupCode
+			    )
+	 )
 
 -- Validate
     SELECT 
@@ -103,6 +122,7 @@ BEGIN
     SELECT
     rs.*
     ,ds.DecisionStatusName
+    ,ROW_NUMBER() OVER(ORDER BY rs.BillingRequestGroupCode) AS rwId 
     INTO #Tmp
     FROM
     (
@@ -150,6 +170,7 @@ BEGIN
                   ,rj.RejectedAmount
                   ,rj.BillingRequestItemCode                    BillingRequestResultImportItemCode
                   ,rj.RejectedRemark
+                  ,rj.tmpCode                                   IptmpCode
                   ,IIF(rj.BillingRequestItemCode IS NULL ,1,0)  IsAproved
                   ,IIF(
                     (ISNULL(bi.AmountTotal , 0) - ISNULL(rj.RejectedAmount, 0) <> ISNULL(bi.AmountTotal , 0)) 
@@ -182,7 +203,8 @@ BEGIN
 	             LEFT JOIN 
 	             (
 		            SELECT 
-		             BillingRequestItemCode
+		             tmpCode
+                     ,BillingRequestItemCode
 		             ,RejectedAmount
                      ,RejectedRemark
 		             ,IsActive 
@@ -198,20 +220,39 @@ BEGIN
     LEFT JOIN [dbo].[DecisionStatus] ds
             ON rs.DecisionStatusId = ds.DecisionStatusId
 
+    DECLARE @Total int
+    DECLARE @YY varchar(2)
+    DECLARE @MM varchar(2)
+    DECLARE @RunningFrom int
+    DECLARE @RunningTo int
+    
+    IF @_TmpCode IS NULL
+    BEGIN
+        EXECUTE [dbo].[usp_GenerateCode_FromTo] 
+           @TransactionCodeControlTypeDetail
+          ,@Total
+          ,@YY OUTPUT
+          ,@MM OUTPUT
+          ,@RunningFrom OUTPUT
+          ,@RunningTo OUTPUT  
+    END
+
+    SELECT *
+    ,IIF( t.IptmpCode IS NULL
+        ,CONCAT(@TransactionCodeControlTypeDetail ,@YY,@MM ,dbo.func_ConvertIntToString((@RunningFrom + rwId - 1),6)) 
+        ,t.Iptmpcode)   
+                        [TmpCode]
+    INTO #TmpWithRuningCode
+    FROM #Tmp t
+    LEFT JOIN #tmpTmplist tl
+     ON tl.Element = t.IptmpCode
+           
 	/*Process*/
 	IF (@IsResult = 1)
 	BEGIN
 
 		BEGIN TRY
-			BEGIN TRANSACTION
-
-                IF @_TmpCode IS NULL
-                BEGIN
-                EXECUTE [dbo].[usp_GenerateCode] 
-                   @TransactionCodeControlTypeDetail
-                  ,6
-                  ,@_TmpCode OUTPUT                    
-                END
+			BEGIN TRANSACTION                            
                 
                 INSERT INTO [dbo].[TmpBillingRequestResult]
                            (
@@ -237,7 +278,7 @@ BEGIN
                            ,[Remark3]
                            )
                  SELECT             
-                            @_TmpCode                    [TmpCode]
+                            [TmpCode]
                            ,[BillingRequestItemCode]
                            ,NULL                        [PaymentReferenceId]
                            ,[CalCoverAmount]            [CoverAmount]
@@ -257,7 +298,7 @@ BEGIN
                            ,[BankAccountName]
                            ,[BankAccountNumber]
                            ,[RejectedRemark]            [Remark3]
-                 FROM #Tmp
+                 FROM #TmpWithRuningCode
                  WHERE DecisionStatusId <> 4
 
                 INSERT INTO [dbo].[TmpBillingReceiveResultHeader]
@@ -276,7 +317,7 @@ BEGIN
                            )
                 SELECT 
                            DISTINCT
-                           @_TmpCode                    [TmpCode]
+                           [TmpCode]
                            ,BillingDate                 [BillingDate]
                            ,2                           [BillingReceiveStatusId]
                            ,[BillingRequestGroupCode]
@@ -287,7 +328,8 @@ BEGIN
                            ,@D2                          [CreatedDate]
                            ,@_UserId                     [UpdatedByUserId]
                            ,@D2                          [UpdatedDate]
-                FROM #Tmp
+                FROM #TmpWithRuningCode
+                WHERE DecisionStatusId <> 4
 
                 DECLARE @TmpBillingRequestResultHeader TABLE
                 (
@@ -418,6 +460,8 @@ BEGIN
 	IF OBJECT_ID('tempdb..#temp') IS NOT NULL DROP TABLE #temp;
 	IF OBJECT_ID('tempdb..#rawData') IS NOT NULL DROP TABLE #rawData;
     IF OBJECT_ID('tempdb..#tmplist') IS NOT NULL DROP TABLE #tmplist;
+    IF OBJECT_ID('tempdb..#tmpTmplist') IS NOT NULL DROP TABLE #tmpTmplist;
+    IF OBJECT_ID('tempdb..#TmpWithRuningCode') IS NOT NULL DROP TABLE #TmpWithRuningCode;
 
 END
 GO

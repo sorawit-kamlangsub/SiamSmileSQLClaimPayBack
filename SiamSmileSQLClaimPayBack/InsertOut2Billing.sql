@@ -16,7 +16,7 @@ GO
     @TmpCode VARCHAR(MAX),
 	@PaymentDate DATETIME2 = '2026-07-09',
 	@UserId INT = 1,
-    @BillingRequestGroupCode VARCHAR(MAX) = 'BQGCM04H6900001,BQGSP04H6900001'
+    @BillingRequestGroupCode VARCHAR(MAX) = 'BQGCM04H6900002,BQGSP04H6900002'
 --AS
 --BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
@@ -294,7 +294,7 @@ GO
                            ,[BankAccountNumber]
                            ,[RejectedRemark]            [Remark3]
                  FROM #TmpWithRuningCode
-                 --WHERE DecisionStatusId <> 4
+                 WHERE DecisionStatusId <> 4
 
                 --INSERT INTO [dbo].[TmpBillingReceiveResultHeader]
                 --           (
