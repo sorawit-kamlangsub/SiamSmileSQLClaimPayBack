@@ -1,16 +1,19 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequestResultImportGroup_Insert]    Script Date: 9/7/2569 15:05:24 ******/
+
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequestResultImportGroup_Insert]    Script Date: 10/7/2569 17:18:52 ******/
 --SET ANSI_NULLS ON
 --GO
+
 --SET QUOTED_IDENTIFIER ON
 --GO
+
 -- =============================================
 -- Author:		Sorawit kamlangsub
 -- Create date: 2026-07-04 16:30
 -- Description:	Insert Tmp Out2
 -- =============================================
---ALTER PROCEDURE [dbo].[usp_BillingRequestResultImportGroup_Insert]
+--CREATE PROCEDURE [dbo].[usp_BillingRequestResultImportGroup_Insert]
 	-- Add the parameters for the stored procedure here
 	DECLARE
     @TmpCode VARCHAR(MAX),
@@ -66,28 +69,31 @@ GO
         ON bg.BillingRequestGroupId = bi.BillingRequestGroupId
 	 LEFT JOIN dbo.BillingRequestResultImport bri
 	  ON bi.BillingRequestItemCode = bri.BillingRequestItemCode
+	 LEFT JOIN dbo.BillingRequestResultDetail brd
+	  ON brd.BillingRequestItemCode = bi.BillingRequestItemCode
 	 LEFT JOIN #tmplist t
 	  ON t.Element = bg.BillingRequestGroupCode
-	WHERE
-    (   
-     EXISTS 
-     (
-        SELECT 1 
-        FROM #tmpTmplist t
-        WHERE t.Element = bri.tmpCode
-     )
-        AND @_BillingRequestGroupCode IS NULL
-     )
-	OR (
-		@_TmpCode IS NULL 
-		AND 
-		EXISTS 
-			(
-				SELECT 1
-				FROM #tmplist t
-				WHERE t.Element = bg.BillingRequestGroupCode
-			)
-		)
+	WHERE brd.BillingRequestResultDetailId IS NULL
+    AND
+        (   
+         EXISTS 
+         (
+            SELECT 1 
+            FROM #tmpTmplist t
+            WHERE t.Element = bri.tmpCode
+         )
+            AND @_BillingRequestGroupCode IS NULL
+         )
+	    OR (
+		    @_TmpCode IS NULL 
+		    AND 
+		    EXISTS 
+			    (
+				    SELECT 1
+				    FROM #tmplist t
+				    WHERE t.Element = bg.BillingRequestGroupCode
+			    )
+	 )
 
 -- Validate
     SELECT 
@@ -221,16 +227,16 @@ GO
     DECLARE @RunningFrom int
     DECLARE @RunningTo int
     
-    IF @_TmpCode IS NULL
-    BEGIN
-        EXECUTE [dbo].[usp_GenerateCode_FromTo] 
-           @TransactionCodeControlTypeDetail
-          ,@Total
-          ,@YY OUTPUT
-          ,@MM OUTPUT
-          ,@RunningFrom OUTPUT
-          ,@RunningTo OUTPUT  
-    END
+    --IF @_TmpCode IS NULL
+    --BEGIN
+    --    EXECUTE [dbo].[usp_GenerateCode_FromTo] 
+    --       @TransactionCodeControlTypeDetail
+    --      ,@Total
+    --      ,@YY OUTPUT
+    --      ,@MM OUTPUT
+    --      ,@RunningFrom OUTPUT
+    --      ,@RunningTo OUTPUT  
+    --END
 
     SELECT *
     ,IIF( t.IptmpCode IS NULL
@@ -324,6 +330,7 @@ GO
                            ,@_UserId                     [UpdatedByUserId]
                            ,@D2                          [UpdatedDate]
                 FROM #TmpWithRuningCode
+                WHERE DecisionStatusId <> 4
 
                 DECLARE @TmpBillingRequestResultHeader TABLE
                 (
@@ -458,3 +465,5 @@ GO
     IF OBJECT_ID('tempdb..#TmpWithRuningCode') IS NOT NULL DROP TABLE #TmpWithRuningCode;
 
 --END
+--GO
+
