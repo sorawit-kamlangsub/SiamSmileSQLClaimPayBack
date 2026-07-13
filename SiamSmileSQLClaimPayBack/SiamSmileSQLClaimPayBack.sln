@@ -19,7 +19,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "V1.8.0_Draft", "V1.8.0_Draft", "{DFCBEBB0-8BF8-4575-ADFF-33B9D0E8DD7A}"
 	ProjectSection(SolutionItems) = preProject
 		Create_BillingRequestGroupSFTPEncryption.sql = Create_BillingRequestGroupSFTPEncryption.sql
+		Create_BillingRequestResultImport.sql = Create_BillingRequestResultImport.sql
 		Create_usp_BillingRequestResultImportGroup_Insert.sql = Create_usp_BillingRequestResultImportGroup_Insert.sql
+		Create_usp_BillingRequestResultImportGroup_Select.sql = Create_usp_BillingRequestResultImportGroup_Select.sql
 		Insert_ProgramConfig_CHUBB.sql = Insert_ProgramConfig_CHUBB.sql
 		Create_usp_Report_PAClaimBeforePolicyApproval_Select.sql = Create_usp_Report_PAClaimBeforePolicyApproval_Select.sql
 	EndProjectSection

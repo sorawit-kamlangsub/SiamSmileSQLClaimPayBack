@@ -1,7 +1,7 @@
 USE [ClaimPayBack]
 GO
 
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequestResultImportGroup_Insert]    Script Date: 10/7/2569 17:18:52 ******/
+
 SET ANSI_NULLS ON
 GO
 

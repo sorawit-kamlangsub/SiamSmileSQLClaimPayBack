@@ -1,7 +1,7 @@
 ﻿USE [ClaimPayBack]
 GO
 
-/****** Object:  StoredProcedure [dbo].[usp_Report_PAClaimBeforePolicyApproval_Select]    Script Date: 13/7/2569 9:04:00 ******/
+
 SET ANSI_NULLS ON
 GO
 
