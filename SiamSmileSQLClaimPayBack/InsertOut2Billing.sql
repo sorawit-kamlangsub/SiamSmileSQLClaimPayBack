@@ -449,8 +449,9 @@ DECLARE
                     --    ,m.DecisionStatusId = t.DecisionStatusId
                     --    ,m.DecisionStatus = t.DecisionStatusName
                     --    ,m.DecisionDate = @D
-                    --    ,UpdatedByUserId = @_UserId
-                    --    ,UpdatedDate = @D
+                        --,m.UpdatedByUserId = @_UserId
+                        --,m.UpdatedDate = @D
+                        --,m.EstimatePaymentDate = @_PaymentDate
                     FROM [dbo].[BillingRequestResultDetail] m
                     INNER JOIN [dbo].[BillingRequestResultImport] bri
                         ON bri.BillingRequestItemCode = m.BillingRequestItemCode

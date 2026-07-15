@@ -448,8 +448,9 @@ BEGIN
                         ,m.DecisionStatusId = IIF(t.DecisionStatusId IN (2,3),2,t.DecisionStatusId)
                         ,m.DecisionStatus = IIF(t.DecisionStatusId IN (2,3),N'อนุมัติ',t.DecisionStatusName)
                         ,m.DecisionDate = @D
-                        ,UpdatedByUserId = @_UserId
-                        ,UpdatedDate = @D
+                        ,m.UpdatedByUserId = @_UserId
+                        ,m.UpdatedDate = @D
+                        ,m.EstimatePaymentDate = @_PaymentDate
                     FROM [dbo].[BillingRequestResultDetail] m
                     INNER JOIN [dbo].[BillingRequestResultImport] bri
                         ON bri.BillingRequestItemCode = m.BillingRequestItemCode
