@@ -445,8 +445,8 @@ BEGIN
                     UPDATE m 
                         SET m.CoverAmount = t.CalCoverAmount
                         ,m.UncoverAmount = t.UnCoverAmount
-                        ,m.DecisionStatusId = t.DecisionStatusId
-                        ,m.DecisionStatus = t.DecisionStatusName
+                        ,m.DecisionStatusId = IIF(t.DecisionStatusId IN (2,3),2,t.DecisionStatusId)
+                        ,m.DecisionStatus = IIF(t.DecisionStatusId IN (2,3),N'อนุมัติ',t.DecisionStatusName)
                         ,m.DecisionDate = @D
                         ,UpdatedByUserId = @_UserId
                         ,UpdatedDate = @D
