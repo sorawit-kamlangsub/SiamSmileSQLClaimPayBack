@@ -10,6 +10,7 @@ GO
 -- Create date: 2026-07-04 16:30
 -- Update date: 2026-07-15 10:00 Insert data in Column EstimatePaymentDate 
 --              table [BillingRequestResultDetail]  with PaymentDate
+--              Add Upsert BillingRequestResultDetail
 -- Description:	Insert Tmp Out2
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_BillingRequestResultImportGroup_Insert]
@@ -354,13 +355,13 @@ BEGIN
                 SELECT     DISTINCT
                            [FileName]
                            ,BillingRequestGroupCode    [BillingRequestResultHeaderCode]
-                           ,1   [IsActive]
-                           ,@D   [CreatedDate]
-                           ,1   [CreatedByUserId]
-                           ,@D  [UpdatedDate]
-                           ,1   [UpdatedByUserId]
-                           ,0   [IsManual]
-                           ,0   [IsManualNPL]
+                           ,1           [IsActive]
+                           ,@D          [CreatedDate]
+                           ,@_UserId    [CreatedByUserId]
+                           ,@D          [UpdatedDate]
+                           ,@_UserId    [UpdatedByUserId]
+                           ,0           [IsManual]
+                           ,0           [IsManualNPL]
                 FROM #Tmp t
                 WHERE NOT EXISTS 
                 (
@@ -407,9 +408,9 @@ BEGIN
                            ,[ClaimCode]
                            ,1                           [IsActive]
                            ,@D                          [CreatedDate]
-                           ,1                           [CreatedByUserId]
+                           ,@_UserId                    [CreatedByUserId]
                            ,@D                          [UpdatedDate]
-                           ,1                           [UpdatedByUserId]
+                           ,@_UserId                    [UpdatedByUserId]
                            ,[ClaimHeaderGroupImportDetailId]
                            ,[PaySS_Total]
                 FROM #Tmp t
@@ -428,6 +429,25 @@ BEGIN
                 FROM dbo.BillingRequestResultImport m
                 INNER JOIN #Tmp t
                     ON t.BillingRequestItemCode = m.BillingRequestItemCode
+
+                IF @_TmpCode IS NOT NULL 
+                BEGIN
+
+                    --SELECT *
+                    UPDATE m 
+                        SET m.CoverAmount = m.CoverAmount - bri.RejectedAmount
+                        ,m.UncoverAmount = bri.RejectedAmount
+                        ,UpdatedByUserId = @_UserId
+                        ,UpdatedDate = @D
+                    FROM [dbo].[BillingRequestResultDetail] m
+                    INNER JOIN [dbo].[BillingRequestResultImport] bri
+                        ON bri.BillingRequestItemCode = m.BillingRequestItemCode
+                    INNER JOIN #tmpTmplist t 
+                        ON t.Element = bri.tmpCode
+                    WHERE m.IsActive = 1
+                    AND bri.IsActive = 1
+
+                END
 
 			COMMIT TRANSACTION
 		END TRY
