@@ -1,25 +1,25 @@
 ﻿USE [ClaimPayBack]
 GO
-
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequestResultImportGroup_Insert]    Script Date: 10/7/2569 17:18:52 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequestResultImportGroup_Insert]    Script Date: 15/7/2569 11:29:53 ******/
 --SET ANSI_NULLS ON
 --GO
-
 --SET QUOTED_IDENTIFIER ON
 --GO
-
 -- =============================================
 -- Author:		Sorawit kamlangsub
 -- Create date: 2026-07-04 16:30
+-- Update date: 2026-07-15 10:00 Insert data in Column EstimatePaymentDate 
+--              table [BillingRequestResultDetail]  with PaymentDate
+--              Add Upsert BillingRequestResultDetail
 -- Description:	Insert Tmp Out2
 -- =============================================
---CREATE PROCEDURE [dbo].[usp_BillingRequestResultImportGroup_Insert]
+--ALTER PROCEDURE [dbo].[usp_BillingRequestResultImportGroup_Insert]
 	-- Add the parameters for the stored procedure here
-	DECLARE
-    @TmpCode VARCHAR(MAX),
-	@PaymentDate DATETIME2 = '2026-07-09',
+DECLARE
+    @TmpCode VARCHAR(MAX) = 'TCB6907000323',
+	@PaymentDate DATETIME2 = '2026-07-15',
 	@UserId INT = 1,
-    @BillingRequestGroupCode VARCHAR(MAX) = 'BQGCM04H6900002,BQGSP04H6900002'
+    @BillingRequestGroupCode VARCHAR(MAX);
 --AS
 --BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
@@ -73,8 +73,7 @@ GO
 	  ON brd.BillingRequestItemCode = bi.BillingRequestItemCode
 	 LEFT JOIN #tmplist t
 	  ON t.Element = bg.BillingRequestGroupCode
-	WHERE brd.BillingRequestResultDetailId IS NULL
-    AND
+	WHERE 
         (   
          EXISTS 
          (
@@ -131,9 +130,9 @@ GO
         *
         ,IIF(IsSomeRejectAmount = 1,Pay_Total - RejectedAmount, Pay_Total)  AmountPayment
         ,CASE 
-             WHEN CoverAmount IS NOT NULL THEN CoverAmount
              WHEN IsAproved = 1 THEN PaySS_Total
-             WHEN IsSomeRejectAmount = 1 THEN RejectedAmount
+             WHEN IsReject = 1 THEN PaySS_Total - RejectedAmount
+             WHEN IsSomeRejectAmount = 1 THEN PaySS_Total 
              ELSE 0
          END                                                                [CalCoverAmount]
         ,CASE 
@@ -143,9 +142,9 @@ GO
              ELSE 1
          END                                                                [DecisionStatusId]
          ,CASE 
-                WHEN IsSomeRejectAmount = 1 THEN Pay_Total - RejectedAmount
                 WHEN IsAproved = 1 THEN 0
                 WHEN IsReject = 1 THEN RejectedAmount
+                WHEN IsSomeRejectAmount = 1 THEN RejectedAmount
                 ELSE 0 
           END                                                                [UnCoverAmount]
          ,IIF(RejectedRemark IS NOT NULL,RejectedRemark,NULL)                [UnCoverRemark]
@@ -227,16 +226,16 @@ GO
     DECLARE @RunningFrom int
     DECLARE @RunningTo int
     
-    --IF @_TmpCode IS NULL
-    --BEGIN
-    --    EXECUTE [dbo].[usp_GenerateCode_FromTo] 
-    --       @TransactionCodeControlTypeDetail
-    --      ,@Total
-    --      ,@YY OUTPUT
-    --      ,@MM OUTPUT
-    --      ,@RunningFrom OUTPUT
-    --      ,@RunningTo OUTPUT  
-    --END
+    IF @_TmpCode IS NULL
+    BEGIN
+        EXECUTE [dbo].[usp_GenerateCode_FromTo] 
+           @TransactionCodeControlTypeDetail
+          ,@Total
+          ,@YY OUTPUT
+          ,@MM OUTPUT
+          ,@RunningFrom OUTPUT
+          ,@RunningTo OUTPUT  
+    END
 
     SELECT *
     ,IIF( t.IptmpCode IS NULL
@@ -247,6 +246,7 @@ GO
     FROM #Tmp t
     LEFT JOIN #tmpTmplist tl
      ON tl.Element = t.IptmpCode
+    WHERE t.DecisionStatusId IN (3,4)
            
 	/*Process*/
 	IF (@IsResult = 1)
@@ -293,7 +293,7 @@ GO
                            ,[RejectedRemark]            [Remark]
                            ,1                           [IsValid]
                            ,NULL                        [ValidateResult]
-                           ,@_PaymentDate                [PaymentDate]
+                           ,@_PaymentDate               [PaymentDate]
                            ,[AmountPayment]
                            ,[BankName]
                            ,[BankAccountName]
@@ -357,13 +357,13 @@ GO
                 SELECT     DISTINCT
                            [FileName]
                            ,BillingRequestGroupCode    [BillingRequestResultHeaderCode]
-                           ,1   [IsActive]
-                           ,@D   [CreatedDate]
-                           ,1   [CreatedByUserId]
-                           ,@D  [UpdatedDate]
-                           ,1   [UpdatedByUserId]
-                           ,0   [IsManual]
-                           ,0   [IsManualNPL]
+                           ,1           [IsActive]
+                           ,@D          [CreatedDate]
+                           ,@_UserId    [CreatedByUserId]
+                           ,@D          [UpdatedDate]
+                           ,@_UserId    [UpdatedByUserId]
+                           ,0           [IsManual]
+                           ,0           [IsManualNPL]
                 FROM #Tmp t
                 WHERE NOT EXISTS 
                 (
@@ -405,14 +405,14 @@ GO
                            ,[DecisionStatusId]          [DecisionStatusId]
                            ,[RejectedRemark]            [RejectResult]
                            ,@D                          [DecisionDate]
-                           ,NULL                        [EstimatePaymentDate]
+                           ,@_PaymentDate               [EstimatePaymentDate]
                            ,NULL                        [Remark]
                            ,[ClaimCode]
                            ,1                           [IsActive]
                            ,@D                          [CreatedDate]
-                           ,1                           [CreatedByUserId]
+                           ,@_UserId                    [CreatedByUserId]
                            ,@D                          [UpdatedDate]
-                           ,1                           [UpdatedByUserId]
+                           ,@_UserId                    [UpdatedByUserId]
                            ,[ClaimHeaderGroupImportDetailId]
                            ,[PaySS_Total]
                 FROM #Tmp t
@@ -424,6 +424,26 @@ GO
                     WHERE rd.BillingRequestItemCode = t.BillingRequestResultDetailItemCode
                 )
 
+                IF @_TmpCode IS NOT NULL 
+                BEGIN
+
+                    SELECT *
+                    --UPDATE m 
+                    --    SET m.CoverAmount = (m.CoverAmount - bri.RejectedAmount)
+                    --    ,m.UncoverAmount = bri.RejectedAmount
+                    --    ,m.DecisionStatusId = t.DecisionStatusId
+                    --    ,m.DecisionStatus = t.DecisionStatusName
+                    --    ,m.DecisionDate = @D
+                    --    ,UpdatedByUserId = @_UserId
+                    --    ,UpdatedDate = @D
+                    FROM [dbo].[BillingRequestResultDetail] m
+                    INNER JOIN [dbo].[BillingRequestResultImport] bri
+                        ON bri.BillingRequestItemCode = m.BillingRequestItemCode
+                    INNER JOIN #TmpWithRuningCode t 
+                        ON t.IptmpCode = bri.tmpCode
+                    WHERE m.IsActive = 1
+                    AND bri.IsActive = 1
+
                 /* Clean Bill import Temp */
                 SELECT *
                 --UPDATE m 
@@ -431,6 +451,8 @@ GO
                 FROM dbo.BillingRequestResultImport m
                 INNER JOIN #Tmp t
                     ON t.BillingRequestItemCode = m.BillingRequestItemCode
+
+                END
 
 		--	COMMIT TRANSACTION
 		--END TRY
@@ -465,5 +487,3 @@ GO
     IF OBJECT_ID('tempdb..#TmpWithRuningCode') IS NOT NULL DROP TABLE #TmpWithRuningCode;
 
 --END
---GO
-

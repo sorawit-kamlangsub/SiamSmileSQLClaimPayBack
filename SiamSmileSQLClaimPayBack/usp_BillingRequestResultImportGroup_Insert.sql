@@ -17,7 +17,7 @@ ALTER PROCEDURE [dbo].[usp_BillingRequestResultImportGroup_Insert]
 	-- Add the parameters for the stored procedure here
     @TmpCode VARCHAR(MAX),
 	@PaymentDate DATETIME2,
-	@UserId INT = 1,
+	@UserId INT,
     @BillingRequestGroupCode VARCHAR(MAX)
 AS
 BEGIN
@@ -129,9 +129,9 @@ BEGIN
         *
         ,IIF(IsSomeRejectAmount = 1,Pay_Total - RejectedAmount, Pay_Total)  AmountPayment
         ,CASE 
-             WHEN CoverAmount IS NOT NULL THEN CoverAmount
              WHEN IsAproved = 1 THEN PaySS_Total
-             WHEN IsSomeRejectAmount = 1 THEN RejectedAmount
+             WHEN IsReject = 1 THEN PaySS_Total - RejectedAmount
+             WHEN IsSomeRejectAmount = 1 THEN PaySS_Total 
              ELSE 0
          END                                                                [CalCoverAmount]
         ,CASE 
@@ -141,9 +141,9 @@ BEGIN
              ELSE 1
          END                                                                [DecisionStatusId]
          ,CASE 
-                WHEN IsSomeRejectAmount = 1 THEN Pay_Total - RejectedAmount
                 WHEN IsAproved = 1 THEN 0
                 WHEN IsReject = 1 THEN RejectedAmount
+                WHEN IsSomeRejectAmount = 1 THEN RejectedAmount
                 ELSE 0 
           END                                                                [UnCoverAmount]
          ,IIF(RejectedRemark IS NOT NULL,RejectedRemark,NULL)                [UnCoverRemark]
@@ -245,6 +245,7 @@ BEGIN
     FROM #Tmp t
     LEFT JOIN #tmpTmplist tl
      ON tl.Element = t.IptmpCode
+    WHERE t.DecisionStatusId IN (3,4)
            
 	/*Process*/
 	IF (@IsResult = 1)
@@ -422,6 +423,26 @@ BEGIN
                     WHERE rd.BillingRequestItemCode = t.BillingRequestResultDetailItemCode
                 )
 
+                IF @_TmpCode IS NOT NULL 
+                BEGIN
+
+                    --SELECT *
+                    UPDATE m 
+                        SET m.CoverAmount = (m.CoverAmount - bri.RejectedAmount)
+                        ,m.UncoverAmount = bri.RejectedAmount
+                        ,m.DecisionStatusId = t.DecisionStatusId
+                        ,m.DecisionStatus = t.DecisionStatusName
+                        ,m.DecisionDate = @D
+                        ,UpdatedByUserId = @_UserId
+                        ,UpdatedDate = @D
+                    FROM [dbo].[BillingRequestResultDetail] m
+                    INNER JOIN [dbo].[BillingRequestResultImport] bri
+                        ON bri.BillingRequestItemCode = m.BillingRequestItemCode
+                    INNER JOIN #TmpWithRuningCode t 
+                        ON t.IptmpCode = bri.tmpCode
+                    WHERE m.IsActive = 1
+                    AND bri.IsActive = 1
+
                 /* Clean Bill import Temp */
                 --SELECT *
                 UPDATE m 
@@ -429,23 +450,6 @@ BEGIN
                 FROM dbo.BillingRequestResultImport m
                 INNER JOIN #Tmp t
                     ON t.BillingRequestItemCode = m.BillingRequestItemCode
-
-                IF @_TmpCode IS NOT NULL 
-                BEGIN
-
-                    --SELECT *
-                    UPDATE m 
-                        SET m.CoverAmount = m.CoverAmount - bri.RejectedAmount
-                        ,m.UncoverAmount = bri.RejectedAmount
-                        ,UpdatedByUserId = @_UserId
-                        ,UpdatedDate = @D
-                    FROM [dbo].[BillingRequestResultDetail] m
-                    INNER JOIN [dbo].[BillingRequestResultImport] bri
-                        ON bri.BillingRequestItemCode = m.BillingRequestItemCode
-                    INNER JOIN #tmpTmplist t 
-                        ON t.Element = bri.tmpCode
-                    WHERE m.IsActive = 1
-                    AND bri.IsActive = 1
 
                 END
 
