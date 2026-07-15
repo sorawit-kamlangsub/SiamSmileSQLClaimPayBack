@@ -93,31 +93,6 @@ BEGIN
 			    )
 	 )
 
--- Validate
-    SELECT 
-     @CountBqgApprove = COUNT(trh.BillingReceiveStatusId)
-    FROM #temp t
-    INNER JOIN dbo.TmpBillingReceiveResultHeader trh
-        ON trh.BillingRequestGroupCode = t.BillingRequestGroupCode
-    WHERE trh.BillingReceiveStatusId IN (2,3)
-
-    IF (@CountBqgApprove > 0) 
-    BEGIN 
-        SET @IsResult = 0;
-        SET @Msg = N'รายการ ซ้ำกับในระบบ';
-    END
-
-    SELECT 
-     @CountForInsert = COUNT(*)
-    FROM #temp
-
-    IF (@CountForInsert = 0) 
-    BEGIN 
-        SET @IsResult = 0;
-        SET @Msg = N'ไม่มีข้อมูล';
-    END
---End Validate
-
     SELECT
     rs.*
     ,ds.DecisionStatusName
@@ -245,7 +220,33 @@ BEGIN
     FROM #Tmp t
     LEFT JOIN #tmpTmplist tl
      ON tl.Element = t.IptmpCode
-    WHERE t.DecisionStatusId IN (3,4)
+    WHERE ( @_TmpCode IS NOT NULL AND t.DecisionStatusId IN (3,4))
+    OR (@_BillingRequestGroupCode IS NOT NULL AND t.DecisionStatusId = 2)
+
+-- Validate
+    SELECT 
+     @CountBqgApprove = COUNT(trh.BillingReceiveStatusId)
+    FROM #temp t
+    INNER JOIN dbo.TmpBillingReceiveResultHeader trh
+        ON trh.BillingRequestGroupCode = t.BillingRequestGroupCode
+    WHERE trh.BillingReceiveStatusId IN (2,3)
+
+    IF (@CountBqgApprove > 0) 
+    BEGIN 
+        SET @IsResult = 0;
+        SET @Msg = N'รายการ ซ้ำกับในระบบ';
+    END
+
+    SELECT 
+     @CountForInsert = COUNT(*)
+    FROM #TmpWithRuningCode
+
+    IF (@CountForInsert = 0) 
+    BEGIN 
+        SET @IsResult = 0;
+        SET @Msg = N'ไม่มีข้อมูล';
+    END
+--End Validate
            
 	/*Process*/
 	IF (@IsResult = 1)
