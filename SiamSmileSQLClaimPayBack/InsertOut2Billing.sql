@@ -16,10 +16,10 @@ GO
 --ALTER PROCEDURE [dbo].[usp_BillingRequestResultImportGroup_Insert]
 	-- Add the parameters for the stored procedure here
 DECLARE
-    @TmpCode VARCHAR(MAX) = 'TCB6907000362',
+    @TmpCode VARCHAR(MAX),
 	@PaymentDate DATETIME2,
 	@UserId INT,
-    @BillingRequestGroupCode VARCHAR(MAX);
+    @BillingRequestGroupCode VARCHAR(MAX) = 'BQGCM04H6900002,BQGSP04H6900002';
 --AS
 --BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
@@ -208,6 +208,8 @@ DECLARE
     DECLARE @MM varchar(2)
     DECLARE @RunningFrom int
     DECLARE @RunningTo int
+
+    SET @Total = (SELECT MAX(rwId) FROM #Tmp);
     
     IF @_TmpCode IS NULL
     BEGIN

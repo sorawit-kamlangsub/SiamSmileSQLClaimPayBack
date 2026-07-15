@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequestResultImportGroup_Insert]    Script Date: 15/7/2569 11:29:53 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequestResultImportGroup_Insert]    Script Date: 15/7/2569 15:41:32 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -208,6 +208,8 @@ BEGIN
     DECLARE @RunningFrom int
     DECLARE @RunningTo int
     
+    SET @Total = (SELECT MAX(rwId) FROM #Tmp);
+
     IF @_TmpCode IS NULL
     BEGIN
         EXECUTE [dbo].[usp_GenerateCode_FromTo] 
