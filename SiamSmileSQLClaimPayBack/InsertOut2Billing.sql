@@ -16,7 +16,7 @@ GO
 --ALTER PROCEDURE [dbo].[usp_BillingRequestResultImportGroup_Insert]
 	-- Add the parameters for the stored procedure here
 DECLARE
-    @TmpCode VARCHAR(MAX) = 'TCB6907000326',
+    @TmpCode VARCHAR(MAX) = 'TCB6907000362',
 	@PaymentDate DATETIME2,
 	@UserId INT,
     @BillingRequestGroupCode VARCHAR(MAX);
@@ -63,11 +63,19 @@ DECLARE
 	SELECT DISTINCT
 	 bg.BillingRequestGroupCode
      ,bg.InsuranceCompanyId
+     ,bri.tmpCode
 	 INTO #temp
 	FROM dbo.BillingRequestItem bi 
      LEFT JOIN dbo.BillingRequestGroup bg
         ON bg.BillingRequestGroupId = bi.BillingRequestGroupId
-	 LEFT JOIN dbo.BillingRequestResultImport bri
+	 LEFT JOIN 
+     (
+      SELECT 
+       BillingRequestItemCode
+       ,tmpCode
+      FROM dbo.BillingRequestResultImport
+      WHERE IsActive = 1   
+     ) bri
 	  ON bi.BillingRequestItemCode = bri.BillingRequestItemCode
 	 LEFT JOIN dbo.BillingRequestResultDetail brd
 	  ON brd.BillingRequestItemCode = bi.BillingRequestItemCode
@@ -79,7 +87,7 @@ DECLARE
          (
             SELECT 1 
             FROM #tmpTmplist t
-            WHERE t.Element = bri.tmpCode
+            WHERE t.Element = bri.tmpCode 
          )
             AND @_BillingRequestGroupCode IS NULL
          )
@@ -213,16 +221,20 @@ DECLARE
     END
 
     SELECT *
-    ,IIF( t.IptmpCode IS NULL
+    ,IIF( tl.tmpCodeTmp IS NULL
         ,CONCAT(@TransactionCodeControlTypeDetail ,@YY,@MM ,dbo.func_ConvertIntToString((@RunningFrom + rwId - 1),6)) 
-        ,t.Iptmpcode)   
+        ,tl.tmpCodeTmp)   
                         [TmpCode]
     INTO #TmpWithRuningCode
     FROM #Tmp t
-    LEFT JOIN #tmpTmplist tl
-     ON tl.Element = t.IptmpCode
-    WHERE ( @_TmpCode IS NOT NULL AND t.DecisionStatusId IN (3,4))
-    OR (@_BillingRequestGroupCode IS NOT NULL AND t.DecisionStatusId = 2)
+    LEFT JOIN 
+     (
+        SELECT 
+         BillingRequestGroupCode BillingRequestGroupCodeTmp
+         ,tmpCode tmpCodeTmp
+        FROM #temp
+     ) tl
+     ON t.BillingRequestGroupCode = tl.BillingRequestGroupCodeTmp
 
 -- Validate
     SELECT 
@@ -430,8 +442,8 @@ DECLARE
 
                     SELECT *
                     --UPDATE m 
-                    --    SET m.CoverAmount = (m.CoverAmount - bri.RejectedAmount)
-                    --    ,m.UncoverAmount = bri.RejectedAmount
+                    --    SET m.CoverAmount = t.CalCoverAmount
+                    --    ,m.UncoverAmount = t.UnCoverAmount
                     --    ,m.DecisionStatusId = t.DecisionStatusId
                     --    ,m.DecisionStatus = t.DecisionStatusName
                     --    ,m.DecisionDate = @D
@@ -443,7 +455,6 @@ DECLARE
                     INNER JOIN #TmpWithRuningCode t 
                         ON t.IptmpCode = bri.tmpCode
                     WHERE m.IsActive = 1
-                    AND bri.IsActive = 1
 
                 /* Clean Bill import Temp */
                 SELECT *
