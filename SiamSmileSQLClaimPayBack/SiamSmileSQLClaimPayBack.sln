@@ -22,8 +22,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "V1.8.0_Draft", "V1.8.0_Draf
 		C:\Users\NB-67-06-01\Desktop\CPBScriptV_1_8_0\Create_BillingRequestResultImport.sql = C:\Users\NB-67-06-01\Desktop\CPBScriptV_1_8_0\Create_BillingRequestResultImport.sql
 		C:\Users\NB-67-06-01\Desktop\CPBScriptV_1_8_0\Create_usp_BillingRequestResultImportGroup_Insert.sql = C:\Users\NB-67-06-01\Desktop\CPBScriptV_1_8_0\Create_usp_BillingRequestResultImportGroup_Insert.sql
 		C:\Users\NB-67-06-01\Desktop\CPBScriptV_1_8_0\Create_usp_BillingRequestResultImportGroup_Select.sql = C:\Users\NB-67-06-01\Desktop\CPBScriptV_1_8_0\Create_usp_BillingRequestResultImportGroup_Select.sql
-		C:\Users\NB-67-06-01\Desktop\CPBScriptV_1_8_0\Insert_ProgramConfig_CHUBB.sql = C:\Users\NB-67-06-01\Desktop\CPBScriptV_1_8_0\Insert_ProgramConfig_CHUBB.sql
 		C:\Users\NB-67-06-01\Desktop\CPBScriptV_1_8_0\Create_usp_Report_PAClaimBeforePolicyApproval_Select.sql = C:\Users\NB-67-06-01\Desktop\CPBScriptV_1_8_0\Create_usp_Report_PAClaimBeforePolicyApproval_Select.sql
+		C:\Users\NB-67-06-01\Desktop\CPBScriptV_1_8_0\Insert_ProgramConfig_CHUBB.sql = C:\Users\NB-67-06-01\Desktop\CPBScriptV_1_8_0\Insert_ProgramConfig_CHUBB.sql
 	EndProjectSection
 EndProject
 Global
@@ -32,7 +32,7 @@ Global
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{81F9C8E8-7583-A700-5CE6-F9B6F3403E8E}.Default|Default.ActiveCfg = Default
-		{9D14CCBD-BD62-46B2-A09A-63D791454488}.Default|Default.ActiveCfg = Default
+		{021CDF53-C547-4BD8-9112-C367C081BD1D}.Default|Default.ActiveCfg = Default
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

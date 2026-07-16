@@ -103,8 +103,8 @@ BEGIN
 
     SELECT
     rs.*
-    ,ds.DecisionStatusName
-    ,ROW_NUMBER() OVER(ORDER BY rs.BillingRequestGroupCode) AS rwId 
+    ,IIF(rs.DecisionStatusId IN (2,3),N'อนุมัติ',ds.DecisionStatusName)    DecisionStatusName
+    ,ROW_NUMBER() OVER(ORDER BY rs.BillingRequestGroupCode)             rwId 
     INTO #Tmp
     FROM
     (
@@ -119,7 +119,7 @@ BEGIN
          END                                                                [CalCoverAmount]
         ,CASE 
              WHEN IsAproved = 1 THEN 2
-             WHEN IsSomeRejectAmount = 1 THEN 3
+             WHEN IsSomeRejectAmount = 1 THEN 2
              WHEN IsReject = 1 THEN 4
              ELSE 1
          END                                                                [DecisionStatusId]
@@ -415,8 +415,8 @@ BEGIN
                            ,[CalCoverAmount]                                                [CoverAmount]
                            ,[UnCoverAmount]                                                 [UncoverAmount]
                            ,[UnCoverRemark]                                                 [UnCoverRemark]
-                           ,IIF(t.DecisionStatusId IN (2,3),N'อนุมัติ',t.DecisionStatusName)   [DecisionStatus]
-                           ,IIF(t.DecisionStatusId IN (2,3),2,t.DecisionStatusId)           [DecisionStatusId]
+                           ,t.DecisionStatusName                                            [DecisionStatus]
+                           ,t.DecisionStatusId                                              [DecisionStatusId]
                            ,[RejectedRemark]                                                [RejectResult]
                            ,@D                                                              [DecisionDate]
                            ,@_PaymentDate                                                   [EstimatePaymentDate]
@@ -445,8 +445,8 @@ BEGIN
                     UPDATE m 
                         SET m.CoverAmount = t.CalCoverAmount
                         ,m.UncoverAmount = t.UnCoverAmount
-                        ,m.DecisionStatusId = IIF(t.DecisionStatusId IN (2,3),2,t.DecisionStatusId)
-                        ,m.DecisionStatus = IIF(t.DecisionStatusId IN (2,3),N'อนุมัติ',t.DecisionStatusName)
+                        ,m.DecisionStatusId = t.DecisionStatusId
+                        ,m.DecisionStatus = t.DecisionStatusId
                         ,m.DecisionDate = @D
                         ,m.UpdatedByUserId = @_UserId
                         ,m.UpdatedDate = @D
