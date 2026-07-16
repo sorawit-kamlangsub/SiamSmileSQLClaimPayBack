@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_Report_BillingRejectClaim_select]    Script Date: 16/7/2569 14:54:06 ******/
+/****** Object:  StoredProcedure [dbo].[usp_Report_BillingRejectClaim_select]    Script Date: 16/7/2569 14:48:43 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -35,7 +35,7 @@ BEGIN
 	,bi.AmountTotal					AS Pay_Total
 	,rd.UncoverAmount				
 	,rd.UnCoverRemark
-	,ds.DecisionStatusName			AS DecisionStatus
+	,IIF(rd.DecisionStatusId = 2 AND rd.UncoverAmount > 0 ,N'อนุมัติบางส่วน',ds.DecisionStatusName)	AS DecisionStatus
 	,rd.DecisionDate
 	,rd.RejectResult
 	,ct.Detail						AS ClaimType
@@ -70,9 +70,9 @@ BEGIN
 		LEFT JOIN dbo.DecisionStatus ds
 			ON rd.DecisionStatusId = ds.DecisionStatusId
 	WHERE rd.BillingRequestItemCode IS NOT NULL
-		AND rd.DecisionStatusId IN(3,4)
+		AND (rd.DecisionStatusId = 4 OR (rd.DecisionStatusId = 2 AND rd.UncoverAmount > 0 ) )
 		AND	(bg.InsuranceCompanyId = @InsuranceId OR @InsuranceId IS NULL)
-		AND (rd.DecisionStatusId = @DecisionStatusId OR @DecisionStatusId IS NULL)
-		AND (rd.CreatedDate >= @DateFrom AND rd.CreatedDate < @DateTo)
+		AND (rd.DecisionStatusId = @DecisionStatusId OR @DecisionStatusId IS NULL OR (@DecisionStatusId = 3 AND rd.DecisionStatusId = 2 AND rd.UncoverAmount > 0))
+		AND (rd.DecisionDate >= @DateFrom AND rd.DecisionDate < @DateTo)
 
 END
