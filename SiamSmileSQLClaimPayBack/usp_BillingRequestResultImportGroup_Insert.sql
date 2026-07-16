@@ -441,7 +441,7 @@ BEGIN
                 IF @_TmpCode IS NOT NULL 
                 BEGIN
 
-                    --SELECT *
+                    --SELECT m.*
                     UPDATE m 
                         SET m.CoverAmount = t.CalCoverAmount
                         ,m.UncoverAmount = t.UnCoverAmount
@@ -455,18 +455,18 @@ BEGIN
                     INNER JOIN [dbo].[BillingRequestResultImport] bri
                         ON bri.BillingRequestItemCode = m.BillingRequestItemCode
                     INNER JOIN #TmpWithRuningCode t 
-                        ON t.TmpCode = bri.tmpCode
+                        ON t.IptmpCode = bri.tmpCode
                     WHERE m.IsActive = 1
 
+                END
+
                 /* Clean Bill import Temp */
-                --SELECT *
+                --SELECT m.*
                 UPDATE m 
                     SET m.IsActive = 0
                 FROM dbo.BillingRequestResultImport m
                 INNER JOIN #Tmp t
                     ON t.BillingRequestItemCode = m.BillingRequestItemCode
-
-                END
 
 			COMMIT TRANSACTION
 		END TRY

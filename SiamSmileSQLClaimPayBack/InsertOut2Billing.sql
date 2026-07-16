@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequestResultImportGroup_Insert]    Script Date: 15/7/2569 11:29:53 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequestResultImportGroup_Insert]    Script Date: 15/7/2569 15:41:32 ******/
 --SET ANSI_NULLS ON
 --GO
 --SET QUOTED_IDENTIFIER ON
@@ -16,10 +16,10 @@ GO
 --ALTER PROCEDURE [dbo].[usp_BillingRequestResultImportGroup_Insert]
 	-- Add the parameters for the stored procedure here
 DECLARE
-    @TmpCode VARCHAR(MAX),
+    @TmpCode VARCHAR(MAX) = 'TCB6907000397',
 	@PaymentDate DATETIME2,
 	@UserId INT,
-    @BillingRequestGroupCode VARCHAR(MAX) = 'BQGCM04H6900002,BQGSP04H6900002';
+    @BillingRequestGroupCode VARCHAR(MAX);
 --AS
 --BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
@@ -208,9 +208,9 @@ DECLARE
     DECLARE @MM varchar(2)
     DECLARE @RunningFrom int
     DECLARE @RunningTo int
-
-    SET @Total = (SELECT MAX(rwId) FROM #Tmp);
     
+    SET @Total = (SELECT MAX(rwId) FROM #Tmp);
+
     IF @_TmpCode IS NULL
     BEGIN
         EXECUTE [dbo].[usp_GenerateCode_FromTo] 
@@ -410,24 +410,24 @@ DECLARE
                 --           ,[PaySS_Total]
                 --           )
                 SELECT
-                           th.BillingRequestResultHeaderId   [BillingRequestResultHeaderId]
+                           th.BillingRequestResultHeaderId                                  [BillingRequestResultHeaderId]
                            ,[BillingRequestItemCode]
-                           ,'-'                         [PaymentReferenceId]
-                           ,[CalCoverAmount]            [CoverAmount]
-                           ,[UnCoverAmount]             [UncoverAmount]
-                           ,[UnCoverRemark]             [UnCoverRemark]
-                           ,[DecisionStatusName]        [DecisionStatus]
-                           ,[DecisionStatusId]          [DecisionStatusId]
-                           ,[RejectedRemark]            [RejectResult]
-                           ,@D                          [DecisionDate]
-                           ,@_PaymentDate               [EstimatePaymentDate]
-                           ,NULL                        [Remark]
+                           ,'-'                                                             [PaymentReferenceId]
+                           ,[CalCoverAmount]                                                [CoverAmount]
+                           ,[UnCoverAmount]                                                 [UncoverAmount]
+                           ,[UnCoverRemark]                                                 [UnCoverRemark]
+                           ,IIF(t.DecisionStatusId IN (2,3),N'อนุมัติ',t.DecisionStatusName)   [DecisionStatus]
+                           ,IIF(t.DecisionStatusId IN (2,3),2,t.DecisionStatusId)           [DecisionStatusId]
+                           ,[RejectedRemark]                                                [RejectResult]
+                           ,@D                                                              [DecisionDate]
+                           ,@_PaymentDate                                                   [EstimatePaymentDate]
+                           ,NULL                                                            [Remark]
                            ,[ClaimCode]
-                           ,1                           [IsActive]
-                           ,@D                          [CreatedDate]
-                           ,@_UserId                    [CreatedByUserId]
-                           ,@D                          [UpdatedDate]
-                           ,@_UserId                    [UpdatedByUserId]
+                           ,1                                                               [IsActive]
+                           ,@D                                                              [CreatedDate]
+                           ,@_UserId                                                        [CreatedByUserId]
+                           ,@D                                                              [UpdatedDate]
+                           ,@_UserId                                                        [UpdatedByUserId]
                            ,[ClaimHeaderGroupImportDetailId]
                            ,[PaySS_Total]
                 FROM #Tmp t
@@ -442,22 +442,24 @@ DECLARE
                 IF @_TmpCode IS NOT NULL 
                 BEGIN
 
-                    SELECT *
+                    SELECT t.*
                     --UPDATE m 
                     --    SET m.CoverAmount = t.CalCoverAmount
                     --    ,m.UncoverAmount = t.UnCoverAmount
-                    --    ,m.DecisionStatusId = t.DecisionStatusId
-                    --    ,m.DecisionStatus = t.DecisionStatusName
+                    --    ,m.DecisionStatusId = IIF(t.DecisionStatusId IN (2,3),2,t.DecisionStatusId)
+                    --    ,m.DecisionStatus = IIF(t.DecisionStatusId IN (2,3),N'อนุมัติ',t.DecisionStatusName)
                     --    ,m.DecisionDate = @D
-                        --,m.UpdatedByUserId = @_UserId
-                        --,m.UpdatedDate = @D
-                        --,m.EstimatePaymentDate = @_PaymentDate
+                    --    ,m.UpdatedByUserId = @_UserId
+                    --    ,m.UpdatedDate = @D
+                    --    ,m.EstimatePaymentDate = @_PaymentDate
                     FROM [dbo].[BillingRequestResultDetail] m
                     INNER JOIN [dbo].[BillingRequestResultImport] bri
                         ON bri.BillingRequestItemCode = m.BillingRequestItemCode
                     INNER JOIN #TmpWithRuningCode t 
                         ON t.IptmpCode = bri.tmpCode
                     WHERE m.IsActive = 1
+
+                END
 
                 /* Clean Bill import Temp */
                 SELECT *
@@ -466,8 +468,6 @@ DECLARE
                 FROM dbo.BillingRequestResultImport m
                 INNER JOIN #Tmp t
                     ON t.BillingRequestItemCode = m.BillingRequestItemCode
-
-                END
 
 		--	COMMIT TRANSACTION
 		--END TRY
