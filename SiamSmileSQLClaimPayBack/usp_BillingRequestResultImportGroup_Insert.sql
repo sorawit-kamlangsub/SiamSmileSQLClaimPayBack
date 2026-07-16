@@ -429,7 +429,7 @@ BEGIN
                            ,@_UserId                                                        [UpdatedByUserId]
                            ,[ClaimHeaderGroupImportDetailId]
                            ,[PaySS_Total]
-                FROM #Tmp t
+                FROM #TmpWithRuningCode t
                 INNER JOIN @TmpBillingRequestResultHeader th
                     ON th.BillingRequestResultHeaderCode = t.BillingRequestGroupCode
                 WHERE NOT EXISTS 
@@ -441,7 +441,7 @@ BEGIN
                 IF @_TmpCode IS NOT NULL 
                 BEGIN
 
-                    --SELECT m.*
+                    --SELECT t.BillingRequestItemCode,t.DecisionStatusName,t.CalCoverAmount,t.UnCoverAmount,t.IptmpCode
                     UPDATE m 
                         SET m.CoverAmount = t.CalCoverAmount
                         ,m.UncoverAmount = t.UnCoverAmount
@@ -452,11 +452,9 @@ BEGIN
                         ,m.UpdatedDate = @D
                         ,m.EstimatePaymentDate = @_PaymentDate
                     FROM [dbo].[BillingRequestResultDetail] m
-                    INNER JOIN [dbo].[BillingRequestResultImport] bri
-                        ON bri.BillingRequestItemCode = m.BillingRequestItemCode
                     INNER JOIN #TmpWithRuningCode t 
-                        ON t.IptmpCode = bri.tmpCode
-                    WHERE m.IsActive = 1
+                        ON t.BillingRequestItemCode = m.BillingRequestItemCode
+                    WHERE m.IsActive = 1 
 
                 END
 
