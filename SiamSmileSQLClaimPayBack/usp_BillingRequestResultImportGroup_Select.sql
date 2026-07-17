@@ -75,6 +75,7 @@ BEGIN
 		AND t.IsActive = 1
 		AND t.BillingReceiveStatusId IN (2,3)
 	 )
+	 AND (brd.DecisionStatusId IS NULL OR brd.DecisionStatusId <> 4)
 
 	SELECT 
 	 bg.BillingRequestGroupCode
