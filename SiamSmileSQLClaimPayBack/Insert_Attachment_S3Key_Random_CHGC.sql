@@ -93,9 +93,9 @@ DECLARE @S3Bucket NVARCHAR(255) = 'p-isc-ss-1-bucketdata'
 	) td	
 	 WHERE td.ClaimHeaderGroupCodeInDB IN
 	 (
-		'SBAD-888-69070001-0',
-		'SBAD-888-69070002-0',
-		'SBAD-888-69070003-0'
+		'SBAN-771-59100004-0',
+		'SBAO-521-63090035-0',
+		'SBAO-573-62060007-0'
 	 )
 	--WHERE td.ClaimHeaderCodeInDB IN
 	--(

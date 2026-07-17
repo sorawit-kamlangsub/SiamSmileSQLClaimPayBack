@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequestResultImportGroup_Insert]    Script Date: 15/7/2569 15:41:32 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequestResultImportGroup_Insert]    Script Date: 17/7/2569 14:27:43 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -312,7 +312,7 @@ BEGIN
                            ,[BankName]
                            ,[BankAccountName]
                            ,[BankAccountNumber]
-                           ,[RejectedRemark]            [Remark3]
+                           ,NULL                        [Remark3]
                  FROM #TmpWithRuningCode
                  WHERE DecisionStatusId <> 4
 

@@ -313,7 +313,7 @@ DECLARE
                            ,[BankName]
                            ,[BankAccountName]
                            ,[BankAccountNumber]
-                           ,[RejectedRemark]            [Remark3]
+                           ,NULL                        [Remark3]
                  FROM #TmpWithRuningCode
                  WHERE DecisionStatusId <> 4
 
