@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequestResultImportGroup_Insert]    Script Date: 17/7/2569 14:27:43 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequestResultImportGroup_Insert]    Script Date: 7/20/2026 2:58:14 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -104,7 +104,7 @@ BEGIN
     SELECT
     rs.*
     ,ds.DecisionStatusName
-    ,ROW_NUMBER() OVER(ORDER BY rs.BillingRequestGroupCode) AS rwId 
+    ,DENSE_RANK() OVER(ORDER BY rs.BillingRequestGroupId) AS rwId 
     INTO #Tmp
     FROM
     (
@@ -135,6 +135,7 @@ BEGIN
             SELECT 
                   bi.[BillingRequestItemCode]
                   ,bg.[BillingRequestGroupCode]
+                  ,bg.[BillingRequestGroupId]
                   ,gi.[InsuranceCompanyId]
                   ,gi.[ClaimTypeCode]
                   ,@D                                       [PaymentDate]

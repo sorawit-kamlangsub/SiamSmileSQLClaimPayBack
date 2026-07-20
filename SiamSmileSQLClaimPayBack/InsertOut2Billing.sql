@@ -16,10 +16,10 @@ GO
 --ALTER PROCEDURE [dbo].[usp_BillingRequestResultImportGroup_Insert]
 	-- Add the parameters for the stored procedure here
 DECLARE
-    @TmpCode VARCHAR(MAX) = 'TCB6907000435,TCB6907000435',
+    @TmpCode VARCHAR(MAX),
 	@PaymentDate DATETIME2,
 	@UserId INT,
-    @BillingRequestGroupCode VARCHAR(MAX);
+    @BillingRequestGroupCode VARCHAR(MAX) = 'BQGPA04B6907032';
 --AS
 --BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
@@ -105,7 +105,7 @@ DECLARE
     SELECT
     rs.*
     ,ds.DecisionStatusName
-    ,ROW_NUMBER() OVER(ORDER BY rs.BillingRequestGroupCode) AS rwId 
+    ,DENSE_RANK() OVER(ORDER BY rs.BillingRequestGroupId) AS rwId 
     INTO #Tmp
     FROM
     (
@@ -136,6 +136,7 @@ DECLARE
             SELECT 
                   bi.[BillingRequestItemCode]
                   ,bg.[BillingRequestGroupCode]
+                  ,bg.BillingRequestGroupId
                   ,gi.[InsuranceCompanyId]
                   ,gi.[ClaimTypeCode]
                   ,@D                                       [PaymentDate]
@@ -262,6 +263,8 @@ DECLARE
         SET @Msg = N'ไม่มีข้อมูล';
     END
 --End Validate
+
+SELECT * FROM #TmpWithRuningCode
            
 	/*Process*/
 	IF (@IsResult = 1)
