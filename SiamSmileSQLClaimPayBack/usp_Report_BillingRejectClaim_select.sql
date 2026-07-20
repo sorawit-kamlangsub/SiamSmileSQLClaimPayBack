@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_Report_BillingRejectClaim_select]    Script Date: 16/7/2569 14:48:43 ******/
+/****** Object:  StoredProcedure [dbo].[usp_Report_BillingRejectClaim_select]    Script Date: 7/20/2026 3:36:42 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -8,6 +8,8 @@ GO
 -- =============================================
 -- Author:		Chanadol Koonkam
 -- Create date: 2023-07-13
+-- Update date: 2026-07-14 Sorawit.k
+-- Description:	แก้ไขการ filter อนุมัติบางส่วนด้วย DecisionStatusId = 2
 -- Description:	BillingRejectClaim Report
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_Report_BillingRejectClaim_select] 
