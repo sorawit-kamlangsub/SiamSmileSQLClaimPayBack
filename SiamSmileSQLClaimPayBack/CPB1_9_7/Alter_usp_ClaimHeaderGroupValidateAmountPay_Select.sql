@@ -8,6 +8,7 @@ GO
 
 
 
+
 -- =============================================
 -- Author:		Mr.Bunchuai chaiket
 -- Create date: 2025-09-03 14:32
@@ -30,6 +31,8 @@ GO
 -- Description:	Function สำหรับ Validate ยอดเงิน บ.ส. และยอดเงินโอน
 -- Update date: 2026-07-14 17:10 Krekpon.D
 --				Check Validate Status Policy
+-- Update date: 2026-07-21 09:20 Krekpon.D
+--				Update Check Validate Status Policy
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ClaimHeaderGroupValidateAmountPay_Select]  
 	@ProductGroupId				INT
@@ -40,9 +43,9 @@ BEGIN
 SET NOCOUNT ON;
 
 -- =============================================
---DECLARE @ProductGroupId				INT				= 11;
---DECLARE @ClaimGroupTypeId			INT				= 8; 
---DECLARE @ClaimHeaderGroupCode		VARCHAR(MAX)	= 'CHSPO88869060004';
+--DECLARE @ProductGroupId				INT				= 3;
+--DECLARE @ClaimGroupTypeId			INT				= 2; 
+--DECLARE @ClaimHeaderGroupCode		VARCHAR(MAX)	= 'WAAO-888-69070001-0';
 -- =============================================
 
 -- Set message 
@@ -193,6 +196,14 @@ ELSE IF @ProductGroupId = 3
 						THEN @PolicyStatusWarning + ' , '
 						ELSE ''
 					END, NULL
+				)
+				+ISNULL(
+					CASE
+						WHEN @ClaimGroupTypeId IN (2,3,6)
+							AND (ctm.Status_id IN ('3020','3030','3035'))
+						THEN @PolicyStatusWarning + ' , '
+						ELSE ''
+					END,NULL
 				)
 			) AS WarningMessage
 				

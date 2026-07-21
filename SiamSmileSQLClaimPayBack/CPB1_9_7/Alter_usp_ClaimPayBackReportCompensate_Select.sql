@@ -1,6 +1,6 @@
 USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimPayBackReportCompensate_Select]    Script Date: 7/21/2026 11:09:30 AM ******/
+
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
