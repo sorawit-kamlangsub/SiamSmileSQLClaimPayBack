@@ -31,6 +31,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "V1.9.7", "V1.9.7", "{9CE7D2
 		CPB1_9_7\Alter_usp_BillingRequestResultImportGroup_Insert.sql = CPB1_9_7\Alter_usp_BillingRequestResultImportGroup_Insert.sql
 		CPB1_9_7\Alter_usp_BillingRequestResultImportGroup_Select.sql = CPB1_9_7\Alter_usp_BillingRequestResultImportGroup_Select.sql
 		CPB1_9_7\Alter_usp_ClaimHeaderGroupValidateAmountPay_Select.sql = CPB1_9_7\Alter_usp_ClaimHeaderGroupValidateAmountPay_Select.sql
+		Alter_usp_ClaimPayBackReportCompensate_Select.sql = Alter_usp_ClaimPayBackReportCompensate_Select.sql
+		CPB1_9_7\Alter_usp_ClaimPayBackReportCompensate_Select.sql = CPB1_9_7\Alter_usp_ClaimPayBackReportCompensate_Select.sql
 		CPB1_9_7\Alter_usp_ClaimPayBackReportNonClaimCompensate_Select.sql = CPB1_9_7\Alter_usp_ClaimPayBackReportNonClaimCompensate_Select.sql
 		CPB1_9_7\Alter_usp_Report_BillingRejectClaim_select.sql = CPB1_9_7\Alter_usp_Report_BillingRejectClaim_select.sql
 	EndProjectSection
