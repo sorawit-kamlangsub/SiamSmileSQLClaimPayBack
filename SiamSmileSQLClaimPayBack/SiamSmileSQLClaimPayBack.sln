@@ -16,7 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fix_Data", "Fix_Data", "{39
 		Insert_ClaimPayBackDetailReport.sql = Insert_ClaimPayBackDetailReport.sql
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "V1.8.0_Draft", "V1.8.0_Draft", "{DFCBEBB0-8BF8-4575-ADFF-33B9D0E8DD7A}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "V1.8.0", "V1.8.0", "{DFCBEBB0-8BF8-4575-ADFF-33B9D0E8DD7A}"
 	ProjectSection(SolutionItems) = preProject
 		C:\Users\NB-67-06-01\Desktop\CPBScriptV_1_8_0\Create_BillingRequestGroupSFTPEncryption.sql = C:\Users\NB-67-06-01\Desktop\CPBScriptV_1_8_0\Create_BillingRequestGroupSFTPEncryption.sql
 		C:\Users\NB-67-06-01\Desktop\CPBScriptV_1_8_0\Create_BillingRequestResultImport.sql = C:\Users\NB-67-06-01\Desktop\CPBScriptV_1_8_0\Create_BillingRequestResultImport.sql
@@ -26,13 +26,22 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "V1.8.0_Draft", "V1.8.0_Draf
 		C:\Users\NB-67-06-01\Desktop\CPBScriptV_1_8_0\Insert_ProgramConfig_CHUBB.sql = C:\Users\NB-67-06-01\Desktop\CPBScriptV_1_8_0\Insert_ProgramConfig_CHUBB.sql
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "V1.9.7", "V1.9.7", "{9CE7D252-F4F2-494B-8141-F01424678A7E}"
+	ProjectSection(SolutionItems) = preProject
+		CPB1_9_7\Alter_usp_BillingRequestResultImportGroup_Insert.sql = CPB1_9_7\Alter_usp_BillingRequestResultImportGroup_Insert.sql
+		CPB1_9_7\Alter_usp_BillingRequestResultImportGroup_Select.sql = CPB1_9_7\Alter_usp_BillingRequestResultImportGroup_Select.sql
+		CPB1_9_7\Alter_usp_ClaimHeaderGroupValidateAmountPay_Select.sql = CPB1_9_7\Alter_usp_ClaimHeaderGroupValidateAmountPay_Select.sql
+		CPB1_9_7\Alter_usp_ClaimPayBackReportNonClaimCompensate_Select.sql = CPB1_9_7\Alter_usp_ClaimPayBackReportNonClaimCompensate_Select.sql
+		CPB1_9_7\Alter_usp_Report_BillingRejectClaim_select.sql = CPB1_9_7\Alter_usp_Report_BillingRejectClaim_select.sql
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Default|Default = Default|Default
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{81F9C8E8-7583-A700-5CE6-F9B6F3403E8E}.Default|Default.ActiveCfg = Default
-		{0577A4DD-EE7B-49D1-A927-ECE744D8885A}.Default|Default.ActiveCfg = Default
+		{5FE050FC-4053-4A3A-B1CE-446628BEC09B}.Default|Default.ActiveCfg = Default
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

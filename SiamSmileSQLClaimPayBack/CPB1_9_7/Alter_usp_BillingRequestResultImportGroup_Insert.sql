@@ -1,10 +1,10 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequestResultImportGroup_Insert]    Script Date: 15/7/2569 15:41:32 ******/
---SET ANSI_NULLS ON
---GO
---SET QUOTED_IDENTIFIER ON
---GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 -- =============================================
 -- Author:		Sorawit kamlangsub
 -- Create date: 2026-07-04 16:30
@@ -13,18 +13,17 @@ GO
 --              Add Upsert BillingRequestResultDetail
 -- Description:	Insert Tmp Out2
 -- =============================================
---ALTER PROCEDURE [dbo].[usp_BillingRequestResultImportGroup_Insert]
+ALTER PROCEDURE [dbo].[usp_BillingRequestResultImportGroup_Insert]
 	-- Add the parameters for the stored procedure here
-DECLARE
     @TmpCode VARCHAR(MAX),
 	@PaymentDate DATETIME2,
 	@UserId INT,
-    @BillingRequestGroupCode VARCHAR(MAX) = 'BQGPA04B6907032,BQGCM04H6900002';
---AS
---BEGIN
+    @BillingRequestGroupCode VARCHAR(MAX)
+AS
+BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
 	-- interfering with SELECT statements.
-	--SET NOCOUNT ON;
+	SET NOCOUNT ON;
 
 	DECLARE @IsResult			BIT				= 1;
 	DECLARE @Result				VARCHAR(100)	= '';
@@ -136,7 +135,7 @@ DECLARE
             SELECT 
                   bi.[BillingRequestItemCode]
                   ,bg.[BillingRequestGroupCode]
-                  ,bg.BillingRequestGroupId
+                  ,bg.[BillingRequestGroupId]
                   ,gi.[InsuranceCompanyId]
                   ,gi.[ClaimTypeCode]
                   ,@D                                       [PaymentDate]
@@ -263,39 +262,37 @@ DECLARE
         SET @Msg = N'ไม่มีข้อมูล';
     END
 --End Validate
-
-SELECT * FROM #TmpWithRuningCode
            
 	/*Process*/
 	IF (@IsResult = 1)
 	BEGIN
 
-		--BEGIN TRY
-		--	BEGIN TRANSACTION                            
+		BEGIN TRY
+			BEGIN TRANSACTION                            
                 
-                --INSERT INTO [dbo].[TmpBillingRequestResult]
-                --           (
-                --           [TmpCode]
-                --           ,[BillingRequestItemCode]
-                --           ,[PaymentReferenceId]
-                --           ,[CoverAmount]
-                --           ,[UncoverAmount]
-                --           ,[UnCoverRemark]
-                --           ,[DecisionStatus]
-                --           ,[DecisionStatusId]
-                --           ,[RejectResult]
-                --           ,[DecisionDate]
-                --           ,[EstimatePaymentDate]
-                --           ,[Remark]
-                --           ,[IsValid]
-                --           ,[ValidateResult]
-                --           ,[PaymentDate]
-                --           ,[AmountPayment]
-                --           ,[BankName]
-                --           ,[BankAccountName]
-                --           ,[BankAccountNumber]
-                --           ,[Remark3]
-                --           )
+                INSERT INTO [dbo].[TmpBillingRequestResult]
+                           (
+                           [TmpCode]
+                           ,[BillingRequestItemCode]
+                           ,[PaymentReferenceId]
+                           ,[CoverAmount]
+                           ,[UncoverAmount]
+                           ,[UnCoverRemark]
+                           ,[DecisionStatus]
+                           ,[DecisionStatusId]
+                           ,[RejectResult]
+                           ,[DecisionDate]
+                           ,[EstimatePaymentDate]
+                           ,[Remark]
+                           ,[IsValid]
+                           ,[ValidateResult]
+                           ,[PaymentDate]
+                           ,[AmountPayment]
+                           ,[BankName]
+                           ,[BankAccountName]
+                           ,[BankAccountNumber]
+                           ,[Remark3]
+                           )
                  SELECT             
                             [TmpCode]
                            ,[BillingRequestItemCode]
@@ -320,20 +317,20 @@ SELECT * FROM #TmpWithRuningCode
                  FROM #TmpWithRuningCode
                  WHERE DecisionStatusId <> 4
 
-                --INSERT INTO [dbo].[TmpBillingReceiveResultHeader]
-                --           (
-                --           [TmpCode]
-                --           ,[BillingDate]
-                --           ,[BillingReceiveStatusId]
-                --           ,[BillingRequestGroupCode]
-                --           ,[InsuranceCompanyId]
-                --           ,[ClaimTypeCode]
-                --           ,[IsActive]
-                --           ,[CreatedByUserId]
-                --           ,[CreatedDate]
-                --           ,[UpdatedByUserId]
-                --           ,[UpdatedDate]
-                --           )
+                INSERT INTO [dbo].[TmpBillingReceiveResultHeader]
+                           (
+                           [TmpCode]
+                           ,[BillingDate]
+                           ,[BillingReceiveStatusId]
+                           ,[BillingRequestGroupCode]
+                           ,[InsuranceCompanyId]
+                           ,[ClaimTypeCode]
+                           ,[IsActive]
+                           ,[CreatedByUserId]
+                           ,[CreatedDate]
+                           ,[UpdatedByUserId]
+                           ,[UpdatedDate]
+                           )
                 SELECT 
                            DISTINCT
                            [TmpCode]
@@ -356,22 +353,22 @@ SELECT * FROM #TmpWithRuningCode
                     ,BillingRequestResultHeaderCode VARCHAR(20)
                 );
 
-                --INSERT INTO [dbo].[BillingRequestResultHeader]
-                --           (
-                --           [FileName]
-                --           ,[BillingRequestResultHeaderCode]
-                --           ,[IsActive]
-                --           ,[CreatedDate]
-                --           ,[CreatedByUserId]
-                --           ,[UpdatedDate]
-                --           ,[UpdatedByUserId]
-                --           ,[IsManual]
-                --           ,[IsManualNPL]
-                --           )
-                --OUTPUT
-                --    INSERTED.BillingRequestResultHeaderId
-                --    ,INSERTED.BillingRequestResultHeaderCode
-                --INTO @TmpBillingRequestResultHeader
+                INSERT INTO [dbo].[BillingRequestResultHeader]
+                           (
+                           [FileName]
+                           ,[BillingRequestResultHeaderCode]
+                           ,[IsActive]
+                           ,[CreatedDate]
+                           ,[CreatedByUserId]
+                           ,[UpdatedDate]
+                           ,[UpdatedByUserId]
+                           ,[IsManual]
+                           ,[IsManualNPL]
+                           )
+                OUTPUT
+                    INSERTED.BillingRequestResultHeaderId
+                    ,INSERTED.BillingRequestResultHeaderCode
+                INTO @TmpBillingRequestResultHeader
                 SELECT     DISTINCT
                            [FileName]
                            ,BillingRequestGroupCode    [BillingRequestResultHeaderCode]
@@ -389,29 +386,29 @@ SELECT * FROM #TmpWithRuningCode
                     WHERE rd.BillingRequestItemCode = t.BillingRequestResultDetailItemCode
                 )
 
-                --INSERT INTO [dbo].[BillingRequestResultDetail]
-                --           (
-                --           [BillingRequestResultHeaderId]
-                --           ,[BillingRequestItemCode]
-                --           ,[PaymentReferenceId]
-                --           ,[CoverAmount]
-                --           ,[UncoverAmount]
-                --           ,[UnCoverRemark]
-                --           ,[DecisionStatus]
-                --           ,[DecisionStatusId]
-                --           ,[RejectResult]
-                --           ,[DecisionDate]
-                --           ,[EstimatePaymentDate]
-                --           ,[Remark]
-                --           ,[ClaimCode]
-                --           ,[IsActive]
-                --           ,[CreatedDate]
-                --           ,[CreatedByUserId]
-                --           ,[UpdatedDate]
-                --           ,[UpdatedByUserId]
-                --           ,[ClaimHeaderGroupImportDetailId]
-                --           ,[PaySS_Total]
-                --           )
+                INSERT INTO [dbo].[BillingRequestResultDetail]
+                           (
+                           [BillingRequestResultHeaderId]
+                           ,[BillingRequestItemCode]
+                           ,[PaymentReferenceId]
+                           ,[CoverAmount]
+                           ,[UncoverAmount]
+                           ,[UnCoverRemark]
+                           ,[DecisionStatus]
+                           ,[DecisionStatusId]
+                           ,[RejectResult]
+                           ,[DecisionDate]
+                           ,[EstimatePaymentDate]
+                           ,[Remark]
+                           ,[ClaimCode]
+                           ,[IsActive]
+                           ,[CreatedDate]
+                           ,[CreatedByUserId]
+                           ,[UpdatedDate]
+                           ,[UpdatedByUserId]
+                           ,[ClaimHeaderGroupImportDetailId]
+                           ,[PaySS_Total]
+                           )
                 SELECT
                            th.BillingRequestResultHeaderId                                  [BillingRequestResultHeaderId]
                            ,[BillingRequestItemCode]
@@ -445,16 +442,16 @@ SELECT * FROM #TmpWithRuningCode
                 IF @_TmpCode IS NOT NULL 
                 BEGIN
 
-                    SELECT t.BillingRequestItemCode,t.DecisionStatusName,t.CalCoverAmount,t.UnCoverAmount,t.IptmpCode
-                    --UPDATE m 
-                    --    SET m.CoverAmount = t.CalCoverAmount
-                    --    ,m.UncoverAmount = t.UnCoverAmount
-                    --    ,m.DecisionStatusId = IIF(t.DecisionStatusId IN (2,3),2,t.DecisionStatusId)
-                    --    ,m.DecisionStatus = IIF(t.DecisionStatusId IN (2,3),N'อนุมัติ',t.DecisionStatusName)
-                    --    ,m.DecisionDate = @D
-                    --    ,m.UpdatedByUserId = @_UserId
-                    --    ,m.UpdatedDate = @D
-                    --    ,m.EstimatePaymentDate = @_PaymentDate
+                    --SELECT t.BillingRequestItemCode,t.DecisionStatusName,t.CalCoverAmount,t.UnCoverAmount,t.IptmpCode
+                    UPDATE m 
+                        SET m.CoverAmount = t.CalCoverAmount
+                        ,m.UncoverAmount = t.UnCoverAmount
+                        ,m.DecisionStatusId = IIF(t.DecisionStatusId IN (2,3),2,t.DecisionStatusId)
+                        ,m.DecisionStatus = IIF(t.DecisionStatusId IN (2,3),N'อนุมัติ',t.DecisionStatusName)
+                        ,m.DecisionDate = @D
+                        ,m.UpdatedByUserId = @_UserId
+                        ,m.UpdatedDate = @D
+                        ,m.EstimatePaymentDate = @_PaymentDate
                     FROM [dbo].[BillingRequestResultDetail] m
                     INNER JOIN #TmpWithRuningCode t 
                         ON t.BillingRequestItemCode = m.BillingRequestItemCode
@@ -463,20 +460,20 @@ SELECT * FROM #TmpWithRuningCode
                 END
 
                 /* Clean Bill import Temp */
-                SELECT *
-                --UPDATE m 
-                --    SET m.IsActive = 0
+                --SELECT m.*
+                UPDATE m 
+                    SET m.IsActive = 0
                 FROM dbo.BillingRequestResultImport m
                 INNER JOIN #Tmp t
                     ON t.BillingRequestItemCode = m.BillingRequestItemCode
 
-		--	COMMIT TRANSACTION
-		--END TRY
-		--BEGIN CATCH
+			COMMIT TRANSACTION
+		END TRY
+		BEGIN CATCH
 
-		--	IF @@TRANCOUNT > 0 ROLLBACK;
+			IF @@TRANCOUNT > 0 ROLLBACK;
 
-		--END CATCH
+		END CATCH
 
 	END;
 
@@ -502,4 +499,4 @@ SELECT * FROM #TmpWithRuningCode
     IF OBJECT_ID('tempdb..#tmpTmplist') IS NOT NULL DROP TABLE #tmpTmplist;
     IF OBJECT_ID('tempdb..#TmpWithRuningCode') IS NOT NULL DROP TABLE #TmpWithRuningCode;
 
---END
+END
