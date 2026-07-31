@@ -13,6 +13,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fix_Data", "Fix_Data", "{393229F8-4702-459F-92F1-5A0BF9FC3693}"
 	ProjectSection(SolutionItems) = preProject
 		InsertOut2Billing.sql = InsertOut2Billing.sql
+		Insert_AIG_Sftp_Config_PROD.sql = Insert_AIG_Sftp_Config_PROD.sql
 		Insert_ClaimPayBackDetailReport.sql = Insert_ClaimPayBackDetailReport.sql
 	EndProjectSection
 EndProject
@@ -42,7 +43,7 @@ Global
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{81F9C8E8-7583-A700-5CE6-F9B6F3403E8E}.Default|Default.ActiveCfg = Default
-		{5FE050FC-4053-4A3A-B1CE-446628BEC09B}.Default|Default.ActiveCfg = Default
+		{6739C531-0F0D-40DC-8214-E4504EE34FFE}.Default|Default.ActiveCfg = Default
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
