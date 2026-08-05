@@ -1,10 +1,10 @@
-ÔªøUSE [ClaimPayBack]
+USE [ClaimPayBack]
 GO
 
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+--SET ANSI_NULLS ON
+--GO
+--SET QUOTED_IDENTIFIER ON
+--GO
 
 
 
@@ -13,30 +13,199 @@ GO
 -- Create date: 2022-11-02
 -- Update date: 2023-08-08	Siriphong	Narkphung	Add ValidateDoc
 -- update date:  2024-01-24 Kittisak.Ph 
--- update date:  2024-02-01 Kittisak.Ph ‡πÄ‡∏ä‡πá‡∏Ñ‡∏£‡∏≤‡∏¢‡∏Å‡∏≤‡∏£‡πÄ‡∏Ñ‡∏•‡∏°‡∏ã‡πâ‡∏≥ ‡πÉ‡∏ô ‡∏ö.‡∏™.‡πÄ‡∏î‡∏µ‡∏¢‡∏ß‡∏Å‡∏±‡∏ô
--- update date:	2024-04-23 Kerkpon.Mind ‡πÄ‡∏û‡∏¥‡πà‡∏°‡πÄ‡∏á‡∏∑‡πà‡∏≠‡∏ô‡πÑ‡∏Ç‡πÄ‡∏ä‡πá‡∏Ñ‡∏ß‡πà‡∏≤‡πÄ‡∏•‡∏Ç claim ‡∏°‡∏µ‡∏ã‡πâ‡∏≥
--- update date: 2024-06-17 Krekpon.Mind ‡πÄ‡∏û‡∏¥‡πà‡∏°‡πÄ‡∏á‡∏∑‡πà‡∏≠‡∏ô‡πÑ‡∏Ç
--- update date: 2024-07-09 Krekpon.Mind ‡πÄ‡∏û‡∏¥‡πà‡∏° IsActive
--- update date: 2025-04-11 Wetpisit.P ‡πÄ‡∏û‡∏¥‡πà‡∏° validate ‡πÄ‡∏ä‡πá‡∏Ñ‡πÄ‡∏•‡∏Ç‡∏Å‡∏£‡∏°‡∏ò‡∏£‡∏£‡∏°‡πå‡πÉ‡∏ô ‡∏ö.‡∏™.‡πÇ‡∏î‡∏¢‡∏î‡∏∂‡∏á‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏• PolicyNo ‡∏°‡∏≤‡πÉ‡∏™‡πà #TmpDetail ‡πÄ‡∏û‡∏∑‡πà‡∏≠‡∏ô‡∏≥‡πÑ‡∏õ‡πÄ‡∏ä‡πá‡∏Ñ,‡πÄ‡∏û‡∏¥‡πà‡∏°‡πÄ‡∏á‡∏∑‡πà‡∏≠‡∏ô‡πÑ‡∏Ç‡∏Å‡∏≤‡∏£‡πÄ‡∏ä‡πá‡∏Ñ‡∏à‡∏≥‡∏ô‡∏ß‡∏ô‡πÄ‡∏≠‡∏Å‡∏™‡∏≤‡∏£‡πÉ‡∏ô #tmpDoc
--- update date: 2025-10-02 10:02 ‡πÄ‡∏û‡∏¥‡πà‡∏° IsActive ‡πÉ‡∏ô LEFT JOIN ClaimHeaderGroupImport
+-- update date:  2024-02-01 Kittisak.Ph ‡™Á§√“¬°“√‡§≈¡´È” „π ∫. .‡¥’¬«°—π
+-- update date:	2024-04-23 Kerkpon.Mind ‡æ‘Ë¡‡ß◊ËÕπ‰¢‡™Á§«Ë“‡≈¢ claim ¡’´È”
+-- update date: 2024-06-17 Krekpon.Mind ‡æ‘Ë¡‡ß◊ËÕπ‰¢
+-- update date: 2024-07-09 Krekpon.Mind ‡æ‘Ë¡ IsActive
+-- update date: 2025-04-11 Wetpisit.P ‡æ‘Ë¡ validate ‡™Á§‡≈¢°√¡∏√√¡Ï„π ∫. .‚¥¬¥÷ß¢ÈÕ¡Ÿ≈ PolicyNo ¡“„ Ë #TmpDetail ‡æ◊ËÕπ”‰ª‡™Á§,‡æ‘Ë¡‡ß◊ËÕπ‰¢°“√‡™Á§®”π«π‡Õ° “√„π #tmpDoc
+-- update date: 2025-10-02 10:02 ‡æ‘Ë¡ IsActive „π LEFT JOIN ClaimHeaderGroupImport
 -- Update date: 2025-10-16 14:01 Clear comment Krekpon.D
 -- Update date: 2025-10-30 09:34 Add ClaimMisc and Clean Script Sorawit kamlangsub
 -- Update date: 2026-03-11 13:16 Add Pa Validate PolicyNo Sorawit kamlangsub
--- Update date: 2026-03-12 08:47 ‡πÄ‡∏û‡∏¥‡πà‡∏° Validate ‡∏Å‡∏£‡∏ì‡∏µ‡πÄ‡∏õ‡πá‡∏ô ‡∏ö.‡∏™.‡∏ô‡∏±‡πâ‡∏ô‡πÄ‡∏õ‡πá‡∏ô‡πÄ‡∏ö‡∏¥‡∏Å‡∏à‡πà‡∏≤‡∏¢‡∏Å‡∏≠‡∏á‡∏ó‡∏∏‡∏ô‡∏°‡πâ‡∏≤‡∏•‡∏≤‡∏¢ Sorawit kamlangsub
--- Update date: 2026-06-06 08:57 ‡πÄ‡∏û‡∏¥‡πà‡∏° union ClaimMisc ‡πÉ‡∏ô #TmpClaimType Sorawit kamlangsub
+-- Update date: 2026-03-12 08:47 ‡æ‘Ë¡ Validate °√≥’‡ªÁπ ∫. .π—Èπ‡ªÁπ‡∫‘°®Ë“¬°Õß∑ÿπ¡È“≈“¬ Sorawit kamlangsub
+-- Update date: 2026-06-06 08:57 ‡æ‘Ë¡ union ClaimMisc „π #TmpClaimType Sorawit kamlangsub
 -- Description:	PROD (P30,1000) dl.DocumentListID = 137 (2000) dl.DocumentListID = 138 
 --	UAT  dl.DocumentListID = 134 (2000) dl.DocumentListID = 135
 -- =============================================
-ALTER PROCEDURE [dbo].[usp_TmpClaimHeaderGroupImport_Validate_V2]
-	@TmpCode VARCHAR(20)
+--ALTER PROCEDURE [dbo].[usp_TmpClaimHeaderGroupImport_Validate_V2]
+--	@TmpCode VARCHAR(20)
 
-AS
-BEGIN
+--AS
+--BEGIN
 	
-SET NOCOUNT ON;
+--SET NOCOUNT ON;
+
+DECLARE @IsQuery BIT = 0;
+DECLARE @IsImport BIT = 1;
+
+IF @IsQuery = 1
+BEGIN
+	SELECT TOP(1000)
+		td.ClaimHeaderGroupCodeInDB
+		,1 ItemCode
+		,IIF(ISNULL(td.TotalAmount,0) = 0 ,td.TotalAmountSS,td.TotalAmount)	Amount
+		,ISNULL(td.TotalAmount,0)	TotalAmount
+		,ISNULL(td.TotalAmountSS,0)	TotalAmountSS
+		,td.InsuranceCompanyId
+		,td.ClaimHeaderCodeInDB
+		,td.ProductGroup
+		,td.PolicyNo
+		,td.CreatedDate
+		,td.PolicyType_id
+	FROM
+		(	--SSS------
+			SELECT h.ClaimHeaderGroup_id					AS ClaimHeaderGroupCodeInDB
+					,CAST(v.Pay_Total AS DECIMAL(16,2))		AS TotalAmount
+					,v.PaySS_Total							AS TotalAmountSS
+					,ins.Organize_ID						AS InsuranceCompanyId
+					,h.Code									AS ClaimHeaderCodeInDB
+					,IIF(h.Product_id = 'P30',h.Product_id,'1000') AS ProductGroup
+					,cus.InsuredPolicy_no					AS PolicyNo
+					,h.CreatedDate
+					,NULL									AS PolicyType_id
+			FROM SSS.dbo.DB_ClaimHeader h
+				LEFT JOIN SSS.dbo.DB_ClaimVoucher v
+					ON h.Code = v.Code
+				LEFT JOIN DataCenterV1.Organize.Organize ins
+					ON h.InsuranceCompany_id = ins.OrganizeCode
+				LEFT JOIN sss.dbo.MT_ClaimType ct
+					ON h.ClaimAdmitType_id = ct.Code
+				LEFT JOIN sss.dbo.DB_Customer  cus
+					ON h.App_id = cus.App_id
+
+			UNION
+			--SSSPA------
+			SELECT hg.Code								AS ClaimHeaderGroupCodeInDB
+					,CAST(h.Amount_Pay AS DECIMAL(16,2))	AS TotalAmount
+					,h.PaySS_Total							AS TotalAmountSS
+					,ins.Organize_ID						AS InsuranceCompanyId
+					,h.Code									AS ClaimHeaderCodeInDB
+					,'2000'									AS ProductGroup
+					,ctp.Detail								AS PolicyNo
+					,hg.CreatedDate
+					,ctp.PolicyType_id
+			FROM SSSPA.dbo.DB_ClaimHeaderGroup AS hg
+				LEFT JOIN SSSPA.dbo.DB_ClaimHeader h
+					ON hg.Code = h.ClaimheaderGroup_id
+				LEFT JOIN DataCenterV1.Organize.Organize AS ins
+					ON hg.InsuranceCompany_id = ins.OrganizeCode
+				LEFT JOIN SSSPA.dbo.DB_CustomerDetail AS ctd
+					ON h.CustomerDetail_id = ctd.Code
+				LEFT JOIN SSSPA.dbo.DB_Customer AS cus
+					ON ctd.Application_id = cus.App_id AND cus.Status_id <> '3090' 
+				LEFT JOIN SSSPA.dbo.DB_CustomerPolicy  AS ctp
+					ON cus.App_id  = ctp.App_id 
+
+			UNION
+
+			--ClaimCompensate------
+			SELECT cg.ClaimCompensateGroupCode				AS ClaimHeaderGroupCodeInDB
+				,cc.CompensateRemain						AS TotalAmount
+				,cc.CompensateRemain						AS TotalAmountSS
+				,ins.Organize_ID							AS InsuranceCompanyId
+				,cc.ClaimCompensateCode						AS ClaimHeaderCodeInDB
+				,'2222'										AS ProductGroup
+				,cus.InsuredPolicy_no						AS PolicyNo
+				,cg.CreatedDate
+				,NULL										AS PolicyType_id
+			FROM SSS.dbo.ClaimCompensateGroup cg
+				LEFT JOIN
+					(
+						SELECT 
+							CompensateRemain
+							,ClaimCompensateCode
+							,ClaimCompensateGroupId
+						FROM SSS.dbo.ClaimCompensate
+						WHERE IsActive = 1
+					)cc
+					ON cg.ClaimCompensateGroupId = cc.ClaimCompensateGroupId
+				LEFT JOIN DataCenterV1.Organize.Organize AS ins
+					ON cg.InsuranceCompanyCode = ins.OrganizeCode
+				LEFT JOIN SSS.dbo.DB_ClaimHeader h
+					ON cg.ClaimCompensateGroupCode = h.ClaimHeaderGroup_id
+				LEFT JOIN sss.dbo.DB_Customer  cus
+					ON h.App_id = cus.App_id
+
+			UNION
+
+				-- ClaimMisc 
+				SELECT 	
+					cm.ClaimHeaderGroupCode									ClaimHeaderGroupCodeInDB
+					,cm.PayAmount												TotalAmount
+					,cm.PayAmount												TotalAmountSS
+					,org.Organize_ID											InsuranceCompanyId
+					,NULL														ClaimHeaderCodeInDB
+					,IIF(cpbType.ClaimPaymentTypeId = 2, 'ZebraMisc','Misc')	ProductGroup
+					,cm.PolicyNo												PolicyNo
+					,cm.CreatedDate
+					,NULL														PolicyType_id
+				FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
+					LEFT JOIN [ClaimMiscellaneous].[misc].[InsuranceCompany] ins
+						ON ins.InsuranceCompanyId = cm.InsuranceCompanyId
+					LEFT JOIN [DataCenterV1].[Organize].[Organize] org
+						ON org.OrganizeCode = ins.InsuranceCompanyCode
+					LEFT JOIN (
+							SELECT DISTINCT
+								h.ClaimMiscId
+								,cp.ClaimPaymentTypeId
+								,cp.ClaimPaymentTypeName
+							FROM [ClaimMiscellaneous].[misc].[ClaimMiscPaymentHeader] h
+								LEFT JOIN [ClaimMiscellaneous].[misc].[ClaimMiscPayment] p
+								 ON h.ClaimMiscPaymentHeaderId = p.ClaimMiscPaymentHeaderId
+								LEFT JOIN [ClaimMiscellaneous].[misc].[ClaimPaymentType] cp
+								 ON cp.ClaimPaymentTypeId = p.ClaimPaymentTypeId
+								) cpbType
+						ON cm.ClaimMiscId = cpbType.ClaimMiscId
+
+	) td
+	WHERE td.ClaimHeaderGroupCodeInDB IS NOT NULL
+	  AND td.ClaimHeaderGroupCodeInDB <> ''
+	  AND SUBSTRING(td.ClaimHeaderGroupCodeInDB, 3, 1) = 'A'
+	  AND (td.PolicyNo IS NOT NULL AND td.PolicyType_id <> '')
+	  AND td.PolicyType_id <> 9601
+	ORDER BY td.ClaimHeaderGroupCodeInDB ASC
+END
+
+DECLARE @TransactionCodeControlTypeDetail varchar(8) = 'IMCHG'
+DECLARE @RunningLenght int = 6
+DECLARE @ResultCode varchar(20)
+
+IF @IsImport = 1
+BEGIN
+
+	EXECUTE [dbo].[usp_GenerateCode] 
+	   @TransactionCodeControlTypeDetail
+	  ,@RunningLenght
+	  ,@ResultCode OUTPUT
+
+	INSERT INTO [dbo].[TmpClaimHeaderGroupImport]
+			   ([TmpCode]
+			   ,[ClaimHeaderGroupCode]
+			   ,[ItemCount]
+			   ,[TotalAmount]
+			   ,[BillingDate]
+			   ,[IsValid]
+			   ,[ValidateResult]
+			   ,[InsuranceCompanyId]
+			   ,[ClaimHeaderGroupTypeId]
+			   ,[ClaimTypeCode])
+		 VALUES
+			   (
+			   @ResultCode				--[TmpCode]
+			   ,'BUAD-101-59080001-0'	--[ClaimHeaderGroupCode]
+			   ,1						--[ItemCount]
+			   ,10000					--[TotalAmount]
+			   ,NULL					--[BillingDate]
+			   ,NULL					--[IsValid]
+			   ,NULL					--[ValidateResult]
+			   ,NULL					--[InsuranceCompanyId]
+			   ,3					--[ClaimHeaderGroupTypeId]
+			   ,NULL					--[ClaimTypeCode]
+			   )
+END
 
 --Test Zone
---DECLARE @TmpCode VARCHAR(20) = 'IMCHG6812000071'
+DECLARE @TmpCode VARCHAR(20) = @ResultCode
 --End Test
 
 DECLARE @ClaimHeaderSSS INT = 2;
@@ -65,7 +234,7 @@ DECLARE @ClaimTypeCode_H	VARCHAR(20) = '1000'
 DECLARE @ClaimTypeCode_C	VARCHAR(20) = '2000'
 ----------------------------------------------
 
-IF @IsResult = 1			
+IF @IsResult = 1 AND @IsImport = 1		
 	BEGIN					
 	
 		SELECT 
@@ -141,6 +310,8 @@ IF @IsResult = 1
 			,d.ClaimHeaderCodeInDB
 			,d.ProductGroup
 			,d.PolicyNo
+			,d.PolicyType_id
+			,d.PolicyType
 		INTO #TmpDetail
 		FROM
 			(	--SSS------
@@ -152,6 +323,8 @@ IF @IsResult = 1
 						,h.Code									AS ClaimHeaderCodeInDB
 						,IIF(h.Product_id = 'P30',h.Product_id,'1000') AS ProductGroup
 						,cus.InsuredPolicy_no					AS PolicyNo
+						,NULL										AS PolicyType_id
+						,NULL										AS PolicyType
 				FROM #Tmp t
 					LEFT JOIN SSS.dbo.DB_ClaimHeader h
 						ON t.ClaimHeaderGroupCode = h.ClaimHeaderGroup_id
@@ -176,6 +349,8 @@ IF @IsResult = 1
 						,h.Code									AS ClaimHeaderCodeInDB
 						,'2000'									AS ProductGroup
 						,ctp.Detail								AS PolicyNo
+						,ctp.PolicyType_id
+						,smcode.Detail							AS PolicyType
 				FROM #Tmp t
 					INNER JOIN SSSPA.dbo.DB_ClaimHeaderGroup AS hg
 						ON t.ClaimHeaderGroupCode = hg.Code
@@ -186,9 +361,11 @@ IF @IsResult = 1
 					LEFT JOIN SSSPA.dbo.DB_CustomerDetail AS ctd
 						ON h.CustomerDetail_id = ctd.Code
 					LEFT JOIN SSSPA.dbo.DB_Customer AS cus
-						ON ctd.Application_id = cus.App_id AND cus.Status_id <> '3090' --‡πÑ‡∏°‡πà‡πÉ‡∏ä‡πà‡∏¢‡∏Å‡πÄ‡∏•‡∏¥‡∏Å‡∏Å‡∏£‡∏°‡∏ò‡∏£‡∏£‡∏°‡πå
+						ON ctd.Application_id = cus.App_id AND cus.Status_id <> '3090' --‰¡Ë„™Ë¬°‡≈‘°°√¡∏√√¡Ï
 					LEFT JOIN SSSPA.dbo.DB_CustomerPolicy  AS ctp
-						ON cus.App_id  = ctp.App_id AND PolicyType_id = '9601' --‡πÄ‡∏õ‡πá‡∏ô‡πÄ‡∏•‡∏Ç‡∏Å‡∏£‡∏°‡∏ò‡∏£‡∏£‡∏°‡πå ‡∏õ‡∏Å‡∏ï‡∏¥
+						ON cus.App_id  = ctp.App_id  --AND PolicyType_id = '9601' --‡ªÁπ‡≈¢°√¡∏√√¡Ï ª°µ‘
+					LEFT JOIN SSSPA.dbo.SM_Code smcode
+						ON ctp.PolicyType_id = smcode.Code
 				WHERE t.ClaimHeaderGroupTypeId = @ClaimHeaderSSSPA
 
 				UNION
@@ -202,6 +379,8 @@ IF @IsResult = 1
 					,cc.ClaimCompensateCode						AS ClaimHeaderCodeInDB
 					,'2222'										AS ProductGroup
 					,cus.InsuredPolicy_no						AS PolicyNo
+					,NULL										AS PolicyType_id
+					,NULL										AS PolicyType
 				FROM #Tmp t
 					INNER JOIN SSS.dbo.ClaimCompensateGroup cg
 						ON t.ClaimHeaderGroupCode = cg.ClaimCompensateGroupCode
@@ -235,6 +414,8 @@ IF @IsResult = 1
 					,NULL														ClaimHeaderCodeInDB
 					,IIF(cpbType.ClaimPaymentTypeId = 2, 'ZebraMisc','Misc')	ProductGroup
 					,cm.PolicyNo												PolicyNo
+					,NULL														PolicyType_id
+					,NULL														PolicyTypes
 				FROM #Tmp t
 					INNER JOIN [ClaimMiscellaneous].[misc].[ClaimMisc] cm
 						ON t.ClaimHeaderGroupCode = cm.ClaimHeaderGroupCode
@@ -262,7 +443,7 @@ IF @IsResult = 1
              , m.ClaimHeaderCodeInDB
 			 , m.TotalAmountSS
 			 , IIF(m.ProductGroup IN ('Misc','ZebraMisc'),1,ISNULL(d.CountDoc,0)) CountDoc
-			 , IIF(IIF(m.ProductGroup IN ('Misc','ZebraMisc'),1,ISNULL(d.CountDoc,0)) = 0,N'‡πÑ‡∏°‡πà‡∏û‡∏ö‡πÄ‡∏≠‡∏Å‡∏™‡∏≤‡∏£‡πÅ‡∏ô‡∏ö','') ValidateDetailResult
+			 , IIF(IIF(m.ProductGroup IN ('Misc','ZebraMisc'),1,ISNULL(d.CountDoc,0)) = 0,N'‰¡Ëæ∫‡Õ° “√·π∫','') ValidateDetailResult
 		INTO #TmpDoc
 		FROM #TmpDetail m
 			LEFT JOIN 
@@ -271,23 +452,23 @@ IF @IsResult = 1
 							,td.ClaimHeaderCodeInDB
 							,CASE 
 								WHEN 
-									-- ‡∏ï‡∏£‡∏ß‡∏à‡∏™‡∏≠‡∏ö‡πÄ‡∏≠‡∏Å‡∏™‡∏≤‡∏£ PH ‡∏ó‡∏µ‡πà‡πÄ‡∏õ‡πá‡∏ô‡πÄ‡∏Ñ‡∏•‡∏°‡πÇ‡∏£‡∏á‡∏û‡∏¢‡∏≤‡∏ö‡∏≤‡∏•‡∏ï‡πâ‡∏≠‡∏á‡∏°‡∏µ‡∏ó‡∏±‡πâ‡∏á‡πÄ‡∏≠‡∏Å‡∏™‡∏≤‡∏£‡πÄ‡∏Ñ‡∏•‡∏°‡πÇ‡∏£‡∏á‡∏û‡∏¢‡∏≤‡∏ö‡∏≤‡∏•(24) ‡∏Å‡∏±‡∏ö‡∏´‡∏ô‡∏±‡∏á‡∏™‡∏∑‡∏≠‡πÅ‡∏à‡πâ‡∏á‡∏ä‡∏≥‡∏£‡∏∞‡∏Ñ‡πà‡∏≤‡∏£‡∏±‡∏Å‡∏©‡∏≤‡∏û‡∏¢‡∏≤‡∏ö‡∏≤‡∏• (UAT 134,PROD 137)
+									-- µ√«® Õ∫‡Õ° “√ PH ∑’Ë‡ªÁπ‡§≈¡‚√ßæ¬“∫“≈µÈÕß¡’∑—Èß‡Õ° “√‡§≈¡‚√ßæ¬“∫“≈(24) °—∫Àπ—ß ◊Õ·®Èß™”√–§Ë“√—°…“æ¬“∫“≈ (UAT 134,PROD 137)
 									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup IN ('P30','1000') AND dl.DocumentListID = 24 THEN 1 ELSE 0 END) >= 1
 									AND
 									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup IN ('P30','1000') AND dl.DocumentListID = 134 THEN 1 ELSE 0 END) >= 1
 								THEN 1
 								WHEN 
-									-- ‡∏ï‡∏£‡∏ß‡∏à‡∏™‡∏≠‡∏ö‡πÄ‡∏≠‡∏Å‡∏™‡∏≤‡∏£ PA ‡∏ó‡∏µ‡πà‡πÄ‡∏õ‡πá‡∏ô‡πÄ‡∏Ñ‡∏•‡∏°‡πÇ‡∏£‡∏á‡∏û‡∏¢‡∏≤‡∏ö‡∏≤‡∏•‡∏ï‡πâ‡∏≠‡∏á‡∏°‡∏µ‡∏ó‡∏±‡πâ‡∏á‡πÄ‡∏≠‡∏Å‡∏™‡∏≤‡∏£‡πÄ‡∏Ñ‡∏•‡∏°‡πÇ‡∏£‡∏á‡∏û‡∏¢‡∏≤‡∏ö‡∏≤‡∏•(26) ‡∏Å‡∏±‡∏ö‡∏´‡∏ô‡∏±‡∏á‡∏™‡∏∑‡∏≠‡πÅ‡∏à‡πâ‡∏á‡∏ä‡∏≥‡∏£‡∏∞‡∏Ñ‡πà‡∏≤‡∏£‡∏±‡∏Å‡∏©‡∏≤‡∏û‡∏¢‡∏≤‡∏ö‡∏≤‡∏• (UAT 135,PROD 138)
+									-- µ√«® Õ∫‡Õ° “√ PA ∑’Ë‡ªÁπ‡§≈¡‚√ßæ¬“∫“≈µÈÕß¡’∑—Èß‡Õ° “√‡§≈¡‚√ßæ¬“∫“≈(26) °—∫Àπ—ß ◊Õ·®Èß™”√–§Ë“√—°…“æ¬“∫“≈ (UAT 135,PROD 138)
 									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup = '2000' AND dl.DocumentListID = 26 THEN 1 ELSE 0 END) >= 1
 									AND
 									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup = '2000' AND dl.DocumentListID = 135 THEN 1 ELSE 0 END) >= 1
 								THEN 1
 								WHEN 
-									-- ‡∏Å‡∏£‡∏ì‡∏µ‡πÄ‡∏õ‡πá‡∏ô‡πÄ‡∏Ñ‡∏•‡∏°‡∏™‡∏≤‡∏Ç‡∏≤ ‡∏ï‡πâ‡∏≠‡∏á‡πÑ‡∏°‡πà‡∏°‡∏µ‡∏Ç‡∏≠‡∏á‡πÄ‡∏Ñ‡∏•‡∏°‡πÇ‡∏£‡∏á‡∏û‡∏¢‡∏≤‡∏ö‡∏≤‡∏•
+									-- °√≥’‡ªÁπ‡§≈¡ “¢“ µÈÕß‰¡Ë¡’¢Õß‡§≈¡‚√ßæ¬“∫“≈
 									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H THEN 1 ELSE 0 END) = 0
 								THEN 1
 								WHEN 
-									-- ‡∏Å‡∏£‡∏ì‡∏µ‡πÄ‡∏õ‡πá‡∏ô‡πÄ‡∏Ñ‡∏•‡∏°‡πÇ‡∏≠‡∏ô‡πÅ‡∏¢‡∏Å
+									-- °√≥’‡ªÁπ‡§≈¡‚Õπ·¬°
 									MAX(CASE WHEN td.ProductGroup = '2222' THEN 1 ELSE 0 END) = 1
 								THEN 1
 								ELSE 0
@@ -331,14 +512,14 @@ IF @IsResult = 1
 				----------------------Update 2023-08-08--------------------
 				,CONCAT
 					(
-						 IIF(s.ClaimHeaderGroupCode IS NOT NULL,N'‡∏£‡∏≤‡∏¢‡∏Å‡∏≤‡∏£ ‡∏ö.‡∏™. ‡∏ã‡πâ‡∏≥‡∏Å‡∏±‡∏ô‡πÉ‡∏ô‡πÑ‡∏ü‡∏•‡πå, ','')
-						,IIF(img.ClaimHeaderGroupCode IS NOT NULL,N'‡∏£‡∏≤‡∏¢‡∏Å‡∏≤‡∏£ ‡∏ö.‡∏™. ‡∏ã‡πâ‡∏≥‡∏Å‡∏±‡∏ö‡πÉ‡∏ô‡∏£‡∏∞‡∏ö‡∏ö, ','')
-						,IIF(c.ClaimHeaderGroupCodeInDB IS NULL, N'‡πÑ‡∏°‡πà‡∏û‡∏ö‡πÄ‡∏•‡∏Ç ‡∏ö.‡∏™. ‡∏ô‡∏µ‡πâ‡πÉ‡∏ô‡∏ê‡∏≤‡∏ô‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏•, ','')
-						,IIF(t.ItemCount<>ISNULL(c.ItemCountInDB,0) AND t.ClaimHeaderGroupTypeId = pg.ProductGroupId AND s.ClaimHeaderGroupCode IS NULL,N'‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏•‡∏à‡∏≥‡∏ô‡∏ß‡∏ô‡πÄ‡∏Ñ‡∏•‡∏°‡πÑ‡∏°‡πà‡∏ï‡∏£‡∏á‡∏Å‡∏±‡∏ö‡πÉ‡∏ô‡∏ê‡∏≤‡∏ô‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏•, ','')
-						,IIF(t.TotalAmount = 0,N'‡πÑ‡∏°‡πà‡∏°‡∏µ‡∏¢‡∏≠‡∏î‡πÄ‡∏á‡∏¥‡∏ô‡πÉ‡∏ô‡∏£‡∏≤‡∏¢‡∏Å‡∏≤‡∏£ ‡∏ö.‡∏™., ','')
-						,IIF(t.TotalAmount<>ISNULL(c.TotalAmountInDB,0) AND t.ClaimHeaderGroupTypeId = pg.ProductGroupId AND s.ClaimHeaderGroupCode IS NULL,CONCAT(N'‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏•‡∏à‡∏≥‡∏ô‡∏ß‡∏ô‡πÄ‡∏á‡∏¥‡∏ô‡∏£‡∏ß‡∏°‡πÑ‡∏°‡πà‡∏ï‡∏£‡∏á‡∏Å‡∏±‡∏ö‡πÉ‡∏ô‡∏ê‡∏≤‡∏ô‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏•','( ',FORMAT(c.TotalAmountInDB,'N'),'), '),'')
-						,IIF(imd.ClaimCodeInSystem IS NOT NULL AND t.ClaimHeaderGroupCode LIKE '%_0' AND cbd.ClaimGroupCode = t.ClaimHeaderGroupCode AND imd.ClaimHeaderGroupCode = t.ClaimHeaderGroupCode ,N'‡∏°‡∏µ‡∏£‡∏≤‡∏¢‡∏Å‡∏≤‡∏£‡πÄ‡∏Ñ‡∏•‡∏°‡∏ô‡∏µ‡πâ‡πÉ‡∏ô‡∏£‡∏∞‡∏ö‡∏ö‡πÅ‡∏•‡πâ‡∏ß, ','') -- Update 2024-02-01 Kittisak.Ph ‡πÄ‡∏ä‡πá‡∏Ñ‡∏£‡∏≤‡∏¢‡∏Å‡∏≤‡∏£‡πÄ‡∏Ñ‡∏•‡∏°‡∏ã‡πâ‡∏≥ ‡πÉ‡∏ô ‡∏ö.‡∏™.‡πÄ‡∏î‡∏µ‡∏¢‡∏ß‡∏Å‡∏±‡∏ô --Update 2024-06-17 Krekpon.Mind ‡πÄ‡∏û‡∏¥‡πà‡∏°‡πÄ‡∏á‡∏∑‡πà‡∏≠‡∏ô‡πÑ‡∏Ç
-						,IIF(t.ClaimHeaderGroupTypeId <> pg.ProductGroupId ,CONCAT(N'‡∏£‡∏≤‡∏¢‡∏Å‡∏≤‡∏£ ‡∏ö.‡∏™. ‡∏ô‡∏µ‡πâ ‡πÑ‡∏°‡πà‡πÉ‡∏ä‡πà‡∏Å‡∏•‡∏∏‡πà‡∏°', 
+						 IIF(s.ClaimHeaderGroupCode IS NOT NULL,N'√“¬°“√ ∫. . ´È”°—π„π‰ø≈Ï, ','')
+						,IIF(img.ClaimHeaderGroupCode IS NOT NULL,N'√“¬°“√ ∫. . ´È”°—∫„π√–∫∫, ','')
+						,IIF(c.ClaimHeaderGroupCodeInDB IS NULL, N'‰¡Ëæ∫‡≈¢ ∫. . π’È„π∞“π¢ÈÕ¡Ÿ≈, ','')
+						,IIF(t.ItemCount<>ISNULL(c.ItemCountInDB,0) AND t.ClaimHeaderGroupTypeId = pg.ProductGroupId AND s.ClaimHeaderGroupCode IS NULL,N'¢ÈÕ¡Ÿ≈®”π«π‡§≈¡‰¡Ëµ√ß°—∫„π∞“π¢ÈÕ¡Ÿ≈, ','')
+						,IIF(t.TotalAmount = 0,N'‰¡Ë¡’¬Õ¥‡ß‘π„π√“¬°“√ ∫. ., ','')
+						,IIF(t.TotalAmount<>ISNULL(c.TotalAmountInDB,0) AND t.ClaimHeaderGroupTypeId = pg.ProductGroupId AND s.ClaimHeaderGroupCode IS NULL,CONCAT(N'¢ÈÕ¡Ÿ≈®”π«π‡ß‘π√«¡‰¡Ëµ√ß°—∫„π∞“π¢ÈÕ¡Ÿ≈','( ',FORMAT(c.TotalAmountInDB,'N'),'), '),'')
+						,IIF(imd.ClaimCodeInSystem IS NOT NULL AND t.ClaimHeaderGroupCode LIKE '%_0' AND cbd.ClaimGroupCode = t.ClaimHeaderGroupCode AND imd.ClaimHeaderGroupCode = t.ClaimHeaderGroupCode ,N'¡’√“¬°“√‡§≈¡π’È„π√–∫∫·≈È«, ','') -- Update 2024-02-01 Kittisak.Ph ‡™Á§√“¬°“√‡§≈¡´È” „π ∫. .‡¥’¬«°—π --Update 2024-06-17 Krekpon.Mind ‡æ‘Ë¡‡ß◊ËÕπ‰¢
+						,IIF(t.ClaimHeaderGroupTypeId <> pg.ProductGroupId ,CONCAT(N'√“¬°“√ ∫. . π’È ‰¡Ë„™Ë°≈ÿË¡', 
 									' ',
 									--IIF(t.ClaimHeaderGroupTypeId = @ClaimHeaderSSS,'PH','PA30')
 									CASE
@@ -352,15 +533,19 @@ IF @IsResult = 1
 										WHEN 
 											t.ClaimHeaderGroupTypeId = @ClaimMisc
 										THEN 
-											'‡πÄ‡∏ö‡πá‡∏î‡πÄ‡∏ï‡∏•‡πá‡∏î'
+											'‡∫Á¥‡µ≈Á¥'
 										ELSE
 											'-'
 									END
-									,N' ‡∏ï‡∏≤‡∏°‡∏Å‡∏•‡∏∏‡πà‡∏°‡∏ó‡∏µ‡πà‡∏£‡∏∞‡∏ö‡∏∏, '),'')
-						,IIF(doc.CountDoc > 0 ,N'‡∏ö.‡∏™. ‡πÑ‡∏°‡πà‡∏°‡∏µ‡πÄ‡∏≠‡∏Å‡∏™‡∏≤‡∏£‡πÅ‡∏ô‡∏ö, ','')
-						,IIF(a.ClaimTypeCode = '',N'‡πÑ‡∏°‡πà‡πÑ‡∏î‡πâ MappingType (H,C), ','')
-						,IIF(c.ProductGroup = '2000' AND (c.PolicyNo = '' OR c.PolicyNo IS NULL),'‡πÑ‡∏°‡πà‡∏°‡∏µ‡πÄ‡∏•‡∏Ç‡∏Å‡∏£‡∏°‡∏ò‡∏£‡∏£‡∏°‡πå','' )
-						,IIF(c.ProductGroup = 'ZebraMisc', '‡∏ï‡∏£‡∏ß‡∏à‡∏™‡∏≠‡∏ö‡∏£‡∏≤‡∏¢‡∏Å‡∏≤‡∏£‡πÄ‡∏Ñ‡∏•‡∏°‡∏Å‡∏≠‡∏á‡∏ó‡∏∏‡∏ô‡∏£‡∏ñ‡∏°‡πâ‡∏≤‡∏•‡∏≤‡∏¢','')
+									,N' µ“¡°≈ÿË¡∑’Ë√–∫ÿ, '),'')
+						,IIF(doc.CountDoc > 0 ,N'∫. . ‰¡Ë¡’‡Õ° “√·π∫, ','')
+						,IIF(a.ClaimTypeCode = '',N'‰¡Ë‰¥È MappingType (H,C), ','')
+						,IIF(
+							c.ProductGroup = '2000' --AND (c.PolicyNo = '' OR c.PolicyNo IS NULL)
+							--AND c.PolicyType_id <> 9601
+							,CONCAT('‰¡Ë„™Ë°√¡∏√√¡Ï ª°µ‘',' ‡ªÁπ ',c.PolicyType)		
+							,'' )
+						,IIF(c.ProductGroup = 'ZebraMisc', 'µ√«® Õ∫√“¬°“√‡§≈¡°Õß∑ÿπ√∂¡È“≈“¬','')
 					)ValidateResult
 				---------------------------------------------------------------
 				,a.ClaimTypeCode	ClaimTypeCode
@@ -375,8 +560,10 @@ IF @IsResult = 1
 						,SUM(TotalAmountSS)  TotalAmountInDB
 						,MAX(ProductGroup)	ProductGroup
 						,PolicyNo
+						,PolicyType
+						,PolicyType_id
 					FROM #TmpDetail
-					GROUP BY ClaimHeaderGroupCodeInDB,InsuranceCompanyId,PolicyNo
+					GROUP BY ClaimHeaderGroupCodeInDB,InsuranceCompanyId,PolicyNo,PolicyType,PolicyType_id
 				) c
 				ON t.ClaimHeaderGroupCode = c.ClaimHeaderGroupCodeInDB
 			LEFT JOIN @ProductGroup pg
@@ -390,12 +577,12 @@ IF @IsResult = 1
 			LEFT JOIN
 				(
 					SELECT  d.ClaimHeaderGroupCodeInDB AS ClaimCodeInSystem
-							,imd.ClaimHeaderGroupCode AS ClaimHeaderGroupCode --Update 2024-06-17 Krekpon.Mind ‡πÄ‡∏û‡∏¥‡πà‡∏°‡πÄ‡∏á‡∏∑‡πà‡∏≠‡∏ô‡πÑ‡∏Ç
+							,imd.ClaimHeaderGroupCode AS ClaimHeaderGroupCode --Update 2024-06-17 Krekpon.Mind ‡æ‘Ë¡‡ß◊ËÕπ‰¢
 					FROM #TmpDetail d
 						INNER JOIN dbo.ClaimHeaderGroupImportDetail imd 
 							ON d.ClaimHeaderCodeInDB = imd.ClaimCode
-					WHERE d.ClaimHeaderCodeInDB = imd.ClaimCode -- ‡∏•‡∏≠‡∏á‡πÄ‡∏õ‡∏•‡∏µ‡πà‡∏¢‡∏ô‡πÄ‡∏õ‡πá‡∏ô Where 2024-04-23 Krekpon-Mind
-						  AND imd.IsActive = 1 -- 2024-07-09 Krekpon.Mind ‡πÄ‡∏û‡∏¥‡πà‡∏° IsActive
+					WHERE d.ClaimHeaderCodeInDB = imd.ClaimCode -- ≈Õß‡ª≈’Ë¬π‡ªÁπ Where 2024-04-23 Krekpon-Mind
+						  AND imd.IsActive = 1 -- 2024-07-09 Krekpon.Mind ‡æ‘Ë¡ IsActive
 					GROUP BY d.ClaimHeaderGroupCodeInDB,imd.ClaimHeaderGroupCode
 				) imd
 				ON t.ClaimHeaderGroupCode = imd.ClaimCodeInSystem
@@ -432,56 +619,11 @@ IF @IsResult = 1
 
 		------------------------------------------------------
 
-		BEGIN TRY			
-			BEGIN TRANSACTION
-				
-				--SELECT *
-				DELETE hd
-				FROM dbo.TmpClaimHeaderGroupImportDetail hd
-					INNER JOIN #TmpDoc d
-						ON hd.TmpClaimHeaderGroupImportId = d.TmpClaimHeaderGroupImportId;
-
-				INSERT INTO dbo.TmpClaimHeaderGroupImportDetail
-				(
-				    TmpClaimHeaderGroupImportId
-				  , ClaimHeaderCode
-				  , DocumentCount
-				  , Amount
-				  , ValidateDetailResult
-				  ,IsValid
-				)
-				SELECT TmpClaimHeaderGroupImportId
-                     , ClaimHeaderCodeInDB
-                     , CountDoc 
-					 ,TotalAmountSS
-					 ,ValidateDetailResult
-					 ,IIF(ValidateDetailResult = '',1,0)	IsValid
-				FROM #TmpDoc 
-				WHERE ClaimHeaderGroupCodeInDB IS NOT NULL
-				ORDER BY TmpClaimHeaderGroupImportId;
-
-				--SELECT *
-				UPDATE m
-					SET m.ValidateResult = u.ValidateResult
-					,m.IsValid = IIF(u.ValidateResult = '',1,0)
-					,m.InsuranceCompanyId = u.InsuranceCompanyId
-					,m.ClaimTypeCode = u.ClaimTypeCode
-				FROM dbo.TmpClaimHeaderGroupImport m
-					INNER JOIN #TmpUpdate u
-						ON m.TmpClaimHeaderGroupImportId = u.TmpClaimHeaderGroupImportId;
-
-
-			SET @IsResult = 1			  					
-			SET @Msg = '‡∏ö‡∏±‡∏ô‡∏ó‡∏∂‡∏Å ‡∏™‡∏≥‡πÄ‡∏£‡πá‡∏à'	 												  					
-			COMMIT TRANSACTION			  					
-		END TRY							  					
-		BEGIN CATCH						  					
-										  					
-			SET @IsResult = 0			  					
-			SET @Msg = '‡∏ö‡∏±‡∏ô‡∏ó‡∏∂‡∏Å ‡πÑ‡∏°‡πà‡∏™‡∏≥‡πÄ‡∏£‡πá‡∏à'						
-										  					
-			IF @@TRANCOUNT > 0 ROLLBACK	  					
-		END CATCH
+SELECT * FROM #Tmp;
+SELECT * FROM #TmpDetail;
+SELECT * FROM #TmpDoc;
+SELECT * FROM #TmpUpdate;
+SELECT * FROM #TmpClaimType;
 		
 IF OBJECT_ID('tempdb..#Tmp') IS NOT NULL  DROP TABLE #Tmp;
 IF OBJECT_ID('tempdb..#TmpDetail') IS NOT NULL  DROP TABLE #TmpDetail;
@@ -502,4 +644,4 @@ ELSE				BEGIN	SET @Result = 'Failure'END
 
 
 
-END
+--END

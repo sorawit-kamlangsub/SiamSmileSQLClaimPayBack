@@ -1,4 +1,4 @@
-USE ClaimPayBack
+USE SSSPA
 
 SELECT 
     o.name AS [ProcedureName]
@@ -12,7 +12,7 @@ INNER JOIN
 INNER JOIN 
     sys.schemas s ON o.schema_id = s.schema_id
 WHERE 1=1
-    AND m.definition LIKE '%ClaimPayBackDetailReport%' 
+    AND m.definition LIKE '%DB_CustomerPolicy%' 
     AND o.type = 'P'  -- 'P' stands for stored procedures
 ORDER BY 
     s.name, o.name;
