@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImport_Insert]    Script Date: 17/12/2568 9:07:17 ******/
+/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImport_Insert]    Script Date: 8/6/2026 9:50:49 AM ******/
 --SET ANSI_NULLS ON
 --GO
 --SET QUOTED_IDENTIFIER ON
@@ -20,6 +20,8 @@ GO
 --				 - เพิ่ม parameters @ImportFrom เพื่อแยกว่ารายการที่ Import มาจากช่องทางไหน กำหนด 1 ImportExcel 2 Import จากการตั้งเบิก
 -- UpdateDate:	2025-11-06 15:20 Sorawit Kamlangsub
 --				- Add ClaimMisc
+-- UpdateDate:	2026-06-06 9:28 Sorawit Kamlangsub
+--				- Add ClaimMisc Hospital
 -- Description:	<Description,,>
 -- =============================================
 --ALTER PROCEDURE [dbo].[usp_ClaimHeaderGroupImport_Insert]
@@ -30,18 +32,16 @@ GO
 --	,@ImportFrom INT
 --AS
 --BEGIN
-----WAITFOR DELAY '00:05:00';
---	-- SET NOCOUNT ON added to prevent extra result sets from
---	-- interfering with SELECT statements.
---	SET NOCOUNT ON;
+--WAITFOR DELAY '00:05:00';
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	--SET NOCOUNT ON;
 
---Start Test
 DECLARE
-	@TmpCode VARCHAR(20)  = 'IMCHG6902000044'
+	@TmpCode VARCHAR(20)  = 'IMCHG6810000133'
 	,@FileName NVARCHAR(255) = 'EX_importBillingRequestGroup.xlsx'
-	,@CreateByUseId INT = 0
+	,@CreateByUseId INT = 1
 	,@ImportFrom INT = 1;
---End Test
 
 DECLARE @ClaimHeaderSSS INT = 2;
 DECLARE @ClaimHeaderSSSPA INT = 3;
@@ -692,7 +692,7 @@ IF @IsResult = 1
 					,cm.StartCoverDate								StartCoverDate
 					,NULL											ClaimAdmitTypeCode
 					,cxa.ClaimAdmitType								ClaimAdmitType
-					,'เคลมลูกค้า'										ClaimType
+					,IIF(cm.ClaimTypeId = 2,'เคลมโรงพยาบาล','เคลมลูกค้า')	ClaimType
 					,NULL											ICD10_1Code
 					,NULL											ICD10
 					,NULL											IPDCount
@@ -772,8 +772,8 @@ IF @IsResult = 1
 		SELECT @CountItemFile = COUNT(TmpCode) 
 		FROM #Tmp;
 
-		BEGIN TRY								
-			BEGIN TRANSACTION
+		--BEGIN TRY								
+		--	BEGIN TRANSACTION
 
 				---INSERT File------
 				--INSERT INTO dbo.ClaimHeaderGroupImportFile
@@ -787,16 +787,16 @@ IF @IsResult = 1
 				--			 ,UpdatedDate
 				--			 ,UpdatedByUserId
 				--		 )
-				SELECT @FileName				[FileName]
-					,@CountItemFile				ItemCount
-					,@ClaimHeaderGroupTypeId	ClaimHeaderGroupTypeId
-					,1							IsActive
-					,@D							CreatedDate
-					,@CreateByUseId				CreatedByUserId
-					,@D							UpdatedDate
-					,@CreateByUseId				UpdatedByUserId
+				--SELECT @FileName				[FileName]
+				--	,@CountItemFile				ItemCount
+				--	,@ClaimHeaderGroupTypeId	ClaimHeaderGroupTypeId
+				--	,1							IsActive
+				--	,@D							CreatedDate
+				--	,@CreateByUseId				CreatedByUserId
+				--	,@D							UpdatedDate
+				--	,@CreateByUseId				UpdatedByUserId
 
-				SET @ClaimHeaderGroupImportFileId = SCOPE_IDENTITY();
+				--SET @ClaimHeaderGroupImportFileId = SCOPE_IDENTITY();
 
 				---INSERT GROUP-----
 				--INSERT INTO dbo.ClaimHeaderGroupImport
@@ -818,25 +818,25 @@ IF @IsResult = 1
 				--			 ,InsuranceCompanyName
 				--		 )
 				--OUTPUT Inserted.ClaimHeaderGroupImportId , Inserted.ClaimHeaderGroupCode INTO @TmpOut
-				SELECT t1.ClaimHeaderGroupCode
-					,@ClaimHeaderGroupImportFileId	ClaimGroupImportFileId
-					,t1.ItemCount					
-					,t1.TotalAmount					
+				--SELECT t1.ClaimHeaderGroupCode
+				--	,@ClaimHeaderGroupImportFileId	ClaimGroupImportFileId
+				--	,t1.ItemCount					
+				--	,t1.TotalAmount					
 					
-					,t1.BillingDate					
-					,2								ClaimHeaderGroupImportStatusId
-					,t1.InsuranceCompanyId
-					,NULL							BillingRequestGroupId
-					,1								IsActive
-					,@D								CreatedDate
-					,@CreateByUseId					CreatedByUserId
-					,@D								UpdatedDate
-					,@CreateByUseId					CreatedByUserId
-					,t1.ClaimTypeCode
-					,tc.InsuranceCompany_Name
-				FROM #Tmp t1
-					LEFT JOIN #TmpCompany tc
-						ON t1.ClaimHeaderGroupCode = tc.ClaimHeaderGroup_id
+				--	,t1.BillingDate					
+				--	,2								ClaimHeaderGroupImportStatusId
+				--	,t1.InsuranceCompanyId
+				--	,NULL							BillingRequestGroupId
+				--	,1								IsActive
+				--	,@D								CreatedDate
+				--	,@CreateByUseId					CreatedByUserId
+				--	,@D								UpdatedDate
+				--	,@CreateByUseId					CreatedByUserId
+				--	,t1.ClaimTypeCode
+				--	,tc.InsuranceCompany_Name
+				--FROM #Tmp t1
+				--	LEFT JOIN #TmpCompany tc
+				--		ON t1.ClaimHeaderGroupCode = tc.ClaimHeaderGroup_id
 
 				---INSERT DETAIL-----
 				--INSERT INTO dbo.ClaimHeaderGroupImportDetail
@@ -889,71 +889,71 @@ IF @IsResult = 1
 				--			 ,UpdatedByUserId
 				--			 ,CreatedByBranchId
 				--		 )
-				SELECT 
-					u.ClaimHeaderGroupImportId
-					,m.ClaimCode
-					,m.ClaimHeaderGroupCode
-					,m.Province
-					,m.IdentityCard
-					,m.CustName
-					,m.DateHappen
-					,m.Pay
-					,m.HospitalId
-					,m.HospitalName
-					,m.DateIn
-					,m.DateOut
-					,m.ApplicationCode
-					,m.ProductId
-					,m.Product
-					,m.DateNotice
-					,m.StartCoverDate
-					,m.ClaimAdmitTypeCode
-					,m.ClaimAdmitType
-					,m.ClaimType
-					,m.ICD10_1Code
-					,m.ICD10
-					,m.IPDCount
-					,m.ICUCount
-					,m.Net
-					,m.Compensate_Include
-					,m.Pay_Total
-					,m.DiscountSS
-					,m.PaySS_Total
-					--,m.PolicyNo
-					,CASE 	
-						WHEN @ClaimHeaderGroupTypeId IN (2,4,5) THEN p.PolicyNo
-						ELSE m.PolicyNo
-						END	PolicyNo
-					,m.SchoolName
-					,m.CustomerDetailCode
-					,m.SchoolLevel
-					,m.Accident
-					,m.ChiefComplain
-					,m.Orgen
-					,m.Amount_Compeasate_in
-					,m.Amount_Compeasate_out
-					,m.Amount_Pay
-					,m.Amount_Dead
-					,m.Remark
-					,1						IsActive
-					,@D						CreatedDate
-					,@CreateByUseId			CreatedByUserId
-					,@D						UpdatedDate
-					,@CreateByUseId			UpdatedByUserId
-					,dtB.Branch_ID			BranchId
-				FROM @TmpDetail m
-					LEFT JOIN @TmpOut u
-						ON m.ClaimHeaderGroupCode = u.ClaimHeaderGroupCode
-					LEFT JOIN #TmpDcrPolicyNo p 
-						ON m.ClaimCode = p.ClaimCode
-					LEFT JOIN DataCenterV1.Address.Branch dtB
-						ON m.CreatedByBranchCode = dtB.tempcode;
+				--SELECT 
+				--	u.ClaimHeaderGroupImportId
+				--	,m.ClaimCode
+				--	,m.ClaimHeaderGroupCode
+				--	,m.Province
+				--	,m.IdentityCard
+				--	,m.CustName
+				--	,m.DateHappen
+				--	,m.Pay
+				--	,m.HospitalId
+				--	,m.HospitalName
+				--	,m.DateIn
+				--	,m.DateOut
+				--	,m.ApplicationCode
+				--	,m.ProductId
+				--	,m.Product
+				--	,m.DateNotice
+				--	,m.StartCoverDate
+				--	,m.ClaimAdmitTypeCode
+				--	,m.ClaimAdmitType
+				--	,m.ClaimType
+				--	,m.ICD10_1Code
+				--	,m.ICD10
+				--	,m.IPDCount
+				--	,m.ICUCount
+				--	,m.Net
+				--	,m.Compensate_Include
+				--	,m.Pay_Total
+				--	,m.DiscountSS
+				--	,m.PaySS_Total
+				--	--,m.PolicyNo
+				--	,CASE 	
+				--		WHEN @ClaimHeaderGroupTypeId IN (2,4,5) THEN p.PolicyNo
+				--		ELSE m.PolicyNo
+				--		END	PolicyNo
+				--	,m.SchoolName
+				--	,m.CustomerDetailCode
+				--	,m.SchoolLevel
+				--	,m.Accident
+				--	,m.ChiefComplain
+				--	,m.Orgen
+				--	,m.Amount_Compeasate_in
+				--	,m.Amount_Compeasate_out
+				--	,m.Amount_Pay
+				--	,m.Amount_Dead
+				--	,m.Remark
+				--	,1						IsActive
+				--	,@D						CreatedDate
+				--	,@CreateByUseId			CreatedByUserId
+				--	,@D						UpdatedDate
+				--	,@CreateByUseId			UpdatedByUserId
+				--	,dtB.Branch_ID			BranchId
+				--FROM @TmpDetail m
+				--	LEFT JOIN @TmpOut u
+				--		ON m.ClaimHeaderGroupCode = u.ClaimHeaderGroupCode
+				--	LEFT JOIN #TmpDcrPolicyNo p 
+				--		ON m.ClaimCode = p.ClaimCode
+				--	LEFT JOIN DataCenterV1.Address.Branch dtB
+				--		ON m.CreatedByBranchCode = dtB.tempcode;
 
 				--Delete TmpClaimHeaderGroupImport
-				SELECT *
+				--SELECT *
 				--DELETE m
-				FROM dbo.TmpClaimHeaderGroupImport m 
-				WHERE m.TmpCode = @TmpCode;
+				--FROM dbo.TmpClaimHeaderGroupImport m 
+				--WHERE m.TmpCode = @TmpCode;
 
 				-- Insert ClaimHeaderGroupImportCancel
 				--INSERT INTO [dbo].[ClaimHeaderGroupImportCancel]
@@ -962,26 +962,26 @@ IF @IsResult = 1
 				--		      ,[IsActive]
 				--		      ,[CreatedByUserId]
 				--		      ,[CreatedDate])
-						SELECT 
-							i.ClaimHeaderGroupImportId								ClaimHeaderGroupImportId
-							,IIF(@ImportFrom = 1, @CancelDetail1, @CancelDetail2)	CancelDetail
-							,1														IsActive
-							,@CreateByUseId											CreatedByUserId
-							,@D														CreatedDate
-						FROM @TmpOut i;
+				--		SELECT 
+				--			i.ClaimHeaderGroupImportId								ClaimHeaderGroupImportId
+				--			,IIF(@ImportFrom = 1, @CancelDetail1, @CancelDetail2)	CancelDetail
+				--			,1														IsActive
+				--			,@CreateByUseId											CreatedByUserId
+				--			,@D														CreatedDate
+				--		FROM @TmpOut i;
 
 			SET @IsResult = 1			  					
 			SET @Msg = 'บันทึก สำเร็จ'	 						
 										  					
-			COMMIT TRANSACTION			  					
-		END TRY							  					
-		BEGIN CATCH						  					
+		--	COMMIT TRANSACTION			  					
+		--END TRY							  					
+		--BEGIN CATCH						  					
 										  					
-			SET @IsResult = 0			  					
-			SET @Msg = 'บันทึก ไม่สำเร็จ'		
+		--	SET @IsResult = 0			  					
+		--	SET @Msg = 'บันทึก ไม่สำเร็จ'		
 							
-			IF @@TRANCOUNT > 0 ROLLBACK	  					
-		END CATCH
+		--	IF @@TRANCOUNT > 0 ROLLBACK	  					
+		--END CATCH
 
 
 		IF OBJECT_ID('tempdb..#Tmp') IS NOT NULL  DROP TABLE #Tmp;
