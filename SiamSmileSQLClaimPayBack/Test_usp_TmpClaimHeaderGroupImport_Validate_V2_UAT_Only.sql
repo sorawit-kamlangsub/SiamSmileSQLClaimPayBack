@@ -1,4 +1,4 @@
-USE [ClaimPayBack]
+ÔªøUSE [ClaimPayBack]
 GO
 
 --SET ANSI_NULLS ON
@@ -13,17 +13,17 @@ GO
 -- Create date: 2022-11-02
 -- Update date: 2023-08-08	Siriphong	Narkphung	Add ValidateDoc
 -- update date:  2024-01-24 Kittisak.Ph 
--- update date:  2024-02-01 Kittisak.Ph ‡™Á§√“¬°“√‡§≈¡´È” „π ∫. .‡¥’¬«°—π
--- update date:	2024-04-23 Kerkpon.Mind ‡æ‘Ë¡‡ß◊ËÕπ‰¢‡™Á§«Ë“‡≈¢ claim ¡’´È”
--- update date: 2024-06-17 Krekpon.Mind ‡æ‘Ë¡‡ß◊ËÕπ‰¢
--- update date: 2024-07-09 Krekpon.Mind ‡æ‘Ë¡ IsActive
--- update date: 2025-04-11 Wetpisit.P ‡æ‘Ë¡ validate ‡™Á§‡≈¢°√¡∏√√¡Ï„π ∫. .‚¥¬¥÷ß¢ÈÕ¡Ÿ≈ PolicyNo ¡“„ Ë #TmpDetail ‡æ◊ËÕπ”‰ª‡™Á§,‡æ‘Ë¡‡ß◊ËÕπ‰¢°“√‡™Á§®”π«π‡Õ° “√„π #tmpDoc
--- update date: 2025-10-02 10:02 ‡æ‘Ë¡ IsActive „π LEFT JOIN ClaimHeaderGroupImport
+-- update date:  2024-02-01 Kittisak.Ph ‡πÄ‡∏ä‡πá‡∏Ñ‡∏£‡∏≤‡∏¢‡∏Å‡∏≤‡∏£‡πÄ‡∏Ñ‡∏•‡∏°‡∏ã‡πâ‡∏≥ ‡πÉ‡∏ô ‡∏ö.‡∏™.‡πÄ‡∏î‡∏µ‡∏¢‡∏ß‡∏Å‡∏±‡∏ô
+-- update date:	2024-04-23 Kerkpon.Mind ‡πÄ‡∏û‡∏¥‡πà‡∏°‡πÄ‡∏á‡∏∑‡πà‡∏≠‡∏ô‡πÑ‡∏Ç‡πÄ‡∏ä‡πá‡∏Ñ‡∏ß‡πà‡∏≤‡πÄ‡∏•‡∏Ç claim ‡∏°‡∏µ‡∏ã‡πâ‡∏≥
+-- update date: 2024-06-17 Krekpon.Mind ‡πÄ‡∏û‡∏¥‡πà‡∏°‡πÄ‡∏á‡∏∑‡πà‡∏≠‡∏ô‡πÑ‡∏Ç
+-- update date: 2024-07-09 Krekpon.Mind ‡πÄ‡∏û‡∏¥‡πà‡∏° IsActive
+-- update date: 2025-04-11 Wetpisit.P ‡πÄ‡∏û‡∏¥‡πà‡∏° validate ‡πÄ‡∏ä‡πá‡∏Ñ‡πÄ‡∏•‡∏Ç‡∏Å‡∏£‡∏°‡∏ò‡∏£‡∏£‡∏°‡πå‡πÉ‡∏ô ‡∏ö.‡∏™.‡πÇ‡∏î‡∏¢‡∏î‡∏∂‡∏á‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏• PolicyNo ‡∏°‡∏≤‡πÉ‡∏™‡πà #TmpDetail ‡πÄ‡∏û‡∏∑‡πà‡∏≠‡∏ô‡∏≥‡πÑ‡∏õ‡πÄ‡∏ä‡πá‡∏Ñ,‡πÄ‡∏û‡∏¥‡πà‡∏°‡πÄ‡∏á‡∏∑‡πà‡∏≠‡∏ô‡πÑ‡∏Ç‡∏Å‡∏≤‡∏£‡πÄ‡∏ä‡πá‡∏Ñ‡∏à‡∏≥‡∏ô‡∏ß‡∏ô‡πÄ‡∏≠‡∏Å‡∏™‡∏≤‡∏£‡πÉ‡∏ô #tmpDoc
+-- update date: 2025-10-02 10:02 ‡πÄ‡∏û‡∏¥‡πà‡∏° IsActive ‡πÉ‡∏ô LEFT JOIN ClaimHeaderGroupImport
 -- Update date: 2025-10-16 14:01 Clear comment Krekpon.D
 -- Update date: 2025-10-30 09:34 Add ClaimMisc and Clean Script Sorawit kamlangsub
 -- Update date: 2026-03-11 13:16 Add Pa Validate PolicyNo Sorawit kamlangsub
--- Update date: 2026-03-12 08:47 ‡æ‘Ë¡ Validate °√≥’‡ªÁπ ∫. .π—Èπ‡ªÁπ‡∫‘°®Ë“¬°Õß∑ÿπ¡È“≈“¬ Sorawit kamlangsub
--- Update date: 2026-06-06 08:57 ‡æ‘Ë¡ union ClaimMisc „π #TmpClaimType Sorawit kamlangsub
+-- Update date: 2026-03-12 08:47 ‡πÄ‡∏û‡∏¥‡πà‡∏° Validate ‡∏Å‡∏£‡∏ì‡∏µ‡πÄ‡∏õ‡πá‡∏ô ‡∏ö.‡∏™.‡∏ô‡∏±‡πâ‡∏ô‡πÄ‡∏õ‡πá‡∏ô‡πÄ‡∏ö‡∏¥‡∏Å‡∏à‡πà‡∏≤‡∏¢‡∏Å‡∏≠‡∏á‡∏ó‡∏∏‡∏ô‡∏°‡πâ‡∏≤‡∏•‡∏≤‡∏¢ Sorawit kamlangsub
+-- Update date: 2026-06-06 08:57 ‡πÄ‡∏û‡∏¥‡πà‡∏° union ClaimMisc ‡πÉ‡∏ô #TmpClaimType Sorawit kamlangsub
 -- Description:	PROD (P30,1000) dl.DocumentListID = 137 (2000) dl.DocumentListID = 138 
 --	UAT  dl.DocumentListID = 134 (2000) dl.DocumentListID = 135
 -- =============================================
@@ -361,9 +361,9 @@ IF @IsResult = 1 AND @IsImport = 1
 					LEFT JOIN SSSPA.dbo.DB_CustomerDetail AS ctd
 						ON h.CustomerDetail_id = ctd.Code
 					LEFT JOIN SSSPA.dbo.DB_Customer AS cus
-						ON ctd.Application_id = cus.App_id AND cus.Status_id <> '3090' --‰¡Ë„™Ë¬°‡≈‘°°√¡∏√√¡Ï
+						ON ctd.Application_id = cus.App_id AND cus.Status_id <> '3090' --‡πÑ‡∏°‡πà‡πÉ‡∏ä‡πà‡∏¢‡∏Å‡πÄ‡∏•‡∏¥‡∏Å‡∏Å‡∏£‡∏°‡∏ò‡∏£‡∏£‡∏°‡πå
 					LEFT JOIN SSSPA.dbo.DB_CustomerPolicy  AS ctp
-						ON cus.App_id  = ctp.App_id  --AND PolicyType_id = '9601' --‡ªÁπ‡≈¢°√¡∏√√¡Ï ª°µ‘
+						ON cus.App_id  = ctp.App_id  --AND PolicyType_id = '9601' --‡πÄ‡∏õ‡πá‡∏ô‡πÄ‡∏•‡∏Ç‡∏Å‡∏£‡∏°‡∏ò‡∏£‡∏£‡∏°‡πå ‡∏õ‡∏Å‡∏ï‡∏¥
 					LEFT JOIN SSSPA.dbo.SM_Code smcode
 						ON ctp.PolicyType_id = smcode.Code
 				WHERE t.ClaimHeaderGroupTypeId = @ClaimHeaderSSSPA
@@ -443,7 +443,7 @@ IF @IsResult = 1 AND @IsImport = 1
              , m.ClaimHeaderCodeInDB
 			 , m.TotalAmountSS
 			 , IIF(m.ProductGroup IN ('Misc','ZebraMisc'),1,ISNULL(d.CountDoc,0)) CountDoc
-			 , IIF(IIF(m.ProductGroup IN ('Misc','ZebraMisc'),1,ISNULL(d.CountDoc,0)) = 0,N'‰¡Ëæ∫‡Õ° “√·π∫','') ValidateDetailResult
+			 , IIF(IIF(m.ProductGroup IN ('Misc','ZebraMisc'),1,ISNULL(d.CountDoc,0)) = 0,N'‡πÑ‡∏°‡πà‡∏û‡∏ö‡πÄ‡∏≠‡∏Å‡∏™‡∏≤‡∏£‡πÅ‡∏ô‡∏ö','') ValidateDetailResult
 		INTO #TmpDoc
 		FROM #TmpDetail m
 			LEFT JOIN 
@@ -452,23 +452,23 @@ IF @IsResult = 1 AND @IsImport = 1
 							,td.ClaimHeaderCodeInDB
 							,CASE 
 								WHEN 
-									-- µ√«® Õ∫‡Õ° “√ PH ∑’Ë‡ªÁπ‡§≈¡‚√ßæ¬“∫“≈µÈÕß¡’∑—Èß‡Õ° “√‡§≈¡‚√ßæ¬“∫“≈(24) °—∫Àπ—ß ◊Õ·®Èß™”√–§Ë“√—°…“æ¬“∫“≈ (UAT 134,PROD 137)
+									-- ‡∏ï‡∏£‡∏ß‡∏à‡∏™‡∏≠‡∏ö‡πÄ‡∏≠‡∏Å‡∏™‡∏≤‡∏£ PH ‡∏ó‡∏µ‡πà‡πÄ‡∏õ‡πá‡∏ô‡πÄ‡∏Ñ‡∏•‡∏°‡πÇ‡∏£‡∏á‡∏û‡∏¢‡∏≤‡∏ö‡∏≤‡∏•‡∏ï‡πâ‡∏≠‡∏á‡∏°‡∏µ‡∏ó‡∏±‡πâ‡∏á‡πÄ‡∏≠‡∏Å‡∏™‡∏≤‡∏£‡πÄ‡∏Ñ‡∏•‡∏°‡πÇ‡∏£‡∏á‡∏û‡∏¢‡∏≤‡∏ö‡∏≤‡∏•(24) ‡∏Å‡∏±‡∏ö‡∏´‡∏ô‡∏±‡∏á‡∏™‡∏∑‡∏≠‡πÅ‡∏à‡πâ‡∏á‡∏ä‡∏≥‡∏£‡∏∞‡∏Ñ‡πà‡∏≤‡∏£‡∏±‡∏Å‡∏©‡∏≤‡∏û‡∏¢‡∏≤‡∏ö‡∏≤‡∏• (UAT 134,PROD 137)
 									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup IN ('P30','1000') AND dl.DocumentListID = 24 THEN 1 ELSE 0 END) >= 1
 									AND
 									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup IN ('P30','1000') AND dl.DocumentListID = 134 THEN 1 ELSE 0 END) >= 1
 								THEN 1
 								WHEN 
-									-- µ√«® Õ∫‡Õ° “√ PA ∑’Ë‡ªÁπ‡§≈¡‚√ßæ¬“∫“≈µÈÕß¡’∑—Èß‡Õ° “√‡§≈¡‚√ßæ¬“∫“≈(26) °—∫Àπ—ß ◊Õ·®Èß™”√–§Ë“√—°…“æ¬“∫“≈ (UAT 135,PROD 138)
+									-- ‡∏ï‡∏£‡∏ß‡∏à‡∏™‡∏≠‡∏ö‡πÄ‡∏≠‡∏Å‡∏™‡∏≤‡∏£ PA ‡∏ó‡∏µ‡πà‡πÄ‡∏õ‡πá‡∏ô‡πÄ‡∏Ñ‡∏•‡∏°‡πÇ‡∏£‡∏á‡∏û‡∏¢‡∏≤‡∏ö‡∏≤‡∏•‡∏ï‡πâ‡∏≠‡∏á‡∏°‡∏µ‡∏ó‡∏±‡πâ‡∏á‡πÄ‡∏≠‡∏Å‡∏™‡∏≤‡∏£‡πÄ‡∏Ñ‡∏•‡∏°‡πÇ‡∏£‡∏á‡∏û‡∏¢‡∏≤‡∏ö‡∏≤‡∏•(26) ‡∏Å‡∏±‡∏ö‡∏´‡∏ô‡∏±‡∏á‡∏™‡∏∑‡∏≠‡πÅ‡∏à‡πâ‡∏á‡∏ä‡∏≥‡∏£‡∏∞‡∏Ñ‡πà‡∏≤‡∏£‡∏±‡∏Å‡∏©‡∏≤‡∏û‡∏¢‡∏≤‡∏ö‡∏≤‡∏• (UAT 135,PROD 138)
 									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup = '2000' AND dl.DocumentListID = 26 THEN 1 ELSE 0 END) >= 1
 									AND
 									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup = '2000' AND dl.DocumentListID = 135 THEN 1 ELSE 0 END) >= 1
 								THEN 1
 								WHEN 
-									-- °√≥’‡ªÁπ‡§≈¡ “¢“ µÈÕß‰¡Ë¡’¢Õß‡§≈¡‚√ßæ¬“∫“≈
+									-- ‡∏Å‡∏£‡∏ì‡∏µ‡πÄ‡∏õ‡πá‡∏ô‡πÄ‡∏Ñ‡∏•‡∏°‡∏™‡∏≤‡∏Ç‡∏≤ ‡∏ï‡πâ‡∏≠‡∏á‡πÑ‡∏°‡πà‡∏°‡∏µ‡∏Ç‡∏≠‡∏á‡πÄ‡∏Ñ‡∏•‡∏°‡πÇ‡∏£‡∏á‡∏û‡∏¢‡∏≤‡∏ö‡∏≤‡∏•
 									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H THEN 1 ELSE 0 END) = 0
 								THEN 1
 								WHEN 
-									-- °√≥’‡ªÁπ‡§≈¡‚Õπ·¬°
+									-- ‡∏Å‡∏£‡∏ì‡∏µ‡πÄ‡∏õ‡πá‡∏ô‡πÄ‡∏Ñ‡∏•‡∏°‡πÇ‡∏≠‡∏ô‡πÅ‡∏¢‡∏Å
 									MAX(CASE WHEN td.ProductGroup = '2222' THEN 1 ELSE 0 END) = 1
 								THEN 1
 								ELSE 0
@@ -512,14 +512,14 @@ IF @IsResult = 1 AND @IsImport = 1
 				----------------------Update 2023-08-08--------------------
 				,CONCAT
 					(
-						 IIF(s.ClaimHeaderGroupCode IS NOT NULL,N'√“¬°“√ ∫. . ´È”°—π„π‰ø≈Ï, ','')
-						,IIF(img.ClaimHeaderGroupCode IS NOT NULL,N'√“¬°“√ ∫. . ´È”°—∫„π√–∫∫, ','')
-						,IIF(c.ClaimHeaderGroupCodeInDB IS NULL, N'‰¡Ëæ∫‡≈¢ ∫. . π’È„π∞“π¢ÈÕ¡Ÿ≈, ','')
-						,IIF(t.ItemCount<>ISNULL(c.ItemCountInDB,0) AND t.ClaimHeaderGroupTypeId = pg.ProductGroupId AND s.ClaimHeaderGroupCode IS NULL,N'¢ÈÕ¡Ÿ≈®”π«π‡§≈¡‰¡Ëµ√ß°—∫„π∞“π¢ÈÕ¡Ÿ≈, ','')
-						,IIF(t.TotalAmount = 0,N'‰¡Ë¡’¬Õ¥‡ß‘π„π√“¬°“√ ∫. ., ','')
-						,IIF(t.TotalAmount<>ISNULL(c.TotalAmountInDB,0) AND t.ClaimHeaderGroupTypeId = pg.ProductGroupId AND s.ClaimHeaderGroupCode IS NULL,CONCAT(N'¢ÈÕ¡Ÿ≈®”π«π‡ß‘π√«¡‰¡Ëµ√ß°—∫„π∞“π¢ÈÕ¡Ÿ≈','( ',FORMAT(c.TotalAmountInDB,'N'),'), '),'')
-						,IIF(imd.ClaimCodeInSystem IS NOT NULL AND t.ClaimHeaderGroupCode LIKE '%_0' AND cbd.ClaimGroupCode = t.ClaimHeaderGroupCode AND imd.ClaimHeaderGroupCode = t.ClaimHeaderGroupCode ,N'¡’√“¬°“√‡§≈¡π’È„π√–∫∫·≈È«, ','') -- Update 2024-02-01 Kittisak.Ph ‡™Á§√“¬°“√‡§≈¡´È” „π ∫. .‡¥’¬«°—π --Update 2024-06-17 Krekpon.Mind ‡æ‘Ë¡‡ß◊ËÕπ‰¢
-						,IIF(t.ClaimHeaderGroupTypeId <> pg.ProductGroupId ,CONCAT(N'√“¬°“√ ∫. . π’È ‰¡Ë„™Ë°≈ÿË¡', 
+						 IIF(s.ClaimHeaderGroupCode IS NOT NULL,N'‡∏£‡∏≤‡∏¢‡∏Å‡∏≤‡∏£ ‡∏ö.‡∏™. ‡∏ã‡πâ‡∏≥‡∏Å‡∏±‡∏ô‡πÉ‡∏ô‡πÑ‡∏ü‡∏•‡πå, ','')
+						,IIF(img.ClaimHeaderGroupCode IS NOT NULL,N'‡∏£‡∏≤‡∏¢‡∏Å‡∏≤‡∏£ ‡∏ö.‡∏™. ‡∏ã‡πâ‡∏≥‡∏Å‡∏±‡∏ö‡πÉ‡∏ô‡∏£‡∏∞‡∏ö‡∏ö, ','')
+						,IIF(c.ClaimHeaderGroupCodeInDB IS NULL, N'‡πÑ‡∏°‡πà‡∏û‡∏ö‡πÄ‡∏•‡∏Ç ‡∏ö.‡∏™. ‡∏ô‡∏µ‡πâ‡πÉ‡∏ô‡∏ê‡∏≤‡∏ô‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏•, ','')
+						,IIF(t.ItemCount<>ISNULL(c.ItemCountInDB,0) AND t.ClaimHeaderGroupTypeId = pg.ProductGroupId AND s.ClaimHeaderGroupCode IS NULL,N'‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏•‡∏à‡∏≥‡∏ô‡∏ß‡∏ô‡πÄ‡∏Ñ‡∏•‡∏°‡πÑ‡∏°‡πà‡∏ï‡∏£‡∏á‡∏Å‡∏±‡∏ö‡πÉ‡∏ô‡∏ê‡∏≤‡∏ô‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏•, ','')
+						,IIF(t.TotalAmount = 0,N'‡πÑ‡∏°‡πà‡∏°‡∏µ‡∏¢‡∏≠‡∏î‡πÄ‡∏á‡∏¥‡∏ô‡πÉ‡∏ô‡∏£‡∏≤‡∏¢‡∏Å‡∏≤‡∏£ ‡∏ö.‡∏™., ','')
+						,IIF(t.TotalAmount<>ISNULL(c.TotalAmountInDB,0) AND t.ClaimHeaderGroupTypeId = pg.ProductGroupId AND s.ClaimHeaderGroupCode IS NULL,CONCAT(N'‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏•‡∏à‡∏≥‡∏ô‡∏ß‡∏ô‡πÄ‡∏á‡∏¥‡∏ô‡∏£‡∏ß‡∏°‡πÑ‡∏°‡πà‡∏ï‡∏£‡∏á‡∏Å‡∏±‡∏ö‡πÉ‡∏ô‡∏ê‡∏≤‡∏ô‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏•','( ',FORMAT(c.TotalAmountInDB,'N'),'), '),'')
+						,IIF(imd.ClaimCodeInSystem IS NOT NULL AND t.ClaimHeaderGroupCode LIKE '%_0' AND cbd.ClaimGroupCode = t.ClaimHeaderGroupCode AND imd.ClaimHeaderGroupCode = t.ClaimHeaderGroupCode ,N'‡∏°‡∏µ‡∏£‡∏≤‡∏¢‡∏Å‡∏≤‡∏£‡πÄ‡∏Ñ‡∏•‡∏°‡∏ô‡∏µ‡πâ‡πÉ‡∏ô‡∏£‡∏∞‡∏ö‡∏ö‡πÅ‡∏•‡πâ‡∏ß, ','') -- Update 2024-02-01 Kittisak.Ph ‡πÄ‡∏ä‡πá‡∏Ñ‡∏£‡∏≤‡∏¢‡∏Å‡∏≤‡∏£‡πÄ‡∏Ñ‡∏•‡∏°‡∏ã‡πâ‡∏≥ ‡πÉ‡∏ô ‡∏ö.‡∏™.‡πÄ‡∏î‡∏µ‡∏¢‡∏ß‡∏Å‡∏±‡∏ô --Update 2024-06-17 Krekpon.Mind ‡πÄ‡∏û‡∏¥‡πà‡∏°‡πÄ‡∏á‡∏∑‡πà‡∏≠‡∏ô‡πÑ‡∏Ç
+						,IIF(t.ClaimHeaderGroupTypeId <> pg.ProductGroupId ,CONCAT(N'‡∏£‡∏≤‡∏¢‡∏Å‡∏≤‡∏£ ‡∏ö.‡∏™. ‡∏ô‡∏µ‡πâ ‡πÑ‡∏°‡πà‡πÉ‡∏ä‡πà‡∏Å‡∏•‡∏∏‡πà‡∏°', 
 									' ',
 									--IIF(t.ClaimHeaderGroupTypeId = @ClaimHeaderSSS,'PH','PA30')
 									CASE
@@ -533,19 +533,19 @@ IF @IsResult = 1 AND @IsImport = 1
 										WHEN 
 											t.ClaimHeaderGroupTypeId = @ClaimMisc
 										THEN 
-											'‡∫Á¥‡µ≈Á¥'
+											'‡πÄ‡∏ö‡πá‡∏î‡πÄ‡∏ï‡∏•‡πá‡∏î'
 										ELSE
 											'-'
 									END
-									,N' µ“¡°≈ÿË¡∑’Ë√–∫ÿ, '),'')
-						,IIF(doc.CountDoc > 0 ,N'∫. . ‰¡Ë¡’‡Õ° “√·π∫, ','')
-						,IIF(a.ClaimTypeCode = '',N'‰¡Ë‰¥È MappingType (H,C), ','')
+									,N' ‡∏ï‡∏≤‡∏°‡∏Å‡∏•‡∏∏‡πà‡∏°‡∏ó‡∏µ‡πà‡∏£‡∏∞‡∏ö‡∏∏, '),'')
+						,IIF(doc.CountDoc > 0 ,N'‡∏ö.‡∏™. ‡πÑ‡∏°‡πà‡∏°‡∏µ‡πÄ‡∏≠‡∏Å‡∏™‡∏≤‡∏£‡πÅ‡∏ô‡∏ö, ','')
+						,IIF(a.ClaimTypeCode = '',N'‡πÑ‡∏°‡πà‡πÑ‡∏î‡πâ MappingType (H,C), ','')
 						,IIF(
 							c.ProductGroup = '2000' --AND (c.PolicyNo = '' OR c.PolicyNo IS NULL)
 							--AND c.PolicyType_id <> 9601
-							,CONCAT('‰¡Ë„™Ë°√¡∏√√¡Ï ª°µ‘',' ‡ªÁπ ',c.PolicyType)		
+							,CONCAT('‡πÑ‡∏°‡πà‡πÉ‡∏ä‡πà‡∏Å‡∏£‡∏°‡∏ò‡∏£‡∏£‡∏°‡πå ‡∏õ‡∏Å‡∏ï‡∏¥',' ‡πÄ‡∏õ‡πá‡∏ô ',c.PolicyType)		
 							,'' )
-						,IIF(c.ProductGroup = 'ZebraMisc', 'µ√«® Õ∫√“¬°“√‡§≈¡°Õß∑ÿπ√∂¡È“≈“¬','')
+						,IIF(c.ProductGroup = 'ZebraMisc', '‡∏ï‡∏£‡∏ß‡∏à‡∏™‡∏≠‡∏ö‡∏£‡∏≤‡∏¢‡∏Å‡∏≤‡∏£‡πÄ‡∏Ñ‡∏•‡∏°‡∏Å‡∏≠‡∏á‡∏ó‡∏∏‡∏ô‡∏£‡∏ñ‡∏°‡πâ‡∏≤‡∏•‡∏≤‡∏¢','')
 					)ValidateResult
 				---------------------------------------------------------------
 				,a.ClaimTypeCode	ClaimTypeCode
@@ -577,12 +577,12 @@ IF @IsResult = 1 AND @IsImport = 1
 			LEFT JOIN
 				(
 					SELECT  d.ClaimHeaderGroupCodeInDB AS ClaimCodeInSystem
-							,imd.ClaimHeaderGroupCode AS ClaimHeaderGroupCode --Update 2024-06-17 Krekpon.Mind ‡æ‘Ë¡‡ß◊ËÕπ‰¢
+							,imd.ClaimHeaderGroupCode AS ClaimHeaderGroupCode --Update 2024-06-17 Krekpon.Mind ‡πÄ‡∏û‡∏¥‡πà‡∏°‡πÄ‡∏á‡∏∑‡πà‡∏≠‡∏ô‡πÑ‡∏Ç
 					FROM #TmpDetail d
 						INNER JOIN dbo.ClaimHeaderGroupImportDetail imd 
 							ON d.ClaimHeaderCodeInDB = imd.ClaimCode
-					WHERE d.ClaimHeaderCodeInDB = imd.ClaimCode -- ≈Õß‡ª≈’Ë¬π‡ªÁπ Where 2024-04-23 Krekpon-Mind
-						  AND imd.IsActive = 1 -- 2024-07-09 Krekpon.Mind ‡æ‘Ë¡ IsActive
+					WHERE d.ClaimHeaderCodeInDB = imd.ClaimCode -- ‡∏•‡∏≠‡∏á‡πÄ‡∏õ‡∏•‡∏µ‡πà‡∏¢‡∏ô‡πÄ‡∏õ‡πá‡∏ô Where 2024-04-23 Krekpon-Mind
+						  AND imd.IsActive = 1 -- 2024-07-09 Krekpon.Mind ‡πÄ‡∏û‡∏¥‡πà‡∏° IsActive
 					GROUP BY d.ClaimHeaderGroupCodeInDB,imd.ClaimHeaderGroupCode
 				) imd
 				ON t.ClaimHeaderGroupCode = imd.ClaimCodeInSystem
