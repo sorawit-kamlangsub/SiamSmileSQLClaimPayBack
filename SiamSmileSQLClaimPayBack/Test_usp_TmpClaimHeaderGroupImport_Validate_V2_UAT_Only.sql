@@ -234,6 +234,18 @@ VALUES
 ,(6,'Misc')
 DECLARE @ClaimTypeCode_H	VARCHAR(20) = '1000'
 DECLARE @ClaimTypeCode_C	VARCHAR(20) = '2000'
+
+DECLARE @MapAdmitTypeWithPolicy TABLE (AdmitTypeCode VARCHAR(20),PolicyCode VARCHAR(20),Detail NVARCHAR(255));
+INSERT @MapAdmitTypeWithPolicy
+(
+AdmitTypeCode
+,PolicyCode
+,Detail
+)
+VALUES
+(N'4009',N'9602',N'ความรับผิดสถานศึกษา ต้องเป็น กรมธรรม์ PL')
+,(N'4010',N'9602',N'ภัยสาธารณะ ต้องเป็น กรมธรรม์ เสริมพิเศษ')
+,(N'4001',N'9601',N'ค่ารักษาอุบัติเหตุ ต้องเป็น กรมธรรม์ปกติ')
 ----------------------------------------------
 
 IF @IsResult = 1 AND @IsImport = 1		
@@ -311,10 +323,9 @@ IF @IsResult = 1 AND @IsImport = 1
 			,d.InsuranceCompanyId
 			,d.ClaimHeaderCodeInDB
 			,d.ProductGroup
+			,d.AdmitTypeCode
 			,d.PolicyNo
-			,d.PolicyType_id
-			,d.PolicyType
-			,d.GroupPolicy
+			,d.PolicyHistory
 		INTO #TmpDetail
 		FROM
 			(	--SSS------
@@ -325,10 +336,9 @@ IF @IsResult = 1 AND @IsImport = 1
 						,ins.Organize_ID								AS InsuranceCompanyId
 						,h.Code											AS ClaimHeaderCodeInDB
 						,IIF(h.Product_id = 'P30',h.Product_id,'1000')  AS ProductGroup
+						,NULL											AS AdmitTypeCode
 						,cus.InsuredPolicy_no							AS PolicyNo
-						,NULL											AS PolicyType_id
-						,NULL											AS PolicyType
-						,NULL											AS GroupPolicy
+						,NULL											AS PolicyHistory
 				FROM #Tmp t
 					LEFT JOIN SSS.dbo.DB_ClaimHeader h
 						ON t.ClaimHeaderGroupCode = h.ClaimHeaderGroup_id
@@ -347,81 +357,53 @@ IF @IsResult = 1 AND @IsImport = 1
 				--SSSPA------
 				SELECT t.TmpClaimHeaderGroupImportId
 						,hg.Code									AS ClaimHeaderGroupCodeInDB
-						,CAST(claim.Amount_Pay AS DECIMAL(16,2))	AS TotalAmount
-						,claim.PaySS_Total							AS TotalAmountSS
+						,CAST(h.Amount_Pay AS DECIMAL(16,2))		AS TotalAmount
+						,h.PaySS_Total								AS TotalAmountSS
 						,ins.Organize_ID							AS InsuranceCompanyId
-						,claim.Code									AS ClaimHeaderCodeInDB
-						,'2000'										AS ProductGroup
-						,claim.LastPolicyNo							AS PolicyNo
-						,claim.LastPolicyType_id					AS PolicyType_id
-						,claim.PolicyType							AS PolicyType
-						,claim.GroupPolicy							AS GroupPolicy
+						,h.Code										AS ClaimHeaderCodeInDB
+						,'2000'										AS ProductGroup	
+						,h.ClaimType_id								AS AdmitTypeCode
+						,custpolicy.PolicyNo
+					    ,CONCAT( 'ประวัติการบันทึกกรมธรรม์ ',STUFF((
+					   			SELECT ' > ' + CONCAT(p.Detail,' (',policyType.Detail,')')
+					   			FROM SSSPA.dbo.DB_CustomerPolicy p
+					   			LEFT JOIN SSSPA.dbo.SM_Code policyType
+					   				ON p.PolicyType_id = policyType.Code
+					   			WHERE p.App_id = cust.App_id
+					   			ORDER BY p.CreatedDate ASC
+					   			FOR XML PATH(''), TYPE
+					   			).value('.', 'nvarchar(255)'), 1, 3, '')
+							)										AS	PolicyHistory
 				FROM #Tmp t
 					INNER JOIN SSSPA.dbo.DB_ClaimHeaderGroup AS hg
 						ON t.ClaimHeaderGroupCode = hg.Code
 					LEFT JOIN DataCenterV1.Organize.Organize AS ins
 						ON hg.InsuranceCompany_id = ins.OrganizeCode
-					--LEFT JOIN SSSPA.dbo.DB_ClaimHeader h
-					--	ON hg.Code = h.ClaimheaderGroup_id
-					--LEFT JOIN SSSPA.dbo.DB_CustomerDetail AS ctd
-					--	ON h.CustomerDetail_id = ctd.Code
-					--LEFT JOIN SSSPA.dbo.DB_Customer AS cus
-					--	ON ctd.Application_id = cus.App_id AND cus.Status_id <> '3090' 
-					--LEFT JOIN SSSPA.dbo.DB_CustomerPolicy  AS ctp
-					--	ON cus.App_id  = ctp.App_id 
-					--LEFT JOIN SSSPA.dbo.SM_Code smcode
-					--	ON ctp.PolicyType_id = smcode.Code
+					LEFT JOIN SSSPA.dbo.DB_ClaimHeader h
+						ON hg.Code = h.ClaimheaderGroup_id
 					LEFT JOIN 
 					(
 						SELECT 
-						 h.Code
-						 ,h.Amount_Pay
-						 ,h.PaySS_Total
-						 ,h.ClaimheaderGroup_id
-						 ,ctp.LastPolicyNo
-						 ,ctp.GroupPolicy
-						 ,ctp.LastPolicyType_id
-						 ,smcode.Detail			PolicyType
-						FROM SSSPA.dbo.DB_ClaimHeader h
-						LEFT JOIN SSSPA.dbo.DB_CustomerDetail ctd
-							ON h.CustomerDetail_id = ctd.Code
+						 ctd.Code
+						 ,cus.App_id
+						FROM SSSPA.dbo.DB_CustomerDetail ctd
 						LEFT JOIN SSSPA.dbo.DB_Customer cus
 							ON ctd.Application_id = cus.App_id 
-						LEFT JOIN 
-							(
-								SELECT
-								 c.App_id
-								 ,c.PolicyType_id
-								 ,c.Detail			LastPolicyNo
-								 ,c.PolicyType_id	LastPolicyType_id
-								 ,STUFF((
-									SELECT ' > ' + p.Detail
-									FROM SSSPA.dbo.DB_CustomerPolicy p
-									WHERE p.App_id = c.App_id
-									ORDER BY c.CreatedDate DESC
-									FOR XML PATH(''), TYPE
-									).value('.', 'nvarchar(255)'), 1, 3, '') GroupPolicy
-								FROM 
-								(
-									SELECT  App_id
-											,Detail
-											,PolicyType_id
-											,CreatedDate
-											,ROW_NUMBER() OVER
-										   (
-											   PARTITION BY App_id
-											   ORDER BY CreatedDate DESC
-										   ) AS rn
-									FROM SSSPA.dbo.DB_CustomerPolicy								
-								) c
-								WHERE c.rn = 1
-							) ctp
-							ON cus.App_id  = ctp.App_id 
-						LEFT JOIN SSSPA.dbo.SM_Code smcode
-							ON ctp.PolicyType_id = smcode.Code
 						WHERE cus.Status_id <> '3090' 
-					) claim
-						ON hg.Code = claim.ClaimheaderGroup_id
+					) cust
+						ON h.CustomerDetail_id = cust.Code 
+					LEFT JOIN @MapAdmitTypeWithPolicy mapPolicy	
+						ON h.ClaimType_id = mapPolicy.AdmitTypeCode
+					LEFT JOIN 
+					(
+						SELECT 
+						 App_id
+						 ,Detail	PolicyNo
+						 ,PolicyType_id
+						FROM SSSPA.dbo.DB_CustomerPolicy
+					) custpolicy
+					ON cust.App_id = custpolicy.App_id
+						AND custpolicy.PolicyType_id = mapPolicy.PolicyCode
 				WHERE t.ClaimHeaderGroupTypeId = @ClaimHeaderSSSPA
 
 				UNION
@@ -434,10 +416,9 @@ IF @IsResult = 1 AND @IsImport = 1
 					,ins.Organize_ID							AS InsuranceCompanyId
 					,cc.ClaimCompensateCode						AS ClaimHeaderCodeInDB
 					,'2222'										AS ProductGroup
+					,NULL										AS AdmitTypeCode
 					,cus.InsuredPolicy_no						AS PolicyNo
-					,NULL										AS PolicyType_id
-					,NULL										AS PolicyType
-					,NULL										AS GroupPolicy
+					,NULL										AS PolicyHistory
 				FROM #Tmp t
 					INNER JOIN SSS.dbo.ClaimCompensateGroup cg
 						ON t.ClaimHeaderGroupCode = cg.ClaimCompensateGroupCode
@@ -469,11 +450,10 @@ IF @IsResult = 1 AND @IsImport = 1
 					,cm.PayAmount												TotalAmountSS
 					,org.Organize_ID											InsuranceCompanyId
 					,NULL														ClaimHeaderCodeInDB
+					,NULL														AdmitTypeCode					
 					,IIF(cpbType.ClaimPaymentTypeId = 2, 'ZebraMisc','Misc')	ProductGroup
 					,cm.PolicyNo												PolicyNo
-					,NULL														PolicyType_id
-					,NULL														PolicyType
-					,NULL														GroupPolicy
+					,NULL														PolicyHistory
 				FROM #Tmp t
 					INNER JOIN [ClaimMiscellaneous].[misc].[ClaimMisc] cm
 						ON t.ClaimHeaderGroupCode = cm.ClaimHeaderGroupCode
@@ -598,8 +578,7 @@ IF @IsResult = 1 AND @IsImport = 1
 									,N' ตามกลุ่มที่ระบุ, '),'')
 						,IIF(doc.CountDoc > 0 ,N'บ.ส. ไม่มีเอกสารแนบ, ','')
 						,IIF(a.ClaimTypeCode = '',N'ไม่ได้ MappingType (H,C), ','')
-						--,
-						,c.GroupPolicy
+						,IIF(c.PolicyNo IS NULL , mapPolicy.Detail,'')
 						,IIF(c.ProductGroup = 'ZebraMisc', 'ตรวจสอบรายการเคลมกองทุนรถม้าลาย','')
 					)ValidateResult
 				---------------------------------------------------------------
@@ -611,15 +590,17 @@ IF @IsResult = 1 AND @IsImport = 1
 				(
 					SELECT ClaimHeaderGroupCodeInDB
 						,InsuranceCompanyId
-						,COUNT(ClaimHeaderGroupCodeInDB) ItemCountInDB
-						,SUM(TotalAmountSS)  TotalAmountInDB
-						,MAX(ProductGroup)	ProductGroup
-						,PolicyNo
-						,PolicyType
-						,PolicyType_id
-						,GroupPolicy
+						,COUNT(ClaimHeaderGroupCodeInDB)	ItemCountInDB
+						,SUM(TotalAmountSS)					TotalAmountInDB
+						,ProductGroup
+						,AdmitTypeCode
+						,MAX(PolicyNo)						PolicyNo
+						,MAX(PolicyHistory)					PolicyHistory
 					FROM #TmpDetail
-					GROUP BY ClaimHeaderGroupCodeInDB,InsuranceCompanyId,PolicyNo,PolicyType,PolicyType_id,GroupPolicy
+					GROUP BY ClaimHeaderGroupCodeInDB
+							,InsuranceCompanyId
+							,ProductGroup
+							,AdmitTypeCode
 				) c
 				ON t.ClaimHeaderGroupCode = c.ClaimHeaderGroupCodeInDB
 			LEFT JOIN @ProductGroup pg
@@ -665,7 +646,11 @@ IF @IsResult = 1 AND @IsImport = 1
 				) doc
 				ON t.ClaimHeaderGroupCode = doc.ClaimHeaderGroupCodeInDB
 			-------------------------------------------------------------------	
-			LEFT JOIN [ClaimPayBack].[dbo].[ClaimPayBackDetail] cbd ON cbd.ClaimGroupCode = t.ClaimHeaderGroupCode
+			LEFT JOIN [ClaimPayBack].[dbo].[ClaimPayBackDetail] cbd 
+				ON cbd.ClaimGroupCode = t.ClaimHeaderGroupCode
+			LEFT JOIN @MapAdmitTypeWithPolicy mapPolicy
+				ON c.AdmitTypeCode = mapPolicy.AdmitTypeCode
+
 			SELECT @CountIsError = COUNT(ValidateResult)
 			FROM #TmpUpdate
 			WHERE TmpCode = @TmpCode 
