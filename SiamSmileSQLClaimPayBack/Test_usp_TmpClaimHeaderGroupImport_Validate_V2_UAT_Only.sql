@@ -236,16 +236,23 @@ DECLARE @ClaimTypeCode_H	VARCHAR(20) = '1000'
 DECLARE @ClaimTypeCode_C	VARCHAR(20) = '2000'
 
 DECLARE @MapAdmitTypeWithPolicy TABLE (AdmitTypeCode VARCHAR(20),PolicyCode VARCHAR(20),Detail NVARCHAR(255));
-INSERT @MapAdmitTypeWithPolicy
+INSERT INTO @MapAdmitTypeWithPolicy
+SELECT
+    admit.Code AdmitTypeCode
+    ,[policy].Code PolicyCode
+    ,CONCAT(admit.Detail,' ต้องมี ',[policy].Detail) Detail
+FROM
 (
-AdmitTypeCode
-,PolicyCode
-,Detail
-)
-VALUES
-(N'4009',N'9602',N'ความรับผิดสถานศึกษา ต้องมี กรมธรรม์ PL')
-,(N'4010',N'9602',N'ภัยสาธารณะ ต้องมี กรมธรรม์ เสริมพิเศษ')
-,(N'4001',N'9601',N'ค่ารักษาอุบัติเหตุ ต้องมี กรมธรรม์ปกติ')
+    VALUES
+        ('4001', '9601'),
+        ('4009', '9602'),
+        ('4010', '9604')
+) m(AdmitTypeCode, PolicyCode)
+INNER JOIN SSSPA.dbo.SM_Code admit
+    ON admit.Code = m.AdmitTypeCode
+INNER JOIN SSSPA.dbo.SM_Code [policy]
+    ON [policy].Code = m.PolicyCode
+
 ----------------------------------------------
 
 IF @IsResult = 1 AND @IsImport = 1		
@@ -660,6 +667,7 @@ IF @IsResult = 1 AND @IsImport = 1
 
 		------------------------------------------------------
 
+SELECT * FROM @MapAdmitTypeWithPolicy;
 SELECT * FROM #Tmp;
 SELECT * FROM #TmpDetail;
 SELECT * FROM #TmpDoc;
