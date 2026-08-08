@@ -578,7 +578,7 @@ IF @IsResult = 1 AND @IsImport = 1
 									,N' ตามกลุ่มที่ระบุ, '),'')
 						,IIF(doc.CountDoc > 0 ,N'บ.ส. ไม่มีเอกสารแนบ, ','')
 						,IIF(a.ClaimTypeCode = '',N'ไม่ได้ MappingType (H,C), ','')
-						,IIF(c.PolicyNo IS NULL , mapPolicy.Detail,'')
+						,IIF(c.PolicyNo IS NULL , CONCAT(mapPolicy.Detail,' , ',c.PolicyHistory),'')
 						,IIF(c.ProductGroup = 'ZebraMisc', 'ตรวจสอบรายการเคลมกองทุนรถม้าลาย','')
 					)ValidateResult
 				---------------------------------------------------------------
