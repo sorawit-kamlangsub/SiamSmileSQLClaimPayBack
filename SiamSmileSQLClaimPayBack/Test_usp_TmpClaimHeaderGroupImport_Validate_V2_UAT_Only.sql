@@ -371,7 +371,7 @@ IF @IsResult = 1 AND @IsImport = 1
 						,'2000'										AS ProductGroup	
 						,h.ClaimType_id								AS AdmitTypeCode
 						,custpolicy.PolicyNo
-					    ,CONCAT( 'ประวัติการบันทึกกรมธรรม์ ',STUFF((
+					    ,CONCAT( 'ประวัติการบันทึกกรมธรรม์ >> ',STUFF((
 					   			SELECT ' > ' + CONCAT(p.Detail,' (',policyType.Detail,')')
 					   			FROM SSSPA.dbo.DB_CustomerPolicy p
 					   			LEFT JOIN SSSPA.dbo.SM_Code policyType
