@@ -37,13 +37,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "V1.9.7", "V1.9.7", "{9CE7D2
 		CPB1_9_7\Alter_usp_Report_BillingRejectClaim_select.sql = CPB1_9_7\Alter_usp_Report_BillingRejectClaim_select.sql
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
+	ProjectSection(SolutionItems) = preProject
+		scripts\line_reminder.py = scripts\line_reminder.py
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Default|Default = Default|Default
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{81F9C8E8-7583-A700-5CE6-F9B6F3403E8E}.Default|Default.ActiveCfg = Default
-		{281DA7F7-4EB4-4869-8758-8C5DE7BDD851}.Default|Default.ActiveCfg = Default
+		{D6AB19D4-A3F8-4B49-9D40-495EFAF3B396}.Default|Default.ActiveCfg = Default
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
