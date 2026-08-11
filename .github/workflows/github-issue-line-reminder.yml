@@ -1,16 +1,16 @@
 name: GitHub Issue LINE Reminder
 
-# on:
-#   schedule:
-#     # 08:00 Thailand
-#     - cron: "0 1 * * *"
-
-#     # 12:00 Thailand
-#     - cron: "0 5 * * *"
 on:
   schedule:
-    # ทุก 5 นาที
-    - cron: "*/5 * * * *"
+    # 08:00 Thailand
+    - cron: "0 1 * * *"
+
+    # 12:00 Thailand
+    - cron: "0 5 * * *"
+# on:
+#   schedule:
+#     # ทุก 5 นาที
+    # - cron: "*/5 * * * *"
 
   workflow_dispatch:
 
