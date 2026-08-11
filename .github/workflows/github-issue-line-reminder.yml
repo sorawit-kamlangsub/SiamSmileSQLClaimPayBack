@@ -1,0 +1,46 @@
+name: GitHub Issue LINE Reminder
+
+# on:
+#   schedule:
+#     # 08:00 Thailand
+#     - cron: "0 1 * * *"
+
+#     # 12:00 Thailand
+#     - cron: "0 5 * * *"
+on:
+  schedule:
+    # ทุก 5 นาที
+    - cron: "*/5 * * * *"
+
+  workflow_dispatch:
+
+permissions:
+  issues: read
+
+jobs:
+  reminder:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get open reminder issues
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue list \
+            --repo "${{ github.repository }}" \
+            --state open \
+            --label reminder \
+            --json number,title,url \
+            > issues.json
+
+          cat issues.json
+
+      - name: Send LINE notification
+        env:
+          LINE_CHANNEL_ACCESS_TOKEN: SStjoMjuX9qvouDM3iR605FWxbn4uqpbfLlF/vNYcuoBQj7oxPm/58U2jj0wtyMqN1IMUri2hIP/BX2iDtEWSUc8T6oM16PEIV6CzkN9BCoI0nG2Uy+tRR7B+kHQMhawOFCrac/GLX1zrBfY3/Nk/QdB04t89/1O/w1cDnyilFU=
+          LINE_TO: C7b97c98438b6f15ee64ca43c587a90c1
+        run: |
+          python3 SiamSmileSQLClaimPayBack/scripts/line_reminder.py
