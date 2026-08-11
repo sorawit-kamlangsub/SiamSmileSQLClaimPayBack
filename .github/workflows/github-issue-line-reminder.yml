@@ -40,7 +40,7 @@ jobs:
 
       - name: Send LINE notification
         env:
-          LINE_CHANNEL_ACCESS_TOKEN: 98a39e9ab7ba6822bd3a955a2c3f146f
+          LINE_CHANNEL_ACCESS_TOKEN: SStjoMjuX9qvouDM3iR605FWxbn4uqpbfLlF/vNYcuoBQj7oxPm/58U2jj0wtyMqN1IMUri2hIP/BX2iDtEWSUc8T6oM16PEIV6CzkN9BCoI0nG2Uy+tRR7B+kHQMhawOFCrac/GLX1zrBfY3/Nk/QdB04t89/1O/w1cDnyilFU=
           LINE_TO: C7b97c98438b6f15ee64ca43c587a90c1
         run: |
           python3 SiamSmileSQLClaimPayBack/scripts/line_reminder.py
