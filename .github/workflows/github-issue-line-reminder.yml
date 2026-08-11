@@ -43,4 +43,4 @@ jobs:
           LINE_CHANNEL_ACCESS_TOKEN: 98a39e9ab7ba6822bd3a955a2c3f146f
           LINE_TO: C7b97c98438b6f15ee64ca43c587a90c1
         run: |
-          python3 scripts/line_reminder.py
+          python3 SiamSmileSQLClaimPayBack/scripts/line_reminder.py
