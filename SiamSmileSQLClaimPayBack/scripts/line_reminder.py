@@ -6,7 +6,7 @@ import urllib.request
 LINE_TOKEN = os.environ["LINE_CHANNEL_ACCESS_TOKEN"]
 LINE_TO = os.environ["LINE_TO"]
 
-with open("issues.json", "r", encoding="utf-8-sig") as f:
+with open("issues.json", "r", encoding="utf-8") as f:
     issues = json.load(f)
 
 
@@ -32,7 +32,7 @@ for issue in issues:
 
     request = urllib.request.Request(
         "https://api.line.me/v2/bot/message/push",
-        data=json.dumps(data).encode("utf-8-sig"),
+        data=json.dumps(data).encode("utf-8"),
         headers={
             "Content-Type": "application/json",
             "Authorization": f"Bearer {LINE_TOKEN}"
@@ -50,4 +50,4 @@ for issue in issues:
 
     except urllib.error.HTTPError as e:
         print(f"LINE ERROR: HTTP {e.code}")
-        print(e.read().decode("utf-8-sig"))
+        print(e.read().decode("utf-8"))
