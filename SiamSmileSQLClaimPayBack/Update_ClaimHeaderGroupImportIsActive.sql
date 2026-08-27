@@ -45,59 +45,41 @@ GO
 BEGIN TRY
 	BEGIN TRANSACTION
 
-    --SELECT i.ClaimHeaderGroupCode,i.IsActive
-    UPDATE i 
-        SET i.IsActive = @IsActive
-            ,i.UpdatedByUserId = @UserId
-            ,i.UpdatedDate = @D2
+    SELECT i.ClaimHeaderGroupCode,i.IsActive
+    --UPDATE i 
+    --    SET i.IsActive = @IsActive
+    --        ,i.UpdatedByUserId = @UserId
+    --        ,i.UpdatedDate = @D2
     FROM dbo.ClaimHeaderGroupImport i
     INNER JOIN #Tmp t
         ON i.ClaimHeaderGroupCode = t.ClaimHeaderGroupCode;
 
-    --SELECT id.ClaimHeaderGroupCode,id.IsActive
-    UPDATE id 
-        SET id.IsActive = @IsActive
-            ,id.UpdatedByUserId = @UserId
-            ,id.UpdatedDate = @D2
+    SELECT id.ClaimHeaderGroupCode,id.IsActive
+    --UPDATE id 
+    --    SET id.IsActive = @IsActive
+    --        ,id.UpdatedByUserId = @UserId
+    --        ,id.UpdatedDate = @D2
     FROM dbo.ClaimHeaderGroupImportDetail id
     INNER JOIN #Tmp t
         ON id.ClaimHeaderGroupCode = t.ClaimHeaderGroupCode;
 
-    --SELECT bi.BillingRequestItemCode,bi.IsActive
-    UPDATE bi 
-        SET bi.IsActive = @IsActive
-            ,bi.UpdatedByUserId = @UserId
-            ,bi.UpdatedDate = @D2
+    SELECT bi.BillingRequestItemCode,bi.IsActive
+    --UPDATE bi 
+    --    SET bi.IsActive = @IsActive
+    --        ,bi.UpdatedByUserId = @UserId
+    --        ,bi.UpdatedDate = @D2
     FROM dbo.BillingRequestItem bi
     INNER JOIN #Tmp t
         ON bi.BillingRequestItemId = t.BillingRequestItemId;
 
-    --SELECT bg.BillingRequestGroupCode, bg.CoverAmount - SUM(CASE WHEN bi.IsActive = 0 THEN bi.CoverAmount ELSE 0 END) CoverAmount, bg.PaySS_Total - SUM(CASE WHEN bi.IsActive = 0 THEN bi.PaySS_Total ELSE 0 END) PaySS_Total, bg.TotalAmount - SUM(CASE WHEN bi.IsActive = 0 THEN bi.AmountTotal ELSE 0 END) TotalAmount
+    SELECT x.*
     --UPDATE bg
-    --    SET bg.CoverAmount = (bg.CoverAmount - SUM(CASE WHEN bi.IsActive = 0 THEN bi.CoverAmount ELSE 0 END))
-    --    ,bg.PaySS_Total = (bg.PaySS_Total - SUM(CASE WHEN bi.IsActive = 0 THEN bi.PaySS_Total ELSE 0 END)) 
-    --    ,bg.TotalAmount = (bg.TotalAmount - SUM(CASE WHEN bi.IsActive = 0 THEN bi.AmountTotal ELSE 0 END))
-    --    ,bg.UpdatedByUserId = 1
-    --    ,bg.UpdatedDate = @D2
-    --FROM dbo.BillingRequestGroup bg
-    --INNER JOIN dbo.BillingRequestItem bi
-    --    ON bg.BillingRequestGroupId = bi.BillingRequestGroupId
-    --INNER JOIN #Tmp t
-    --    ON bi.BillingRequestItemId = t.BillingRequestItemId
-    --GROUP BY
-    --bg.BillingRequestGroupCode,
-    --bg.CoverAmount,
-    --bg.PaySS_Total,
-    --bg.TotalAmount
-
-    --SELECT *
-    UPDATE bg
-    SET
-        bg.CoverAmount = bg.CoverAmount - x.CoverAmount,
-        bg.PaySS_Total = bg.PaySS_Total - x.PaySS_Total,
-        bg.TotalAmount = bg.TotalAmount - x.TotalAmount,
-        bg.UpdatedByUserId = 1,
-        bg.UpdatedDate = @D2
+    --SET
+    --    bg.CoverAmount = bg.CoverAmount - x.CoverAmount,
+    --    bg.PaySS_Total = bg.PaySS_Total - x.PaySS_Total,
+    --    bg.TotalAmount = bg.TotalAmount - x.TotalAmount,
+    --    bg.UpdatedByUserId = 1,
+    --    bg.UpdatedDate = @D2
     FROM dbo.BillingRequestGroup bg
     INNER JOIN (
         SELECT
