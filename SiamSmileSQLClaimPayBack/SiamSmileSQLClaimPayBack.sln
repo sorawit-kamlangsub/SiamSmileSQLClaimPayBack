@@ -1,41 +1,231 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # SQL Server Management Studio Version 21
 VisualStudioVersion = 17.14.36408.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{4F2E2C19-372F-40D8-9FA7-9D2138C6997A}") = "SiamSmileSQLClaimPayBack", "SiamSmileSQLClaimPayBack.ssmssqlproj", "{81F9C8E8-7583-A700-5CE6-F9B6F3403E8E}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "V1.6.0", "V1.6.0", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "StoredProcedures", "StoredProcedures", "{8329704F-7C6F-FD37-A35E-8B48EB0EC483}"
 	ProjectSection(SolutionItems) = preProject
-		V_1_6_0.sql = V_1_6_0.sql
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fix_Data", "Fix_Data", "{393229F8-4702-459F-92F1-5A0BF9FC3693}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BillingRequest", "BillingRequest", "{A3A64620-307F-4838-A6A0-B683D37CAD32}"
 	ProjectSection(SolutionItems) = preProject
-		InsertOut2Billing.sql = InsertOut2Billing.sql
-		Insert_AIG_Sftp_Config_PROD.sql = Insert_AIG_Sftp_Config_PROD.sql
-		Insert_ClaimPayBackDetailReport.sql = Insert_ClaimPayBackDetailReport.sql
-		Update_ClaimHeaderGroupImportIsActive.sql = Update_ClaimHeaderGroupImportIsActive.sql
+		StoredProcedures\BillingRequest\usp_BillingClaimMiscExport_Select.sql = StoredProcedures\BillingRequest\usp_BillingClaimMiscExport_Select.sql
+		StoredProcedures\BillingRequest\usp_BillingPAExportDetail_Select.sql = StoredProcedures\BillingRequest\usp_BillingPAExportDetail_Select.sql
+		StoredProcedures\BillingRequest\usp_BillingRequest_ClaimMisc_Insert.sql = StoredProcedures\BillingRequest\usp_BillingRequest_ClaimMisc_Insert.sql
+		StoredProcedures\BillingRequest\usp_BillingRequest_Insert.sql = StoredProcedures\BillingRequest\usp_BillingRequest_Insert.sql
+		StoredProcedures\BillingRequest\usp_BillingRequest_Insert_V3.sql = StoredProcedures\BillingRequest\usp_BillingRequest_Insert_V3.sql
+		StoredProcedures\BillingRequest\usp_BillingRequest_Sub01_Insert.sql = StoredProcedures\BillingRequest\usp_BillingRequest_Sub01_Insert.sql
+		StoredProcedures\BillingRequest\usp_BillingRequest_Sub01_Insert_V2.sql = StoredProcedures\BillingRequest\usp_BillingRequest_Sub01_Insert_V2.sql
+		StoredProcedures\BillingRequest\usp_BillingRequestGroup_Select.sql = StoredProcedures\BillingRequest\usp_BillingRequestGroup_Select.sql
+		StoredProcedures\BillingRequest\usp_BillingRequestItem_Select.sql = StoredProcedures\BillingRequest\usp_BillingRequestItem_Select.sql
+		StoredProcedures\BillingRequest\usp_BillingRequestResultImportGroup_Insert.sql = StoredProcedures\BillingRequest\usp_BillingRequestResultImportGroup_Insert.sql
+		StoredProcedures\BillingRequest\usp_BillingRequestResultImportGroup_Select.sql = StoredProcedures\BillingRequest\usp_BillingRequestResultImportGroup_Select.sql
+		StoredProcedures\BillingRequest\usp_BillingRequestResultManual_Insert.sql = StoredProcedures\BillingRequest\usp_BillingRequestResultManual_Insert.sql
+		StoredProcedures\BillingRequest\usp_BillingRequestValidate_Select.sql = StoredProcedures\BillingRequest\usp_BillingRequestValidate_Select.sql
+		StoredProcedures\BillingRequest\usp_GenerateCodeV2.sql = StoredProcedures\BillingRequest\usp_GenerateCodeV2.sql
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "V1.8.0", "V1.8.0", "{DFCBEBB0-8BF8-4575-ADFF-33B9D0E8DD7A}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ClaimHeaderGroup", "ClaimHeaderGroup", "{28D5EC5B-2C41-B13B-AE42-71F131013B1E}"
 	ProjectSection(SolutionItems) = preProject
-		C:\Users\NB-67-06-01\Desktop\CPBScriptV_1_8_0\Create_BillingRequestGroupSFTPEncryption.sql = C:\Users\NB-67-06-01\Desktop\CPBScriptV_1_8_0\Create_BillingRequestGroupSFTPEncryption.sql
-		C:\Users\NB-67-06-01\Desktop\CPBScriptV_1_8_0\Create_BillingRequestResultImport.sql = C:\Users\NB-67-06-01\Desktop\CPBScriptV_1_8_0\Create_BillingRequestResultImport.sql
-		C:\Users\NB-67-06-01\Desktop\CPBScriptV_1_8_0\Create_usp_BillingRequestResultImportGroup_Insert.sql = C:\Users\NB-67-06-01\Desktop\CPBScriptV_1_8_0\Create_usp_BillingRequestResultImportGroup_Insert.sql
-		C:\Users\NB-67-06-01\Desktop\CPBScriptV_1_8_0\Create_usp_BillingRequestResultImportGroup_Select.sql = C:\Users\NB-67-06-01\Desktop\CPBScriptV_1_8_0\Create_usp_BillingRequestResultImportGroup_Select.sql
-		C:\Users\NB-67-06-01\Desktop\CPBScriptV_1_8_0\Create_usp_Report_PAClaimBeforePolicyApproval_Select.sql = C:\Users\NB-67-06-01\Desktop\CPBScriptV_1_8_0\Create_usp_Report_PAClaimBeforePolicyApproval_Select.sql
-		C:\Users\NB-67-06-01\Desktop\CPBScriptV_1_8_0\Insert_ProgramConfig_CHUBB.sql = C:\Users\NB-67-06-01\Desktop\CPBScriptV_1_8_0\Insert_ProgramConfig_CHUBB.sql
+		StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupDetail_SelectV3.sql = StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupDetail_SelectV3.sql
+		StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupDetail_SelectV4.sql = StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupDetail_SelectV4.sql
+		StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupDetail_SelectV5.sql = StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupDetail_SelectV5.sql
+		StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupImport_Insert.sql = StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupImport_Insert.sql
+		StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupImport_Select.sql = StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupImport_Select.sql
+		StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupImportIsValidated_Select.sql = StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupImportIsValidated_Select.sql
+		StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupItem_Select.sql = StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupItem_Select.sql
+		StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupValidateAmountPay_Select.sql = StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupValidateAmountPay_Select.sql
+		StoredProcedures\ClaimHeaderGroup\usp_GetClaimHeaderGroupImportDetailById_Select.sql = StoredProcedures\ClaimHeaderGroup\usp_GetClaimHeaderGroupImportDetailById_Select.sql
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "V1.9.7", "V1.9.7", "{9CE7D252-F4F2-494B-8141-F01424678A7E}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ClaimPayBack", "ClaimPayBack", "{718AFA6F-8BE8-4B36-B55D-C94177BD4FFC}"
 	ProjectSection(SolutionItems) = preProject
-		CPB1_9_7\Alter_usp_BillingRequestResultImportGroup_Insert.sql = CPB1_9_7\Alter_usp_BillingRequestResultImportGroup_Insert.sql
-		CPB1_9_7\Alter_usp_BillingRequestResultImportGroup_Select.sql = CPB1_9_7\Alter_usp_BillingRequestResultImportGroup_Select.sql
-		CPB1_9_7\Alter_usp_ClaimHeaderGroupValidateAmountPay_Select.sql = CPB1_9_7\Alter_usp_ClaimHeaderGroupValidateAmountPay_Select.sql
-		CPB1_9_7\Alter_usp_ClaimPayBackReportCompensate_Select.sql = CPB1_9_7\Alter_usp_ClaimPayBackReportCompensate_Select.sql
-		CPB1_9_7\Alter_usp_ClaimPayBackReportNonClaimCompensate_Select.sql = CPB1_9_7\Alter_usp_ClaimPayBackReportNonClaimCompensate_Select.sql
-		CPB1_9_7\Alter_usp_Report_BillingRejectClaim_select.sql = CPB1_9_7\Alter_usp_Report_BillingRejectClaim_select.sql
+		StoredProcedures\ClaimPayBack\usp_ClaimPayBackByTransfer_Select.sql = StoredProcedures\ClaimPayBack\usp_ClaimPayBackByTransfer_Select.sql
+		StoredProcedures\ClaimPayBack\usp_ClaimPayBackDetail_InsertV4.sql = StoredProcedures\ClaimPayBack\usp_ClaimPayBackDetail_InsertV4.sql
+		StoredProcedures\ClaimPayBack\usp_ClaimPayBackDetail_InsertV4_Backup_20251106.sql = StoredProcedures\ClaimPayBack\usp_ClaimPayBackDetail_InsertV4_Backup_20251106.sql
+		StoredProcedures\ClaimPayBack\usp_ClaimPayBackDetail_InsertV5.sql = StoredProcedures\ClaimPayBack\usp_ClaimPayBackDetail_InsertV5.sql
+		StoredProcedures\ClaimPayBack\usp_ClaimPayBackDetailByHeader_Select.sql = StoredProcedures\ClaimPayBack\usp_ClaimPayBackDetailByHeader_Select.sql
+		StoredProcedures\ClaimPayBack\usp_ClaimPayBackDetailXClaim_Select.sql = StoredProcedures\ClaimPayBack\usp_ClaimPayBackDetailXClaim_Select.sql
+		StoredProcedures\ClaimPayBack\usp_ClaimPayBackReportCompensate_Select.sql = StoredProcedures\ClaimPayBack\usp_ClaimPayBackReportCompensate_Select.sql
+		StoredProcedures\ClaimPayBack\usp_ClaimPayBackReportNonClaimCompensate_Select.sql = StoredProcedures\ClaimPayBack\usp_ClaimPayBackReportNonClaimCompensate_Select.sql
+		StoredProcedures\ClaimPayBack\usp_ClaimPayBackReportNonClaimCompensateDetail_Select.sql = StoredProcedures\ClaimPayBack\usp_ClaimPayBackReportNonClaimCompensateDetail_Select.sql
+		StoredProcedures\ClaimPayBack\usp_ClaimPayBackSubGroup_Insert.sql = StoredProcedures\ClaimPayBack\usp_ClaimPayBackSubGroup_Insert.sql
+		StoredProcedures\ClaimPayBack\usp_ClaimPayBackSubGroupDetailByTransferId_Select.sql = StoredProcedures\ClaimPayBack\usp_ClaimPayBackSubGroupDetailByTransferId_Select.sql
+		StoredProcedures\ClaimPayBack\usp_ClaimPayBackSubGroupRePayTransfer_Select.sql = StoredProcedures\ClaimPayBack\usp_ClaimPayBackSubGroupRePayTransfer_Select.sql
+		StoredProcedures\ClaimPayBack\usp_ClaimPayBackTransfer_Insert.sql = StoredProcedures\ClaimPayBack\usp_ClaimPayBackTransfer_Insert.sql
+		StoredProcedures\ClaimPayBack\usp_ClaimPayBackTransfer_Select.sql = StoredProcedures\ClaimPayBack\usp_ClaimPayBackTransfer_Select.sql
+		StoredProcedures\ClaimPayBack\usp_ClaimPayBackTransfer_Update.sql = StoredProcedures\ClaimPayBack\usp_ClaimPayBackTransfer_Update.sql
+		StoredProcedures\ClaimPayBack\usp_ClaimPayBackTransferMonitor_Select.sql = StoredProcedures\ClaimPayBack\usp_ClaimPayBackTransferMonitor_Select.sql
+		StoredProcedures\ClaimPayBack\usp_ClaimPayBackTransferNonClaimCompensateReport_Select.sql = StoredProcedures\ClaimPayBack\usp_ClaimPayBackTransferNonClaimCompensateReport_Select.sql
+		StoredProcedures\ClaimPayBack\usp_ClaimPayBackTransferOutPocket_Insert.sql = StoredProcedures\ClaimPayBack\usp_ClaimPayBackTransferOutPocket_Insert.sql
+		StoredProcedures\ClaimPayBack\usp_ClaimPayBackTransferOutPocket_Select.sql = StoredProcedures\ClaimPayBack\usp_ClaimPayBackTransferOutPocket_Select.sql
+		StoredProcedures\ClaimPayBack\usp_ClaimPayBackTrasferReport_Select.sql = StoredProcedures\ClaimPayBack\usp_ClaimPayBackTrasferReport_Select.sql
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Reports", "Reports", "{84B4493E-D92B-E733-94E6-40E9C204FC9C}"
+	ProjectSection(SolutionItems) = preProject
+		StoredProcedures\Reports\usp_Report_BillingRejectClaim_select.sql = StoredProcedures\Reports\usp_Report_BillingRejectClaim_select.sql
+		StoredProcedures\Reports\usp_Report_BillingRequest_Select.sql = StoredProcedures\Reports\usp_Report_BillingRequest_Select.sql
+		StoredProcedures\Reports\usp_Report_ClaimPayBackFinancialTransaction_Select.sql = StoredProcedures\Reports\usp_Report_ClaimPayBackFinancialTransaction_Select.sql
+		StoredProcedures\Reports\usp_Report_ClaimPayBackFinancialTransactionDetail_Select.sql = StoredProcedures\Reports\usp_Report_ClaimPayBackFinancialTransactionDetail_Select.sql
+		StoredProcedures\Reports\usp_Report_ClaimPayBackTransferAll_Select.sql = StoredProcedures\Reports\usp_Report_ClaimPayBackTransferAll_Select.sql
+		StoredProcedures\Reports\usp_Report_ClaimPayBackTransfersFinancialTransaction_Select.sql = StoredProcedures\Reports\usp_Report_ClaimPayBackTransfersFinancialTransaction_Select.sql
+		StoredProcedures\Reports\usp_ReportBillingRequestResultConfirm_Select.sql = StoredProcedures\Reports\usp_ReportBillingRequestResultConfirm_Select.sql
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utility", "Utility", "{BD508743-69C3-C63D-A507-34E4E6CE2395}"
+	ProjectSection(SolutionItems) = preProject
+		StoredProcedures\Utility\usp_GetDocumentIdDocStorage_Select.sql = StoredProcedures\Utility\usp_GetDocumentIdDocStorage_Select.sql
+		StoredProcedures\Utility\usp_GetS3ByBillingRequestGroupId_Select.sql = StoredProcedures\Utility\usp_GetS3ByBillingRequestGroupId_Select.sql
+		StoredProcedures\Utility\usp_OrganizeInfo_Select.sql = StoredProcedures\Utility\usp_OrganizeInfo_Select.sql
+		StoredProcedures\Utility\usp_PersonalInfo_Select.sql = StoredProcedures\Utility\usp_PersonalInfo_Select.sql
+		StoredProcedures\Utility\usp_TmpBillingRequestResult_Validate.sql = StoredProcedures\Utility\usp_TmpBillingRequestResult_Validate.sql
+		StoredProcedures\Utility\usp_TmpClaimHeaderGroupImport_Validate_V2.sql = StoredProcedures\Utility\usp_TmpClaimHeaderGroupImport_Validate_V2.sql
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Create", "Create", "{19E3D818-899C-B23B-9C06-B9C240931ADF}"
+	ProjectSection(SolutionItems) = preProject
+		StoredProcedures\Create\Create_usp_BillingRequestResultImportGroup_Insert.sql = StoredProcedures\Create\Create_usp_BillingRequestResultImportGroup_Insert.sql
+		StoredProcedures\Create\Create_usp_BillingRequestResultImportGroup_Select.sql = StoredProcedures\Create\Create_usp_BillingRequestResultImportGroup_Select.sql
+		StoredProcedures\Create\Create_usp_ClaimHeaderGroupImportIsValidated_Select.sql = StoredProcedures\Create\Create_usp_ClaimHeaderGroupImportIsValidated_Select.sql
+		StoredProcedures\Create\Create_usp_Report_PAClaimBeforePolicyApproval_Select.sql = StoredProcedures\Create\Create_usp_Report_PAClaimBeforePolicyApproval_Select.sql
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{C9EF501B-B780-CE32-B5D3-925C11459239}"
+	ProjectSection(SolutionItems) = preProject
+		Tests\Test_CheckDoc_usp_TmpClaimHeaderGroupImport_Validate_V2.sql = Tests\Test_CheckDoc_usp_TmpClaimHeaderGroupImport_Validate_V2.sql
+		Tests\Test_usp_BillingRequest_ClaimMisc_Insert.sql = Tests\Test_usp_BillingRequest_ClaimMisc_Insert.sql
+		Tests\Test_usp_BillingRequest_Insert_V3.sql = Tests\Test_usp_BillingRequest_Insert_V3.sql
+		Tests\Test_usp_BillingRequest_Sub01_Insert.sql = Tests\Test_usp_BillingRequest_Sub01_Insert.sql
+		Tests\Test_usp_BillingRequest_Sub01_Insert_V2.sql = Tests\Test_usp_BillingRequest_Sub01_Insert_V2.sql
+		Tests\Test_usp_BillingRequestValidate_Select.sql = Tests\Test_usp_BillingRequestValidate_Select.sql
+		Tests\Test_usp_ClaimHeaderGroupDetail_SelectV4.sql = Tests\Test_usp_ClaimHeaderGroupDetail_SelectV4.sql
+		Tests\Test_usp_ClaimHeaderGroupDetail_SelectV4_Ph.sql = Tests\Test_usp_ClaimHeaderGroupDetail_SelectV4_Ph.sql
+		Tests\Test_usp_ClaimHeaderGroupImport_Insert.sql = Tests\Test_usp_ClaimHeaderGroupImport_Insert.sql
+		Tests\Test_usp_ClaimHeaderGroupImport_Select.sql = Tests\Test_usp_ClaimHeaderGroupImport_Select.sql
+		Tests\Test_usp_ClaimHeaderGroupImportIsValidated_Select.sql = Tests\Test_usp_ClaimHeaderGroupImportIsValidated_Select.sql
+		Tests\Test_usp_ClaimHeaderGroupValidateAmountPay_Select.sql = Tests\Test_usp_ClaimHeaderGroupValidateAmountPay_Select.sql
+		Tests\Test_usp_ClaimHeaderGroupValidateAmountPay_Select_WithDoc.sql = Tests\Test_usp_ClaimHeaderGroupValidateAmountPay_Select_WithDoc.sql
+		Tests\Test_usp_ClaimPayBackByTransfer_Select.sql = Tests\Test_usp_ClaimPayBackByTransfer_Select.sql
+		Tests\Test_usp_ClaimPayBackDetail_InsertV4.sql = Tests\Test_usp_ClaimPayBackDetail_InsertV4.sql
+		Tests\Test_usp_ClaimPayBackReportNonClaimCompensate_Select.sql = Tests\Test_usp_ClaimPayBackReportNonClaimCompensate_Select.sql
+		Tests\Test_usp_ClaimPayBackReportNonClaimCompensateDetail_Select.sql = Tests\Test_usp_ClaimPayBackReportNonClaimCompensateDetail_Select.sql
+		Tests\Test_usp_ClaimPayBackTransfer_Select.sql = Tests\Test_usp_ClaimPayBackTransfer_Select.sql
+		Tests\Test_usp_ClaimPayBackTransfer_Update.sql = Tests\Test_usp_ClaimPayBackTransfer_Update.sql
+		Tests\Test_usp_ClaimPayBackTransferMonitor_Select.sql = Tests\Test_usp_ClaimPayBackTransferMonitor_Select.sql
+		Tests\Test_usp_ClaimPayBackTransferNonClaimCompensateReport_Select.sql = Tests\Test_usp_ClaimPayBackTransferNonClaimCompensateReport_Select.sql
+		Tests\Test_usp_ClaimPayBackTransferNonClaimCompensateReport_SelectSubICU.sql = Tests\Test_usp_ClaimPayBackTransferNonClaimCompensateReport_SelectSubICU.sql
+		Tests\Test_usp_ClaimPayBackTransferNonClaimCompensateReport_SelectSubTmpClaimPayBack.sql = Tests\Test_usp_ClaimPayBackTransferNonClaimCompensateReport_SelectSubTmpClaimPayBack.sql
+		Tests\Test_usp_ClaimPayBackTransferOutPocket_Insert.sql = Tests\Test_usp_ClaimPayBackTransferOutPocket_Insert.sql
+		Tests\Test_usp_ClaimPayBackTransferOutPocket_Select.sql = Tests\Test_usp_ClaimPayBackTransferOutPocket_Select.sql
+		Tests\Test_usp_GetClaimHeaderGroupImportDetailById_Select.sql = Tests\Test_usp_GetClaimHeaderGroupImportDetailById_Select.sql
+		Tests\Test_usp_NoName1.sql = Tests\Test_usp_NoName1.sql
+		Tests\Test_usp_TmpClaimHeaderGroupImport_Validate_V2_UAT_Only.sql = Tests\Test_usp_TmpClaimHeaderGroupImport_Validate_V2_UAT_Only.sql
+		Tests\Testusp_ClaimPayBackDetail_InsertV4_BackUp_20260212.sql = Tests\Testusp_ClaimPayBackDetail_InsertV4_BackUp_20260212.sql
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DataScripts", "DataScripts", "{CE90921E-3FA3-2935-A1E8-62135024702C}"
+	ProjectSection(SolutionItems) = preProject
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Insert", "Insert", "{A7C9EA6F-B565-0C34-BB83-2AFF100CE312}"
+	ProjectSection(SolutionItems) = preProject
+		DataScripts\Insert\Insert_AIG_Sftp_Config_PROD.sql = DataScripts\Insert\Insert_AIG_Sftp_Config_PROD.sql
+		DataScripts\Insert\Insert_AIG_SSSPA_UAT.sql = DataScripts\Insert\Insert_AIG_SSSPA_UAT.sql
+		DataScripts\Insert\Insert_Attachment_S3Key_Random.sql = DataScripts\Insert\Insert_Attachment_S3Key_Random.sql
+		DataScripts\Insert\Insert_Attachment_S3Key_Random_CHGC.sql = DataScripts\Insert\Insert_Attachment_S3Key_Random_CHGC.sql
+		DataScripts\Insert\Insert_ClaimHeaderGroup_SaveBalance.sql = DataScripts\Insert\Insert_ClaimHeaderGroup_SaveBalance.sql
+		DataScripts\Insert\Insert_ClaimPayBackDetailReport.sql = DataScripts\Insert\Insert_ClaimPayBackDetailReport.sql
+		DataScripts\Insert\Insert_ProgramConfig_CHUBB.sql = DataScripts\Insert\Insert_ProgramConfig_CHUBB.sql
+		DataScripts\Insert\InsertOut2Billing.sql = DataScripts\Insert\InsertOut2Billing.sql
+		DataScripts\Insert\InsertPolicyPAUAT.sql = DataScripts\Insert\InsertPolicyPAUAT.sql
+		DataScripts\Insert\UnExportGroupIns.sql = DataScripts\Insert\UnExportGroupIns.sql
+		DataScripts\Insert\UnExportGroupInsV2.sql = DataScripts\Insert\UnExportGroupInsV2.sql
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Update", "Update", "{8132BC77-3761-A039-93AD-A2E48C4C2990}"
+	ProjectSection(SolutionItems) = preProject
+		DataScripts\Update\Update_Attachment_S3Key_Random_Unique_TempTables.sql = DataScripts\Update\Update_Attachment_S3Key_Random_Unique_TempTables.sql
+		DataScripts\Update\Update_ClaimHeaderGroupImportIsActive.sql = DataScripts\Update\Update_ClaimHeaderGroupImportIsActive.sql
+		DataScripts\Update\Update_ClaimPayBackTranfer_Cancel.sql = DataScripts\Update\Update_ClaimPayBackTranfer_Cancel.sql
+		DataScripts\Update\UpdateBankAccountNumberBillingExport.sql = DataScripts\Update\UpdateBankAccountNumberBillingExport.sql
+		DataScripts\Update\UpdateISmileDocS3.sql = DataScripts\Update\UpdateISmileDocS3.sql
+		DataScripts\Update\UpdateISmileDocS3_V2.sql = DataScripts\Update\UpdateISmileDocS3_V2.sql
+		DataScripts\Update\UpdateProductGroupId.sql = DataScripts\Update\UpdateProductGroupId.sql
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Queries", "Queries", "{972E459F-D586-EF3A-8486-C8D50978F6FB}"
+	ProjectSection(SolutionItems) = preProject
+		Queries\Select_ClaimNotDoctButInserCPB.sql = Queries\Select_ClaimNotDoctButInserCPB.sql
+		Queries\Select_ClaimPayBackDetail_PendingImport.sql.sql = Queries\Select_ClaimPayBackDetail_PendingImport.sql.sql
+		Queries\Select_ClaimPayBackXClaim_ClaimCode_More_Then_One.sql = Queries\Select_ClaimPayBackXClaim_ClaimCode_More_Then_One.sql
+		Queries\Select_CPBT_For_Cancel_By_ClaimGroupCode.sql = Queries\Select_CPBT_For_Cancel_By_ClaimGroupCode.sql
+		Queries\Select_Find_All_Ismile_Doc_And_Claim.sql = Queries\Select_Find_All_Ismile_Doc_And_Claim.sql
+		Queries\Select_Find_Doc_ClaimMisc.sql = Queries\Select_Find_Doc_ClaimMisc.sql
+		Queries\Select_IsActived_ClaimImportBilling.sql = Queries\Select_IsActived_ClaimImportBilling.sql
+		Queries\Select_Not_Exists_In_ClaimHeaderGroupImport.sql = Queries\Select_Not_Exists_In_ClaimHeaderGroupImport.sql
+		Queries\SelectAIGFromProd.sql = Queries\SelectAIGFromProd.sql
+		Queries\SelectBillingBQGNotOut1.sql = Queries\SelectBillingBQGNotOut1.sql
+		Queries\SelectClaimBillingRequestResultConfirmValidate.sql = Queries\SelectClaimBillingRequestResultConfirmValidate.sql
+		Queries\SelectClaimHeaderGroupCodePerfectForAutomateTest.sql = Queries\SelectClaimHeaderGroupCodePerfectForAutomateTest.sql
+		Queries\SelectClaimMiscToClaimPayBackCreate.sql = Queries\SelectClaimMiscToClaimPayBackCreate.sql
+		Queries\SelectColumnName.sql = Queries\SelectColumnName.sql
+		Queries\SelectDocStorageMainIndexFromClaimMisc.sql = Queries\SelectDocStorageMainIndexFromClaimMisc.sql
+		Queries\SelectFindClaimByClaimHeaderGroupCode.sql = Queries\SelectFindClaimByClaimHeaderGroupCode.sql
+		Queries\SelectMainIndexClaimMisc.sql = Queries\SelectMainIndexClaimMisc.sql
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Reports", "Reports", "{1B4237BD-E785-B737-B2AD-0DA107DF4C79}"
+	ProjectSection(SolutionItems) = preProject
+		Reports\AekReport_TransferError.sql = Reports\AekReport_TransferError.sql
+		Reports\AekReport_TransferError2.sql = Reports\AekReport_TransferError2.sql
+		Reports\CheckClaimMisc.sql = Reports\CheckClaimMisc.sql
+		Reports\CPBCheckISCSmileDoc.sql = Reports\CPBCheckISCSmileDoc.sql
+		Reports\CPBReport_V1_20260225.sql = Reports\CPBReport_V1_20260225.sql
+		Reports\Pang_BillingRequestResultDetail.sql = Reports\Pang_BillingRequestResultDetail.sql
+		Reports\Pang_BillingRequestResultDetail_Success.sql = Reports\Pang_BillingRequestResultDetail_Success.sql
+		Reports\PangReportV1.sql = Reports\PangReportV1.sql
+		Reports\SodaReport1.sql = Reports\SodaReport1.sql
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SearchUtils", "SearchUtils", "{3E16644E-BF27-DF33-8FD3-6549525CA18E}"
+	ProjectSection(SolutionItems) = preProject
+		SearchUtils\Get_Recent_Procedures_Views_ClaimPayBack.sql = SearchUtils\Get_Recent_Procedures_Views_ClaimPayBack.sql
+		SearchUtils\ReadSPStructure.sql = SearchUtils\ReadSPStructure.sql
+		SearchUtils\SearchDataEntrieSchema.sql = SearchUtils\SearchDataEntrieSchema.sql
+		SearchUtils\SearchLogWithDathRangAndMsgTemplate.sql = SearchUtils\SearchLogWithDathRangAndMsgTemplate.sql
+		SearchUtils\SearchSP.sql = SearchUtils\SearchSP.sql
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Schema", "Schema", "{0878F921-3B13-7C3E-87F0-2BD9B304BEBC}"
+	ProjectSection(SolutionItems) = preProject
+		Schema\AlterTable20260318.sql = Schema\AlterTable20260318.sql
+		Schema\ClaimPayBackDB.sql = Schema\ClaimPayBackDB.sql
+		Schema\Create_BillingRequestGroupSFTPEncryption.sql = Schema\Create_BillingRequestGroupSFTPEncryption.sql
+		Schema\Create_BillingRequestResultImport.sql = Schema\Create_BillingRequestResultImport.sql
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Misc", "Misc", "{EBF78864-0470-F934-A314-7210AC52D238}"
+	ProjectSection(SolutionItems) = preProject
+		Misc\MockS3_Job.sql = Misc\MockS3_Job.sql
+		Misc\Note.sql = Misc\Note.sql
+		Misc\V_1_6_0.sql = Misc\V_1_6_0.sql
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Releases", "Releases", "{F80D3B85-AB47-5930-801D-7C791D7FDAAC}"
+	ProjectSection(SolutionItems) = preProject
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CPB1_9_7", "CPB1_9_7", "{9C8837B5-2C85-0A35-9C1D-D4E7821D63B7}"
+	ProjectSection(SolutionItems) = preProject
+		Releases\CPB1_9_7\Alter_usp_BillingRequestResultImportGroup_Insert.sql = Releases\CPB1_9_7\Alter_usp_BillingRequestResultImportGroup_Insert.sql
+		Releases\CPB1_9_7\Alter_usp_BillingRequestResultImportGroup_Select.sql = Releases\CPB1_9_7\Alter_usp_BillingRequestResultImportGroup_Select.sql
+		Releases\CPB1_9_7\Alter_usp_ClaimHeaderGroupValidateAmountPay_Select.sql = Releases\CPB1_9_7\Alter_usp_ClaimHeaderGroupValidateAmountPay_Select.sql
+		Releases\CPB1_9_7\Alter_usp_ClaimPayBackReportCompensate_Select.sql = Releases\CPB1_9_7\Alter_usp_ClaimPayBackReportCompensate_Select.sql
+		Releases\CPB1_9_7\Alter_usp_ClaimPayBackReportNonClaimCompensate_Select.sql = Releases\CPB1_9_7\Alter_usp_ClaimPayBackReportNonClaimCompensate_Select.sql
+		Releases\CPB1_9_7\Alter_usp_Report_BillingRejectClaim_select.sql = Releases\CPB1_9_7\Alter_usp_Report_BillingRejectClaim_select.sql
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
@@ -47,9 +237,19 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Default|Default = Default|Default
 	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A3A64620-307F-4838-A6A0-B683D37CAD32} = {8329704F-7C6F-FD37-A35E-8B48EB0EC483}
+		{28D5EC5B-2C41-B13B-AE42-71F131013B1E} = {8329704F-7C6F-FD37-A35E-8B48EB0EC483}
+		{718AFA6F-8BE8-4B36-B55D-C94177BD4FFC} = {8329704F-7C6F-FD37-A35E-8B48EB0EC483}
+		{84B4493E-D92B-E733-94E6-40E9C204FC9C} = {8329704F-7C6F-FD37-A35E-8B48EB0EC483}
+		{BD508743-69C3-C63D-A507-34E4E6CE2395} = {8329704F-7C6F-FD37-A35E-8B48EB0EC483}
+		{19E3D818-899C-B23B-9C06-B9C240931ADF} = {8329704F-7C6F-FD37-A35E-8B48EB0EC483}
+		{A7C9EA6F-B565-0C34-BB83-2AFF100CE312} = {CE90921E-3FA3-2935-A1E8-62135024702C}
+		{8132BC77-3761-A039-93AD-A2E48C4C2990} = {CE90921E-3FA3-2935-A1E8-62135024702C}
+		{9C8837B5-2C85-0A35-9C1D-D4E7821D63B7} = {F80D3B85-AB47-5930-801D-7C791D7FDAAC}
+	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{81F9C8E8-7583-A700-5CE6-F9B6F3403E8E}.Default|Default.ActiveCfg = Default
-		{2FD54F1D-0D5E-4B0E-9B71-1D1E68DC9A87}.Default|Default.ActiveCfg = Default
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -58,3 +258,4 @@ Global
 		SolutionGuid = {2C88ABC5-1689-4730-9D29-A234455C538E}
 	EndGlobalSection
 EndGlobal
+
