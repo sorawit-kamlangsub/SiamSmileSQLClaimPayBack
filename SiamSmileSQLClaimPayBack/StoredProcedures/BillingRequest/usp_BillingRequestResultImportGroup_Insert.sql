@@ -1,6 +1,6 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequestResultImportGroup_Insert]    Script Date: 7/20/2026 2:58:14 PM ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequestResultImportGroup_Insert]    Script Date: 9/16/2026 2:56:13 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -11,6 +11,7 @@ GO
 -- Update date: 2026-07-15 10:00 Insert data in Column EstimatePaymentDate 
 --              table [BillingRequestResultDetail]  with PaymentDate
 --              Add Upsert BillingRequestResultDetail
+--              2026-9-16 15:12 Add Where IsActive bi
 -- Description:	Insert Tmp Out2
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_BillingRequestResultImportGroup_Insert]
@@ -198,6 +199,7 @@ BEGIN
                 CROSS JOIN dbo.BillingBank b 
             WHERE b.BillingBankId = 1
             AND bg.IsActive = 1
+            AND bi.IsActive = 1
         ) x
     ) rs
     LEFT JOIN [dbo].[DecisionStatus] ds
