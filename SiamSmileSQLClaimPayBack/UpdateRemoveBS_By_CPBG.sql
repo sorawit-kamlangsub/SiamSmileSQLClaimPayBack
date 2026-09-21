@@ -1,9 +1,9 @@
 USE [ClaimPayBack]
 GO
-
+/* Id 7801 Amount 5901.00 */
 DECLARE @ClaimPayBackId 		INT = 7801
-	,@Remark					NVARCHAR(250)
-	,@CreatedByUserId			INT;
+	,@Remark					NVARCHAR(250) = 'แก้ไข ตรวจสอบเอกสาร (incident :T690900000813)'
+	,@CreatedByUserId			INT = 1;
 	
 	DECLARE @IsResult		BIT			  = 1
 	DECLARE @Result			VARCHAR(100)  = ''
@@ -41,8 +41,9 @@ DECLARE @ClaimPayBackId 		INT = 7801
    
    INSERT INTO @tmp_ClaimPayBackXClaim
    SELECT ClaimPayBackXClaimId,ClaimCode 
-   FROM dbo.ClaimPayBackXClaim
-   WHERE ClaimPayBackDetailId = @ClaimPayBackId
+   FROM dbo.ClaimPayBackXClaim x
+   INNER JOIN @tmp_D t
+	ON x.ClaimPayBackDetailId = t.ClaimPayBackDetailId
 	---------------------------------------------
 	
   IF(@IsResult = 1)
@@ -51,19 +52,21 @@ DECLARE @ClaimPayBackId 		INT = 7801
 		BEGIN TRANSACTION
 
 						SELECT 
-						b.Amount			, IIF( (ISNULL(b.Amount,0) - t.Amount) < 0 , 0 , (ISNULL(b.Amount,0) - t.Amount) )
+						b.Amount			, IIF( (ISNULL(b.Amount,0) - SUM(t.Amount)) < 0 , 0 , (ISNULL(b.Amount,0) - SUM(t.Amount)) )
 						,b.UpdatedByUserId	, @CreatedByUserId
 						,b.UpdatedDate		, @D
 						--UPDATE dbo.ClaimPayBack 
-						--	SET  Amount = IIF( (ISNULL(Amount,0) - @l_Amount) < 0 , 0 , (ISNULL(Amount,0) - @l_Amount) )
+						--	SET  Amount = IIF( (ISNULL(b.Amount,0) - SUM(t.Amount)) < 0 , 0 , (ISNULL(b.Amount,0) - SUM(t.Amount)) )
 						--		,UpdatedByUserId = @CreatedByUserId
 						--		,UpdatedDate	 = @D
 						FROM dbo.ClaimPayBack b
 						INNER JOIN @tmp_D t
 							ON b.ClaimPayBackId = t.ClaimPayBackId
+						GROUP BY b.Amount,b.UpdatedByUserId,b.UpdatedDate
 					
 						SELECT
-						d.IsActive			, 0
+						d.ClaimPayBackDetailId
+						,d.IsActive			, 0
 						,d.UpdatedDate 		,@D	
 						,d.UpdatedByUserId 	,@CreatedByUserId
 						,d.CancelRemark 	,@Remark
@@ -77,7 +80,8 @@ DECLARE @ClaimPayBackId 		INT = 7801
 							ON d.ClaimPayBackDetailId = t.ClaimPayBackDetailId
 
 						SELECT
-						x.IsActive			, 0
+						x.ClaimPayBackXClaimId	,x.ClaimPayBackDetailId, x.ClaimCode
+						,x.IsActive			, 0
 						,x.UpdatedByUserId	, @CreatedByUserId
 						,x.UpdatedDate		, @D						
 						--UPDATE dbo.ClaimPayBackXClaim
