@@ -53,7 +53,7 @@ BEGIN
 	SELECT
 	*
 	INTO #tmpTmplist
-	FROM dbo.func_SplitStringToTable(@TmpCode,',')
+	FROM dbo.func_SplitStringToTable(@_TmpCode,',')
 
 	SELECT
 	*
