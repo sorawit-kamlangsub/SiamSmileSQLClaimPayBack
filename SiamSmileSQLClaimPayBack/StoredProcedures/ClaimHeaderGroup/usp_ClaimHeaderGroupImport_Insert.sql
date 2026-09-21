@@ -1,10 +1,14 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImport_Insert]    Script Date: 8/6/2026 9:50:49 AM ******/
+
+/****** Object:  StoredProcedure [dbo].[usp_ClaimHeaderGroupImport_Insert]    Script Date: 21/9/2569 16:31:59 ******/
 SET ANSI_NULLS ON
 GO
+
 SET QUOTED_IDENTIFIER ON
 GO
+
+
 
 -- =============================================
 --	Author:		Siriphong Narkphung
@@ -1002,3 +1006,5 @@ ELSE BEGIN	SET @Result = 'Failure'; END ;
 		,@Msg	 Msg 					  					
 
 END
+GO
+
