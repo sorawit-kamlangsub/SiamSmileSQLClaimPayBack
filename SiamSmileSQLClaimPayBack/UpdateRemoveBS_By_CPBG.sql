@@ -51,56 +51,72 @@ DECLARE @ClaimPayBackId 		INT = 7801
 	 BEGIN TRY
 		BEGIN TRANSACTION
 
-						SELECT 
-						b.Amount			, IIF( (ISNULL(b.Amount,0) - SUM(t.Amount)) < 0 , 0 , (ISNULL(b.Amount,0) - SUM(t.Amount)) )
-						,b.UpdatedByUserId	, @CreatedByUserId
-						,b.UpdatedDate		, @D
-						--UPDATE dbo.ClaimPayBack 
-						--	SET  Amount = IIF( (ISNULL(b.Amount,0) - SUM(t.Amount)) < 0 , 0 , (ISNULL(b.Amount,0) - SUM(t.Amount)) )
-						--		,UpdatedByUserId = @CreatedByUserId
-						--		,UpdatedDate	 = @D
+					--SELECT
+					--	b.ClaimPayBackId
+					--	,b.Amount,
+					--	IIF(
+					--		ISNULL(b.Amount, 0) - d.TotalAmount < 0,
+					--		0,
+					--		ISNULL(b.Amount, 0) - d.TotalAmount
+					--	) 
+					--	,b.UpdatedByUserId  ,@CreatedByUserId
+					--	,b.UpdatedDate		,@D
+						UPDATE b
+						SET
+							Amount = CASE
+										WHEN ISNULL(b.Amount, 0) - d.TotalAmount < 0 THEN 0
+										ELSE ISNULL(b.Amount, 0) - d.TotalAmount
+									 END
+							,UpdatedByUserId = @CreatedByUserId
+							,UpdatedDate = @D
 						FROM dbo.ClaimPayBack b
-						INNER JOIN @tmp_D t
-							ON b.ClaimPayBackId = t.ClaimPayBackId
-						GROUP BY b.Amount,b.UpdatedByUserId,b.UpdatedDate
+						INNER JOIN
+						(
+							SELECT
+								ClaimPayBackId,
+								SUM(Amount) AS TotalAmount
+							FROM @tmp_D
+							GROUP BY ClaimPayBackId
+						) d
+							ON b.ClaimPayBackId = d.ClaimPayBackId;
 					
-						SELECT
-						d.ClaimPayBackDetailId
-						,d.IsActive			, 0
-						,d.UpdatedDate 		,@D	
-						,d.UpdatedByUserId 	,@CreatedByUserId
-						,d.CancelRemark 	,@Remark
-						--UPDATE dbo.ClaimPayBackDetail
-						--   SET   IsActive = 0
-						--		,UpdatedDate =  @D	
-						--		,UpdatedByUserId = @CreatedByUserId
-						--		,CancelRemark =  @Remark
+						--SELECT
+						--d.ClaimPayBackDetailId
+						--,d.IsActive			, 0
+						--,d.UpdatedDate 		,@D	
+						--,d.UpdatedByUserId 	,@CreatedByUserId
+						--,d.CancelRemark 	,@Remark
+						UPDATE dbo.ClaimPayBackDetail
+						   SET   IsActive = 0
+								,UpdatedDate =  @D	
+								,UpdatedByUserId = @CreatedByUserId
+								,CancelRemark =  @Remark
 						FROM dbo.ClaimPayBackDetail d
 						INNER JOIN @tmp_D t
 							ON d.ClaimPayBackDetailId = t.ClaimPayBackDetailId
 
-						SELECT
-						x.ClaimPayBackXClaimId	,x.ClaimPayBackDetailId, x.ClaimCode
-						,x.IsActive			, 0
-						,x.UpdatedByUserId	, @CreatedByUserId
-						,x.UpdatedDate		, @D						
-						--UPDATE dbo.ClaimPayBackXClaim
-						--   SET   IsActive = 0
-						--		,UpdatedByUserId = @CreatedByUserId
-						--		,UpdatedDate  = @D
+						--SELECT
+						--x.ClaimPayBackXClaimId	,x.ClaimPayBackDetailId, x.ClaimCode
+						--,x.IsActive			, 0
+						--,x.UpdatedByUserId	, @CreatedByUserId
+						--,x.UpdatedDate		, @D						
+						UPDATE dbo.ClaimPayBackXClaim
+						   SET   IsActive = 0
+								,UpdatedByUserId = @CreatedByUserId
+								,UpdatedDate  = @D
 						FROM dbo.ClaimPayBackXClaim x
 						INNER JOIN @tmp_D t
 							ON x.ClaimPayBackDetailId = t.ClaimPayBackDetailId
 
 
-						 SELECT
-						  b.IsActive		, 0
-						 ,b.UpdatedByUserId	, @CreatedByUserId
-						 ,b.UpdatedDate		, @D						 
-						 --UPDATE dbo.ClaimPayBack 
-						 --SET	 IsActive = 0
-							--	,UpdatedByUserId = @CreatedByUserId
-							--	,UpdatedDate = @D
+						 --SELECT
+						 -- b.IsActive		, 0
+						 --,b.UpdatedByUserId	, @CreatedByUserId
+						 --,b.UpdatedDate		, @D						 
+						 UPDATE dbo.ClaimPayBack 
+						 SET	 IsActive = 0
+								,UpdatedByUserId = @CreatedByUserId
+								,UpdatedDate = @D
 						FROM dbo.ClaimPayBack   b
 						WHERE b.ClaimPayBackId = @ClaimPayBackId
 						AND NOT EXISTS (SELECT pb.ClaimPayBackDetailId , pb.ClaimPayBackId
@@ -110,10 +126,10 @@ DECLARE @ClaimPayBackId 		INT = 7801
 						 AND (b.IsActive = 1 )
 
 						----Kittisak.Ph 2024-04-25---------------------
-						SELECT
-						wDrawal.IsActive	, 0
-						--UPDATE wDrawal
-						--SET wDrawal.IsActive=0
+						--SELECT
+						--wDrawal.IsActive	, 0
+						UPDATE wDrawal
+						SET wDrawal.IsActive=0
 						FROM [ClaimOnlineV2].[dbo].[ClaimWithdrawal] wDrawal
 						INNER JOIN @tmp_ClaimPayBackXClaim xClaim ON xClaim.ClaimPayBackXClaimId = wDrawal.ClaimPayBackXClaimId AND xClaim.ClaimCode = wDrawal.ClaimCode
 						---------------------------------------------
