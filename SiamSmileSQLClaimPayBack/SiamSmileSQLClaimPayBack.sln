@@ -36,6 +36,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ClaimHeaderGroup", "ClaimHe
 		StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupItem_Select.sql = StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupItem_Select.sql
 		StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupValidateAmountPay_Select.sql = StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupValidateAmountPay_Select.sql
 		StoredProcedures\ClaimHeaderGroup\usp_GetClaimHeaderGroupImportDetailById_Select.sql = StoredProcedures\ClaimHeaderGroup\usp_GetClaimHeaderGroupImportDetailById_Select.sql
+		StoredProcedures\ClaimHeaderGroup\usp_TmpClaimHeaderGroupImport_Validate_V2_Backup_Validate_Policy.sql = StoredProcedures\ClaimHeaderGroup\usp_TmpClaimHeaderGroupImport_Validate_V2_Backup_Validate_Policy.sql
+		StoredProcedures\ClaimHeaderGroup\usp_TmpClaimHeaderGroupImport_Validate_V2_PROD.sql = StoredProcedures\ClaimHeaderGroup\usp_TmpClaimHeaderGroupImport_Validate_V2_PROD.sql
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ClaimPayBack", "ClaimPayBack", "{718AFA6F-8BE8-4B36-B55D-C94177BD4FFC}"
