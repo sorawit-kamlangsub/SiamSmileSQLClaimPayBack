@@ -1,6 +1,6 @@
 USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BillingRequestItem_Select]    Script Date: 21/1/2569 18:27:06 ******/
+/****** Object:  StoredProcedure [dbo].[usp_BillingRequestItem_Select]    Script Date: 9/29/2026 8:40:26 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -15,6 +15,7 @@ GO
 --					2023-08-31 Chanadol Koonkam Change CoverAmount from BillingRequestItem
 --					2024-01-26 Chanadol Koonkam Change Pay_Total to  PaySS_Total
 --					2025-11-17 Sorawit KamlangSuab Add Order By ClaimHeaderGroupCode Option
+-- Update date:		2026-07-22 Bunchuai chaiket (เพิ่มเงื่อนไข กรณี PA ChiefComplain ให้ใส่ Code)
 -- Description:	
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_BillingRequestItem_Select]
@@ -30,6 +31,16 @@ AS
 BEGIN
 	--WAITFOR DELAY '00:01'
 	SET NOCOUNT ON;
+
+
+--DECLARE 
+--	 @BillingRequestGroupId		INT = 3129
+--	,@IndexStart				INT = NULL 
+--	,@PageSize					INT = 10000 
+--	,@SortField					NVARCHAR(MAX) = NULL
+--	,@OrderType					NVARCHAR(MAX) = NULL
+--	,@SearchDetail				NVARCHAR(MAX) = NULL;
+
 	----------------------------------------------------------
 	IF @IndexStart		IS NULL    SET @IndexStart		= 0;
 	IF @PageSize        IS NULL    SET @PageSize        = 10;
@@ -50,32 +61,28 @@ BEGIN
 			,c.Province										
 			,c.IdentityCard									
 			,c.CustName										
-			,c.DateHappen									
-			--,c.Pay	- ISNULL(rrd.CoverAmount,0)			Pay	--Folk Update 2023-01-05	
-			,CASE WHEN c.Pay = 0 THEN 0 ELSE c.Pay	- ISNULL(b.CoverAmount,0) END AS Pay --Chanadol Update 2023-08-31
+			,c.DateHappen
+			,CASE WHEN c.Pay = 0 THEN 0 ELSE c.Pay	- ISNULL(b.CoverAmount,0) END AS Pay
 			,c.HospitalName									
 			,c.DateIn										
 			,c.DateOut										
 			,c.ApplicationCode
-			,bh.BranchDetail							Branch --Folk Update 2023-08-15
-			--,IIF(phb.Detail IS NULL,pab.Detail,phb.Detail) Branch--Folk Update 2023-02-03
-			,c.ICD10_1Code		--Folk Update 2023-03-13							
-			,c.ICD10				--Folk Update 2023-03-13	
-			,c.PolicyNo				--Folk Update 2023-03-13	
+			,bh.BranchDetail							Branch
+			,c.ICD10_1Code						
+			,c.ICD10
+			,c.PolicyNo
 			
 			--SSS
 			,c.Product										
-			,c.DateNotice									
+			,IIF(c.DateNotice IS NULL, pa.DateNotice, NULL)		DateNotice
 			,c.StartCoverDate								
 			,c.ClaimAdmitType								
 			,c.ClaimType													
 			,c.IPDCount										
 			,c.ICUCount										
-			,c.Net										Net	--Folk Update 2023-01-05											
-			,c.Compensate_Include							
-			--,c.Pay_Total - ISNULL(rrd.CoverAmount,0)	Pay_Total --Folk Update 2023-01-05	
-			--,c.Pay_Total - ISNULL(b.CoverAmount,0)	Pay_Total --Chanadol Update 2023-08-31
-			,CASE WHEN f.ClaimHeaderGroupTypeId = 6 THEN ISNULL(i.TotalAmount,0)- ISNULL(b.CoverAmount,0) ELSE ISNULL(c.PaySS_Total,0)- ISNULL(b.CoverAmount,0) END Pay_Total --Chanadol  Update 2024-01-26
+			,c.Net										Net										
+			,c.Compensate_Include
+			,CASE WHEN f.ClaimHeaderGroupTypeId = 6 THEN ISNULL(i.TotalAmount,0)- ISNULL(b.CoverAmount,0) ELSE ISNULL(c.PaySS_Total,0)- ISNULL(b.CoverAmount,0) END Pay_Total
 			,c.DiscountSS
 			,c.PaySS_Total
 											
@@ -84,7 +91,7 @@ BEGIN
 			,c.CustomerDetailCode							
 			,c.SchoolLevel									
 			,c.Accident										
-			,c.ChiefComplain								
+			,IIF(g.ClaimHeaderGroupTypeId = 3,  CONCAT(pa.ChiefComplain_id, ':',c.ChiefComplain) , c.ChiefComplain) 	 ChiefComplain							
 			,c.Orgen										
 			,c.Amount_Compensate_in							
 			,c.Amount_Compensate_out						
@@ -92,53 +99,42 @@ BEGIN
 			,c.Amount_Dead									
 			,c.Remark
 			--
-			,@DocumentLink				AS DocumentLink		
-
+			,@DocumentLink										AS DocumentLink
 			,b.CoverAmount
 			,b.AmountTotal
-
-			--,b.IsActive
-			--,b.CreatedDate
-			--,b.CreatedByUserId
-			--,b.UpdatedDate
-			--,b.UpdatedByUserId
-			,COUNT(b.BillingRequestGroupId) OVER ( ) AS TotalCount
+			,smc.Detail											AS [Plan]
+			,smcm.Detail										AS MemberCategory
+			,COUNT(b.BillingRequestGroupId) OVER ( )			AS TotalCount
 	FROM	dbo.BillingRequestItem AS b
 			LEFT JOIN dbo.ClaimHeaderGroupImportDetail AS c
 				ON b.ClaimHeaderGroupImportDetailId = c.ClaimHeaderGroupImportDetailId
 			LEFT JOIN dbo.BillingRequestGroup AS g
 				ON b.BillingRequestGroupId = g.BillingRequestGroupId
-			--LEFT JOIN dbo.BillingRequestResultDetail rrd
-			--	ON c.ClaimHeaderGroupImportDetailId = rrd.ClaimHeaderGroupImportDetailId
 			---------------------------------------
 			LEFT JOIN dbo.ClaimHeaderGroupImport i
 				ON c.ClaimHeaderGroupImportId = i.ClaimHeaderGroupImportId
 			LEFT JOIN dbo.ClaimHeaderGroupImportFile f
 				ON i.ClaimGroupImportFileId = f.ClaimHeaderGroupImportFileId
 			----2023-02-03--------------------------------------
-			--LEFT JOIN SSSPA.dbo.DB_ClaimHeader pa
-			--	ON c.ClaimCode = pa.Code
-			--LEFT JOIN SSS.dbo.DB_Employee pae
-			--	ON pa.CreatedBy_id = pae.Code
-			--LEFT JOIN SSS.dbo.DB_Team pat
-			--	ON pae.Team_id = pat.Code
-			--LEFT JOIN SSS.dbo.MT_Branch pab
-			--	ON pat.Branch_id = pab.Code
-
-			--LEFT JOIN SSS.dbo.DB_ClaimHeader ph
-			--	ON c.ClaimCode = ph.Code
-			--LEFT JOIN SSS.dbo.DB_Employee phe
-			--	ON ph.CreatedBy_id = phe.Code
-			--LEFT JOIN SSS.dbo.DB_Team pht
-			--	ON phe.Team_id = pht.Code
-			--LEFT JOIN SSS.dbo.MT_Branch phb
-			--	ON pht.Branch_id = phb.Code
+			LEFT JOIN SSSPA.dbo.DB_ClaimHeader pa
+				ON c.ClaimCode = pa.Code
+			LEFT JOIN SSSPA.dbo.DB_CustomerDetail ccd
+				ON c.CustomerDetailCode = ccd.code
+			LEFT JOIN SSSPA.dbo.DB_Customer ccm
+				ON ccd.Application_id = ccm.App_id
+			LEFT JOIN SSSPA.dbo.MT_Product mtp
+				ON ccm.Product_id = mtp.Code
+			LEFT JOIN SSSPA.dbo.SM_Code smc
+				ON mtp.ProductCategory_id = smc.Code
+			LEFT JOIN SSSPA.dbo.SM_Code smcm
+				ON ccd.CustomerType_id = smcm.Code
 			----2023-08-15--------------------------------------
 			LEFT JOIN DataCenterV1.Address.Branch bh
 				ON c.CreatedByBranchId = bh.Branch_ID
 			---------------------------------------------------
 	WHERE	(b.BillingRequestGroupId = @BillingRequestGroupId)
 	AND		b.IsActive = 1
+			AND ccd.IsActive = 1
 
 	ORDER BY 
 			CASE WHEN @OrderType IS NULL    AND @SortField IS NULL        THEN BillingRequestItemId END ASC
@@ -148,4 +144,3 @@ BEGIN
 	OFFSET @IndexStart ROWS FETCH NEXT @PageSize ROWS ONLY
 
 END
-
