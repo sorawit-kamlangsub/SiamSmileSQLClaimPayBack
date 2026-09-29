@@ -59,7 +59,7 @@ BEGIN
 			,c.ClaimHeaderGroupCode							
 			,c.ClaimCode									
 			,c.Province										
-			,c.IdentityCard									
+			,IIF(c.IdentityCard IS NOT NULL,c.IdentityCard,ccd.Passport)			IdentityCard									
 			,c.CustName										
 			,c.DateHappen
 			,CASE WHEN c.Pay = 0 THEN 0 ELSE c.Pay	- ISNULL(b.CoverAmount,0) END AS Pay
