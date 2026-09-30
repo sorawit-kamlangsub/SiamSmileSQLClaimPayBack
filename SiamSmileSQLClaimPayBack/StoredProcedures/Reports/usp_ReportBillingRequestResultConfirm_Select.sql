@@ -1,10 +1,11 @@
 ﻿USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_ReportBillingRequestResultConfirm_Select]    Script Date: 9/16/2026 3:20:51 PM ******/
+/****** Object:  StoredProcedure [dbo].[usp_ReportBillingRequestResultConfirm_Select]    Script Date: 9/30/2026 11:10:31 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+
 
 -- =============================================
 -- Author:		Siriphong	Narkphung
@@ -121,7 +122,24 @@ BEGIN
 				ON gi.BillingRequestGroupId = bg.BillingRequestGroupId
 			LEFT JOIN dbo.BillingRequestItem bi
 				ON gd.ClaimHeaderGroupImportDetailId = bi.ClaimHeaderGroupImportDetailId
-			LEFT JOIN dbo.BillingRequestResultDetail bd
+			LEFT JOIN 
+				(
+					SELECT 
+						BillingRequestItemCode
+						,BillingRequestResultDetailId
+						,DecisionStatus
+						,RejectResult
+						,DecisionDate
+						,EstimatePaymentDate
+						,Remark
+						,PaymentReferenceId
+						,CoverAmount
+						,UncoverAmount
+						,UnCoverRemark
+					FROM dbo.BillingRequestResultDetail
+					WHERE IsActive = 1
+				)
+			bd
 				ON bd.BillingRequestItemCode = bi.BillingRequestItemCode
 			LEFT JOIN dbo.BillingRequestResultConfirmDetail bc
 				ON bd.BillingRequestResultDetailId = bc.BillingRequestResultDetailId
@@ -172,7 +190,6 @@ BEGIN
 			AND bg.BillingRequestGroupStatusId = 3
 			AND gd.IsActive = 1
 			AND bi.IsActive = 1
-			AND bd.IsActive = 1
 			AND (bc.IsActive = 1 OR bc.IsActive IS NULL)
 
 		ORDER BY 
