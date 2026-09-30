@@ -16,6 +16,7 @@ GO
 --					2024-01-26 Chanadol Koonkam Change Pay_Total to  PaySS_Total
 --					2025-11-17 Sorawit KamlangSuab Add Order By ClaimHeaderGroupCode Option
 -- Update date:		2026-07-22 Bunchuai chaiket (เพิ่มเงื่อนไข กรณี PA ChiefComplain ให้ใส่ Code)
+-- Update date :	2026-09-30 11:20 Sorawit.k Add Left Join PH Customer For Get Passport
 -- Description:	
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_BillingRequestItem_Select]
@@ -59,7 +60,7 @@ BEGIN
 			,c.ClaimHeaderGroupCode							
 			,c.ClaimCode									
 			,c.Province										
-			,IIF(c.IdentityCard IS NOT NULL,c.IdentityCard,ccd.Passport)			IdentityCard									
+			,COALESCE(NULLIF(c.IdentityCard, ''), cd1.PassportCardID, ccd.Passport) IdentityCard									
 			,c.CustName										
 			,c.DateHappen
 			,CASE WHEN c.Pay = 0 THEN 0 ELSE c.Pay	- ISNULL(b.CoverAmount,0) END AS Pay
@@ -118,6 +119,8 @@ BEGIN
 			----2023-02-03--------------------------------------
 			LEFT JOIN SSSPA.dbo.DB_ClaimHeader pa
 				ON c.ClaimCode = pa.Code
+			LEFT JOIN SSS.dbo.DB_Customer cd1   
+				ON c.ApplicationCode = cd1.App_id
 			LEFT JOIN SSSPA.dbo.DB_CustomerDetail ccd
 				ON c.CustomerDetailCode = ccd.code
 			LEFT JOIN SSSPA.dbo.DB_Customer ccm
