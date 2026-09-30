@@ -20,6 +20,7 @@ GO
 -- Update date	2025-09-02 11:59 Bunchuai Chaiket
 --				ตัดเงื่อนไข Filter OR ออกจาก WHERE @DateFrom และ @DateTo
 -- Update date 2026-09-16 15:20 Add Where IsActive bd
+-- Update date 2026-09-30 11:20 Sorawit.k Add Left Join Customer For Get Passport
 -- Description:	<Description,,>
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_ReportBillingRequestResultConfirm_Select]
@@ -59,7 +60,7 @@ BEGIN
 			,gd.ApplicationCode
 			,gd.Province
 			,gd.ClaimCode
-			,gd.IdentityCard 
+			,COALESCE(NULLIF(gd.IdentityCard, ''), cd1.PassportCardID , cd2.Passport)  IdentityCard
 			,gd.CustName
 			,gd.StartCoverDate
 			,gd.HospitalName
@@ -169,6 +170,15 @@ BEGIN
 				ON emp.Team_id = t.Code
 			LEFT JOIN SSS.dbo.MT_Branch b
 				ON t.Branch_id = b.Code
+			LEFT JOIN SSS.dbo.DB_Customer cd1   
+				ON gd.ApplicationCode = cd1.App_id
+			LEFT JOIN (
+				SELECT code CustomerDetailCode
+				 ,Passport
+				FROM SSSPA.dbo.DB_CustomerDetail	
+				WHERE IsActive = 1
+			) cd2
+				ON gd.CustomerDetailCode = cd2.CustomerDetailCode
 		WHERE 
 			(
 				(
