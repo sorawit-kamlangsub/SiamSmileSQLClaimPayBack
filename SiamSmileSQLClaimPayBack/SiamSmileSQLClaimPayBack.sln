@@ -241,13 +241,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Analysis", "Analysis", "{89
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fix_Store_20260916", "Fix_Store_20260916", "{85DFB0B4-285A-4EDD-BF2E-1D1BAEA73093}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CPB1_10_0", "CPB1_10_0", "{33D97DFC-BF78-4289-940C-1D36BA005E40}"
+	ProjectSection(SolutionItems) = preProject
+		Releases\CPB1_10_0\Alter_usp_BillingRequestItem_Select.sql = Releases\CPB1_10_0\Alter_usp_BillingRequestItem_Select.sql
+		Releases\CPB1_10_0\Alter_usp_ReportBillingRequestResultConfirm_Select.sql = Releases\CPB1_10_0\Alter_usp_ReportBillingRequestResultConfirm_Select.sql
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Default|Default = Default|Default
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{81F9C8E8-7583-A700-5CE6-F9B6F3403E8E}.Default|Default.ActiveCfg = Default
-		{EE8323BE-EAD8-4022-8C8C-10F0F851D21C}.Default|Default.ActiveCfg = Default
+		{11F4753F-2059-4C3E-9458-0BB2CBE714FC}.Default|Default.ActiveCfg = Default
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -263,6 +269,7 @@ Global
 		{8132BC77-3761-A039-93AD-A2E48C4C2990} = {CE90921E-3FA3-2935-A1E8-62135024702C}
 		{9C8837B5-2C85-0A35-9C1D-D4E7821D63B7} = {F80D3B85-AB47-5930-801D-7C791D7FDAAC}
 		{85DFB0B4-285A-4EDD-BF2E-1D1BAEA73093} = {F80D3B85-AB47-5930-801D-7C791D7FDAAC}
+		{33D97DFC-BF78-4289-940C-1D36BA005E40} = {F80D3B85-AB47-5930-801D-7C791D7FDAAC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2C88ABC5-1689-4730-9D29-A234455C538E}
