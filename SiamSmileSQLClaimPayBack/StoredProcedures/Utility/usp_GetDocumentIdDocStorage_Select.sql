@@ -1,10 +1,11 @@
 USE [ClaimPayBack]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_GetDocumentIdDocStorage_Select]    Script Date: 8/6/2569 11:48:08 ******/
+/****** Object:  StoredProcedure [dbo].[usp_GetDocumentIdDocStorage_Select]    Script Date: 11/16/2026 11:04:41 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+
 -- =============================================
 -- Author:		Sorawit KamlangSub
 -- Create date: 2025-11-26 15:30
@@ -19,7 +20,7 @@ BEGIN
 	SET NOCOUNT ON;
 
 	-- Start Test
-	--DECLARE  @ClaimHeaderGroupCodes NVARCHAR(MAX) =  'ZBMPO88869020001';
+	--DECLARE  @ClaimHeaderGroupCodes NVARCHAR(MAX) =  'CHSPH88869060022';
 	-- End Test
 
 	SELECT DISTINCT Element
@@ -28,7 +29,8 @@ BEGIN
 	
 	SELECT 
 		CASE 
-			WHEN doc.TbType = 'ClaimMisc'	THEN cm.ClaimMiscNo
+			WHEN doc.TbType = 'ClaimMisc' AND cm.ClaimTypeId = 2 THEN cddg.ClaimPayBackSubGroupCode
+			WHEN doc.TbType = 'ClaimMisc' THEN cm.ClaimMiscNo
 			WHEN doc.TbType = 'ClaimOnline' THEN cm.ApplicationCode
 			WHEN doc.TbType = 'DocCode'		THEN doc.DocumentCode
 		END MainIndex
@@ -37,6 +39,7 @@ BEGIN
 		,doc.DocumentTypeId
 		,doc.DocumentSubTypeId
 		,doc.DocumentCode
+		,cm.ProductTypeId
 	FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
 		INNER JOIN #Tmplst tl
 			ON cm.ClaimHeaderGroupCode = tl.Element
@@ -84,7 +87,22 @@ BEGIN
 
 		) doc
 			ON doc.ClaimMiscId = cm.ClaimMiscId
-	WHERE cm.IsActive = 1
+		LEFT JOIN (
+			SELECT 
+				cd.ClaimGroupCode
+				,cdg.ClaimPayBackSubGroupId
+				,cdg.ClaimPayBackSubGroupCode
+			FROM  [dbo].ClaimPayBackDetail cd
+				LEFT JOIN [dbo].ClaimPayBackSubGroup cdg 
+					ON cd.ClaimPayBackSubGroupId = cdg.ClaimPayBackSubGroupId
+			WHERE cd.IsActive = 1
+				AND cdg.IsActive = 1
+		)
+		cddg
+			ON cm.ClaimHeaderGroupCode = cddg.ClaimGroupCode
+
+
+	WHERE cm.IsActive = 1 
 
 	IF OBJECT_ID('tempdb..#Tmplst') IS NOT NULL  DROP TABLE #Tmplst;
 

@@ -79,6 +79,18 @@
     </LogicalFolder>
     <LogicalFolder Name="Queries" Type="0" Sorted="true">
       <Items>
+        <FileNode Name="Report_BillingRequest_Select.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
+          <AssociatedConnUserName>devdba</AssociatedConnUserName>
+          <FullPath>Report_BillingRequest_Select.sql</FullPath>
+        </FileNode>
+        <FileNode Name="SelectClaimOnlindDocId.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
+          <AssociatedConnUserName>devdba</AssociatedConnUserName>
+          <FullPath>SelectClaimOnlindDocId.sql</FullPath>
+        </FileNode>
         <FileNode Name="UpdateRemoveBS_By_CPBG.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
           <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
@@ -90,6 +102,12 @@
           <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
           <AssociatedConnUserName>devdba</AssociatedConnUserName>
           <FullPath>usp_ClaimPayBackDetail_Update.sql</FullPath>
+        </FileNode>
+        <FileNode Name="usp_GetDocumentIdDocStorageByClaimCode_Select.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:147.50.133.169:False:devdba</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>147.50.133.169</AssociatedConnSrvName>
+          <AssociatedConnUserName>devdba</AssociatedConnUserName>
+          <FullPath>usp_GetDocumentIdDocStorageByClaimCode_Select.sql</FullPath>
         </FileNode>
       </Items>
     </LogicalFolder>
