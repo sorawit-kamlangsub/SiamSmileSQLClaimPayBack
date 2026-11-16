@@ -51,6 +51,17 @@ BEGIN
 					ON pa.Code = cl.ClaimheaderGroup_id
 				INNER JOIN [ClaimOnlineV2].[dbo].[ClaimOnlineItem] col
 					ON cl.Code = col.ClaimCode
+			WHERE
+				col.ClaimAdmitTypeCode IN (
+				'4000'	
+				,'4001'	
+				,'4006'	
+				,'4006_2'	
+				,'4007'	
+				,'4008'	
+				,'5001'	
+				,'5002'	
+				)
 			
 			UNION ALL 
 
@@ -64,7 +75,16 @@ BEGIN
 					ON ph.Code = cl.ClaimHeaderGroup_id
 				INNER JOIN [ClaimOnlineV2].[dbo].[ClaimOnlineItem] col
 					ON cl.Code = col.ClaimCode
-
+			WHERE ph.ClaimAdmitType_id IN (
+				'4000'	
+				,'4001'	
+				,'4006'	
+				,'4006_2'	
+				,'4007'	
+				,'4008'	
+				,'5001'	
+				,'5002'	
+				)
 		) col
 			ON tmp.Element = col.ClaimHeaderGroupCode
 		LEFT JOIN
