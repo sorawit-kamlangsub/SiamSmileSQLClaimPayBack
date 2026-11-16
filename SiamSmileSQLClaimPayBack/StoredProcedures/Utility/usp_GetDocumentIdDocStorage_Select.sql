@@ -20,33 +20,57 @@ BEGIN
 	SET NOCOUNT ON;
 
 	-- Start Test
-	--DECLARE  @ClaimHeaderGroupCodes NVARCHAR(MAX) =  'CHSPH88869060022';
+	--DECLARE  @ClaimHeaderGroupCodes NVARCHAR(MAX) =  'CHCMH88869060002';
 	-- End Test
 
-	SELECT DISTINCT Element
-	INTO #Tmplst
-	from dbo.func_SplitStringToTable(@ClaimHeaderGroupCodes,',');
-	
 	SELECT 
 		CASE 
 			WHEN doc.TbType = 'ClaimMisc' AND cm.ClaimTypeId = 2 THEN cddg.ClaimPayBackSubGroupCode
 			WHEN doc.TbType = 'ClaimMisc' THEN cm.ClaimMiscNo
 			WHEN doc.TbType = 'ClaimOnline' THEN cm.ApplicationCode
 			WHEN doc.TbType = 'DocCode'		THEN doc.DocumentCode
+			WHEN doc.TbType = 'ClaimOnlineV2'	THEN col.ApplicationCode
 		END MainIndex
-		,cm.ClaimHeaderGroupCode
+		,tmp.Element			ClaimHeaderGroupCode
 		,doc.DocumentId
 		,doc.DocumentTypeId
 		,doc.DocumentSubTypeId
 		,doc.DocumentCode
 		,cm.ProductTypeId
-	FROM [ClaimMiscellaneous].[misc].[ClaimMisc] cm
-		INNER JOIN #Tmplst tl
-			ON cm.ClaimHeaderGroupCode = tl.Element
+	FROM dbo.func_SplitStringToTable(@ClaimHeaderGroupCodes,',') tmp
+		LEFT JOIN [ClaimMiscellaneous].[misc].[ClaimMisc] cm
+			ON tmp.Element = cm.ClaimHeaderGroupCode
+		LEFT JOIN (
+			SELECT 
+			 pa.Code				ClaimHeaderGroupCode		 
+			 ,col.ApplicationCode
+			 ,col.ClaimOnLineItemId	
+			 ,col.IsActive 
+			FROM [SSSPA].[dbo].[DB_ClaimHeaderGroup] pa
+				INNER JOIN [SSSPA].[dbo].[DB_ClaimHeader] cl
+					ON pa.Code = cl.ClaimheaderGroup_id
+				INNER JOIN [ClaimOnlineV2].[dbo].[ClaimOnlineItem] col
+					ON cl.Code = col.ClaimCode
+			
+			UNION ALL 
+
+			SELECT 
+			 ph.Code				ClaimHeaderGroupCode
+			 ,col.ApplicationCode
+			 ,col.ClaimOnLineItemId	
+			 ,col.IsActive 
+			FROM [SSS].[dbo].[DB_ClaimHeaderGroup] ph
+				INNER JOIN [sss].[dbo].[DB_ClaimHeader] cl
+					ON ph.Code = cl.ClaimHeaderGroup_id
+				INNER JOIN [ClaimOnlineV2].[dbo].[ClaimOnlineItem] col
+					ON cl.Code = col.ClaimCode
+
+		) col
+			ON tmp.Element = col.ClaimHeaderGroupCode
 		LEFT JOIN
 		(
 				SELECT
-					doc.ClaimMiscId
+					doc.ClaimMiscId				Id
 					,doc.DocumentId
 					,doc.DocumentCode
 					,'ClaimMisc'				TbType
@@ -61,7 +85,7 @@ BEGIN
 				UNION ALL 
 
 				SELECT 
-					ClaimMiscId
+					ClaimMiscId				Id
 					,DocumentId
 					,DocumentCode
 					,'ClaimOnline'			TbType
@@ -74,7 +98,7 @@ BEGIN
 				UNION ALL 
 
 				SELECT 
-					ClaimMiscId
+					ClaimMiscId				Id
 					,DocumentId
 					,DocumentCode
 					,'DocCode'				TbType
@@ -84,9 +108,20 @@ BEGIN
 				WHERE IsActive = 1
 				AND DocumentSubTypeId <> 340
 
+				UNION ALL
+
+				SELECT
+					ClaimOnLineItemId		Id
+					,DocumentId
+					,DocumentCode
+					,'ClaimOnlineV2'		TbType
+					,NULL					DocumentTypeId
+					,NULL					DocumentSubTypeId	
+				FROM [ClaimOnlineV2].[dbo].[Document] 
+				WHERE IsActive = 1
 
 		) doc
-			ON doc.ClaimMiscId = cm.ClaimMiscId
+			ON doc.Id = cm.ClaimMiscId OR doc.Id = col.ClaimOnLineItemId
 		LEFT JOIN (
 			SELECT 
 				cd.ClaimGroupCode
@@ -100,11 +135,7 @@ BEGIN
 		)
 		cddg
 			ON cm.ClaimHeaderGroupCode = cddg.ClaimGroupCode
-
-
-	WHERE cm.IsActive = 1 
-
-	IF OBJECT_ID('tempdb..#Tmplst') IS NOT NULL  DROP TABLE #Tmplst;
+	WHERE cm.IsActive = 1 OR col.IsActive = 1
 
 	--DECLARE @MainIndex				NVARCHAR(MAX)
 	--DECLARE @DocumentId				UNIQUEIDENTIFIER
