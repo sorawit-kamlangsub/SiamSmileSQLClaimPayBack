@@ -20,7 +20,7 @@ BEGIN
 	SET NOCOUNT ON;
 
 	-- Start Test
-	--DECLARE  @ClaimHeaderGroupCodes NVARCHAR(MAX) =  'CHCMH88869060002';
+	--DECLARE  @ClaimHeaderGroupCodes NVARCHAR(MAX) =  'BUHD-888-69060001-0,CHCMH88869060002';
 	-- End Test
 
 	SELECT 
