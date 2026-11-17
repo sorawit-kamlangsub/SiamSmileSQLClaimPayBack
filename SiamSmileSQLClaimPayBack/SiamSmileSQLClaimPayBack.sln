@@ -214,7 +214,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Misc", "Misc", "{EBF78864-0
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Releases", "Releases", "{F80D3B85-AB47-5930-801D-7C791D7FDAAC}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CPB1_9_7", "CPB1_9_7", "{9C8837B5-2C85-0A35-9C1D-D4E7821D63B7}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CPB1.9.7", "CPB1.9.7", "{9C8837B5-2C85-0A35-9C1D-D4E7821D63B7}"
 	ProjectSection(SolutionItems) = preProject
 		Releases\CPB1_9_7\Alter_usp_BillingRequestResultImportGroup_Insert.sql = Releases\CPB1_9_7\Alter_usp_BillingRequestResultImportGroup_Insert.sql
 		Releases\CPB1_9_7\Alter_usp_BillingRequestResultImportGroup_Select.sql = Releases\CPB1_9_7\Alter_usp_BillingRequestResultImportGroup_Select.sql
@@ -241,10 +241,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Analysis", "Analysis", "{89
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fix_Store_20260916", "Fix_Store_20260916", "{85DFB0B4-285A-4EDD-BF2E-1D1BAEA73093}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CPB1_10_0", "CPB1_10_0", "{33D97DFC-BF78-4289-940C-1D36BA005E40}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CPB1.10.0", "CPB1.10.0", "{33D97DFC-BF78-4289-940C-1D36BA005E40}"
 	ProjectSection(SolutionItems) = preProject
 		Releases\CPB1_10_0\Alter_usp_BillingRequestItem_Select.sql = Releases\CPB1_10_0\Alter_usp_BillingRequestItem_Select.sql
 		Releases\CPB1_10_0\Alter_usp_ReportBillingRequestResultConfirm_Select.sql = Releases\CPB1_10_0\Alter_usp_ReportBillingRequestResultConfirm_Select.sql
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CPB_1.11.0", "CPB_1.11.0", "{9AA84E26-27E2-4622-97B4-7835278DEDA9}"
+	ProjectSection(SolutionItems) = preProject
+		Releases\CPB_1_11_0\Alter_usp_GetDocumentIdDocStorage_Select.sql = Releases\CPB_1_11_0\Alter_usp_GetDocumentIdDocStorage_Select.sql
+		Releases\CPB_1_11_0\Create_usp_GetDocumentIdDocStorageByClaimCode_Select.sql = Releases\CPB_1_11_0\Create_usp_GetDocumentIdDocStorageByClaimCode_Select.sql
 	EndProjectSection
 EndProject
 Global
@@ -253,7 +259,7 @@ Global
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{81F9C8E8-7583-A700-5CE6-F9B6F3403E8E}.Default|Default.ActiveCfg = Default
-		{BA1884B2-99BE-4992-897E-9524A1F03BE3}.Default|Default.ActiveCfg = Default
+		{A89BEECB-C811-496A-8C36-6E7ACB72581D}.Default|Default.ActiveCfg = Default
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -270,6 +276,7 @@ Global
 		{9C8837B5-2C85-0A35-9C1D-D4E7821D63B7} = {F80D3B85-AB47-5930-801D-7C791D7FDAAC}
 		{85DFB0B4-285A-4EDD-BF2E-1D1BAEA73093} = {F80D3B85-AB47-5930-801D-7C791D7FDAAC}
 		{33D97DFC-BF78-4289-940C-1D36BA005E40} = {F80D3B85-AB47-5930-801D-7C791D7FDAAC}
+		{9AA84E26-27E2-4622-97B4-7835278DEDA9} = {F80D3B85-AB47-5930-801D-7C791D7FDAAC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2C88ABC5-1689-4730-9D29-A234455C538E}
