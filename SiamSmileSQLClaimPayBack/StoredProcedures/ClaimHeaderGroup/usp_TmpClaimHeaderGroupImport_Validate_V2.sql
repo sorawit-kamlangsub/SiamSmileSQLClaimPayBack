@@ -28,6 +28,7 @@ GO
 -- Update date: 2026-03-11 13:16 Add Pa Validate PolicyNo Sorawit kamlangsub
 -- Update date: 2026-03-12 08:47 เพิ่ม Validate กรณีเป็น บ.ส.นั้นเป็นเบิกจ่ายกองทุนม้าลาย Sorawit kamlangsub
 -- Update date: 2026-06-06 08:57 เพิ่ม union ClaimMisc ใน #TmpClaimType Sorawit kamlangsub
+-- Update date: 2026-11-07 16:00 skip validate doc by ClaimAdmitTypeCode dead and disability
 -- Description:	PROD (P30,1000) dl.DocumentListID = 137 (2000) dl.DocumentListID = 138 
 --	UAT  dl.DocumentListID = 134 (2000) dl.DocumentListID = 135
 -- =============================================
@@ -261,12 +262,25 @@ IF @IsResult = 1
 			)d;
 
 		----------------Update 2023-08-09-----------------------
-		SELECT m.TmpClaimHeaderGroupImportId
-			 , m.ClaimHeaderGroupCodeInDB
-             , m.ClaimHeaderCodeInDB
-			 , m.TotalAmountSS
-			 , IIF(m.ProductGroup IN ('Misc','ZebraMisc'),1,ISNULL(d.CountDoc,0)) CountDoc
-			 , IIF(IIF(m.ProductGroup IN ('Misc','ZebraMisc'),1,ISNULL(d.CountDoc,0)) = 0,N'ไม่พบเอกสารแนบ','') ValidateDetailResult
+		SELECT
+			  m.TmpClaimHeaderGroupImportId
+			, m.ClaimHeaderGroupCodeInDB
+			, m.ClaimHeaderCodeInDB
+			, m.TotalAmountSS
+			, CASE
+				  WHEN m.ProductGroup IN ('Misc', 'ZebraMisc')
+					   OR skipDoc.IsSkipDocument = 1
+					  THEN 1
+				  ELSE ISNULL(d.CountDoc, 0)
+			  END AS CountDoc
+			, CASE
+				  WHEN m.ProductGroup IN ('Misc', 'ZebraMisc')
+					   OR skipDoc.IsSkipDocument = 1
+					  THEN N''
+				  WHEN ISNULL(d.CountDoc, 0) = 0
+					  THEN N'ไม่พบเอกสารแนบ'
+				  ELSE N''
+			  END AS ValidateDetailResult
 		INTO #TmpDoc
 		FROM #TmpDetail m
 			LEFT JOIN 
@@ -315,7 +329,29 @@ IF @IsResult = 1
 					GROUP BY td.ClaimHeaderGroupCodeInDB, td.ClaimHeaderCodeInDB
 				)d
 				ON m.ClaimHeaderCodeInDB = d.ClaimHeaderCodeInDB
-					AND m.ClaimHeaderGroupCodeInDB = d.ClaimHeaderGroupCodeInDB;
+					AND m.ClaimHeaderGroupCodeInDB = d.ClaimHeaderGroupCodeInDB
+				LEFT JOIN
+				(
+					SELECT DISTINCT
+						  coi.ClaimCode COLLATE DATABASE_DEFAULT AS ClaimCode
+						, 1 AS IsSkipDocument
+					FROM [ClaimOnlineV2].[dbo].[ClaimOnlineItem] coi
+					WHERE coi.IsActive = 1
+					  AND coi.ClaimAdmitTypeCode IN
+					  (
+						  '4000',
+						  '4001',
+						  '4006',
+						  '4006_2',
+						  '4007',
+						  '4008',
+						  '5001',
+						  '5002'
+					  )
+				) skipDoc
+					ON m.ClaimHeaderCodeInDB COLLATE DATABASE_DEFAULT
+					   = skipDoc.ClaimCode				
+				;
 
 		---------------------------------------------------------------------------
 
