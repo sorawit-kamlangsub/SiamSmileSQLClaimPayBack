@@ -252,6 +252,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CPB_1.11.0", "CPB_1.11.0", 
 	ProjectSection(SolutionItems) = preProject
 		Releases\CPB_1_11_0\Alter_usp_ClaimHeaderGroupDetail_SelectV4.sql = Releases\CPB_1_11_0\Alter_usp_ClaimHeaderGroupDetail_SelectV4.sql
 		Releases\CPB_1_11_0\Alter_usp_GetDocumentIdDocStorage_Select.sql = Releases\CPB_1_11_0\Alter_usp_GetDocumentIdDocStorage_Select.sql
+		Releases\CPB_1_11_0\Alter_usp_TmpClaimHeaderGroupImport_Validate_V2.sql = Releases\CPB_1_11_0\Alter_usp_TmpClaimHeaderGroupImport_Validate_V2.sql
 		Releases\CPB_1_11_0\Create_usp_GetDocumentIdDocStorageByClaimCode_Select.sql = Releases\CPB_1_11_0\Create_usp_GetDocumentIdDocStorageByClaimCode_Select.sql
 	EndProjectSection
 EndProject
