@@ -36,6 +36,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ClaimHeaderGroup", "ClaimHe
 		StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupItem_Select.sql = StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupItem_Select.sql
 		StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupValidateAmountPay_Select.sql = StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupValidateAmountPay_Select.sql
 		StoredProcedures\ClaimHeaderGroup\usp_GetClaimHeaderGroupImportDetailById_Select.sql = StoredProcedures\ClaimHeaderGroup\usp_GetClaimHeaderGroupImportDetailById_Select.sql
+		StoredProcedures\ClaimHeaderGroup\usp_TmpClaimHeaderGroupImport_Validate_V2.sql = StoredProcedures\ClaimHeaderGroup\usp_TmpClaimHeaderGroupImport_Validate_V2.sql
 		StoredProcedures\ClaimHeaderGroup\usp_TmpClaimHeaderGroupImport_Validate_V2_Backup_Validate_Policy.sql = StoredProcedures\ClaimHeaderGroup\usp_TmpClaimHeaderGroupImport_Validate_V2_Backup_Validate_Policy.sql
 		StoredProcedures\ClaimHeaderGroup\usp_TmpClaimHeaderGroupImport_Validate_V2_PROD.sql = StoredProcedures\ClaimHeaderGroup\usp_TmpClaimHeaderGroupImport_Validate_V2_PROD.sql
 	EndProjectSection
@@ -249,6 +250,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CPB1.10.0", "CPB1.10.0", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CPB_1.11.0", "CPB_1.11.0", "{9AA84E26-27E2-4622-97B4-7835278DEDA9}"
 	ProjectSection(SolutionItems) = preProject
+		Releases\CPB_1_11_0\Alter_usp_ClaimHeaderGroupDetail_SelectV4.sql = Releases\CPB_1_11_0\Alter_usp_ClaimHeaderGroupDetail_SelectV4.sql
 		Releases\CPB_1_11_0\Alter_usp_GetDocumentIdDocStorage_Select.sql = Releases\CPB_1_11_0\Alter_usp_GetDocumentIdDocStorage_Select.sql
 		Releases\CPB_1_11_0\Create_usp_GetDocumentIdDocStorageByClaimCode_Select.sql = Releases\CPB_1_11_0\Create_usp_GetDocumentIdDocStorageByClaimCode_Select.sql
 	EndProjectSection
