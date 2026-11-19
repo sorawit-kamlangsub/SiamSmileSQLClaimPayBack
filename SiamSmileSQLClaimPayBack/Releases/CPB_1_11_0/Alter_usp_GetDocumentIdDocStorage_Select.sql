@@ -11,6 +11,7 @@ GO
 -- Create date: 2025-11-26 15:30
 -- Update date: 2026-02-23 14:22 Remove doctype
 -- Update date: 2026-05-26 16:42 Add DocumentSubTypeId
+-- Update date: 2026-11-19 09:20 Left Join COL
 -- Description:	For Get DocStorage Data
 -- =============================================
 ALTER PROCEDURE [dbo].[usp_GetDocumentIdDocStorage_Select]
