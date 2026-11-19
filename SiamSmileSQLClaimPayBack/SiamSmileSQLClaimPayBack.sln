@@ -27,6 +27,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BillingRequest", "BillingRe
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ClaimHeaderGroup", "ClaimHeaderGroup", "{28D5EC5B-2C41-B13B-AE42-71F131013B1E}"
 	ProjectSection(SolutionItems) = preProject
+		Releases\CPB_1_11_0\Alter_usp_TmpClaimHeaderGroupImport_Validate_V2.sql = Releases\CPB_1_11_0\Alter_usp_TmpClaimHeaderGroupImport_Validate_V2.sql
 		StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupDetail_SelectV3.sql = StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupDetail_SelectV3.sql
 		StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupDetail_SelectV4.sql = StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupDetail_SelectV4.sql
 		StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupDetail_SelectV5.sql = StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupDetail_SelectV5.sql
@@ -36,7 +37,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ClaimHeaderGroup", "ClaimHe
 		StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupItem_Select.sql = StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupItem_Select.sql
 		StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupValidateAmountPay_Select.sql = StoredProcedures\ClaimHeaderGroup\usp_ClaimHeaderGroupValidateAmountPay_Select.sql
 		StoredProcedures\ClaimHeaderGroup\usp_GetClaimHeaderGroupImportDetailById_Select.sql = StoredProcedures\ClaimHeaderGroup\usp_GetClaimHeaderGroupImportDetailById_Select.sql
-		Releases\CPB_1_11_0\Alter_usp_TmpClaimHeaderGroupImport_Validate_V2.sql = Releases\CPB_1_11_0\Alter_usp_TmpClaimHeaderGroupImport_Validate_V2.sql
 		StoredProcedures\ClaimHeaderGroup\usp_TmpClaimHeaderGroupImport_Validate_V2_Backup_Validate_Policy.sql = StoredProcedures\ClaimHeaderGroup\usp_TmpClaimHeaderGroupImport_Validate_V2_Backup_Validate_Policy.sql
 		StoredProcedures\ClaimHeaderGroup\usp_TmpClaimHeaderGroupImport_Validate_V2_PROD.sql = StoredProcedures\ClaimHeaderGroup\usp_TmpClaimHeaderGroupImport_Validate_V2_PROD.sql
 	EndProjectSection
@@ -248,12 +248,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CPB1.10.0", "CPB1.10.0", "{
 		Releases\CPB1_10_0\Alter_usp_ReportBillingRequestResultConfirm_Select.sql = Releases\CPB1_10_0\Alter_usp_ReportBillingRequestResultConfirm_Select.sql
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CPB_1.11.0", "CPB_1.11.0", "{9AA84E26-27E2-4622-97B4-7835278DEDA9}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CPB_1.11.7", "CPB_1.11.7", "{9AA84E26-27E2-4622-97B4-7835278DEDA9}"
 	ProjectSection(SolutionItems) = preProject
-		Releases\CPB_1_11_0\Alter_usp_ClaimHeaderGroupDetail_SelectV4.sql = Releases\CPB_1_11_0\Alter_usp_ClaimHeaderGroupDetail_SelectV4.sql
-		Releases\CPB_1_11_0\Alter_usp_GetDocumentIdDocStorage_Select.sql = Releases\CPB_1_11_0\Alter_usp_GetDocumentIdDocStorage_Select.sql
-		Releases\CPB_1_11_0\Alter_usp_TmpClaimHeaderGroupImport_Validate_V2.sql = Releases\CPB_1_11_0\Alter_usp_TmpClaimHeaderGroupImport_Validate_V2.sql
-		Releases\CPB_1_11_0\Create_usp_GetDocumentIdDocStorageByClaimCode_Select.sql = Releases\CPB_1_11_0\Create_usp_GetDocumentIdDocStorageByClaimCode_Select.sql
+		Releases\CPB_1_11_7\Alter_usp_ClaimHeaderGroupDetail_SelectV4.sql = Releases\CPB_1_11_7\Alter_usp_ClaimHeaderGroupDetail_SelectV4.sql
+		Releases\CPB_1_11_7\Alter_usp_GetDocumentIdDocStorage_Select.sql = Releases\CPB_1_11_7\Alter_usp_GetDocumentIdDocStorage_Select.sql
+		Releases\CPB_1_11_7\Alter_usp_TmpClaimHeaderGroupImport_Validate_V2.sql = Releases\CPB_1_11_7\Alter_usp_TmpClaimHeaderGroupImport_Validate_V2.sql
+		Releases\CPB_1_11_7\Create_usp_GetDocumentIdDocStorageByClaimCode_Select.sql = Releases\CPB_1_11_7\Create_usp_GetDocumentIdDocStorageByClaimCode_Select.sql
 	EndProjectSection
 EndProject
 Global
@@ -262,7 +262,7 @@ Global
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{81F9C8E8-7583-A700-5CE6-F9B6F3403E8E}.Default|Default.ActiveCfg = Default
-		{A89BEECB-C811-496A-8C36-6E7ACB72581D}.Default|Default.ActiveCfg = Default
+		{74B352E4-B771-4CAC-A450-F14C0884A195}.Default|Default.ActiveCfg = Default
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

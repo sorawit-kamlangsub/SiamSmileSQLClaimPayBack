@@ -292,13 +292,13 @@ IF @IsResult = 1
 									-- ตรวจสอบเอกสาร PH ที่เป็นเคลมโรงพยาบาลต้องมีทั้งเอกสารเคลมโรงพยาบาล(24) กับหนังสือแจ้งชำระค่ารักษาพยาบาล (UAT 134,PROD 137)
 									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup IN ('P30','1000') AND dl.DocumentListID = 24 THEN 1 ELSE 0 END) >= 1
 									AND
-									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup IN ('P30','1000') AND dl.DocumentListID = 134 THEN 1 ELSE 0 END) >= 1
+									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup IN ('P30','1000') AND dl.DocumentListID = 137 THEN 1 ELSE 0 END) >= 1
 								THEN 1
 								WHEN 
 									-- ตรวจสอบเอกสาร PA ที่เป็นเคลมโรงพยาบาลต้องมีทั้งเอกสารเคลมโรงพยาบาล(26) กับหนังสือแจ้งชำระค่ารักษาพยาบาล (UAT 135,PROD 138)
 									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup = '2000' AND dl.DocumentListID = 26 THEN 1 ELSE 0 END) >= 1
 									AND
-									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup = '2000' AND dl.DocumentListID = 135 THEN 1 ELSE 0 END) >= 1
+									SUM(CASE WHEN ct.ClaimTypeCode = @ClaimTypeCode_H AND td.ProductGroup = '2000' AND dl.DocumentListID = 138 THEN 1 ELSE 0 END) >= 1
 								THEN 1
 								WHEN 
 									-- กรณีเป็นเคลมสาขา ต้องไม่มีของเคลมโรงพยาบาล
