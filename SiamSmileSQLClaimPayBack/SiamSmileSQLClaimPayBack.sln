@@ -257,6 +257,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CPB_1.11.7", "CPB_1.11.7", 
 		Releases\CPB_1_11_7\Create_usp_GetDocumentIdDocStorageByClaimCode_Select.sql = Releases\CPB_1_11_7\Create_usp_GetDocumentIdDocStorageByClaimCode_Select.sql
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CPB1.11.7 Fix", "CPB1.11.7 Fix", "{FBC24B28-E686-4D8E-AEF8-523062EA21C0}"
+	ProjectSection(SolutionItems) = preProject
+		Releases\CPB_V1_11_7_Fix\Alter_usp_GetDocumentIdDocStorageByClaimCode_Select.sql = Releases\CPB_V1_11_7_Fix\Alter_usp_GetDocumentIdDocStorageByClaimCode_Select.sql
+		Releases\CPB_V1_11_7_Fix\Alter_usp_GetDocumentIdDocStorage_Select.sql = Releases\CPB_V1_11_7_Fix\Alter_usp_GetDocumentIdDocStorage_Select.sql
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Default|Default = Default|Default
@@ -281,6 +287,7 @@ Global
 		{85DFB0B4-285A-4EDD-BF2E-1D1BAEA73093} = {F80D3B85-AB47-5930-801D-7C791D7FDAAC}
 		{33D97DFC-BF78-4289-940C-1D36BA005E40} = {F80D3B85-AB47-5930-801D-7C791D7FDAAC}
 		{9AA84E26-27E2-4622-97B4-7835278DEDA9} = {F80D3B85-AB47-5930-801D-7C791D7FDAAC}
+		{FBC24B28-E686-4D8E-AEF8-523062EA21C0} = {F80D3B85-AB47-5930-801D-7C791D7FDAAC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2C88ABC5-1689-4730-9D29-A234455C538E}
